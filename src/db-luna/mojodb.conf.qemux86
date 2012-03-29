@@ -1,0 +1,30 @@
+{
+	"log" : {
+		"appender" : { 
+			"type" : "syslog"
+		},
+		"levels" : {
+			/*"default" : "info"*/
+		}
+	},	
+	"db" : {
+		"permissions" : [
+			{"type":"db.role","object":"admin","caller":"com.palm.configurator","operations":{"*":"allow"}},
+			{"type":"db.role","object":"admin","caller":"com.palm.service.backup","operations":{"*":"allow"}},
+			{"type":"db.role","object":"admin","caller":"com.palm.odd.service","operations":{"*":"allow"}},
+			{"type":"db.role","object":"admin","caller":"com.palm.service.migrationscript","operations":{"*":"allow"}},
+			{"type":"db.role","object":"admin","caller":"com.palm.spacecadet","operations":{"*":"allow"}},
+			{"type":"db.role","object":"admin","caller":"com.palm.service.centaur","operations":{"*":"allow"}}
+		],
+		"quotas" : [
+			{"owner":"*","size":20971520},
+			{"owner":"com.palm.*","size":78643200}
+		],
+		"loadStepSize" : 173,
+	},
+	"bdb" : {
+		"maxLocks" : 6000,
+		"maxLockers" : 1000,
+		"compactStepSize" : 25000
+	}
+}

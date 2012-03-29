@@ -1,0 +1,19 @@
+{
+    "activity" : {
+        "name" : "mojodbpurge",
+        "description" : "Scheduled mojodb purge activity",
+        "schedule" : {
+            "interval" : "24h"
+        },
+        "callback" : {
+            "method" : "palm://com.palm.db/internal/scheduledPurge" 
+        },
+        "type" : {
+            "background" : true,
+            "persist" : true,
+            "power" : true
+        }
+    },
+    "replace" : true,
+    "start" : true
+}

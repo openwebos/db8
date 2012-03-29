@@ -1,0 +1,16 @@
+# -*- mode: conf; -*-
+
+start on stopped finish
+stop on started start_update
+
+respawn
+
+script
+	# move logs
+	if [ -d /var/dblog ]; then
+		mv /var/dblog/* /var/db
+		rmdir /var/dblog
+	fi
+
+	exec /usr/bin/mojodb-luna -c /etc/palm/mojodb.conf /var/db
+end script

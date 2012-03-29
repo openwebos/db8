@@ -1,0 +1,14 @@
+{
+    "role": {
+        "exeName":"/usr/bin/mojodb-luna",
+        "type": "regular",
+        "allowedNames": ["com.palm.db","com.palm.tempdb"]
+    },
+    "permissions": [
+        {
+            "service":"com.palm.db",
+            "inbound":["*"],
+            "outbound":[]
+        }
+    ]
+}

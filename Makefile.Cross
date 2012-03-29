@@ -1,0 +1,13 @@
+BUILD_TYPE := debug
+CC := arm-none-linux-gnueabi-g++
+CXX := arm-none-linux-gnueabi-g++
+
+CFLAGS := -isystem $(OE_CROSS_DIR)/include -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -mthumb-interwork -mno-thumb -fPIC
+LDFLAGS := -L$(OE_CROSS_DIR)/lib
+
+INCLUDES := \
+	-I$(LUNA_STAGING)/include \
+	-I$(LUNA_STAGING)/glib-2.0 \
+	$(INCLUDES)
+
+include Makefile

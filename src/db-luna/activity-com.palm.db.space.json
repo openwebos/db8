@@ -1,0 +1,19 @@
+{
+    "activity" : {
+        "name" : "mojodbspace",
+        "description" : "Scheduled mojodb space check activity",
+        "schedule" : {
+            "interval" : "5m"
+        },
+        "callback" : {
+            "method" : "palm://com.palm.db/internal/scheduledSpaceCheck" 
+        },
+        "type" : {
+            "background" : true,
+            "persist" : true,
+            "power" : true
+        }
+    },
+    "replace" : true,
+    "start" : true
+}

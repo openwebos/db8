@@ -1,0 +1,7 @@
+{
+    "id": "com.palm.db",
+    "preBackup": "internal/preBackup",
+    "postBackup": "internal/postBackup",
+    "preRestore": "internal/preRestore",
+    "postRestore": "internal/postRestore"
+}

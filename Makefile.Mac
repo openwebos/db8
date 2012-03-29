@@ -1,0 +1,3 @@
+BUILD_TYPE := debug
+
+include build/Makefile.Mac.inc

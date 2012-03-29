@@ -1,0 +1,5 @@
+BUILD_TYPE := release
+
+include build/Makefile.Mac.inc
+
+

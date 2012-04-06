@@ -100,7 +100,7 @@ MojErr MojMessageDispatcher::wait()
 	}
 	m_threads.clear();
 
-	return MojErrNone;
+	return err;
 }
 
 MojErr MojMessageDispatcher::dispatch(bool& stoppedOut)

@@ -121,7 +121,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %d; warnings: %d \n"), 
+		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %ld; warnings: %d \n"), 
 								 from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;
@@ -160,8 +160,8 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 				s2 = ((char *)m_keyData) + m_keySize - 17;
 			MojSize idIndex = m_plan->idIndex();
 			const MojChar * from = m_plan->query().from().data();
-			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %d; group: %d; KeySize: %d; %s ;id: %s \n"), 
-								 from, idIndex, group, m_keySize, s, s2);
+			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %ld; group: %d; KeySize: %ld; %s ;id: %s \n"), 
+								 from, idIndex, (int)group, m_keySize, s, s2);
 //#endif 
 		}
 		MojErrCheck(err);

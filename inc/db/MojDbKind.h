@@ -73,7 +73,7 @@ public:
 	MojDbKindEngine* kindEngine() const { return m_kindEngine; }
 	MojInt64 token() const { return m_state->token(); }
 	MojUInt32 version() const { return m_version; }
-	MojUInt32 nsubkinds() const {return m_subs.size(); }
+	MojUInt32 nsubkinds() const {return (MojUInt32)m_subs.size(); }
 
 	MojErr stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, bool verify);
 	MojErr verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& req);

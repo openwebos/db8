@@ -405,10 +405,10 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 
 					gettimeofday(&transactionStopTime, NULL);
 					
-					int elapsedTransactionTimeMS = (transactionStopTime.tv_sec - transactionStartTime.tv_sec) * 1000 +
+					long int elapsedTransactionTimeMS = (transactionStopTime.tv_sec - transactionStartTime.tv_sec) * 1000 +
 								(transactionStopTime.tv_usec - transactionStartTime.tv_usec) / 1000;
 					
-					total_transaction_time += elapsedTransactionTimeMS;
+					total_transaction_time += (int)elapsedTransactionTimeMS;
 					
 					transactions++;
 				}
@@ -430,7 +430,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	MojErrCheck(err);
 
 	gettimeofday(&stopTime, NULL);
-	int elapsedTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 +
+	long int elapsedTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 +
 				(stopTime.tv_usec - startTime.tv_usec) / 1000;
 	
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
@@ -438,7 +438,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	MojLogInfo(s_log, _T("Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
 						path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 	
-	MojLogWarning(s_log, _T("Loaded %s with %d records in %dms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
+	MojLogWarning(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
 		path, total, elapsedTimeMS, total_transaction_time, transactions, mutexes_used - orig_mutexes_used, mutexes_free, total_mutexes);
 	
 	return MojErrNone;
@@ -534,7 +534,7 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 	MojErrCheck(err);
 
 	//MojLogInfo(s_log, _T("Finished Backup with %d warnings \n"), warns);
-	MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), warns);
+	MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), (int)warns);
 	
 	// construct the next incremental key
 	if (response && !curRev.undefined()) {

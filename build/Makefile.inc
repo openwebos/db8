@@ -157,9 +157,28 @@ LUNA_SERVICE_TEST_SOURCES := \
 	MojLunaServiceTest.cpp
 
 # ------------------------------------------------------------------
+MOJ_USE_BDB := 1
+MOJ_USE_LDB := 0
 
-MOJ_USE_LDB := 1
+ifeq ("$(MOJ_USE_BDB)", "1")
+	 DB_LUNA_SOURCES += \
+		MojDbBerkeleyEngine.cpp \
+		MojDbBerkeleyFactory.cpp \
+		MojDbBerkeleyQuery.cpp
+		
+	DB_TEST_SOURCES  += \
+		MojDbBerkeleyEngine.cpp \
+		MojDbBerkeleyFactory.cpp \
+		MojDbBerkeleyQuery.cpp
 
+	DB_PERF_TEST_SOURCES  += \
+		MojDbBerkeleyEngine.cpp \
+		MojDbBerkeleyFactory.cpp \
+		MojDbBerkeleyQuery.cpp
+
+	DB_ENGINE_LIBS += -ldb-4.8
+	LOCAL_DEFINES += -DMOJ_USE_BDB
+endif
 
 ifeq ("$(MOJ_USE_LDB)", "1")
 	 DB_LUNA_SOURCES += \

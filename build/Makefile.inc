@@ -262,13 +262,16 @@ DB_LIB_LIBS := $(ICU_LIBS)
 DB_LIB_NAME := libmojodb
 DB_LIB_SHARED_TARGET := $(OBJDIR)/$(DB_LIB_NAME).so
 
+#LUNASERVICELIB = $(shell pkg-config --libs luna-service2)
+LUNASERVICELIB := -L/usr/local/lib -lluna-service2
+
 LUNA_LIB_OBJS := $(LUNA_LIB_SOURCES:%.cpp=$(OBJDIR)/%.o)
-LUNA_LIB_LIBS := -lmojocore -llunaservice
+LUNA_LIB_LIBS := -lmojocore $(LUNASERVICELIB)
 LUNA_LIB_NAME := libmojoluna
 LUNA_LIB_SHARED_TARGET := $(OBJDIR)/$(LUNA_LIB_NAME).so
 
 DB_LUNA_OBJS := $(DB_LUNA_SOURCES:%.cpp=$(OBJDIR)/%.o)
-DB_LUNA_LIBS := -lmojodb -lmojoluna -lmojocore -llunaservice $(ICU_LIBS) $(DB_ENGINE_LIBS) $(LOCAL_LIBS)
+DB_LUNA_LIBS := -lmojodb -lmojoluna -lmojocore $(ICU_LIBS) $(DB_ENGINE_LIBS) $(LOCAL_LIBS) $(LUNASERVICELIB)
 DB_LUNA_TARGET := $(OBJDIR)/mojodb-luna
 
 CORE_TEST_OBJS := $(CORE_TEST_SOURCES:%.cpp=$(OBJDIR)/%.o)
@@ -280,7 +283,7 @@ DB_TEST_LIBS := -lmojodb -lmojocore $(ICU_LIBS) $(DB_ENGINE_LIBS) $(LOCAL_LIBS)
 DB_TEST_TARGET := $(OBJDIR)/mojodb-test
 
 DB_CLIENT_TEST_OBJS := $(DB_CLIENT_TEST_SOURCES:%.cpp=$(OBJDIR)/%.o)
-DB_CLIENT_TEST_LIBS :=  -lmojoluna -lmojodb -lmojocore -llunaservice  $(LOCAL_LIBS)
+DB_CLIENT_TEST_LIBS :=  -lmojoluna -lmojodb -lmojocore $(LOCAL_LIBS) $(LUNASERVICELIB)
 DB_CLIENT_TEST_TARGET := $(OBJDIR)/mojodbclient-test
 
 DB_PERF_TEST_OBJS := $(DB_PERF_TEST_SOURCES:%.cpp=$(OBJDIR)/%.o)
@@ -288,11 +291,11 @@ DB_PERF_TEST_LIBS :=  -lmojodb -lmojocore  $(ICU_LIBS) $(DB_ENGINE_LIBS) $(LOCAL
 DB_PERF_TEST_TARGET := $(OBJDIR)/mojodbperf-test
 
 DB_STRESS_TEST_OBJS := $(DB_STRESS_TEST_SOURCES:%.cpp=$(OBJDIR)/%.o)
-DB_STRESS_TEST_LIBS :=  -lmojoluna -lmojodb -lmojocore -llunaservice $(DB_ENGINE_LIBS) $(LOCAL_LIBS)
+DB_STRESS_TEST_LIBS :=  -lmojoluna -lmojodb -lmojocore  $(DB_ENGINE_LIBS) $(LOCAL_LIBS) $(LUNASERVICELIB)
 DB_STRESS_TEST_TARGET := $(OBJDIR)/mojodbstress-test
 
 LUNA_SERVICE_TEST_OBJS := $(LUNA_SERVICE_TEST_SOURCES:%.cpp=$(OBJDIR)/%.o)
-LUNA_SERVICE_TEST_LIBS := -lmojoluna -lmojocore -llunaservice $(LOCAL_LIBS)
+LUNA_SERVICE_TEST_LIBS := -lmojoluna -lmojocore $(LOCAL_LIBS) $(LUNASERVICELIB)
 LUNA_SERVICE_TEST_TARGET := $(OBJDIR)/mojolunaservice-test
 
 SHARED_LIB_TARGETS := $(CORE_LIB_SHARED_TARGET) $(DB_LIB_SHARED_TARGET) ${LUNA_LIB_SHARED_TARGET} $(SYNC_LUNA_LIB_SHARED_TARGET)

@@ -22,7 +22,7 @@
 #define MOJLUNADEFS_H_
 
 #include "core/MojCoreDefs.h"
-#include "lunaservice.h"
+#include <lunaservice.h>
 
 class MojLunaErr;
 class MojLunaMessage;

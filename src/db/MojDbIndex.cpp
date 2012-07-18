@@ -185,7 +185,7 @@ MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
 	MojSize size = 0;
 	MojErr err = m_index->stats(req.txn(), count, size);
 
-	MojLogInfo(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %lX; count= %ld; size= %ld; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err); 
+	MojLogInfo(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err); 
 	
 	MojErrCheck(err);
 	usageOut += size;
@@ -267,7 +267,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(newKeys, txn);
 		MojErrCheck(err);
-		MojLogInfo(s_log, _T("IndexAdd: %s; Keys= %ld \n"), this->m_name.data(), newKeys.size());
+		MojLogInfo(s_log, _T("IndexAdd: %s; Keys= %zu \n"), this->m_name.data(), newKeys.size());
 	} else if (includeOld && !includeNew) {
 		// we include the old but not the new objects, so del all the old keys
 		MojAssert(oldObj);
@@ -278,7 +278,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(oldKeys, txn);
 		MojErrCheck(err);
-		MojLogInfo(s_log, _T("IndexDel: %s; Keys= %ld \n"), this->name().data(), oldKeys.size());
+		MojLogInfo(s_log, _T("IndexDel: %s; Keys= %zu \n"), this->name().data(), oldKeys.size());
 	} else if (includeNew && includeOld) {
 		// we include old and new objects
 		MojAssert(newObj && oldObj);
@@ -300,7 +300,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = delKeys(keysToDel, txn, forcedel);
 		
-		MojLogInfo(s_log, _T("IndexMerge: %s; OldKeys= %ld; NewKeys= %ld; Dropped= %ld; Added= %ld ; err = %d\n"), 
+		MojLogInfo(s_log, _T("IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n"), 
 			this->name().data(), oldKeys.size(), newKeys.size(), keysToDel.size(), keysToPut.size(), (int)err);
 
 		MojErrCheck(err);

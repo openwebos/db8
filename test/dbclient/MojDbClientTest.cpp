@@ -237,6 +237,7 @@ void MojDbClientTest::cleanup()
 
 	err = delTestData();
 	MojAssert(err == MojErrNone);
+	err=err; //Suppress "not used" warning when asserts compiled out
 }
 
 MojErr MojDbClientTest::staleTestData(bool& resultOut)

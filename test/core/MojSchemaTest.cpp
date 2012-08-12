@@ -767,23 +767,22 @@ MojErr MojSchemaTest::enumTest()
 
 MojErr MojSchemaTest::divisibleTest()
 {
-	MojErr err = MojErrNone;
-	err = checkValid(_T("{\"divisibleBy\":0}"),
+	(void) checkValid(_T("{\"divisibleBy\":0}"),
 					 _T("18"),
 					 false);
-	err = checkValid(_T("{\"divisibleBy\":1}"),
+	(void) checkValid(_T("{\"divisibleBy\":1}"),
 					 _T("18"),
 					 true);
-	err = checkValid(_T("{\"divisibleBy\":3}"),
+	(void) checkValid(_T("{\"divisibleBy\":3}"),
 					 _T("18"),
 					 true);
-	err = checkValid(_T("{\"divisibleBy\":3}"),
+	(void) checkValid(_T("{\"divisibleBy\":3}"),
 					 _T("18.0"),
 					 true);
-	err = checkValid(_T("{\"divisibleBy\":3}"),
+	(void) checkValid(_T("{\"divisibleBy\":3}"),
 					 _T("18.1"),
 					 false);
-	err = checkValid(_T("{\"divisibleBy\":4}"),
+	(void) checkValid(_T("{\"divisibleBy\":4}"),
 					 _T("18"),
 					 false);
 

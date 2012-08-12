@@ -1617,10 +1617,8 @@ MojErr MojDbQueryTest::basicFromObject()
 	MojTestErrCheck(err);
 	MojTestAssert(q1.from()== _T("Test:1"));
 	const MojDbQuery::WhereMap& where = q1.where();
-	bool foundFoo = false;
 	for (MojDbQuery::WhereMap::ConstIterator i = where.begin(); i != where.end(); i++) {
 		if (i.key() == _T("foo")) {
-			foundFoo = true;
 			MojTestAssert(i->upperOp() == MojDbQuery::OpNone);
 			MojTestAssert(i->lowerOp() == MojDbQuery::OpEq);
 			MojTestAssert(i->lowerVal().intValue() == 1);

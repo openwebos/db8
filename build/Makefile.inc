@@ -250,7 +250,7 @@ LOCAL_LDFLAGS := -L$(OBJDIR) $(LOCAL_FLAGS_OPT) $(LDFLAGS) $(ARCH_LDFLAGS)
 
 # ------------------------------------------------------------------
 
-ICU_LIBS := -licuuc -licutu
+ICU_LIBS := -licui18n -licuuc -licutu
 
 CORE_LIB_OBJS := $(CORE_LIB_SOURCES:%.cpp=$(OBJDIR)/%.o)
 CORE_LIB_LIBS := -lglib-2.0 -lgthread-2.0 -lPmLogLib
@@ -302,7 +302,8 @@ SHARED_LIB_TARGETS := $(CORE_LIB_SHARED_TARGET) $(DB_LIB_SHARED_TARGET) ${LUNA_L
 
 # ------------------------------------------------------------------
 
-ALL_TARGETS := libmojocore libmojodb libmojoluna mojodb-luna mojocore-test mojodb-test mojodbclient-test mojodbperf-test mojodbstress-test mojolunaservice-test
+TEST_TARGETS := libmojocore libmojodb libmojoluna mojodb-luna mojocore-test mojodb-test mojodbclient-test mojodbperf-test mojodbstress-test mojolunaservice-test
+ALL_TARGETS := libmojocore libmojodb libmojoluna mojodb-luna 
 .PHONY: clean all setup install $(ALL_TARGETS)
 
 all: $(ALL_TARGETS)

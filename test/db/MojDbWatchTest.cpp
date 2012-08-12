@@ -381,21 +381,15 @@ MojErr MojDbWatchTest::pageTest(MojDb& db)
 	MojObject idFourth;
 	MojObject idLast;
 	MojInt64 rev;
-	MojInt64 revFirst;
-	MojInt64 revFourth;
-	MojInt64 revLast;
 	for (int i = 100; i < 150; ++i) {
 		MojErr err = put(db, 100, i, id, rev);
 		MojTestErrCheck(err);
 		if (i == 100) {
 			idFirst = id;
-			revFirst = rev;
 		} else if (i == 103) {
 			idFourth = id;
-			revFourth = rev;
 		} else if (i == 149) {
 			idLast = id;
-			revLast = rev;
 		}
 	}
 	MojDbQuery query;

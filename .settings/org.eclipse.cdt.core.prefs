@@ -1,4 +1,0 @@
-#Wed Aug 26 14:02:23 PDT 2009
-eclipse.preferences.version=1
-environment/project/cdt.managedbuild.config.gnu.exe.debug.1411399592=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\=";" name\="LUNA_STAGING" operation\="replace" value\="/home/benstrong/bedlam"/>\n</environment>\n
-environment/project/cdt.managedbuild.config.gnu.exe.release.873323652=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\=";" name\="LUNA_STAGING" operation\="append" value\="/home/benstrong/Local"/>\n</environment>\n

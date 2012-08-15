@@ -10,7 +10,7 @@ This release is provided for informational purposes only.  No build support is p
 # Copyright and License Information
 
 All content, including all source code files and documentation files in this repository are:
- Copyright (c) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

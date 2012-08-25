@@ -121,7 +121,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %zu \n"), 
+		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"), 
 								 from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;

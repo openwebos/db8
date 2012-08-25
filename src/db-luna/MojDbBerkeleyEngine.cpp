@@ -315,7 +315,7 @@ MojErr MojDbBerkeleyDatabase::mutexStats(int * total_mutexes, int * mutexes_free
 	if (mutexes_used_highwater)
 		*mutexes_used_highwater = statp->st_mutex_inuse_max;
 	if (mutexes_regionsize)
-		*mutexes_regionsize = statp->st_regsize;
+		*mutexes_regionsize = (int)(statp->st_regsize);
 
 	free(statp);
 
@@ -993,7 +993,7 @@ MojErr MojDbBerkeleyEngine::compact()
 	memset(&statAtBeginning, '\0', sizeof(statAtBeginning));
 	::statvfs(DatabaseRoot, &statAtBeginning);
 
-	const int blockSize = statAtBeginning.f_bsize;
+	const int blockSize = (int)statAtBeginning.f_bsize;
 
 	// checkpoint before compact
 	MojErr err = m_env->checkpoint(0);
@@ -1002,13 +1002,14 @@ MojErr MojDbBerkeleyEngine::compact()
 	memset(&statAfterCompact, '\0', sizeof(statAfterCompact));
 	::statvfs(DatabaseRoot, &statAfterCompact);
 	
-	int pre_compact_reclaimed_blocks = statAfterCompact.f_bfree - statAtBeginning.f_bfree;
+	int pre_compact_reclaimed_blocks = (int)(statAfterCompact.f_bfree - statAtBeginning.f_bfree);
 	
 	MojLogWarning(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		pre_compact_reclaimed_blocks * blockSize,
 		DatabaseRoot, statAfterCompact.f_bfree * blockSize,
-		 statAfterCompact.f_blocks * blockSize,
-		 (statAfterCompact.f_blocks - statAfterCompact.f_bfree) * 100.0 / statAfterCompact.f_blocks);
+		statAfterCompact.f_blocks * blockSize,
+		(float)(statAfterCompact.f_blocks - statAfterCompact.f_bfree) * 100.0 / (float)statAfterCompact.f_blocks);
+
 
 	// Retrieve setting for record count used to break up compact operations
 	const int stepSize = m_env->compactStepSize();
@@ -1134,8 +1135,8 @@ MojErr MojDbBerkeleyEngine::compact()
 					
 					gettimeofday(&stopTime, NULL);
 				
-					elapsedStepTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 + 
-							  (stopTime.tv_usec - startTime.tv_usec) / 1000;
+					elapsedStepTimeMS = (int)(stopTime.tv_sec - startTime.tv_sec) * 1000 +
+							  (int)(stopTime.tv_usec - startTime.tv_usec) / 1000;
 				}
 				
 				dbc->close(dbc);
@@ -1169,8 +1170,8 @@ MojErr MojDbBerkeleyEngine::compact()
 				
 				gettimeofday(&stopTime, NULL);
 				
-				int elapsedCompactTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 + 
-						           (stopTime.tv_usec - startTime.tv_usec) / 1000;
+				int elapsedCompactTimeMS = (int)(stopTime.tv_sec - startTime.tv_sec) * 1000 +
+						           (int)(stopTime.tv_usec - startTime.tv_usec) / 1000;
 				
 		                MojLogInfo(s_log, _T("Compact stats of %s (partial from ~record %d to %d): time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n"),
         		        	(*i)->m_name.data(),
@@ -1206,7 +1207,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				memset(&statAfterCompact, '\0', sizeof(statAfterCompact));
 				::statvfs(DatabaseRoot, &statAfterCompact);
 				
-				int log_generation_blocks = statBeforeCompact.f_bfree - statAfterCompact.f_bfree;
+				int log_generation_blocks = (int)(statBeforeCompact.f_bfree - statAfterCompact.f_bfree);
 			
 				total_log_generation_blocks += log_generation_blocks;
 				if (log_generation_blocks > max_log_generation_blocks)
@@ -1218,7 +1219,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				memset(&statAfterCompact, '\0', sizeof(statAfterCheckpoint));
 				::statvfs(DatabaseRoot, &statAfterCheckpoint);
 			
-				int reclaimed_blocks = statAfterCheckpoint.f_bfree - statBeforeCompact.f_bfree;
+				int reclaimed_blocks = (int)(statAfterCheckpoint.f_bfree - statBeforeCompact.f_bfree);
 			
 				total_reclaimed_blocks += reclaimed_blocks;
 				if (reclaimed_blocks > max_reclaimed_blocks)
@@ -1284,8 +1285,8 @@ MojErr MojDbBerkeleyEngine::compact()
 
 			gettimeofday(&stopTime, NULL);
 				
-			int elapsedCompactTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 + 
-					           (stopTime.tv_usec - startTime.tv_usec) / 1000;
+			int elapsedCompactTimeMS = (int)(stopTime.tv_sec - startTime.tv_sec) * 1000 +
+					           (int)(stopTime.tv_usec - startTime.tv_usec) / 1000;
 
 			total_compact_time += elapsedCompactTimeMS;
 			if (elapsedCompactTimeMS > max_compact_time)
@@ -1310,7 +1311,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			memset(&statAfterCompact, '\0', sizeof(statAfterCompact));
 			::statvfs(DatabaseRoot, &statAfterCompact);
 			
-			int log_generation_blocks = statBeforeCompact.f_bfree - statAfterCompact.f_bfree;
+			int log_generation_blocks = (int)(statBeforeCompact.f_bfree - statAfterCompact.f_bfree);
 			
 			total_log_generation_blocks += log_generation_blocks;
 			if (log_generation_blocks > max_log_generation_blocks)
@@ -1322,7 +1323,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			memset(&statAfterCompact, '\0', sizeof(statAfterCheckpoint));
 			::statvfs(DatabaseRoot, &statAfterCheckpoint);
 			
-			int reclaimed_blocks = statAfterCheckpoint.f_bfree - statBeforeCompact.f_bfree;
+			int reclaimed_blocks = (int)(statAfterCheckpoint.f_bfree - statBeforeCompact.f_bfree);
 			
 			total_reclaimed_blocks += reclaimed_blocks;
 			if (reclaimed_blocks > max_reclaimed_blocks)
@@ -1341,13 +1342,13 @@ MojErr MojDbBerkeleyEngine::compact()
 	
 	gettimeofday(&totalStopTime, NULL);
 				
-	int elapsedTotalMS = (totalStopTime.tv_sec - totalStartTime.tv_sec) * 1000 + 
-		             (totalStopTime.tv_usec - totalStartTime.tv_usec) / 1000;
+	int elapsedTotalMS = (int)(totalStopTime.tv_sec - totalStartTime.tv_sec) * 1000 +
+		             (int)(totalStopTime.tv_usec - totalStartTime.tv_usec) / 1000;
 
 	memset(&statAtEnd, '\0', sizeof(statAtEnd));
 	::statvfs(DatabaseRoot, &statAtEnd);
 	
-	int compact_freed_blocks = statAtEnd.f_bfree - statAtBeginning.f_bfree;
+	int compact_freed_blocks = (int)(statAtEnd.f_bfree - statAtBeginning.f_bfree);
 
 	MojLogWarning(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
 			     "%d db pages truncated (max burst %d), "
@@ -1374,7 +1375,7 @@ MojErr MojDbBerkeleyEngine::compact()
 		DatabaseRoot,
 		statAfterCompact.f_bfree * blockSize,
 		 statAfterCompact.f_blocks * blockSize,
-		 (statAfterCompact.f_blocks - statAfterCompact.f_bfree) * 100.0 / statAfterCompact.f_blocks);
+		 (float)(statAfterCompact.f_blocks - statAfterCompact.f_bfree) * 100.0 / (float)statAfterCompact.f_blocks);
 
 	return MojErrNone;
 }

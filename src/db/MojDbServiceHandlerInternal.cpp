@@ -429,8 +429,8 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 		}
 	}
 
-	bytesUsed = blocksUsed * dbFsStat.f_frsize;
-	bytesAvailable = dbFsStat.f_blocks * dbFsStat.f_frsize;
+	bytesUsed = (int)(blocksUsed * dbFsStat.f_frsize);
+	bytesAvailable = (int)(dbFsStat.f_blocks * dbFsStat.f_frsize);
 
 	return MojErrNone;
 }
@@ -691,7 +691,7 @@ MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::handleCancel(MojServiceMe
 
 	m_msg.reset();
 
-	int index = -1;
+	MojSize index = -1;
 	for (MojSize i = 0; i < m_parent->m_spaceCheckHandlers.size(); i++) {
 		if (m_parent->m_spaceCheckHandlers.at(i).get() == this) {
 			index = i;

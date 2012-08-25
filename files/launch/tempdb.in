@@ -1,0 +1,12 @@
+# -*- mode: conf; -*-
+
+start on stopped finish
+
+
+script
+if [ -e @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp ]; then
+#	rm -r @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp
+fi
+end script
+
+

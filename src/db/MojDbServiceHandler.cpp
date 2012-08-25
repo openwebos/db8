@@ -731,8 +731,7 @@ MojErr MojDbServiceHandler::Watcher::handleWatch()
 	m_cancelSlot.cancel();
 	MojRefCountedPtr<MojServiceMessage> msg = m_msg;
 
-	MojLogInfo(s_log, _T("Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %d\n response= %s\n"),
-				msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
+	MojLogInfo(s_log, _T("Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %zu;\n response= %s\n"), msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
 
 	m_msg.reset();
 

@@ -1,7 +1,10 @@
-DB8
-===
-DB8 is a userspace service that provides access to the webOS database.  Access to the database APIs is provided over the luna-service bus.  This initial release provides the infrastructure code to wrap a range of database engines.  The webOS team is currently implementing support for the LevelDB engine and updates will be posted here.
+Summary
+-------
+A userspace service that provides access to the openWebOS database
 
+Description
+-----------
+DB8 is a userspace service that provides access to the webOS database.  Access to the database APIs is provided over the luna-service bus.  This initial release provides the infrastructure code to wrap a range of database engines.  The webOS team is currently implementing support for the LevelDB engine and updates will be posted here.
 
 # Build Instructions 
 

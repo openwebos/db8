@@ -1,0 +1,12 @@
+# -*- mode: conf; -*-
+
+start on stopped finish
+
+
+script
+if [ -e /var/db/temp ]; then
+#	rm -r /var/db/temp
+fi
+end script
+
+

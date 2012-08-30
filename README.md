@@ -3,9 +3,17 @@ DB8
 DB8 is a userspace service that provides access to the webOS database.  Access to the database APIs is provided over the luna-service bus.  This initial release provides the infrastructure code to wrap a range of database engines.  The webOS team is currently implementing support for the LevelDB engine and updates will be posted here.
 
 
-# Build Instructions
-This release is provided for informational purposes only.  No build support is provided at this time.
+# Build Instructions 
 
+Please make sure you have BerkeleyDB installed on your system:
+
+        sudo apt-get install libdb4.8-dev
+
+Next, cd to the folder where you have downloaded db8 and execute the following instructions:
+
+        make -f Makefile.Ubuntu.Release install
+
+This will create the binary mojodb-luna under the folder release-linux-x86 along with libraries libmojocore.so, libmojodb.so and libmojoluna.so
 
 # Copyright and License Information
 

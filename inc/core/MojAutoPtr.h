@@ -92,7 +92,7 @@ public:
 
 	T& operator*() const { MojAssert(Base::m_p); return *Base::m_p; }
 	template<class P>
-	MojAutoPtr& operator=(MojAutoPtr<P>& ap) { reset(ap.release()); return *this; }
+	MojAutoPtr& operator=(MojAutoPtr<P>& ap) { this->reset(ap.release()); return *this; }
 	template<class P>
 	operator MojAutoPtr<P>() { return MojAutoPtr<P>(Base::release()); }
 };

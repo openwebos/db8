@@ -165,7 +165,7 @@ void MojQuickSortImpl(T* array, MojSize left, MojSize right, const COMP& comp)
 }
 
 template<class T, class COMP>
-inline void MojQuickSort(T* array, MojSize numElems, const COMP& comp)
+inline void MojQuickSort(T* array, MojSize numElems, const COMP& comp = COMP())
 {
 	return MojQuickSortImpl<T, COMP>(array, 0, numElems, comp);
 }

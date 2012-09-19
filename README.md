@@ -10,7 +10,7 @@ DB8 is a userspace service that provides access to the webOS database.  Access t
 
 Please make sure you have BerkeleyDB installed on your system:
 
-        sudo apt-get install libdb4.8-dev
+        sudo apt-get install libdb4.8-dev libicu-dev
 
 Next, cd to the folder where you have downloaded db8 and execute the following instructions:
 

@@ -20,6 +20,8 @@
 #ifndef MOJREFCOUNTINTERNAL_H_
 #define MOJREFCOUNTINTERNAL_H_
 
+#include "core/internal/MojUtilInternal.h"
+
 #define MojRefCountPtrToAtomic(P) (((MojAtomicT*) P) - 1)
 
 template<class T>

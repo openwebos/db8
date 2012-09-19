@@ -60,10 +60,13 @@ if(BDB STREQUAL "BDB-NOTFOUND")
 endif()
 MESSAGE(STATUS "BDB LIB ${BDB}")
 
+# provide both db8 and mojodb pkgconfigs
 webos_build_pkgconfig(files/pkgconfig/mojodb)
+webos_build_pkgconfig(files/pkgconfig/db8)
+
 webos_add_compiler_flags(ALL -g -O2 -Wall -fPIC -Wconversion -Werror
                          -Wno-unused-but-set-variable -Wno-unused-variable
-                         -fno-exceptions -fno-rtti -DNDEBUG -fexpensive-optimizations
+                         -fno-exceptions -DNDEBUG -fexpensive-optimizations
                          -frename-registers -DMOJ_LINUX -fno-strict-aliasing
                          -DMOJ_INTERNAL -D_REENTRANT)
 webos_add_linker_options(ALL --no-undefined)

@@ -22,5 +22,5 @@ includedir=@WEBOS_INSTALL_INCLUDEDIR@
 Name: @CMAKE_PROJECT_NAME@
 Description: @WEBOS_PROJECT_SUMMARY@
 Version: @WEBOS_COMPONENT_VERSION@
-Libs: -L${libdir} -lmojocore -lmojodb -lmojoluna -l@CMAKE_PROJECT_NAME@
-Cflags: -I${includedir}
+Libs: -L${libdir} -lmojocore -lmojodb -lmojoluna
+Cflags: -I${includedir}/mojodb

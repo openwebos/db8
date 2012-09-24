@@ -16,6 +16,6 @@
 #
 # LICENSE@@@ 
 [D-BUS Service]
-Name=com.palm.db
+Name=com.palm.tempdb
 Exec=@WEBOS_INSTALL_SBINDIR@/mojodb-luna @WEBOS_INSTALL_LOCALSTATEDIR@/db
 Type=static

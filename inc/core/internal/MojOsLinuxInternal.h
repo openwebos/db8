@@ -35,9 +35,14 @@ inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 {
 	MojAssert(a);
+#if __LINUX_ARM_ARCH__ < 6
+	/* This could be used for all of the assembly language blocks, but we
+         * don't want to perturb the code at the moment */
+	return  __sync_add_and_fetch(&a->val, incr);
+#else
+	/* This only assembles for ARMv6 and later */
 	MojUInt32 tmp;
 	MojInt32 res;
-
 	asm volatile(
 			"1:	ldrex %0, [%2]\n"
 			"add %0, %0, %3\n"
@@ -48,6 +53,7 @@ inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 				: "r" (&a->val), "Ir" (incr)
 				: "cc");
 	return res;
+#endif
 }
 #endif
 

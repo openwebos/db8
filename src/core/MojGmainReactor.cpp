@@ -40,11 +40,14 @@ MojGmainReactor::~MojGmainReactor()
 
 MojErr MojGmainReactor::init()
 {
+#if !GLIB_CHECK_VERSION(2,32,0)
     // init glib threads - must be done BEFORE any other call to glib!!!!
+    // glib >= 2.32.0 does this automatically
     if (!g_thread_supported())
     {
         g_thread_init(NULL);
     }
+#endif /* GLIB_CHECK_VERSION */
 	MojAssert(!m_mainLoop.get());
 	m_mainLoop.reset(g_main_loop_new(NULL, false));
 	MojAllocCheck(m_mainLoop.get());

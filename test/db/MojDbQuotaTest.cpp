@@ -342,14 +342,16 @@ MojErr MojDbQuotaTest::testEnforce(MojDb& db)
 	MojErrCheck(err);
 	err = put(db, MojTestKind1Objects[3]);
 	MojTestErrExpected(err, MojErrDbQuotaExceeded);
-	// make sure we can delete the kind
+	// Try to delete the kind
 	MojString kindStr;
 	err = kindStr.assign(_T("Test:1"));
 	MojTestErrCheck(err);
 	bool found = false;
 	err = db.delKind(kindStr, found);
-	MojTestErrCheck(err);
-	MojTestAssert(found);
+
+    //The delete should be failure, because it contain sub kind "Test2:1"
+    MojTestErrExpected(err,MojErrDbKindHasSubKinds); 
+    MojTestAssert(!found); 
 
 	return MojErrNone;
 }

@@ -20,10 +20,10 @@
 #ifndef MOJLUNASERVICE_H_
 #define MOJLUNASERVICE_H_
 
+#include <glib.h>
 #include "luna/MojLunaDefs.h"
 #include "core/MojService.h"
 #include "core/MojString.h"
-#include "glib.h"
 
 class MojLunaService : public MojService
 {

@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2009-2013 Hewlett-Packard Development Company, L.P.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@
 #include "core/MojTime.h"
 
 #include <sys/statvfs.h>
+
+#define MASSIVE_AVAILABLE_SPACE (500000000L) // 500 MB
 
 const MojDbServiceHandlerInternal::Method MojDbServiceHandlerInternal::s_privMethods[] = {
 	{MojDbServiceDefs::PostBackupMethod, (Callback) &MojDbServiceHandlerInternal::handlePostBackup},
@@ -405,18 +407,23 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 
 	fsblkcnt_t blocksUsed = dbFsStat.f_blocks - dbFsStat.f_bfree;
 
+    MojInt64 bigBytesUsed = (MojInt64)blocksUsed * dbFsStat.f_frsize;
+    MojInt64 bigBytesAvailable = (MojInt64)dbFsStat.f_blocks * dbFsStat.f_frsize;
+
 	MojDouble percentUsed =
 		((MojDouble)blocksUsed / (MojDouble)dbFsStat.f_blocks) * 100.0;
 
 	MojLogInfo(s_log, _T("Database volume %.1f full"), percentUsed);
 
-	int level;
-	for (level = AlertLevelHigh; level > NoSpaceAlert; --level) {
-		if (percentUsed >= SpaceAlertLevels[level])
-			break;
-	}
+    if (MASSIVE_AVAILABLE_SPACE > bigBytesAvailable) { // regardless of percent used, if available space is massive, don't set space alert
+        int level;
+        for (level = AlertLevelHigh; level > NoSpaceAlert; --level) {
+            if (percentUsed >= SpaceAlertLevels[level])
+                break;
+        }
+        alertLevel = (AlertLevel) level;
+    }
 
-	alertLevel = (AlertLevel) level;
 
 	if ((AlertLevel)alertLevel > NoSpaceAlert) {
 		MojLogWarning(s_log, _T("Database volume %.1f full, generating "
@@ -429,8 +436,9 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 		}
 	}
 
-	bytesUsed = (int)(blocksUsed * dbFsStat.f_frsize);
-	bytesAvailable = (int)(dbFsStat.f_blocks * dbFsStat.f_frsize);
+    // On embedded devices, available/used space normally well below 2GB, but on desktop environments cap to 2GB
+    bytesUsed = (int)(bigBytesUsed > MojInt32Max ? MojInt32Max : bigBytesUsed);
+    bytesAvailable = (int)(bigBytesAvailable > MojInt32Max ? MojInt32Max : bigBytesAvailable);
 
 	return MojErrNone;
 }

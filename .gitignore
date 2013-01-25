@@ -23,6 +23,7 @@
 # Ignore all build directories and their trees. This should exclude all
 # build products.
 /BUILD*
+/build*
 
 # Ignore build directories from original make system until conversion to cmake
 /release-*

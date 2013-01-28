@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2012 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2012-2013 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,13 +52,10 @@ if(ICUI18N STREQUAL "ICUI18N-NOTFOUND")
 	MESSAGE(FATAL_ERROR "Failed to find ICU-I18N libaries. Please install.")
 endif()
 
-# -- check for BerkeleyDB
-# (add an alternate standard path in case building BDB locally: does not override)
-find_library(BDB NAMES db-4.8 PATH /usr/local/BerkeleyDB.4.8/lib)
-if(BDB STREQUAL "BDB-NOTFOUND")
-	MESSAGE(FATAL_ERROR "Failed to find BerkleyDB libaries. Please install.")
-endif()
-MESSAGE(STATUS "BDB LIB ${BDB}")
+# configure database backend.
+include ("${CMAKE_SOURCE_DIR}/src/db-luna/BackendBuildRules.cmake")
+
+webos_build_system_bus_files()
 
 # provide both db8 and mojodb pkgconfigs
 webos_build_pkgconfig(files/pkgconfig/mojodb)
@@ -120,7 +117,7 @@ target_link_libraries(mojocore
                       )
 webos_build_library(TARGET mojocore NOHEADERS)
 
-# -- source for generating libmojodb.so 
+# -- source for generating libmojodb.so
 set(DB_LIB_SOURCES
     src/db/MojDb.cpp
     src/db/MojDbAdmin.cpp
@@ -160,7 +157,7 @@ set(DB_LIB_SOURCES
     )
 
 add_library(mojodb SHARED ${DB_LIB_SOURCES})
-target_link_libraries(mojodb 
+target_link_libraries(mojodb
                       ${GLIB2_LDFLAGS}
                       ${GTHREAD2_LDFLAGS}
                       mojocore
@@ -179,7 +176,7 @@ set(LUNA_LIB_SOURCES
     )
 
 add_library(mojoluna SHARED ${LUNA_LIB_SOURCES})
-target_link_libraries(mojoluna 
+target_link_libraries(mojoluna
                       ${GLIB2_LDFLAGS}
                       ${GTHREAD2_LDFLAGS}
                       mojocore
@@ -191,27 +188,22 @@ webos_build_library(TARGET mojoluna NOHEADERS)
 
 # -- source for generating mojodb-luna
 set(LUNA_BIN_SOURCES src/db-luna/MojDbLunaServiceApp.cpp)
-set(BDB_SOURCES
-    src/db-luna/MojDbBerkeleyEngine.cpp
-    src/db-luna/MojDbBerkeleyFactory.cpp
-    src/db-luna/MojDbBerkeleyQuery.cpp
-    )
 
-webos_add_compiler_flags(ALL -DMOJ_USE_BDB)
-include_directories(/usr/local/BerkeleyDB.4.8/include)
-add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${BDB_SOURCES})
+include_directories (${DB_BACKEND_INCLUDES})
+add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${DB_BACKEND_WRAPPER_SOURCES})
 target_link_libraries(mojodb-luna
                       ${GLIB2_LDFLAGS}
                       ${GTHREAD2_LDFLAGS}
                       mojocore
                       mojodb
                       mojoluna
-                      ${BDB}
-                      #-L/usr/local/BerkeleyDB.4.8/lib;-ldb-4.8
+                      ${DB_BACKEND_LIB}
                       ${LS2_LDFLAGS}
                       ${ICU}
                       ${ICUI18N}
-                      )
+)
+
+webos_add_compiler_flags(ALL ${DB_BACKEND_WRAPPER_CFLAGS})
 
 webos_build_system_bus_files()
 

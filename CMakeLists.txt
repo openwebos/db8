@@ -1,6 +1,7 @@
 # @@@LICENSE
 #
 # Copyright (c) 2012-2013 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2013 LG Electronics
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@ cmake_minimum_required(VERSION 2.8.7)
 project(db8 CXX)
 
 include(webOS/webOS)
-webos_modules_init(1 0 0 QUALIFIER RC3)
+webos_modules_init(1 0 0 QUALIFIER RC4)
 webos_component(2 0 0)
 
 include(FindPkgConfig)
@@ -53,7 +54,7 @@ if(ICUI18N STREQUAL "ICUI18N-NOTFOUND")
 endif()
 
 # configure database backend.
-include ("${CMAKE_SOURCE_DIR}/src/db-luna/BackendBuildRules.cmake")
+include(${CMAKE_SOURCE_DIR}/src/db-luna/BackendBuildRules.cmake)
 
 webos_build_system_bus_files()
 
@@ -219,3 +220,10 @@ install(FILES src/db-luna/activity-com.palm.db.purge.json DESTINATION ${WEBOS_IN
 install(FILES src/db-luna/activity-com.palm.db.space.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.db)
 
 install(DIRECTORY inc/ DESTINATION ${WEBOS_INSTALL_INCLUDEDIR}/mojodb/)
+
+if (WEBOS_CONFIG_BUILD_TESTS)
+	add_subdirectory(test/core)
+	add_subdirectory(test/db)
+	add_subdirectory(test/dbclient)
+	add_subdirectory(test/luna-service)
+endif()

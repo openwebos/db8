@@ -93,6 +93,12 @@ Below are the tools and libraries (and their minimum versions) required to build
 * gthread-2.0
 * openwebos/luna-service2
 
+### Enable unit tests
+
+To build the unit tests for db8, specify a true value for `WEBOS_CONFIG_BUILD_TESTS` on the cmake command line. For example:
+
+    $ cmake -D WEBOS_CONFIG_BUILD_TESTS:BOOL=True
+
 ### Building Standalone
 
 #### Using cmake
@@ -135,6 +141,7 @@ You will need to use `sudo` if you did not specify `WEBOS_INSTALL_ROOT`.
 
 All content, including all source code files and documentation files in this repository are:
  Copyright (c) 2009-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (c) 2013 LG Electronics
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

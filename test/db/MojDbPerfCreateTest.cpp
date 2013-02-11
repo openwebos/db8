@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,14 +17,20 @@
 *
 * LICENSE@@@ */
 
+#include "db/MojDbStorageEngine.h"
 
 #include "MojDbPerfCreateTest.h"
 #include "db/MojDb.h"
 #include "core/MojTime.h"
+
 #ifdef MOJ_USE_BDB
+#include "db-luna/MojDbBerkeleyFactory.h"
 #include "db-luna/MojDbBerkeleyEngine.h"
 #elif MOJ_USE_LDB
+#include "db-luna/MojDbLevelFactory.h"
 #include "db-luna/MojDbLevelEngine.h"
+#else
+    #error "Doesn't specified database type. See macro MOJ_USE_BDB and MOJ_USE_LDB"
 #endif
 
 static const MojUInt64 numInsert = 1000;
@@ -69,19 +76,17 @@ MojErr MojDbPerfCreateTest::run()
 
 MojErr MojDbPerfCreateTest::testCreate()
 {
-
 	//setup the test storage engine
 #ifdef MOJ_USE_BDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
+    MojDbStorageEngine::setEngineFactory (new MojDbBerkeleyFactory);
 #elif MOJ_USE_LDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
+    MojDbStorageEngine::setEngineFactory (new MojDbLevelFactory);
 #else
-    MojRefCountedPtr<MojDbStorageEngine> engine;
+    #error "Not defined engine type"
 #endif
-	MojAllocCheck(engine.get());
-    MojDb db;
+	MojDb db;
 
-	MojErr err = db.open(MojDbTestDir, engine.get());
+	MojErr err = db.open(MojDbTestDir);
 	MojTestErrCheck(err);
 
 	// time put kind

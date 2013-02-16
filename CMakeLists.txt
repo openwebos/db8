@@ -189,8 +189,9 @@ webos_build_library(TARGET mojoluna NOHEADERS)
 # -- source for generating mojodb-luna
 set(LUNA_BIN_SOURCES src/db-luna/MojDbLunaServiceApp.cpp)
 
-include_directories (${DB_BACKEND_INCLUDES})
-add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${DB_BACKEND_WRAPPER_SOURCES})
+webos_add_compiler_flags(ALL -DMOJ_USE_BDB)
+include_directories(${BDB_INC})
+add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${BDB_SOURCES})
 target_link_libraries(mojodb-luna
                       ${GLIB2_LDFLAGS}
                       ${GTHREAD2_LDFLAGS}

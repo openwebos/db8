@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2012 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2012-2013 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,6 +59,14 @@ if(BDB STREQUAL "BDB-NOTFOUND")
 	MESSAGE(FATAL_ERROR "Failed to find BerkleyDB libaries. Please install.")
 endif()
 MESSAGE(STATUS "BDB LIB ${BDB}")
+
+find_path(BDB_INC db.h
+          PATHS /usr/local/BerkeleyDB.4.8/include
+          PATH_SUFFIXES db4.8)
+if(BDB_INC STREQUAL "BDB_INC-NOTFOUND")
+    MESSAGE(FATAL_ERROR "Failed to find BerkleyDB includes. Please install.")
+endif()
+MESSAGE(STATUS "BDB INC ${BDB_INC}")
 
 # provide both db8 and mojodb pkgconfigs
 webos_build_pkgconfig(files/pkgconfig/mojodb)
@@ -198,7 +206,7 @@ set(BDB_SOURCES
     )
 
 webos_add_compiler_flags(ALL -DMOJ_USE_BDB)
-include_directories(/usr/local/BerkeleyDB.4.8/include)
+include_directories(${BDB_INC})
 add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${BDB_SOURCES})
 target_link_libraries(mojodb-luna
                       ${GLIB2_LDFLAGS}

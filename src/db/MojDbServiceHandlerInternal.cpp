@@ -699,15 +699,17 @@ MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::handleCancel(MojServiceMe
 
 	m_msg.reset();
 
-	MojSize index = -1;
+	MojSize index = 0;
+        bool isFound = false;
 	for (MojSize i = 0; i < m_parent->m_spaceCheckHandlers.size(); i++) {
 		if (m_parent->m_spaceCheckHandlers.at(i).get() == this) {
 			index = i;
+                        isFound = true;
 			break;
 		}
 	}
 
-	MojAssert(index != -1);
+	MojAssert(!isFound);
 	m_parent->m_spaceCheckHandlers.erase(index);
 	
 	return MojErrNone;

@@ -1,4 +1,0 @@
-BUILD_TYPE := release
-
-include build/Makefile.Ubuntu.inc
-

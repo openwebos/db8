@@ -1,3 +1,0 @@
-BUILD_TYPE := debug
-
-include build/Makefile.Ubuntu.inc

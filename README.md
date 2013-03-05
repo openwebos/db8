@@ -136,16 +136,6 @@ You can specify additional directories to be searched prior to this one by setti
 To see all of the make targets that CMake has generated, issue:
 
     $ make help
-    
-#### Using make (not cmake)
-
-First, make sure that you have installed all the required dependencies listed above (excepting cmake and cmake modules).
-
-Next, cd to the folder where you have cloned this source code, and execute the following:
-
-    $ make -f Makefile.Ubuntu.Release install
-
-This will create the binary mojodb-luna under the folder release-linux-x86, along with libraries libmojocore.so, libmojodb.so and libmojoluna.so
 
 #### Uninstalling
 
@@ -158,7 +148,7 @@ You will need to use `sudo` if you did not specify `WEBOS_INSTALL_ROOT`.
 # Copyright and License Information
 
 All content, including all source code files and documentation files in this repository are:
- Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (c) 2009-2013 Hewlett-Packard Development Company, L.P.
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

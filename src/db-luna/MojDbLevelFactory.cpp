@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,14 +20,20 @@
 #include "db-luna/MojDbLevelFactory.h"
 #include "db-luna/MojDbLevelEngine.h"
 
-const MojChar* const MojDbLevelFactory::Name = _T("ldb");
-
-MojErr MojDbLevelFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engineOut)
+MojErr MojDbLevelFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engineOut) const
 {
-	engineOut.reset(new MojDbLevelEngine());
-	MojAllocCheck(engineOut.get());
+    engineOut.reset(new MojDbLevelEngine());
+    MojAllocCheck(engineOut.get());
 
-	return MojErrNone;
+    return MojErrNone;
 }
 
-const MojChar* MojDbLevelFactory::name() {return Name;};
+MojErr MojDbLevelFactory::createEnv(MojRefCountedPtr<MojDbEnv>& envOut) const
+{
+    envOut.reset(new MojDbLevelEnv());
+    MojAllocCheck(envOut.get());
+
+    return MojErrNone;
+}
+
+const MojChar* MojDbLevelFactory::name() const { return _T("ldb"); }

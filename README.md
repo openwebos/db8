@@ -129,6 +129,10 @@ To see all of the make targets that CMake has generated, issue:
 
     $ make help
 
+### Debug build
+
+To enable debug loggin and additional debug checks, set variables MOJ_DEBUG=1 and MOJ_DEBUG_LOGGIN=1
+
 #### Uninstalling
 
 From the directory where you originally ran `make install`, enter:

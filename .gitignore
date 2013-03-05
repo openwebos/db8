@@ -28,3 +28,7 @@
 # Ignore build directories from original make system until conversion to cmake
 /release-*
 /debug-*
+
+# Ignore kdevelop files and deploy script
+*.kdev4
+deploy.sh

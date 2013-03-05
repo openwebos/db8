@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -26,9 +27,9 @@
 #include "core/MojBuffer.h"
 #include "core/MojFile.h"
 
-#define MojLdbErrCheck(E, FNAME)				if (!E.ok()) MojErrThrowMsg(MojErrDbFatal, _T("ldb: %s - %s"), FNAME, E.ToString().data())
-#define MojLdbErrAccumulate(EACC, E, FNAME)		if (!E.ok()) MojErrAccumulate(EACC, MojErrDbFatal)
-#define MojLdbTxnFromStorageTxn(TXN)			((TXN) ? static_cast<MojDbLevelTxn*>(TXN)->impl() : NULL)
+#define MojLdbErrCheck(E, FNAME)                if (!E.ok()) MojErrThrowMsg(MojErrDbFatal, _T("ldb: %s - %s"), FNAME, E.ToString().data())
+#define MojLdbErrAccumulate(EACC, E, FNAME)     if (!E.ok()) MojErrAccumulate(EACC, MojErrDbFatal)
+#define MojLdbTxnFromStorageTxn(TXN)            ((TXN) ? static_cast<MojDbLevelTxn*>(TXN)->impl() : NULL)
 
 class MojDbLevelCursor;
 class MojDbLevelDatabase;
@@ -43,227 +44,244 @@ class MojDbLevelTxn;
 class MojDbLevelCursor : public MojNoCopy
 {
 public:
-	MojDbLevelCursor();
-	~MojDbLevelCursor();
+    MojDbLevelCursor();
+    ~MojDbLevelCursor();
 
-	MojErr open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags);
-	MojErr close();
-	MojErr del();
-	MojErr delPrefix(const MojDbKey& prefix);
-	MojErr get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags);
-	MojErr stats(MojSize& countOut, MojSize& sizeOut);
-	MojErr statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut);
+    MojErr open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags);
+    MojErr close();
+    MojErr del();
+    MojErr delPrefix(const MojDbKey& prefix);
+    MojErr get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags);
+    MojErr stats(MojSize& countOut, MojSize& sizeOut);
+    MojErr statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut);
 
-	leveldb::Iterator* impl() { return m_it; }
+    leveldb::Iterator* impl() { return m_it; }
 
-    enum LDB_FLAGS 
+    enum LDB_FLAGS
     {
-       e_First = 0, e_Last, e_Next, e_Prev, e_Range, e_Set, e_TotalFlags 
+       e_First = 0, e_Last, e_Next, e_Prev, e_Range, e_Set, e_TotalFlags
     };
-    
+
 private:
-	leveldb::Iterator* m_it;
+    leveldb::Iterator* m_it;
     leveldb::DB* m_db;
     MojDbStorageTxn* m_txn;
-	MojSize m_recSize;
-	MojSize m_warnCount;
+    MojSize m_recSize;
+    MojSize m_warnCount;
 };
 
 class MojDbLevelDatabase : public MojDbStorageDatabase
 {
 public:
-	MojDbLevelDatabase();
-	~MojDbLevelDatabase();
+    MojDbLevelDatabase();
+    ~MojDbLevelDatabase();
 
-	MojErr open(const MojChar* dbName, MojDbLevelEngine* env, bool& createdOut, MojDbStorageTxn* txn);
-	virtual MojErr close();
-	virtual MojErr drop(MojDbStorageTxn* txn);
-	virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
-	virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
-	virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
-	virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
-	virtual MojErr get(const MojObject& id, MojDbStorageTxn* txn, bool forUpdate, MojRefCountedPtr<MojDbStorageItem>& itemOut);
-	virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
-	virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
-	virtual MojErr openIndex(const MojObject& id, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageIndex>& indexOut);
+    MojErr open(const MojChar* dbName, MojDbLevelEngine* env, bool& createdOut, MojDbStorageTxn* txn);
+    virtual MojErr close();
+    virtual MojErr drop(MojDbStorageTxn* txn);
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
+    virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
+    virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
+    virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
+    virtual MojErr get(const MojObject& id, MojDbStorageTxn* txn, bool forUpdate, MojRefCountedPtr<MojDbStorageItem>& itemOut);
+    virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
+    virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
+    virtual MojErr openIndex(const MojObject& id, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageIndex>& indexOut);
 
 //hack:
-	virtual MojErr mutexStats(int* total_mutexes, int* mutexes_free, int* mutexes_used, int* mutexes_used_highwater, int* mutex_regionsize);
+    virtual MojErr mutexStats(int* total_mutexes, int* mutexes_free, int* mutexes_used, int* mutexes_used_highwater, int* mutex_regionsize);
 
     MojErr put(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn, bool updateIdQuota);
-	MojErr put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbStorageTxn* txn, bool updateIdQuota);
-	MojErr del(MojDbLevelItem& key, bool& foundOut, MojDbStorageTxn* txn);
-	MojErr get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool forUpdate, MojDbLevelItem& valOut, bool& foundOut);
+    MojErr put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbStorageTxn* txn, bool updateIdQuota);
+    MojErr del(MojDbLevelItem& key, bool& foundOut, MojDbStorageTxn* txn);
+    MojErr get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool forUpdate, MojDbLevelItem& valOut, bool& foundOut);
 
     leveldb::DB* impl() { return m_db; }
-	MojDbLevelEngine* engine() { return m_engine; }
+    MojDbLevelEngine* engine() { return m_engine; }
 
 private:
-	friend class MojDbLevelEngine;
-	friend class MojDbLevelIndex;
+    friend class MojDbLevelEngine;
+    friend class MojDbLevelIndex;
 
-	//MojErr verify();
-	MojErr closeImpl();
-	void postUpdate(MojDbStorageTxn* txn, MojSize updateSize);
+    //MojErr verify();
+    MojErr closeImpl();
+    void postUpdate(MojDbStorageTxn* txn, MojSize updateSize);
 
     leveldb::DB* m_db;
-	MojDbLevelEngine* m_engine;
-	MojString m_file;
-	MojString m_name;
-	MojVector<MojString> m_primaryProps;
+    MojDbLevelEngine* m_engine;
+    MojString m_file;
+    MojString m_name;
+    MojVector<MojString> m_primaryProps;
 };
 
-class MojDbLevelEnv : public MojRefCounted
+class MojDbLevelEnv : public MojDbEnv
 {
 public:
-	static MojLogger s_log;
+    static MojLogger s_log;
 
-	MojDbLevelEnv();
-	~MojDbLevelEnv();
+    MojDbLevelEnv();
+    ~MojDbLevelEnv();
 
-	MojErr configure(const MojObject& conf);
-	MojErr open(const MojChar* path);
-	MojErr close();
-	MojErr postCommit(MojSize updateSize);
+    MojErr configure(const MojObject& conf);
+    MojErr open(const MojChar* path);
+    MojErr close();
+    MojErr postCommit(MojSize updateSize);
 
-	void* impl() { return NULL; }
-	static MojErr translateErr(int dbErr);
+    void* impl() { return m_db; }
+    static MojErr translateErr(int dbErr);
 
 private:
+    static const MojChar* const LockFileName;
 
+    MojErr lockDir(const MojChar* path);
+    MojErr unlockDir();
+
+    MojString m_lockFileName;
+    MojFile m_lockFile;
+    MojString m_logDir;
+    leveldb::DB* m_db;
 };
 
 class MojDbLevelEngine : public MojDbStorageEngine
 {
 public:
-	static MojLogger s_log;
+    static MojLogger s_log;
 
-	MojDbLevelEngine();
-	~MojDbLevelEngine();
+    MojDbLevelEngine();
+    ~MojDbLevelEngine();
 
-	virtual MojErr configure(const MojObject& conf);
-	virtual MojErr drop(const MojChar* path, MojDbStorageTxn* txn);
-	virtual MojErr open(const MojChar* path);
-	virtual MojErr open(const MojChar* path, MojDbLevelEnv* env);
-	virtual MojErr close();
-	virtual MojErr compact();
-	virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
-	virtual MojErr openDatabase(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageDatabase>& dbOut) ;
-	virtual MojErr openSequence(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageSeq>& seqOut) ;
+    virtual MojErr configure(const MojObject& conf);
+    virtual MojErr drop(const MojChar* path, MojDbStorageTxn* txn);
+    virtual MojErr open(const MojChar* path);
+    virtual MojErr open(const MojChar* path, MojDbEnv* env);
+    virtual MojErr close();
+    virtual MojErr compact();
+    virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
+    virtual MojErr openDatabase(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageDatabase>& dbOut) ;
+    virtual MojErr openSequence(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageSeq>& seqOut) ;
 
-	const MojString& path() const { return m_path; }
-	MojDbLevelEnv* env() { return m_env.get(); }
-	MojErr addDatabase(MojDbLevelDatabase* db);
-	MojErr removeDatabase(MojDbLevelDatabase* db);
-	MojErr addSeq(MojDbLevelSeq* seq);
-	MojErr removeSeq(MojDbLevelSeq* seq);
+    const MojString& path() const { return m_path; }
+    MojDbLevelEnv* env() { return m_env.get(); }
+    MojErr addDatabase(MojDbLevelDatabase* db);
+    MojErr removeDatabase(MojDbLevelDatabase* db);
+    MojErr addSeq(MojDbLevelSeq* seq);
+    MojErr removeSeq(MojDbLevelSeq* seq);
+
+    MojDbLevelDatabase* indexDb() { return m_indexDb.get(); }
+    MojRefCountedPtr<MojDbStorageTxn>* getPostTransaction() { return postTransaction; }
 
 private:
-	typedef MojVector<MojRefCountedPtr<MojDbLevelDatabase> > DatabaseVec;
-	typedef MojVector<MojRefCountedPtr<MojDbLevelSeq> > SequenceVec;
+    typedef MojVector<MojRefCountedPtr<MojDbLevelDatabase> > DatabaseVec;
+    typedef MojVector<MojRefCountedPtr<MojDbLevelSeq> > SequenceVec;
 
-	MojRefCountedPtr<MojDbLevelEnv> m_env;
-	MojThreadMutex m_dbMutex;
-	MojString m_path;
-	DatabaseVec m_dbs;
-	SequenceVec m_seqs;
-	bool m_isOpen;
+    MojRefCountedPtr<MojDbLevelEnv> m_env;
+    MojThreadMutex m_dbMutex;
+    MojRefCountedPtr<MojDbLevelDatabase> m_indexDb;
+    MojRefCountedPtr<MojDbLevelDatabase> m_seqDb;
+    MojString m_path;
+    DatabaseVec m_dbs;
+    SequenceVec m_seqs;
+    bool m_isOpen;
+
+    MojRefCountedPtr<MojDbStorageTxn>* postTransaction; // TODO: this is play around close database bug
 };
 
 class MojDbLevelIndex : public MojDbStorageIndex
 {
 public:
-	MojDbLevelIndex();
-	virtual ~MojDbLevelIndex();
+    MojDbLevelIndex();
+    virtual ~MojDbLevelIndex();
 
-	MojErr open(const MojObject& id, MojDbLevelDatabase* db, MojDbStorageTxn* txn);
-	virtual MojErr close();
-	virtual MojErr drop(MojDbStorageTxn* txn);
-	virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
-	virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn);
-	virtual MojErr del(const MojDbKey& key, MojDbStorageTxn* txn);
-	virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
-	virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
+    MojErr open(const MojObject& id, MojDbLevelDatabase* db, MojDbStorageTxn* txn);
+    virtual MojErr close();
+    virtual MojErr drop(MojDbStorageTxn* txn);
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
+    virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn);
+    virtual MojErr del(const MojDbKey& key, MojDbStorageTxn* txn);
+    virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
+    virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
 
 private:
-	bool isOpen() const { return m_primaryDb.get() != NULL; }
+    bool isOpen() const { return m_primaryDb.get() != NULL; }
 
-	MojObject m_id;
-	MojRefCountedPtr<MojDbLevelDatabase> m_primaryDb;
-	MojRefCountedPtr<MojDbLevelDatabase> m_db;
+    MojObject m_id;
+    MojRefCountedPtr<MojDbLevelDatabase> m_primaryDb;
+    MojRefCountedPtr<MojDbLevelDatabase> m_db;
 };
 
 class MojDbLevelItem : public MojDbStorageItem
 {
 public:
-	MojDbLevelItem();
-	virtual ~MojDbLevelItem() { freeData(); }
-	virtual MojErr close() { return MojErrNone; }
-	virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine);
-	virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
-	virtual const MojObject& id() const { return m_header.id(); }
-	virtual MojSize size() const { return m_slice.size(); }
+    MojDbLevelItem();
+    virtual ~MojDbLevelItem() { freeData(); }
+    virtual MojErr close() { return MojErrNone; }
+    virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine);
+    virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
+    virtual const MojObject& id() const { return m_header.id(); }
+    virtual MojSize size() const { return m_slice.size(); }
 
-	void clear();
-	const MojByte* data() const { return (const MojByte*) m_slice.data(); }
-	bool hasPrefix(const MojDbKey& prefix) const;
-	MojErr toArray(MojObject& arrayOut) const;
-	MojErr toObject(MojObject& objOut) const;
+    void clear();
+    const MojByte* data() const { return (const MojByte*) m_slice.data(); }
+    bool hasPrefix(const MojDbKey& prefix) const;
+    MojErr toArray(MojObject& arrayOut) const;
+    MojErr toObject(MojObject& objOut) const;
 
-	void id(const MojObject& id);
-	void fromBytesNoCopy(const MojByte* bytes, MojSize size);
-	MojErr fromBuffer(MojBuffer& buf);
-	MojErr fromBytes(const MojByte* bytes, MojSize size);
-	MojErr fromObject(const MojObject& obj);
-	MojErr fromObjectVector(const MojVector<MojObject>& vec);
+    void id(const MojObject& id);
+    void fromBytesNoCopy(const MojByte* bytes, MojSize size);
+    MojErr fromBuffer(MojBuffer& buf);
+    MojErr fromBytes(const MojByte* bytes, MojSize size);
+    MojErr fromObject(const MojObject& obj);
+    MojErr fromObjectVector(const MojVector<MojObject>& vec);
 
     leveldb::Slice* impl() { return &m_slice; }
 
 private:
-	void freeData();
-	void setData(MojByte* bytes, MojSize size, void (*free)(void*));
+    void freeData();
+    void setData(MojByte* bytes, MojSize size, void (*free)(void*));
 
     leveldb::Slice m_slice;
-	MojAutoPtr<MojBuffer::Chunk> m_chunk;
-	mutable MojDbObjectHeader m_header;
-	void (*m_free)(void*);
+    MojAutoPtr<MojBuffer::Chunk> m_chunk;
+    mutable MojDbObjectHeader m_header;
+    void (*m_free)(void*);
 };
 
 class MojDbLevelSeq : public MojDbStorageSeq
 {
 public:
-	MojDbLevelSeq() : m_db(NULL) {}
-	~MojDbLevelSeq();
+    MojDbLevelSeq() : m_db(NULL) {}
+    ~MojDbLevelSeq();
 
-	MojErr open(const MojChar* name, MojDbLevelDatabase* db);
-	virtual MojErr close();
-	virtual MojErr get(MojInt64& valOut);
+    MojErr open(const MojChar* name, MojDbLevelDatabase* db);
+    virtual MojErr close();
+    virtual MojErr get(MojInt64& valOut);
 
 
 private:
-	friend class MojDbLevelEngine;
+    friend class MojDbLevelEngine;
 
-	MojDbLevelDatabase* m_db;
+    MojDbLevelDatabase* m_db;
 };
 
 class MojDbLevelTxn : public MojDbStorageTxn
 {
 public:
-	MojDbLevelTxn();
-	~MojDbLevelTxn();
+    MojDbLevelTxn();
+    ~MojDbLevelTxn();
 
-	MojErr begin(MojDbLevelDatabase* db);
-	virtual MojErr abort();
+    MojErr begin(MojDbLevelDatabase* db);
+    virtual MojErr abort();
+    virtual bool isValid();
 
-	leveldb::WriteBatch* impl() { return m_batch; }
-	//MojDbLevelEngine* engine() { return m_engine; }
-	void didUpdate(MojSize size) { m_updateSize += size; }
-	MojSize updateSize() const { return m_updateSize; }
+    leveldb::WriteBatch* impl() { return m_batch; }
+    //MojDbLevelEngine* engine() { return m_engine; }
+    void didUpdate(MojSize size) { m_updateSize += size; }
+    MojSize updateSize() const { return m_updateSize; }
+
 
 private:
-	virtual MojErr commitImpl();
+    virtual MojErr commitImpl();
 
-	MojDbLevelDatabase* m_db;
+    MojDbLevelDatabase* m_db;
     leveldb::WriteBatch* m_batch;
     MojSize m_updateSize;
 };

@@ -111,7 +111,7 @@ By default, db8 compiles with berkeleydb database backend.
 
 To build the unit tests for db8, specify a true value for `WEBOS_CONFIG_BUILD_TESTS` on the cmake command line. For example:
 
-    $ cmake -D WEBOS_CONFIG_BUILD_TESTS:BOOL=True
+    $ cmake -D WEBOS_CONFIG_BUILD_TESTS:BOOL=TRUE
 
 ### Building Standalone
 

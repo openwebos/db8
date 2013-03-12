@@ -73,10 +73,9 @@ MESSAGE(STATUS "BDB INC ${BDB_INC}")
 webos_build_pkgconfig(files/pkgconfig/mojodb)
 webos_build_pkgconfig(files/pkgconfig/db8)
 
-webos_add_compiler_flags(ALL -g -O2 -Wall -fPIC -Wconversion -Werror
+webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion
                          -Wno-unused-but-set-variable -Wno-unused-variable
-                         -fno-exceptions -DNDEBUG -fexpensive-optimizations
-                         -frename-registers -DMOJ_LINUX -fno-strict-aliasing
+                         -fno-exceptions -frename-registers -DMOJ_LINUX -fno-strict-aliasing
                          -DMOJ_INTERNAL -D_REENTRANT)
 webos_add_linker_options(ALL --no-undefined)
 

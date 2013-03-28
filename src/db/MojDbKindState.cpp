@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -42,6 +43,7 @@ MojErr MojDbKindState::init(const StringSet& strings, MojDbReq& req)
 	// get kind token
 	MojErr err = initKindToken(req);
 	MojErrCheck(err);
+	// TODO: and go inside this bugging function
 	err = initTokens(req, strings);
 	MojErrCheck(err);
 
@@ -71,7 +73,7 @@ MojErr MojDbKindState::delIndex(const MojChar* indexName, MojDbReq& req)
 	MojErrCheck(err);
 	bool found = false;
 	err = obj.del(indexName, found);
-	MojErrCheck(err);
+    MojErrCheck(err);
 	MojAssert(found);
 	err = writeIds(IndexIdsKey, obj, req, item);
 	MojErrCheck(err);
@@ -159,10 +161,13 @@ MojErr MojDbKindState::initKindToken(MojDbReq& req)
 	return MojErrNone;
 }
 
+
 MojErr MojDbKindState::initTokens(MojDbReq& req, const StringSet& strings)
 {
+	// TODO: bug inside this function. (latest strace step)
 	MojAssertMutexLocked(m_lock);
 
+	// TODO: filing load tokens. Go inside readObj
 	// load tokens
 	MojErr err = readObj(TokensKey, m_tokensObj, m_kindEngine->kindDb(), req.txn(), m_oldTokensItem);
 	MojErrCheck(err);
@@ -319,6 +324,8 @@ MojErr MojDbKindState::readObj(const MojChar* key, MojObject& val, MojDbStorageD
 	if (oldItem.get()) {
 		// get objects
 		MojObject obj;
+
+		// TODO: this bugging ( on calling getObj)
 		err = oldItem->toObject(obj, *m_kindEngine, false);
 		MojErrCheck(err);
 		obj.get(key, val);

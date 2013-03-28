@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -48,7 +49,7 @@ const MojChar* const MojDbKindEngine::RevTimestampJson =
 // DB State built-in
 const MojChar* const MojDbKindEngine::DbStateId = _T("DbState:1");
 const MojChar* const MojDbKindEngine::DbStateJson =
-	_T("{\"id\":\"DbState:1\",\"owner\":\"com.palm.admin\",}");
+	_T("{\"id\":\"DbState:1\",\"owner\":\"com.palm.admin\"}");
 // Permission built-in
 const MojChar* const MojDbKindEngine::PermissionId = _T("Permission:1");
 const MojChar* const MojDbKindEngine::PermissionIdPrefix = _T("Permission:");

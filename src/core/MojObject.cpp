@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -23,12 +24,14 @@
 #include "core/MojHashMap.h"
 #include "core/MojJson.h"
 
+
+#include <string.h>
+
 const MojObject MojObject::Undefined(TypeUndefined);
 const MojObject MojObject::Null(TypeNull);
 
 void MojObject::clear(Type type)
 {
-	release();
 	init(type);
 }
 
@@ -128,8 +131,7 @@ MojErr MojObject::toBase64(MojString& strOut) const
 
 void MojObject::assign(const MojObject& val)
 {
-	release();
-	init(val);
+  init(val);
 }
 
 int MojObject::compare(const MojObject& val) const
@@ -138,12 +140,12 @@ int MojObject::compare(const MojObject& val) const
 	Type valType = val.type();
 	if (thisType != valType)
 		return thisType - valType;
-	return impl().compare(val.impl());
+	return impl()->compare(*val.impl());
 }
 
 MojErr MojObject::begin(Iterator& iter)
 {
-	PropMap* map = const_cast<PropMap*> (impl().map());
+	PropMap* map = const_cast<PropMap*> (impl()->map());
 	if (map) {
 		MojErr err = map->begin(iter);
 		MojErrCheck(err);
@@ -155,7 +157,7 @@ MojErr MojObject::begin(Iterator& iter)
 
 MojObject::ConstIterator MojObject::begin() const
 {
-	const PropMap* map = impl().map();
+	const PropMap* map = impl()->map();
 	if (map)
 		return map->begin();
 	return ConstIterator();
@@ -197,7 +199,8 @@ MojErr MojObject::putString(const MojChar* key, const MojChar* val)
 
 MojErr MojObject::find(const MojChar* key, Iterator& iter)
 {
-	PropMap* map = const_cast<PropMap*> (impl().map());
+    // TODO:  remove const_cast, use mutable
+	PropMap* map = const_cast<PropMap*> (impl()->map());
 	if (map) {
 		MojErr err = map->find(key, iter);
 		MojErrCheck(err);
@@ -209,7 +212,7 @@ MojErr MojObject::find(const MojChar* key, Iterator& iter)
 
 MojObject::ConstIterator MojObject::find(const MojChar* key) const
 {
-	const PropMap* map = impl().map();
+	const PropMap* map = impl()->map();
 	if (map)
 		return map->find(key);
 	return ConstIterator();
@@ -448,58 +451,78 @@ bool MojObject::operator==(const MojObject& rhs) const
 {
 	if (type() != rhs.type())
 		return false;
-	return impl().equals(rhs.impl());
+	return impl()->equals(*rhs.impl());
+}
+
+void MojObject::init(const MojObject& obj)
+{
+    release();
+
+    if (obj.impl())
+        m_implementation = obj.impl()->clone();
+    else
+        m_implementation = new UndefinedImpl();
 }
 
 void MojObject::init(Type type)
 {
-	switch(type) {
+    release();
+
+    switch(type) {
 	case TypeObject:
-		new(&m_impl) ObjectImpl();
+		m_implementation = new ObjectImpl();
 		break;
 	case TypeArray:
-		new(&m_impl) ArrayImpl();
+		m_implementation = new ArrayImpl();
 		break;
 	case TypeString:
-		new(&m_impl) StringImpl();
+		m_implementation = new StringImpl();
 		break;
 	case TypeBool:
-		new(&m_impl) BoolImpl();
+		m_implementation = new BoolImpl();
 		break;
 	case TypeDecimal:
-		new(&m_impl) DecimalImpl();
+		m_implementation = new DecimalImpl();
 		break;
 	case TypeInt:
-		new(&m_impl) IntImpl();
+		m_implementation = new IntImpl();
 		break;
 	case TypeNull:
-		new(&m_impl) NullImpl();
+		m_implementation = new NullImpl();
+		break;
+	case TypeUndefined:
+		m_implementation = new UndefinedImpl();
 		break;
 	default:
-		MojAssertNotReached(); 	// fall through to undefined
-	case TypeUndefined:
-		new(&m_impl) UndefinedImpl();
-		break;
-
+        m_implementation = new UndefinedImpl();
+        MojAssertNotReached(); 	// fall through to undefined
 	}
+}
+
+void MojObject::release()
+{
+    if (m_implementation)  {
+        delete m_implementation;  m_implementation = 0;
+    }
+
 }
 
 MojObject::ObjectImpl& MojObject::ensureObject()
 {
 	if (type() != TypeObject) {
 		release();
-		new(&m_impl) ObjectImpl();
+		m_implementation = new ObjectImpl();
 	}
-	return static_cast<ObjectImpl&>(impl());
+	return static_cast<ObjectImpl&>(*m_implementation);
 }
 
 MojObject::ArrayImpl& MojObject::ensureArray()
 {
 	if (type() != TypeArray) {
 		release();
-		new(&m_impl) ArrayImpl();
+		m_implementation = new ArrayImpl();
 	}
-	return static_cast<ArrayImpl&>(impl());
+	return static_cast<ArrayImpl&>(*m_implementation);
 }
 
 MojErr MojObject::Impl::stringValue(MojString& valOut) const
@@ -577,7 +600,7 @@ MojSize MojObject::ObjectImpl::hashCode() const
 	return hash;
 }
 
-MojSize MojObject::ObjectImpl::size() const
+MojSize MojObject::ObjectImpl::containerSize() const
 {
 	return m_props.size();
 }
@@ -595,7 +618,7 @@ MojErr MojObject::ObjectImpl::visit(MojObjectVisitor& visitor) const
 		const MojString& propName = i.key();
 		err = visitor.propName(propName, propName.length());
 		MojErrCheck(err);
-		err = i.value().impl().visit(visitor);
+		err = i.value().impl()->visit(visitor);
 		MojErrCheck(err);
 	}
 	err = visitor.endObject();
@@ -646,7 +669,7 @@ MojSize MojObject::ArrayImpl::hashCode() const
 	return hash;
 }
 
-MojSize MojObject::ArrayImpl::size() const
+MojSize MojObject::ArrayImpl::containerSize() const
 {
 	return m_vec.size();
 }
@@ -661,7 +684,7 @@ MojErr MojObject::ArrayImpl::visit(MojObjectVisitor& visitor) const
 	MojErr err = visitor.beginArray();
 	MojErrCheck(err);
 	for (ObjectVec::ConstIterator i = m_vec.begin(); i != m_vec.end(); ++i) {
-		err = i->impl().visit(visitor);
+		err = i->impl()->visit(visitor);
 		MojErrCheck(err);
 	}
 	err = visitor.endArray();

@@ -51,28 +51,37 @@ public:
 	typedef PropMap::ConstIterator ConstIterator;
 	typedef PropMap::Iterator Iterator;
 
-	MojObject() { new(&m_impl) UndefinedImpl(); }
-	MojObject(const MojObject& obj) { init(obj); }
-	MojObject(bool val) { new(&m_impl) BoolImpl(val); }
-	MojObject(MojInt64 val) { new(&m_impl) IntImpl(val); }
-	MojObject(MojInt32 val) { new(&m_impl) IntImpl(val); }
-	MojObject(const MojDecimal& val) { new(&m_impl) DecimalImpl(val); }
-	MojObject(const MojString& val) { new(&m_impl) StringImpl(val); }
-	explicit MojObject(Type type) { init(type); }
+	MojObject() { m_implementation = new UndefinedImpl(); }
+	MojObject(const MojObject& obj) { m_implementation = 0; init(obj); }
+	MojObject(bool val) { m_implementation = new BoolImpl(val); }
+	MojObject(MojInt64 val) { m_implementation = new IntImpl(val); }
+	MojObject(MojInt32 val) { m_implementation = new IntImpl(val); }
+	MojObject(const MojDecimal& val) { m_implementation = new DecimalImpl(val); }
+	MojObject(const MojString& val) { m_implementation = new StringImpl(val); }
+	explicit MojObject(Type type) { m_implementation = 0; init(type); }
 	~MojObject() { release(); }
 
-	Type type() const { return impl().type(); }
-	MojSize size() const { return impl().size(); }
+	inline Type type() const { return impl()->type(); }
+
+	/**
+	 * If object is container, return count of elements in container
+	 * @return how many elements in container
+	 */
+	MojSize size() const { return impl()->containerSize(); }
+
+	/**
+	 * If object is container, return if container is null
+	 */
 	bool empty() const { return size() == 0; }
 	bool null() const { return type() == TypeNull; }
 	bool undefined() const { return type() == TypeUndefined; }
-	MojSize hashCode() const { return impl().hashCode(); }
-	MojErr visit(MojObjectVisitor& visitor) const { return impl().visit(visitor); }
+	MojSize hashCode() const { return impl()->hashCode(); }
+	MojErr visit(MojObjectVisitor& visitor) const { return impl()->visit(visitor); }
 
-	bool boolValue() const { return impl().boolValue(); }
-	MojInt64 intValue() const { return impl().intValue(); }
-	MojDecimal decimalValue() const { return impl().decimalValue(); }
-	MojErr stringValue(MojString& valOut) const { return impl().stringValue(valOut); }
+	bool boolValue() const { return impl()->boolValue(); }
+	MojInt64 intValue() const { return impl()->intValue(); }
+	MojDecimal decimalValue() const { return impl()->decimalValue(); }
+	MojErr stringValue(MojString& valOut) const { return impl()->stringValue(valOut); }
 
 	void clear(Type type = TypeUndefined);
 	MojErr coerce(Type toType);
@@ -99,11 +108,11 @@ public:
 	MojErr putBool(const MojChar* key, bool val) { return put(key, MojObject(val)); }
 	MojErr putInt(const MojChar* key, MojInt64 val) { return put(key, MojObject(val)); }
 	MojErr putDecimal(const MojChar* key, const MojDecimal& val) { return put(key, MojObject(val)); }
-	MojErr del(const MojChar* key, bool& foundOut) { return impl().del(key, foundOut); }
+	MojErr del(const MojChar* key, bool& foundOut) { return impl()->del(key, foundOut); }
 	MojErr find(const MojChar* key, Iterator& iter);
 	ConstIterator find(const MojChar* key) const;
 	bool contains(const MojChar* key) const { return find(key) != end(); }
-	bool get(const MojChar* key, MojObject& valOut) const { return impl().get(key, valOut); }
+	bool get(const MojChar* key, MojObject& valOut) const { return impl()->get(key, valOut); }
 	bool get(const MojChar* key, bool& valOut) const;
 	bool get(const MojChar* key, MojInt64& valOut) const;
 	bool get(const MojChar* key, MojDecimal& valOut) const;
@@ -121,13 +130,13 @@ public:
 	MojErr getRequired(const MojChar* key, MojString& valOut) const;
 
 	// array methods
-	MojErr arrayBegin(ArrayIterator& iter) { return impl().arrayBegin(iter); }
-	ConstArrayIterator arrayBegin() const { return impl().arrayBegin(); }
-	ConstArrayIterator arrayEnd() const { return impl().arrayEnd(); }
+	MojErr arrayBegin(ArrayIterator& iter) { return impl()->arrayBegin(iter); }
+	ConstArrayIterator arrayBegin() const { return impl()->arrayBegin(); }
+	ConstArrayIterator arrayEnd() const { return impl()->arrayEnd(); }
 	MojErr push(const MojObject& val);
 	MojErr pushString(const MojChar* val);
 	MojErr setAt(MojSize idx, const MojObject& val);
-	bool at(MojSize idx, MojObject& objOut) const { return impl().at(idx, objOut); }
+	bool at(MojSize idx, MojObject& objOut) const { return impl()->at(idx, objOut); }
 	bool at(MojSize idx, bool& valOut) const;
 	bool at(MojSize idx, MojInt64& valOut) const;
 	bool at(MojSize idx, MojDecimal& valOut) const;
@@ -147,11 +156,12 @@ private:
 	public:
 		virtual ~Impl() {}
 		virtual Type type() const = 0;
-		virtual void clone(void* buf) const = 0;
+		virtual Impl* clone() const = 0;
 		virtual int compare (const Impl& rhs) const = 0;
 		virtual bool equals(const Impl& rhs) const = 0;
 		virtual MojSize hashCode() const = 0;
-		virtual MojSize size() const { return 0; }
+		virtual MojSize objectSize() const = 0;
+		virtual MojSize containerSize() const { return 0; }
 		virtual bool boolValue() const { return false; }
 		virtual MojInt64 intValue() const { return 0; }
 		virtual MojDecimal decimalValue() const { return MojDecimal(); }
@@ -169,33 +179,36 @@ private:
 	{
 	public:
 		virtual Type type() const { return TypeNull; }
-		virtual void clone(void* buf) const { new(buf) NullImpl(); }
+		virtual Impl* clone() const { return new NullImpl(); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
+		virtual MojSize objectSize() const { return sizeof(NullImpl); }
 	};
 	class UndefinedImpl : public NullImpl
 	{
 	public:
 		virtual Type type() const { return TypeUndefined; }
-		virtual void clone(void* buf) const { new(buf) UndefinedImpl(); }
+		virtual Impl* clone() const { return new UndefinedImpl(); }
 		virtual MojSize hashCode() const;
+		virtual MojSize objectSize() const  { return sizeof(UndefinedImpl); }
 	};
 	class ObjectImpl : public Impl
 	{
 	public:
 		virtual Type type() const { return TypeObject; }
-		virtual void clone(void* buf) const { new(buf) ObjectImpl(*this); }
+		virtual Impl* clone() const { return new  ObjectImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
-		virtual MojSize size() const;
+		virtual MojSize containerSize() const;
 		virtual bool boolValue() const;
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
 		virtual const PropMap* map() const;
 		virtual bool get(const MojChar* key, MojObject& valOut) const;
 		virtual MojErr del(const MojChar* key, bool& foundOut);
+		virtual MojSize objectSize() const  { return sizeof(ObjectImpl); }
 
 		PropMap m_props;
 	};
@@ -203,17 +216,18 @@ private:
 	{
 	public:
 		virtual Type type() const { return TypeArray; }
-		virtual void clone(void* buf) const { new(buf) ArrayImpl(*this); }
+		virtual Impl* clone() const { return new ArrayImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
-		virtual MojSize size() const;
+		virtual MojSize containerSize() const;
 		virtual bool boolValue() const;
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
 		virtual MojErr arrayBegin(ArrayIterator& iter);
 		virtual ConstArrayIterator arrayBegin() const;
 		virtual ConstArrayIterator arrayEnd() const;
 		virtual bool at(MojSize idx, MojObject& objOut) const;
+		virtual MojSize objectSize() const  { return sizeof(ArrayImpl); }
 
 		ObjectVec m_vec;
 	};
@@ -223,7 +237,7 @@ private:
 		StringImpl() {}
 		StringImpl(const MojString& str) : m_val(str) {}
 		virtual Type type() const { return TypeString; }
-		virtual void clone(void* buf) const { new(buf) StringImpl(*this); }
+		virtual Impl* clone() const { return new StringImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
@@ -232,6 +246,7 @@ private:
 		virtual MojDecimal decimalValue() const;
 		virtual MojErr stringValue(MojString& valOut) const;
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
+		virtual MojSize objectSize() const  { return sizeof(StringImpl); }
 
 		MojString m_val;
 	};
@@ -241,7 +256,7 @@ private:
 		BoolImpl() : m_val(false) {}
 		BoolImpl(bool val) : m_val(val) {}
 		virtual Type type() const { return TypeBool; }
-		virtual void clone(void* buf) const { new(buf) BoolImpl(*this); }
+		virtual Impl* clone() const { return new BoolImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
@@ -249,6 +264,7 @@ private:
 		virtual MojInt64 intValue() const { return m_val; }
 		virtual MojDecimal decimalValue() const { return MojDecimal(m_val, 0); }
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
+		virtual MojSize objectSize() const  { return sizeof(BoolImpl); }
 
 		bool m_val;
 	};
@@ -258,7 +274,7 @@ private:
 		DecimalImpl() {}
 		DecimalImpl(const MojDecimal& val) : m_val(val) {}
 		virtual Type type() const { return TypeDecimal; }
-		virtual void clone(void* buf) const { new(buf) DecimalImpl(*this); }
+		virtual Impl* clone() const { return new DecimalImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
@@ -266,6 +282,7 @@ private:
 		virtual MojInt64 intValue() const { return m_val.magnitude(); }
 		virtual MojDecimal decimalValue() const { return m_val; }
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
+		virtual MojSize objectSize() const  { return sizeof(DecimalImpl); }
 
 		MojDecimal m_val;
 	};
@@ -275,7 +292,7 @@ private:
 		IntImpl() : m_val(0) {}
 		IntImpl(MojInt64 val) : m_val(val) {}
 		virtual Type type() const { return TypeInt; }
-		virtual void clone(void* buf) const { new(buf) IntImpl(*this); }
+		virtual Impl* clone() const { return new IntImpl(*this); }
 		virtual int compare (const Impl& rhs) const;
 		virtual bool equals(const Impl& rhs) const;
 		virtual MojSize hashCode() const;
@@ -283,48 +300,26 @@ private:
 		virtual MojInt64 intValue() const { return m_val; }
 		virtual MojDecimal decimalValue() const { return MojDecimal(m_val); }
 		virtual MojErr visit(MojObjectVisitor& visitor) const;
+		virtual MojSize objectSize() const  { return sizeof(IntImpl); }
 
 		MojInt64 m_val;
 	};
-	typedef union {
-		// for easier inspection in the debugger
-		struct {
-			void* m_vtbl;
-			union {
-				const MojObject* m_array;
-				const MojChar* m_str;
-				bool m_bool;
-				MojInt64 m_int;
-			} u;
-		} data;
-		// to ensure proper size
-		union {
-			MojByte undefinedImpl[sizeof(UndefinedImpl)];
-			MojByte nullImpl[sizeof(NullImpl)];
-			MojByte objImpl[sizeof(ObjectImpl)];
-			MojByte arrayImpl[sizeof(ArrayImpl)];
-			MojByte stringImpl[sizeof(StringImpl)];
-			MojByte boolImpl[sizeof(BoolImpl)];
-			MojByte MojDecimalImpl[sizeof(DecimalImpl)];
-			MojByte intImpl[sizeof(IntImpl)];
-		} buf;
-	} ImplUnion;
 
 	MojObject(const MojChar*); // avoid coercion for illegal assignment
 	void init(Type type);
-	void init(const MojObject& obj) { obj.impl().clone(&m_impl); }
-	void release() { impl().~Impl(); }
+	void init(const MojObject& obj);
+	void release();
 	ObjectImpl& ensureObject();
 	ArrayImpl& ensureArray();
-	Impl& impl() { return *reinterpret_cast<Impl*>(&m_impl); }
-	const Impl& impl() const { return *reinterpret_cast<const Impl*>(&m_impl); }
+	Impl* impl() { return m_implementation; }
+	const Impl* impl() const { return m_implementation; }
 
 	template<class T>
 	MojErr getRequiredT(const MojChar* key, T& valOut) const;
 	template<class T>
 	MojErr getRequiredErrT(const MojChar* key, T& valOut) const;
 
-	ImplUnion m_impl;
+	Impl* m_implementation;
 };
 
 class MojObjectVisitor : private MojNoCopy

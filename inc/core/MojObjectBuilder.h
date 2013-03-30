@@ -22,6 +22,7 @@
 
 #include "core/MojCoreDefs.h"
 #include "core/MojObject.h"
+#include <stack>
 
 class MojObjectBuilder : public MojObjectVisitor
 {
@@ -50,12 +51,12 @@ private:
 		MojObject m_obj;
 		MojString m_propName;
 	};
-	typedef MojVector<Rec> ObjStack;
+	typedef std::stack<Rec> ObjStack;
 
 	MojErr push(MojObject::Type type);
 	MojErr pop();
 	MojErr value(const MojObject& val);
-	MojObject& back() { return const_cast<MojObject&>(m_stack.back().m_obj); }
+	MojObject& back() { return m_stack.top().m_obj; }
 
 	ObjStack m_stack;
 	MojObject m_obj;

@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+* Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ MojObjectBuilder::MojObjectBuilder()
 MojErr MojObjectBuilder::reset()
 {
 	m_obj.clear();
-	m_stack.clear();
+	m_stack = ObjStack();
 	m_propName.clear();
 	return MojErrNone;
 }
@@ -113,8 +114,7 @@ MojErr MojObjectBuilder::stringValue(const MojChar* val, MojSize len)
 
 MojErr MojObjectBuilder::push(MojObject::Type type)
 {
-	MojErr err = m_stack.push(Rec(type, m_propName));
-	MojErrCheck(err);
+	m_stack.push(Rec(type, m_propName));
 
 	return MojErrNone;
 }
@@ -123,7 +123,7 @@ MojErr MojObjectBuilder::pop()
 {
 	MojAssert(!m_stack.empty());
 
-	const Rec& rec = m_stack.back();
+	const Rec& rec = m_stack.top();
 	MojObject obj = rec.m_obj;
 	m_propName = rec.m_propName;
 	m_stack.pop();

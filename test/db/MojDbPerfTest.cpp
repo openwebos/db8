@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -238,7 +239,7 @@ MojErr MojDbPerfTest::delKinds(MojDb& db)
 	MojTestErrCheck(err);
 
 	MojString kind2Id;
-	err = kind1Id.assign(MojPerfMedKindId);
+        err = kind2Id.assign(MojPerfMedKindId);
 	MojTestErrCheck(err);
 	err = db.delKind(kind2Id, found);
 	MojTestErrCheck(err);
@@ -336,6 +337,8 @@ MojErr MojDbPerfTest::timePutKind(MojDb& db, MojTime& putKindTime, MojObject kin
 
 MojErr MojDbPerfTest::createSmallObj(MojObject& obj, MojUInt64 i)
 {
+
+
 	MojErr err = obj.putString(_T("first"), s_firstNames[i % 50]);
 	MojTestErrCheck(err);
 	err = obj.putString(_T("last"), s_lastNames[i % 50]);

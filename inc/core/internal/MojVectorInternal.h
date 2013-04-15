@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -265,28 +266,22 @@ template<class T, class EQ, class COMP>
 MojErr MojVector<T, EQ, COMP>::erase(MojSize idx, MojSize numElems)
 {
     MojAssert(idx + numElems <= size());
-    if (numElems == 0)
-      return MojErrNone;
 
-    if (idx + numElems > size()) {
-      return MojErrInvalidArg;
-    }
-
-    // may invalidate iters
-    MojErr err = ensureWritable();
-    MojErrCheck(err);
-
-    MojSize removedElements = 0;
-    Iterator pos = m_begin + idx;
-    for (removedElements = 0; pos != m_end && removedElements < numElems; ++removedElements, ++pos) {
-        *pos = *(pos + numElems);
-    }
-
-    // then destroy elems hanging off the end
-    m_end -= removedElements;
-    MojDestroy(m_end, numElems);
+   // may invalidate iters
+   MojErr err = ensureWritable();
+   MojErrCheck(err);
+   MojSize numMove = size() - (idx + numElems);
+   Iterator pos = m_begin + idx;
+   // do moves
+   for (MojSize i = 0; i < numMove; ++i, ++pos) {
+       *pos = *(pos + numElems);
+   }
+   // then destroy elems hanging off the end
+   m_end -= numElems;
+   MojDestroy(m_end, numElems);
 
     return MojErrNone;
+
 }
 
 template<class T, class EQ, class COMP>

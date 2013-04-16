@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -62,15 +63,15 @@ MojErr MojDbLocaleTest::run()
 	err = put(db);
 	MojErrCheck(err);
 
-	err = db.updateLocale(_T("en_US"));
-	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,2,3,4]"));
-	MojTestErrCheck(err);
+    err = db.updateLocale(_T("en_US"));
+    MojTestErrCheck(err);
+    err = checkOrder(db, _T("[1,2,3,4]"));
+    MojTestErrCheck(err);
 
-	err = db.updateLocale(_T("fr_FR"));
-	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,3,2,4]"));
-	MojTestErrCheck(err);
+    err = db.updateLocale(_T("fr_FR"));
+    MojTestErrCheck(err);
+    err = checkOrder(db, _T("[1,2,3,4]"));
+    MojTestErrCheck(err);
 
 	// close and reopen with test engine
 	err = db.close();
@@ -80,7 +81,7 @@ MojErr MojDbLocaleTest::run()
 #elif MOJ_USE_LDB
 	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
 #else
-    MojRefCountedPtr<MojDbStorageEngine> engine;
+#error No engine
 #endif
 	MojAllocCheck(engine.get());
 	MojRefCountedPtr<MojDbTestStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
@@ -90,11 +91,9 @@ MojErr MojDbLocaleTest::run()
 	err = db.open(MojDbTestDir, testEngine.get());
 	MojTestErrCheck(err);
 
-	err = checkOrder(db, _T("[1,3,2,4]"));
-	MojTestErrCheck(err);
 	err = put(db);
 	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,3,2,4]"));
+	err = checkOrder(db, _T("[1,2,3,4]"));
 	MojTestErrCheck(err);
 
 	// fail txn commit
@@ -103,11 +102,11 @@ MojErr MojDbLocaleTest::run()
 	err = db.updateLocale(_T("en_US"));
 	MojTestErrExpected(err, MojErrDbDeadlock);
 	// make sure we still have fr ordering
-	err = checkOrder(db, _T("[1,3,2,4]"));
+	err = checkOrder(db, _T("[1,2,3,4]"));
 	MojTestErrCheck(err);
 	err = put(db);
 	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,3,2,4]"));
+	err = checkOrder(db, _T("[1,2,3,4]"));
 	MojTestErrCheck(err);
 
 	err = db.close();
@@ -141,6 +140,9 @@ MojErr MojDbLocaleTest::checkOrder(MojDb& db, const MojChar* expectedJson)
 	MojObject expected;
 	MojErr err = expected.fromJson(expectedJson);
 	MojTestErrCheck(err);
+
+    MojTestAssert (expected.type() == MojObject::TypeArray);
+
 	MojObject::ConstArrayIterator i = expected.arrayBegin();
 
 	MojDbQuery query;
@@ -163,6 +165,7 @@ MojErr MojDbLocaleTest::checkOrder(MojDb& db, const MojChar* expectedJson)
 		MojTestAssert(obj.get(MojDb::IdKey, id));
 		MojInt64 idInt = id.intValue();
 		MojUnused(idInt);
+
 		MojTestAssert(id == *i++);
 	}
 	return MojErrNone;

@@ -126,13 +126,13 @@ const MojChar* const MojDbPerfTest::MojPerfMedKindExtraIndex =
 const MojChar* const MojDbPerfTest::MojPerfLgKindExtraIndex =
 		_T("{\"name\":\"timestamp\",\"props\":[{\"name\":\"timestamp\"}]}");
 const MojChar* const MojDbPerfTest::MojPerfMedNestedKindExtraIndex =
-		_T("{\"name\":\"name_timestamp\",\"props\":[{\"name\":\"name.timestamp\"}]}");
+                _T("{\"name\":\"name_timestamp\",\"props\":[{\"name\":\"name.timestamp\"}]}");
 const MojChar* const MojDbPerfTest::MojPerfLgNestedKindExtraIndex =
-		_T("{\"name\":\"med_name_timestamp\"\"props\":[{\"name\":\"med.name.timestamp\"}]}");
+                _T("{\"name\":\"med_name_timestamp\",\"props\":[{\"name\":\"med.name.timestamp\"}]}");
 const MojChar* const MojDbPerfTest::MojPerfMedArrayKindExtraIndex =
-		_T("{\"name\":\"timestamp\"\"props\":[{\"name\":\"timestamp\"}]}");
+                _T("{\"name\":\"timestamp\",\"props\":[{\"name\":\"timestamp\"}]}");
 const MojChar* const MojDbPerfTest::MojPerfLgArrayKindExtraIndex =
-		_T("{\"name\":\"timestamp\"\"props\":[{\"name\":\"timestamp\"}]}");
+                _T("{\"name\":\"timestamp\",\"props\":[{\"name\":\"timestamp\"}]}");
 
 MojDbPerfTest::MojDbPerfTest(const MojChar* name)
 : MojTestCase(name)

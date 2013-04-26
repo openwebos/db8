@@ -93,6 +93,20 @@ Below are the tools and libraries (and their minimum versions) required to build
 * gthread-2.0
 * openwebos/luna-service2
 
+### Configure database backend
+
+db8 support different database backends. To select db8 backend, set <tt>cmake</tt> variable <tt>WEBOS_DB8_BACKEND</tt> to one of supported database
+backends. Currently support database backends are:
+
+* leveldb
+* berkeleydb
+
+For example: 
+
+    $ cmake -D WEBOS_INSTALL_ROOT:PATH=$HOME/projects/openwebos -D WEBOS_DB8_BACKEND:STRING=leveldb ..
+
+By default, db8 compiles with berkeleydb database backend.
+
 ### Enable unit tests
 
 To build the unit tests for db8, specify a true value for `WEBOS_CONFIG_BUILD_TESTS` on the cmake command line. For example:

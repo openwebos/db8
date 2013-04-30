@@ -509,20 +509,28 @@ void MojObject::release()
 
 MojObject::ObjectImpl& MojObject::ensureObject()
 {
-	if (type() != TypeObject) {
-		release();
-		m_implementation = new ObjectImpl();
-	}
-	return static_cast<ObjectImpl&>(*m_implementation);
+    ObjectImpl* myImpl;
+    if (type() != TypeObject) {
+        release();
+        myImpl = new ObjectImpl();
+        m_implementation = myImpl;
+    } else {
+        myImpl = dynamic_cast<ObjectImpl*>(m_implementation);
+    }
+    return *myImpl;
 }
 
 MojObject::ArrayImpl& MojObject::ensureArray()
 {
-	if (type() != TypeArray) {
-		release();
-		m_implementation = new ArrayImpl();
-	}
-	return static_cast<ArrayImpl&>(*m_implementation);
+    ArrayImpl* myImpl;
+    if (type() != TypeArray) {
+        release();
+        myImpl = new ArrayImpl();
+        m_implementation = myImpl;
+    } else {
+        myImpl = dynamic_cast<ArrayImpl*>(m_implementation);
+    }
+    return *myImpl;
 }
 
 MojErr MojObject::Impl::stringValue(MojString& valOut) const

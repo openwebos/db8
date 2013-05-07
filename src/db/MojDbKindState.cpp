@@ -307,6 +307,7 @@ MojErr MojDbKindState::writeObj(const MojChar* key, const MojObject& val, MojDbS
 		MojErrCheck(err);
 		// get old item so we can update it next time
 		err = db->get(m_kindId, txn, false, oldItem);
+                MojAssert(oldItem.get());
 		MojErrCheck(err);
 	}
 	txn->quotaEnabled(true);

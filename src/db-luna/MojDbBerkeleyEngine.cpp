@@ -438,13 +438,13 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
     int dbErr = m_db->put(m_db, dbTxn, key.impl(), val.impl(), 0);
 #if defined(MOJ_DEBUG)
     char s[1024];
-    int size1 = key.size();
-    int size2 = val.size();
+    size_t size1 = key.size();
+    size_t size2 = val.size();
     MojErr err2 = MojByteArrayToHex(key.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(key.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbput: %s; keylen: %d, key: %s ; vallen = %d; err = %d\n"),
+    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbput: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     this->m_name.data(), size1, s, size2, err);
 #endif
     MojBdbErrCheck(dbErr, _T("db->put"));
@@ -512,12 +512,12 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
 
 #if defined(MOJ_DEBUG)
     char s[1024];   // big enough for any key
-    int size = key.size();
+    size_t size = key.size();
     MojErr err2 = MojByteArrayToHex(key.data(), size, s);
     MojErrCheck(err2);
     if (size > 16)  // if the object-id is in key
         strncat(s, (char *)(key.data()) + (size - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbdel: %s; keylen: %d, key= %s; err= %d \n"), this->m_name.data(), size, s, dbErr);
+    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbdel: %s; keylen: %zu, key= %s; err= %d \n"), this->m_name.data(), size, s, dbErr);
 #endif
 
     if (dbErr != DB_NOTFOUND) {
@@ -1561,13 +1561,13 @@ MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErr err = m_db->put(keyItem, valItem, txn, true);
 #ifdef MOJ_DEBUG
     char s[1024];
-    int size1 = keyItem.size();
-    int size2 = valItem.size();
+    size_t size1 = keyItem.size();
+    size_t size2 = valItem.size();
     MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexinsert: %s; keylen: %d, key: %s ; vallen = %d; err = %d\n"),
+    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     m_db->m_name.data(), size1, s, size2, err);
 #endif
     MojErrCheck(err);
@@ -1589,12 +1589,12 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 
 #ifdef MOJ_DEBUG
     char s[1024];
-    int size1 = keyItem.size();
+    size_t size1 = keyItem.size();
     MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexdel: %s; keylen: %d, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
+    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
     if (!found)
         MojLogWarning(MojDbBerkeleyEngine::s_log, _T("bdbindexdel_warn: not found: %s \n"), s);
 #endif

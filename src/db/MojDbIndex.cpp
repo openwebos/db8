@@ -608,7 +608,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		char *s2 = NULL;
 		if (m_kind)
 			s2 = (char *)(m_kind->id().data());
-		int size = (*i).size();
+		size_t size = (*i).size();
 		MojErr err2 = MojByteArrayToHex((*i).data(), size, s); 
 		MojErrCheck(err2); 
 		if (size > 16)	// if the object-id is in key
@@ -642,7 +642,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 		MojErr err = m_index->insert(*i, txn);
 #if defined(MOJ_DEBUG_LOGGING)
 		char s[1024];
-		int size = (*i).size();
+		size_t size = (*i).size();
 		MojErr err2 = MojByteArrayToHex((*i).data(), size, s); 
 		MojErrCheck(err2);
 		if (size > 16)	// if the object-id is in key

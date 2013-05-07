@@ -447,13 +447,13 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
 
 #if defined(MOJ_DEBUG)
     char str_buf[1024];
-    int size1 = key.size();
-    int size2 = val.size();
+    size_t size1 = key.size();
+    size_t size2 = val.size();
     MojErr err2 = MojByteArrayToHex(key.data(), size1, str_buf);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldb put: %s; keylen: %d, key: %s ; vallen = %d; err = %d\n"),
+    MojLogInfo(MojDbLevelEngine::s_log, _T("ldb put: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     this->m_name.data(), size1, str_buf, size2, err);
 #endif
 
@@ -537,12 +537,12 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
 
 #if defined(MOJ_DEBUG)
     char str_buf[1024];     // big enough for any key
-    int size = key.size();
+    size_t size = key.size();
     MojErr err2 = MojByteArrayToHex(key.data(), size, str_buf);
     MojErrCheck(err2);
     if (size > 16)  // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbdel: %s; keylen: %d, key= %s; err = %d \n"), this->m_name.data(), size, str_buf, !st.ok());
+    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbdel: %s; keylen: %zu, key= %s; err = %d \n"), this->m_name.data(), size, str_buf, !st.ok());
 #endif
 
     if (st.IsNotFound() == false) {
@@ -1015,13 +1015,13 @@ MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErr err = m_db->put(keyItem, valItem, txn, true);
 #ifdef MOJ_DEBUG
     char s[1024];
-    int size1 = keyItem.size();
-    int size2 = valItem.size();
+    size_t size1 = keyItem.size();
+    size_t size2 = valItem.size();
     MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexinsert: %s; keylen: %d, key: %s ; vallen = %d; err = %d\n"),
+    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     m_db->m_name.data(), size1, s, size2, err);
 #endif
     MojErrCheck(err);
@@ -1043,12 +1043,12 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 
 #ifdef MOJ_DEBUG
     char s[1024];
-    int size1 = keyItem.size();
+    size_t size1 = keyItem.size();
     MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexdel: %s; keylen: %d, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
+    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
     if (!found)
         MojLogWarning(MojDbLevelEngine::s_log, _T("ldbindexdel_warn: not found: %s \n"), s);
 #endif

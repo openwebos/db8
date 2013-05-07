@@ -426,11 +426,15 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
     MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    MojInt64 quotaOffset = val.size();
-    if (updateIdQuota)
-        quotaOffset += key.size();
-    MojErr err = txn->offsetQuota(quotaOffset);
-    MojErrCheck(err);
+    MojErr err;
+    if (txn)
+    {
+        MojInt64 quotaOffset = val.size();
+        if (updateIdQuota)
+            quotaOffset += key.size();
+        err = txn->offsetQuota(quotaOffset);
+        MojErrCheck(err);
+    }
 
     MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
 
@@ -751,12 +755,6 @@ MojErr MojDbLevelEngine::open(const MojChar* path, MojDbEnv* env)
         err = MojCreateDirIfNotPresent(path);
         MojErrCheck(err);
     }
-    // bool created = false;
-    // we don't need to open any DB here since we have a single leveldb
-    // and it should be open by MojoDB core code
-
-//  /*TODO: FIX THIS!!! */
-    /*m_isOpen = false;
 
     // open seqence db
     bool created = false;
@@ -769,7 +767,7 @@ MojErr MojDbLevelEngine::open(const MojChar* path, MojDbEnv* env)
     m_indexDb.reset(new MojDbLevelDatabase);
     MojAllocCheck(m_indexDb.get());
     err = m_indexDb->open(MojEnvIndexDbName, this, created, NULL);
-    MojErrCheck(err);*/
+    MojErrCheck(err);
     m_isOpen = true;
 
     return MojErrNone;
@@ -781,8 +779,11 @@ MojErr MojDbLevelEngine::close()
     MojErr err = MojErrNone;
     MojErr errClose = MojErrNone;
 
+    // close seqs before closing their databases
+    m_seqs.clear();
+
     // close dbs
-    /*if (m_seqDb.get()) {
+    if (m_seqDb.get()) {
         errClose = m_seqDb->close();
         MojErrAccumulate(err, errClose);
         m_seqDb.reset();
@@ -791,7 +792,7 @@ MojErr MojDbLevelEngine::close()
         errClose = m_indexDb->close();
         MojErrAccumulate(err, errClose);
         m_indexDb.reset();
-    }*/
+    }
     m_env.reset();
     m_isOpen = false;
 
@@ -838,16 +839,14 @@ MojErr MojDbLevelEngine::openDatabase(const MojChar* name, MojDbStorageTxn* txn,
 MojErr MojDbLevelEngine::openSequence(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageSeq>& seqOut)
 {
     MojAssert(name && !seqOut.get());
+    MojAssert(m_seqDb.get());
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojRefCountedPtr<MojDbLevelSeq> seq(new MojDbLevelSeq());
     MojAllocCheck(seq.get());
-    //TODO: debug this!!!
-    //MojErr err = seq->open(name, m_seqDb.get());
 
-    MojAssert(m_dbs[0].get());
 
-    MojErr err = seq->open(name, m_dbs[0].get());
+    MojErr err = seq->open(name, m_seqDb.get());
     MojErrCheck(err);
     seqOut = seq;
     m_seqs.push(seq);
@@ -1271,11 +1270,34 @@ MojDbLevelSeq::~MojDbLevelSeq()
 
 MojErr MojDbLevelSeq::open(const MojChar* name, MojDbLevelDatabase* db)
 {
+    MojAssert(db);
     MojLogTrace(MojDbLevelEngine::s_log);
 
     //MojAssert(!m_seq);
+    MojErr err;
 
     m_db = db;
+    err = m_key.fromBytes(reinterpret_cast<const MojByte  *>(name), strlen(name));
+    MojErrCheck(err);
+
+    MojDbLevelItem val;
+    bool found = false;
+    err = m_db->get(m_key, NULL, false, val, found);
+    MojErrCheck(err);
+
+    if (found)
+    {
+        MojObject valObj;
+        err = val.toObject(valObj);
+        MojErrCheck(err);
+        m_next = valObj.intValue();
+    }
+    else
+    {
+        m_next = 0;
+    }
+
+    m_allocated = m_next;
 
     return MojErrNone;
 }
@@ -1284,15 +1306,60 @@ MojErr MojDbLevelSeq::close()
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    return MojErrNone;
+    return store(m_next);
 }
 
 MojErr MojDbLevelSeq::get(MojInt64& valOut)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    // just a number
-    valOut = (MojInt64) 1;
+    if (m_next == m_allocated)
+    {
+        MojErr err = MojDbLevelSeq::allocateMore();
+        MojErrCheck(err);
+        MojAssert(m_allocated > m_next);
+    }
+    valOut = m_next++;
+
+    return MojErrNone;
+}
+
+MojErr MojDbLevelSeq::allocateMore()
+{
+    return store(m_allocated + 100);
+}
+
+MojErr MojDbLevelSeq::store(MojInt64 next)
+{
+    MojAssert( next >= m_next );
+    MojErr err;
+    MojDbLevelItem val;
+
+#ifdef MOJ_DEBUG
+    // ensure that our state is consistent with db
+    bool found = false;
+    err = m_db->get(m_key, NULL, false, val, found);
+    MojErrCheck(err);
+
+    if (found)
+    {
+        MojObject valObj;
+        err = val.toObject(valObj);
+        MojErrCheck(err);
+        if (m_allocated != valObj.intValue()) return MojErrDbInconsistentIndex;
+    }
+    else
+    {
+        if (m_allocated != 0) return MojErrDbInconsistentIndex;
+    }
+
+#endif
+
+    err = val.fromObject(next);
+    MojErrCheck(err);
+    err = m_db->put(m_key, val, NULL, false);
+    MojErrCheck(err);
+    m_allocated = next;
 
     return MojErrNone;
 }

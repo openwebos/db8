@@ -246,7 +246,7 @@ private:
 class MojDbLevelSeq : public MojDbStorageSeq
 {
 public:
-    MojDbLevelSeq() : m_db(NULL) {}
+    MojDbLevelSeq() : m_db(NULL), m_next(0), m_allocated(0) {}
     ~MojDbLevelSeq();
 
     MojErr open(const MojChar* name, MojDbLevelDatabase* db);
@@ -257,7 +257,13 @@ public:
 private:
     friend class MojDbLevelEngine;
 
+    MojErr store(MojInt64 next);
+    MojErr allocateMore();
+
     MojDbLevelDatabase* m_db;
+    MojDbLevelItem m_key;
+    MojInt64 m_next;
+    MojInt64 m_allocated;
 };
 
 #endif /* MOJDBLEVELENGINE_H_ */

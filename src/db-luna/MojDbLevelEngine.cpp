@@ -164,8 +164,8 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
     if(m_it->Valid() )
     {
         foundOut = true;
-        *(val.impl()) = m_it->value();
-        *(key.impl()) = m_it->key();
+        val.from(m_it->value());
+        key.from(m_it->key());
         m_recSize = key.size() + val.size();
     }
 
@@ -489,7 +489,7 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
     if(s.IsNotFound() == false)
     {
         foundOut = true;
-        *valOut.impl() = leveldb::Slice(str);
+        valOut.fromBytes(reinterpret_cast<const MojByte*>(str.data()), str.size());
     }
 
     return MojErrNone;
@@ -1085,7 +1085,7 @@ MojErr MojDbLevelIndex::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 ////////////////////MojDbLevelItem////////////////////////////////////////////
 
 MojDbLevelItem::MojDbLevelItem()
-: m_free(MojFree)
+: m_data(NULL), m_free(MojFree)
 {
 }
 
@@ -1130,7 +1130,6 @@ void MojDbLevelItem::id(const MojObject& id)
 void MojDbLevelItem::clear()
 {
     freeData();
-    m_free = MojFree;
     m_slice.clear();
 }
 
@@ -1176,10 +1175,12 @@ MojErr MojDbLevelItem::fromBuffer(MojBuffer& buf)
 {
     clear();
     if (!buf.empty()) {
-        MojErr err = buf.release(m_chunk);
+        MojAutoPtr<MojBuffer::Chunk> chunk;
+        MojErr err = buf.release(chunk);
         MojErrCheck(err);
-        MojAssert(m_chunk.get());
-        setData(m_chunk->data(), m_chunk->dataSize(), NULL);
+        MojAssert(chunk.get());
+        setData(chunk->data(), chunk->dataSize(), NULL);
+        m_chunk = chunk; // take ownership
     }
     return MojErrNone;
 }
@@ -1228,13 +1229,30 @@ MojErr MojDbLevelItem::fromObjectVector(const MojVector<MojObject>& vec)
 
 void MojDbLevelItem::freeData()
 {
-   // since we are using levelDB::Slice  - no need for memory cleanup
+    // make sure slice points to something weird rather than to unallocated
+    // memory
+    m_slice = leveldb::Slice("(uninitialized)");
+
+    // reset header reader
+    m_header.reset();
+
+    // free m_data
+    if (m_free)
+    {
+        m_free(m_data);
+        m_data = NULL;
+    }
+    m_free = MojFree;
+
+    // free m_chunk
+    m_chunk.reset();
 }
 
 void MojDbLevelItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
 {
     MojAssert(bytes);
     freeData();
+    m_data = bytes;
     m_free = free;
     m_slice = leveldb::Slice( (const char *)bytes, size);
     m_header.reader().data(bytes, size);

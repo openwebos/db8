@@ -227,15 +227,18 @@ public:
     MojErr fromBytes(const MojByte* bytes, MojSize size);
     MojErr fromObject(const MojObject& obj);
     MojErr fromObjectVector(const MojVector<MojObject>& vec);
+    MojErr from(const leveldb::Slice &slice) { return fromBytes(reinterpret_cast<const MojByte*>(slice.data()), slice.size()); }
 
-    leveldb::Slice* impl() { return &m_slice; }
+    const leveldb::Slice* impl() { return &m_slice; }
 
 private:
     void freeData();
     void setData(MojByte* bytes, MojSize size, void (*free)(void*));
 
+    // either points to m_chunk or to m_data
     leveldb::Slice m_slice;
     MojAutoPtr<MojBuffer::Chunk> m_chunk;
+    MojByte *m_data;
     mutable MojDbObjectHeader m_header;
     void (*m_free)(void*);
 };

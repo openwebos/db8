@@ -92,7 +92,7 @@ MojErr MojDbLevelCursor::del()
 
     if(m_it->Valid())
     {
-        leveldb::Slice key = m_it->value();
+        leveldb::Slice key = m_it->key();
         //m_it->Next(); - not clear if we need it here
         if(m_txn)
         {
@@ -946,11 +946,7 @@ MojErr MojDbLevelIndex::open(const MojObject& id, MojDbLevelDatabase* db, MojDbS
     // m_db and m_primaryDb should point to the same object
     // leave both of them here more for debugging purposes
 
-    // TODO: Debug THIS!!
-    /*m_db.reset(db->engine()->indexDb());
-    m_primaryDb.reset(db);*/
-
-    m_db.reset(db);
+    m_db.reset(db->engine()->indexDb());
     m_primaryDb.reset(db);
 
     return MojErrNone;

@@ -34,6 +34,8 @@
 #include "leveldb/write_batch.h"
 #include "leveldb/iterator.h"
 
+#include "MojDbLevelTxn.h"
+
 //const MojChar* const MojDbLevelEnv::LockFileName = _T("_lock");
 MojLogger MojDbLevelEngine::s_log(_T("db.ldb"));
 static const MojChar* const MojEnvIndexDbName = _T("indexes.ldb");
@@ -85,6 +87,7 @@ MojErr MojDbLevelCursor::close()
 MojErr MojDbLevelCursor::del()
 {
     MojAssert(m_it);
+    MojAssert( !m_txn || dynamic_cast<MojDbLevelAbstractTxn *>(m_txn) );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     if(m_it->Valid())
@@ -93,11 +96,8 @@ MojErr MojDbLevelCursor::del()
         //m_it->Next(); - not clear if we need it here
         if(m_txn)
         {
-            MojDbLevelTxn * txn = dynamic_cast<MojDbLevelTxn *> (m_txn);
-            if(txn)
-                txn->impl()->Delete(key);
-            else
-                MojAssert(0);
+            MojDbLevelAbstractTxn *txn = static_cast<MojDbLevelAbstractTxn *>(m_txn);
+            txn->tableTxn(m_db).Delete(key);
         }
         else
         {
@@ -234,6 +234,7 @@ MojDbLevelDatabase::~MojDbLevelDatabase()
 MojErr MojDbLevelDatabase::open(const MojChar* dbName, MojDbLevelEngine* eng, bool& createdOut, MojDbStorageTxn* txn)
 {
     MojAssert(dbName && eng);
+    MojAssert(!txn || txn->isValid());
     MojLogTrace(MojDbLevelEngine::s_log);
 
     // save eng, name and file
@@ -268,12 +269,6 @@ MojErr MojDbLevelDatabase::open(const MojChar* dbName, MojDbLevelEngine* eng, bo
     //keep a reference to this database
     err = eng->addDatabase(this);
     MojErrCheck(err);
-
-    if (!txn->isValid()) {
-        MojLogInfo(MojDbLevelEngine::s_log, "Transaction is not valid, reinit transaction");
-        err = this->beginTxn(*eng->getPostTransaction());
-        MojErrCheck(err);
-    }
 
     return MojErrNone;
 }
@@ -428,6 +423,7 @@ MojErr MojDbLevelDatabase::put(const MojObject& id, MojBuffer& val, MojDbStorage
 MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbStorageTxn* txn, bool updateIdQuota)
 {
     MojAssert(m_db );
+    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojInt64 quotaOffset = val.size();
@@ -435,12 +431,14 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
         quotaOffset += key.size();
     MojErr err = txn->offsetQuota(quotaOffset);
     MojErrCheck(err);
-    leveldb::WriteBatch *batch = MojLdbTxnFromStorageTxn(txn);
+
+    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+
     leveldb::Status s;
 
-    if(batch)
+    if(leveldb_txn)
     {
-        batch->Put(*key.impl(), *val.impl());
+        leveldb_txn->tableTxn(impl()).Put(*key.impl(), *val.impl());
     }
     else
         s = m_db->Put(leveldb::WriteOptions(), *key.impl(), *val.impl());
@@ -457,7 +455,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
                     this->m_name.data(), size1, str_buf, size2, err);
 #endif
 
-    if(batch)
+    if(leveldb_txn)
         ;//MojLdbErrCheck(batch->status(), _T("db->put"));
     else
         MojLdbErrCheck(s, _T("db->put"));
@@ -472,12 +470,19 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
                                MojDbLevelItem& valOut, bool& foundOut)
 {
     MojAssert(m_db);
+    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     foundOut = false;
     std::string str;
 
-    leveldb::Status s = m_db->Get(leveldb::ReadOptions(), *key.impl(), &str);
+    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+
+    leveldb::Status s;
+    if (leveldb_txn)
+        s = leveldb_txn->tableTxn(impl()).Get(*key.impl(), str);
+    else
+        s = m_db->Get(leveldb::ReadOptions(), *key.impl(), &str);
 
     //MojLdbErrCheck(s, _T("db->get"));
 
@@ -492,10 +497,10 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
 
 MojErr MojDbLevelDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-   MojRefCountedPtr<MojDbLevelTxn> txn(new MojDbLevelTxn());
+   MojRefCountedPtr<MojDbLevelTableTxn> txn(new MojDbLevelTableTxn());
 
    MojAllocCheck(txn.get());
-   MojErr err = txn->begin(this);
+   MojErr err = txn->begin(impl());
    MojErrCheck(err);
    txnOut = txn;
    return MojErrNone;
@@ -520,17 +525,20 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
 {
 
     MojAssert(m_db);
+    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     foundOut = false;
     MojErr err = txn->offsetQuota(-(MojInt64) key.size());
     MojErrCheck(err);
-    leveldb::WriteBatch * dbBatch = MojLdbTxnFromStorageTxn(txn);
+
+    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+
     leveldb::Status st;
 
-    if(dbBatch)
+    if(leveldb_txn)
     {
-        dbBatch->Delete(*key.impl());
+        leveldb_txn->tableTxn(impl()).Delete(*key.impl());
     }
     else
         st = m_db->Delete(leveldb::WriteOptions(), *key.impl());
@@ -567,7 +575,8 @@ MojErr MojDbLevelDatabase::closeImpl()
 void MojDbLevelDatabase::postUpdate(MojDbStorageTxn* txn, MojSize size)
 {
     if (txn) {
-        static_cast<MojDbLevelTxn*>(txn)->didUpdate(size);
+        // TODO: implement quotas
+        // XXX: static_cast<MojDbLevelTxn*>(txn)->didUpdate(size);
     }
 }
 
@@ -794,23 +803,13 @@ MojErr MojDbLevelEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
     MojAssert(!txnOut.get());
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    MojRefCountedPtr<MojDbLevelTxn> txn(new MojDbLevelTxn());
+    MojRefCountedPtr<MojDbLevelEnvTxn> txn(new MojDbLevelEnvTxn());
     MojAllocCheck(txn.get());
+    MojErr err = txn->begin(this);
+    MojErrCheck(err);
     txnOut = txn;
 
-    if (!m_dbs.empty()) {
-        MojDbLevelDatabase * db = m_dbs[0].get();
-        return db->beginTxn(txnOut);
-        postTransaction = NULL;
-    } else {
-        postTransaction = &txnOut;
-    }
-
     return MojErrNone;
-
-    // TODO: Check this
-
-    /*MojAssert(m_dbs.size() != 0);*/
 }
 
 MojErr MojDbLevelEngine::openDatabase(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageDatabase>& dbOut)
@@ -1279,77 +1278,5 @@ MojErr MojDbLevelSeq::get(MojInt64& valOut)
 
     return MojErrNone;
 }
-
-///////////////////////////////MojDbLevelTxn////////////////////////////////////////////////////
-
-MojDbLevelTxn::MojDbLevelTxn()
-: m_db(NULL),
-  m_batch(NULL),
-  m_updateSize(0)
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-}
-
-MojDbLevelTxn::~MojDbLevelTxn()
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-    if (m_batch) {
-        abort();
-    }
-}
-MojErr MojDbLevelTxn::begin(MojDbLevelDatabase* db)
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert(!m_batch);
-    MojAssert(db);
-    MojAssert(db->impl());
-
-    m_db = db;
-    m_batch = new leveldb::WriteBatch();
-    return MojErrNone;
-}
-
-MojErr MojDbLevelTxn::commitImpl()
-{
-    MojAssert(m_batch);
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-        leveldb::WriteOptions write_options;
-        write_options.sync = true;
-
-    MojAssert(m_db->impl());
-
-        leveldb::Status s = m_db->impl()->Write(write_options, m_batch);
-    delete m_batch;
-        m_batch = NULL;
-
-    MojLdbErrCheck(s, _T("txn->commit"));
-
-    if (m_updateSize != 0) {
-        MojErr err = m_db->engine()->env()->postCommit(m_updateSize);
-        MojErrCheck(err);
-    }
-    return MojErrNone;
-}
-
-MojErr MojDbLevelTxn::abort()
-{
-    MojAssert(m_batch);
-    MojLogTrace(MojDbLevelEngine::s_log);
-    MojLogWarning(MojDbLevelEngine::s_log, _T("ldb: transaction aborted"));
-
-    m_batch->Clear();
-    delete m_batch;
-    m_batch = NULL;
-
-    return MojErrNone;
-}
-
-bool MojDbLevelTxn::isValid()
-{
-    return (m_db);
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////////

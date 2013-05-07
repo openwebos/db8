@@ -29,7 +29,6 @@
 
 #define MojLdbErrCheck(E, FNAME)                if (!E.ok()) MojErrThrowMsg(MojErrDbFatal, _T("ldb: %s - %s"), FNAME, E.ToString().data())
 #define MojLdbErrAccumulate(EACC, E, FNAME)     if (!E.ok()) MojErrAccumulate(EACC, MojErrDbFatal)
-#define MojLdbTxnFromStorageTxn(TXN)            ((TXN) ? static_cast<MojDbLevelTxn*>(TXN)->impl() : NULL)
 
 class MojDbLevelCursor;
 class MojDbLevelDatabase;
@@ -39,7 +38,6 @@ class MojDbLevelIndex;
 class MojDbLevelItem;
 class MojDbLevelQuery;
 class MojDbLevelSeq;
-class MojDbLevelTxn;
 
 class MojDbLevelCursor : public MojNoCopy
 {
@@ -168,7 +166,6 @@ public:
     MojErr removeSeq(MojDbLevelSeq* seq);
 
     MojDbLevelDatabase* indexDb() { return m_indexDb.get(); }
-    MojRefCountedPtr<MojDbStorageTxn>* getPostTransaction() { return postTransaction; }
 
 private:
     typedef MojVector<MojRefCountedPtr<MojDbLevelDatabase> > DatabaseVec;
@@ -182,8 +179,6 @@ private:
     DatabaseVec m_dbs;
     SequenceVec m_seqs;
     bool m_isOpen;
-
-    MojRefCountedPtr<MojDbStorageTxn>* postTransaction; // TODO: this is play around close database bug
 };
 
 class MojDbLevelIndex : public MojDbStorageIndex
@@ -260,30 +255,6 @@ private:
     friend class MojDbLevelEngine;
 
     MojDbLevelDatabase* m_db;
-};
-
-class MojDbLevelTxn : public MojDbStorageTxn
-{
-public:
-    MojDbLevelTxn();
-    ~MojDbLevelTxn();
-
-    MojErr begin(MojDbLevelDatabase* db);
-    virtual MojErr abort();
-    virtual bool isValid();
-
-    leveldb::WriteBatch* impl() { return m_batch; }
-    //MojDbLevelEngine* engine() { return m_engine; }
-    void didUpdate(MojSize size) { m_updateSize += size; }
-    MojSize updateSize() const { return m_updateSize; }
-
-
-private:
-    virtual MojErr commitImpl();
-
-    MojDbLevelDatabase* m_db;
-    leveldb::WriteBatch* m_batch;
-    MojSize m_updateSize;
 };
 
 #endif /* MOJDBLEVELENGINE_H_ */

@@ -93,20 +93,22 @@ MojErr MojDbLevelCursor::del()
     if(m_it->Valid())
     {
         leveldb::Slice key = m_it->key();
+        const size_t recSize = key.size() + m_it->value().size();
+
         //m_it->Next(); - not clear if we need it here
         if(m_txn)
         {
             MojDbLevelAbstractTxn *txn = static_cast<MojDbLevelAbstractTxn *>(m_txn);
             txn->tableTxn(m_db).Delete(key);
+
+            MojErr err = m_txn->offsetQuota(-(MojInt64) recSize);
+            MojErrCheck(err);
         }
         else
         {
             m_db->Delete(leveldb::WriteOptions(), key);
         }
     }
-
-    MojErr err = m_txn->offsetQuota(-(MojInt64) m_recSize);
-    MojErrCheck(err);
 
     return MojErrNone;
 }
@@ -170,7 +172,6 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
         foundOut = true;
         val.from(m_it->value());
         key.from(m_it->key());
-        m_recSize = key.size() + val.size();
     }
 
     MojLdbErrCheck(m_it->status(), _T("lbb->get"));
@@ -355,13 +356,8 @@ MojErr MojDbLevelDatabase::update(const MojObject& id, MojBuffer& val, MojDbStor
 
     MojErr err = txn->offsetQuota(-(MojInt64) oldVal->size());
     MojErrCheck(err);
-    // first delete from DB
-    // not clear if there's any usage for foundOut
-    // maybe for debugging?
-    bool foundOut = false;
-    err = del(id, txn, foundOut);
-    MojErrCheck(err);
-    // add a new one
+
+    // add/replace with a new one
     err = put(id, val, txn, false);
     MojErrCheck(err);
 

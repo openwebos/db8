@@ -64,7 +64,6 @@ private:
     leveldb::Iterator* m_it;
     leveldb::DB* m_db;
     MojDbStorageTxn* m_txn;
-    MojSize m_recSize;
     MojSize m_warnCount;
 };
 

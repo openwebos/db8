@@ -143,12 +143,16 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
     switch (flags)
     {
     case e_Set:
+        // TODO: skip deleted inside transaction
         m_it->Seek(*key.impl());
     break;
+
     case e_Next:
+        MojAssert(m_it->Valid());
         m_it->Next();
     break;
     case e_Prev:
+        MojAssert(m_it->Valid());
         m_it->Prev();
     break;
     case e_First:
@@ -170,6 +174,13 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
     }
 
     MojLdbErrCheck(m_it->status(), _T("lbb->get"));
+
+    if (!m_it->Valid())
+    {
+        m_it->SeekToLast();
+        MojLdbErrCheck(m_it->status(), _T("lbb->get"));
+    }
+
     return MojErrNone;
 }
 
@@ -734,8 +745,9 @@ MojErr MojDbLevelEngine::open(const MojChar* path)
     MojAllocCheck(env.get());
     MojErr err = env->open(path);
     MojErrCheck(err);
-    err = open(NULL, env.get());
+    err = open(path, env.get());
     MojErrCheck(err);
+    m_path.assign(path);
 
     return MojErrNone;
 }

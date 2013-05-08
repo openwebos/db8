@@ -65,14 +65,14 @@ MojErr MojDbIsamQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
 	MojAssert(m_isOpen);
 
 	itemOut = NULL;
-	int i1 = 0; 
+	int i1 = 0;
 	int i2 = 0;
 	// loop until we get an actual item or there are no more db entries
 	do {
 		i1++;
 		MojErr err = getImpl(itemOut, foundOut, true);
 		if (err == MojErrInternalIndexOnFind && !m_verify) {
-			foundOut = true;  
+			foundOut = true;
 			itemOut = NULL;
 			i2++;
 			continue;
@@ -99,7 +99,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	MojAssert(m_isOpen);
 
 	countOut = 0;
-	MojInt32 warns = 0; 
+	MojInt32 warns = 0;
 	m_plan->limit(MojUInt32Max);
 	bool found = false;
 	do {
@@ -121,7 +121,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"), 
+		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
 								 from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;
@@ -151,18 +151,18 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 	if (foundOut && getItem) {
 		err = getVal(itemOut, foundOut);
 		if (err == MojErrInternalIndexOnFind) {
-//#if defined (MOJ_DEBUG) 
+#if defined (MOJ_DEBUG)
 			char s[1024];
 			char *s2 = NULL;
-			MojErr err2 =  MojByteArrayToHex(m_keyData, m_keySize, s); 
+			MojErr err2 =  MojByteArrayToHex(m_keyData, m_keySize, s);
 			MojErrCheck(err2);
 			if (m_keySize > 17)
 				s2 = ((char *)m_keyData) + m_keySize - 17;
 			MojSize idIndex = m_plan->idIndex();
 			const MojChar * from = m_plan->query().from().data();
-			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"), 
-								 from, idIndex, (int)group, m_keySize, s, s2);
-//#endif 
+			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"),
+								 from, idIndex, (int)group, m_keySize, s, (s2?s2:"NULL"));
+#endif
 		}
 		MojErrCheck(err);
 	}

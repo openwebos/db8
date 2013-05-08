@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,6 +19,7 @@
 
 
 #include "MojDbTestRunner.h"
+#include "MojDbWhereTest.h"
 #include "MojDbBulkTest.h"
 #include "MojDbConcurrencyTest.h"
 #include "MojDbCrudTest.h"
@@ -60,6 +62,7 @@ int main(int argc, char** argv)
 
 void MojDbTestRunner::runTests()
 {
+	test(MojDbWhereTest());
 	test(MojDbBulkTest());
 	test(MojDbConcurrencyTest());
 	test(MojDbCrudTest());

@@ -27,6 +27,7 @@ endforeach ()
 # ---------------------------------
 set (DB_TEST_SOURCES
      MojDbTestRunner.cpp
+     MojDbWhereTest.cpp
      MojDbBulkTest.cpp
      MojDbConcurrencyTest.cpp
      MojDbCrudTest.cpp

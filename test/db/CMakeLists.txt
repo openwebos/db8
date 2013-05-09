@@ -43,6 +43,7 @@ set (DB_TEST_SOURCES
      MojDbRevTest.cpp
      MojDbRevisionSetTest.cpp
      MojDbSearchTest.cpp
+     MojDbDistinctTest.cpp
      MojDbTextCollatorTest.cpp
      MojDbTextTokenizerTest.cpp
      MojDbWatchTest.cpp

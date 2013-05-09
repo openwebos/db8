@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -26,6 +27,7 @@ const MojChar* const MojDbQuery::FromKey = _T("from");
 const MojChar* const MojDbQuery::WhereKey = _T("where");
 const MojChar* const MojDbQuery::FilterKey = _T("filter");
 const MojChar* const MojDbQuery::OrderByKey = _T("orderBy");
+const MojChar* const MojDbQuery::DistinctKey = _T("distinct");
 const MojChar* const MojDbQuery::DescKey = _T("desc");
 const MojChar* const MojDbQuery::IncludeDeletedKey = _T("incDel");
 const MojChar* const MojDbQuery::LimitKey = _T("limit");
@@ -165,6 +167,11 @@ MojErr MojDbQuery::toObject(MojObjectVisitor& visitor) const
 		MojErrCheck(err);
 	}
 
+	if (!m_distinct.empty()) {
+		err = visitor.stringProp(DistinctKey, m_distinct);
+		MojErrCheck(err);
+	}
+
 	if (m_desc) {
 		err = visitor.boolProp(DescKey, true);
 		MojErrCheck(err);
@@ -192,24 +199,51 @@ MojErr MojDbQuery::toObject(MojObjectVisitor& visitor) const
 MojErr MojDbQuery::fromObject(const MojObject& obj)
 {
 	// TODO: validate against query schema
-	// select
+
+	bool found;
+	MojErr err;
 	MojObject array;
 	MojString str;
-	if (obj.get(SelectKey, array)) {
-		if(array.empty()) {
-			MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: select clause but no selected properties"));
+
+	// distinct
+	found = false;
+	err = obj.get(DistinctKey, str, found);
+	MojErrCheck(err);
+	if (found) {
+		err = distinct(str);
+		MojErrCheck(err);
+		// if "distinct" is set, force "distinct" column into "select".
+		err = select(str);
+		MojErrCheck(err);
+		// order
+		err = order(str);
+		MojErrCheck(err);
+	} else {
+		// select
+		if (obj.get(SelectKey, array)) {
+			if(array.empty()) {
+				MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: select clause but no selected properties"));
+			}
+			MojObject prop;
+			MojSize i = 0;
+			while (array.at(i++, prop)) {
+				MojErr err = prop.stringValue(str);
+				MojErrCheck(err);
+				err = select(str);
+				MojErrCheck(err);
+			}
 		}
-		MojObject prop;
-		MojSize i = 0;
-		while (array.at(i++, prop)) {
-			MojErr err = prop.stringValue(str);
-			MojErrCheck(err);
-			err = select(str);
+		// order
+		found = false;
+		err = obj.get(OrderByKey, str, found);
+		MojErrCheck(err);
+		if (found) {
+			err = order(str);
 			MojErrCheck(err);
 		}
 	}
 	// from
-	MojErr err = obj.getRequired(FromKey, str);
+	err = obj.getRequired(FromKey, str);
 	MojErrCheck(err);
 	err = from(str);
 	MojErrCheck(err);
@@ -221,14 +255,6 @@ MojErr MojDbQuery::fromObject(const MojObject& obj)
 	// filter
 	if (obj.get(FilterKey, array)) {
 		err = addClauses(m_filterClauses, array);
-		MojErrCheck(err);
-	}
-	// order
-	bool found = false;
-	err = obj.get(OrderByKey, str, found);
-	MojErrCheck(err);
-	if (found) {
-		err = order(str);
 		MojErrCheck(err);
 	}
 	// desc
@@ -314,6 +340,14 @@ MojErr MojDbQuery::order(const MojChar* propName)
 	return MojErrNone;
 }
 
+MojErr MojDbQuery::distinct(const MojChar* distinct)
+{
+	MojErr err = m_distinct.assign(distinct);
+	MojErrCheck(err);
+
+	return MojErrNone;
+}
+
 MojErr MojDbQuery::includeDeleted(bool val)
 {
 	if (val) {
@@ -383,6 +417,7 @@ bool MojDbQuery::operator==(const MojDbQuery& rhs) const
 	    m_whereClauses != rhs.m_whereClauses ||
 	    m_page.key() != rhs.m_page.key() ||
 		m_orderProp != rhs.m_orderProp ||
+		m_distinct != rhs.m_distinct ||
 		m_limit != rhs.m_limit ||
 		m_desc != rhs.m_desc) {
 		return false;

@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -38,6 +39,7 @@
 				 _T("\"op\":{\"type\":\"string\",\"enum\":[\"<\",\"<=\",\"=\",\">=\",\">\",\"!=\"]},") \
 				 _T("\"val\":{}}}},") \
 		 _T("\"orderBy\":{\"type\":\"string\",\"optional\":true},") \
+		 _T("\"distinct\":{\"type\":\"string\",\"optional\":true},") \
 		 _T("\"desc\":{\"type\":\"boolean\",\"optional\":true},") \
 		 _T("\"incDel\":{\"type\":\"boolean\",\"optional\":true},") \
 		 _T("\"limit\":{\"type\":\"integer\",\"optional\":true,\"minimum\":0,\"maximum\":500},") \

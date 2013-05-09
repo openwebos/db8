@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -85,7 +86,12 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 	// override limit and sort since we need to retrieve everything
 	// and sort before re-imposing limit
 	m_limit = query.limit();
-	m_orderProp = query.order();
+	m_distinct = query.distinct();
+	if (!m_distinct.empty()) {
+		m_orderProp = m_distinct;
+	} else {
+		m_orderProp = query.order();
+	}
 	m_query.limit(MaxResults);
 	err = m_query.order(_T(""));
 	MojErrCheck(err);
@@ -116,6 +122,10 @@ MojErr MojDbSearchCursor::load()
 	if (!m_orderProp.empty()) {
 		err = sort();
 		MojErrCheck(err);
+	}
+	// distinct
+	if (!m_distinct.empty()) {
+		distinct();
 	}
 	// reverse for desc
 	if (m_query.desc()) {
@@ -204,7 +214,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 			warns++;
 			continue;
 		}
-		
+
 		MojErrCheck(err);
 		if (found) {
 			// get object from item
@@ -221,7 +231,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 			MojErrCheck(err);
 		}
 	}
-	if (warns > 0) 
+	if (warns > 0)
 		MojLogWarning(MojDb::s_log, _T("Search warnings: %d \n"), warns);
 	return MojErrNone;
 }
@@ -237,13 +247,13 @@ MojErr MojDbSearchCursor::sort()
 	// TODO: use real locale
 	//MojErr err = collator->init(_T(""), MojDbCollationPrimary);
     MojErr err = MojErrNone;
-    
-    if(m_dbIndex) 
+
+    if(m_dbIndex)
        err = collator->init(m_dbIndex->locale(), MojDbCollationPrimary);
-    else 
+    else
        err = collator->init(m_locale, MojDbCollationPrimary);
     MojErrCheck(err);
-    
+
 	MojDbPropExtractor extractor;
 	extractor.collator(collator.get());
 	err = extractor.prop(m_orderProp);
@@ -267,3 +277,23 @@ MojErr MojDbSearchCursor::sort()
 
 	return MojErrNone;
 }
+
+MojErr MojDbSearchCursor::distinct()
+{
+	MojAssert(!m_items.empty());
+
+	ItemComp itemComp;
+	int idx = 0;
+	int itemSize = m_items.size();
+	while(idx < itemSize-1) {
+		if(itemComp(m_items[idx],m_items[idx+1]) == 0) {
+			m_items.erase(idx+1);
+			itemSize = m_items.size();
+		} else {
+			idx++;
+		}
+	}
+
+	return MojErrNone;
+}
+

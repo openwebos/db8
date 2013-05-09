@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -93,6 +94,7 @@ public:
 	static const MojChar* const WhereKey;
 	static const MojChar* const FilterKey;
 	static const MojChar* const OrderByKey;
+	static const MojChar* const DistinctKey;
 	static const MojChar* const DescKey;
 	static const MojChar* const IncludeDeletedKey;
 	static const MojChar* const LimitKey;
@@ -117,6 +119,7 @@ public:
 	MojErr where(const MojChar* propName, CompOp op, const MojObject& val, MojDbCollationStrength coll = MojDbCollationInvalid);
 	MojErr filter(const MojChar* propName, CompOp op, const MojObject& val);
 	MojErr order(const MojChar* propName);
+	MojErr distinct(const MojChar* distinct);
 	MojErr includeDeleted(bool val = true);
 	void desc(bool val) { m_desc = val; }
 	void limit(MojUInt32 numResults) { m_limit = numResults; }
@@ -129,6 +132,7 @@ public:
 	const WhereMap& where() const { return m_whereClauses; }
 	const WhereMap& filter() const { return m_filterClauses; }
 	const MojString& order() const { return m_orderProp; }
+	const MojString& distinct() const { return m_distinct; }
 	const Page& page() const { return m_page; }
 	bool desc() const { return m_desc; }
 	MojUInt32 limit() const { return m_limit; }
@@ -164,6 +168,7 @@ private:
 	WhereMap m_filterClauses;
 	Page m_page;
 	MojString m_orderProp;
+	MojString m_distinct;
 	MojUInt32 m_limit;
 	bool m_desc;
 

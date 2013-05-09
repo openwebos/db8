@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*  Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -56,9 +57,11 @@ private:
 	MojErr loadIds(ObjectSet& idsOut);
 	MojErr loadObjects(const ObjectSet& ids);
 	MojErr sort();
+	MojErr distinct();
 
 	ItemVec m_items;
 	MojString m_orderProp;
+	MojString m_distinct;
 	MojUInt32 m_limit;
 	ItemVec::ConstIterator m_pos;
 	ItemVec::ConstIterator m_limitPos;

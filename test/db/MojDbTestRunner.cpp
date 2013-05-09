@@ -35,6 +35,7 @@
 #include "MojDbRevTest.h"
 #include "MojDbRevisionSetTest.h"
 #include "MojDbSearchTest.h"
+#include "MojDbDistinctTest.h"
 #include "MojDbTextCollatorTest.h"
 #include "MojDbTextTokenizerTest.h"
 #include "MojDbWatchTest.h"
@@ -56,7 +57,7 @@ int main(int argc, char** argv)
 #elif MOJ_USE_LDB
    MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
 #endif
-    
+
 	return runner.main(argc, argv);
 }
 
@@ -77,6 +78,7 @@ void MojDbTestRunner::runTests()
 	test(MojDbRevTest());
 	test(MojDbRevisionSetTest());
 	test(MojDbSearchTest());
+	test(MojDbDistinctTest());
 	test(MojDbTextCollatorTest());
 	test(MojDbTextTokenizerTest());
 	test(MojDbWatchTest());

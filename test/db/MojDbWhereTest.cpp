@@ -40,6 +40,7 @@ MojDbWhereTest::MojDbWhereTest()
 
 MojErr MojDbWhereTest::run()
 {
+	MojByte success = 1;
 	MojDb db;
 
 	// open
@@ -104,6 +105,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* 2 columns test
@@ -139,6 +141,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (2) where:[{data2 = 1000},{data1 = 2000}]
@@ -172,6 +175,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (3) where:[{data1 <= 1000},{data2 = 2000}]
@@ -205,6 +209,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (4) where:[{data2 <= 1000},{data1 = 2000}]
@@ -238,6 +243,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (5) where:[{data1 <= 1000},{data2 <= 2000}]
@@ -271,6 +277,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* 3 columns test
@@ -308,6 +315,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (2) where:[{data1 < 1000},{data2 = 2000},{data3 = 3000}]
@@ -343,6 +351,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (3) where:[{data1 = 1000},{data2 < 2000},{data3 = 3000}]
@@ -378,6 +387,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (4) where:[{data1 = 1000},{data2 = 2000},{data3 < 3000}]
@@ -413,6 +423,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (5) where:[{data1 < 1000},{data2 = 2000},{data3 < 3000}]
@@ -448,6 +459,7 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	/* (6) where:[{data1 < 1000},{data2 < 2000},{data3 < 3000}]
@@ -483,12 +495,13 @@ MojErr MojDbWhereTest::run()
 	{
 		err = displayMessage(_T("FAILED\n"));
 		MojErrCheck(err);
+		success = 0;
 	}
 
 	err = db.close();
 	MojTestErrCheck(err);
 
-	return MojErrNone;
+	return (success == 1) ? MojErrNone : MojErrTestFailed;
 }
 
 MojErr MojDbWhereTest::displayMessage(const MojChar* format, ...)

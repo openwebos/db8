@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 
 void MojDbTestRunner::runTests()
 {
-	test(MojDbWhereTest());
 	test(MojDbBulkTest());
 	test(MojDbConcurrencyTest());
 	test(MojDbCrudTest());
@@ -81,4 +80,5 @@ void MojDbTestRunner::runTests()
 	test(MojDbTextCollatorTest());
 	test(MojDbTextTokenizerTest());
 	test(MojDbWatchTest());
+    test(MojDbWhereTest());
 }

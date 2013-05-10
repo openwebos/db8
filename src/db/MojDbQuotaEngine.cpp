@@ -313,6 +313,7 @@ MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, MojInt64 offset, M
 	MojErrCheck(err);
 	if (item.get()) {
 		MojInt64 newUsage = offset + usage;
+
 		MojAssert(newUsage >= 0);
 		MojObject newVal(newUsage);
 		MojBuffer buf;

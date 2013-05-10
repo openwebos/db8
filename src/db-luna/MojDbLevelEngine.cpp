@@ -20,6 +20,7 @@
 #include "db-luna/MojDbLevelEngine.h"
 #include "db-luna/MojDbLevelFactory.h"
 #include "db-luna/MojDbLevelQuery.h"
+#include "MojDbLevelSeq.h"
 #include "db/MojDbObjectHeader.h"
 #include "db/MojDbQueryPlan.h"
 #include "db/MojDb.h"
@@ -41,7 +42,7 @@ MojLogger MojDbLevelEngine::s_log(_T("db.ldb"));
 static const MojChar* const MojEnvIndexDbName = _T("indexes.ldb");
 static const MojChar* const MojEnvSeqDbName = _T("seq.ldb");
 
-const MojChar* const MojDbLevelEnv::LockFileName = _T("_lock");
+const MojChar* const MojDbLevelEnv::LockFileName = _T("_ldblock");
 
 
 MojDbLevelCursor::MojDbLevelCursor()
@@ -300,6 +301,7 @@ MojErr MojDbLevelDatabase::close()
 
 MojErr MojDbLevelDatabase::drop(MojDbStorageTxn* txn)
 {
+    // TODO: implement this
     return MojErrNone;
 }
 
@@ -623,9 +625,7 @@ MojErr MojDbLevelEnv::configure(const MojObject& conf)
 
 MojErr MojDbLevelEnv::open(const MojChar* dir)
 {
-    lockDir(dir);
-
-    return MojErrNone;
+    return lockDir(dir);
 }
 
 MojErr MojDbLevelEnv::close()
@@ -1260,112 +1260,3 @@ void MojDbLevelItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
     m_slice = leveldb::Slice( (const char *)bytes, size);
     m_header.reader().data(bytes, size);
 }
-
-/////////////////////////////MojDbLevelSeq//////////////////////////////////////////////////////
-
-// at this point it's just a placeholder
-MojDbLevelSeq::~MojDbLevelSeq()
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-    MojErr err = close();
-    MojErrCatchAll(err);
-}
-
-MojErr MojDbLevelSeq::open(const MojChar* name, MojDbLevelDatabase* db)
-{
-    MojAssert(db);
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-    //MojAssert(!m_seq);
-    MojErr err;
-
-    m_db = db;
-    err = m_key.fromBytes(reinterpret_cast<const MojByte  *>(name), strlen(name));
-    MojErrCheck(err);
-
-    MojDbLevelItem val;
-    bool found = false;
-    err = m_db->get(m_key, NULL, false, val, found);
-    MojErrCheck(err);
-
-    if (found)
-    {
-        MojObject valObj;
-        err = val.toObject(valObj);
-        MojErrCheck(err);
-        m_next = valObj.intValue();
-    }
-    else
-    {
-        m_next = 0;
-    }
-
-    m_allocated = m_next;
-
-    return MojErrNone;
-}
-
-MojErr MojDbLevelSeq::close()
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-    return store(m_next);
-}
-
-MojErr MojDbLevelSeq::get(MojInt64& valOut)
-{
-    MojLogTrace(MojDbLevelEngine::s_log);
-
-    if (m_next == m_allocated)
-    {
-        MojErr err = MojDbLevelSeq::allocateMore();
-        MojErrCheck(err);
-        MojAssert(m_allocated > m_next);
-    }
-    valOut = m_next++;
-
-    return MojErrNone;
-}
-
-MojErr MojDbLevelSeq::allocateMore()
-{
-    return store(m_allocated + 100);
-}
-
-MojErr MojDbLevelSeq::store(MojInt64 next)
-{
-    MojAssert( next >= m_next );
-    MojErr err;
-    MojDbLevelItem val;
-
-#ifdef MOJ_DEBUG
-    // ensure that our state is consistent with db
-    bool found = false;
-    err = m_db->get(m_key, NULL, false, val, found);
-    MojErrCheck(err);
-
-    if (found)
-    {
-        MojObject valObj;
-        err = val.toObject(valObj);
-        MojErrCheck(err);
-        if (m_allocated != valObj.intValue()) return MojErrDbInconsistentIndex;
-    }
-    else
-    {
-        if (m_allocated != 0) return MojErrDbInconsistentIndex;
-    }
-
-#endif
-
-    err = val.fromObject(next);
-    MojErrCheck(err);
-    err = m_db->put(m_key, val, NULL, false);
-    MojErrCheck(err);
-    m_allocated = next;
-
-    return MojErrNone;
-}
-
-///////////////////////////////////////////////////////////////////////////////////

@@ -69,6 +69,7 @@ elseif (WEBOS_DB8_BACKEND STREQUAL "leveldb")
         src/db-luna/MojDbLevelFactory.cpp
         src/db-luna/MojDbLevelQuery.cpp
         src/db-luna/MojDbLevelTxn.cpp
+        src/db-luna/MojDbLevelSeq.cpp
    )
 
     set (DB_BACKEND_WRAPPER_CFLAGS "-DMOJ_USE_LDB")

@@ -24,7 +24,9 @@
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyEngine.h"
 #elif MOJ_USE_LDB
-#include "db-luna/MojDbLevelEngine.h"
+#include "db-luna/leveldb/MojDbLevelEngine.h"
+#else 
+#error "Specify database engine"
 #endif
 
 #include "MojDbTestStorageEngine.h"
@@ -176,7 +178,7 @@ MojErr MojDbKindTest::run()
 	MojTestErrCheck(err);
 	err = testReparent();
 	MojTestErrCheck(err);
-/*	err = testPutKindWithPermissions();
+	/*err = testPutKindWithPermissions();
 	MojTestErrCheck(err);
 	err = testDelKindWithPermissions();
 	MojTestErrCheck(err);

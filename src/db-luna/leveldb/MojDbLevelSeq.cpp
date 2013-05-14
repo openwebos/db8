@@ -16,7 +16,9 @@
 *
 * LICENSE@@@ */
 
-#include "MojDbLevelSeq.h"
+#include "db-luna/leveldb/MojDbLevelSeq.h"
+#include "db-luna/leveldb/MojDbLevelDatabase.h"
+#include "db-luna/leveldb/MojDbLevelEngine.h"
 
 // at this point it's just a placeholder
 MojDbLevelSeq::~MojDbLevelSeq()

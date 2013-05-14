@@ -17,9 +17,10 @@
 *
 * LICENSE@@@ */
 
-
-#include "db-luna/MojDbLevelQuery.h"
-#include "db-luna/MojDbLevelEngine.h"
+#include "db-luna/leveldb/MojDbLevelDatabase.h"
+#include "db-luna/leveldb/MojDbLevelQuery.h"
+#include "db-luna/leveldb/MojDbLevelEngine.h"
+#include "db-luna/leveldb/MojDbLevelCursor.h"
 #include "db/MojDbQueryPlan.h"
 #include "core/MojObjectSerialization.h"
 

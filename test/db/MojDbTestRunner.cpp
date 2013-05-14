@@ -43,7 +43,9 @@
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
 #elif MOJ_USE_LDB
-#include "db-luna/MojDbLevelFactory.h"
+#include "db-luna/leveldb/MojDbLevelFactory.h"
+#else
+#error "Database Engine doesn't set. See README.txt"
 #endif
 
 const MojChar* const MojDbTestDir = _T("mojodb-test-dir");

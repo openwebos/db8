@@ -19,7 +19,8 @@
 #ifndef MOJDBLEVELSEQ_H_
 #define MOJDBLEVELSEQ_H_
 
-#include "db-luna/MojDbLevelEngine.h"
+#include "db-luna/leveldb/MojDbLevelDatabase.h"
+#include "db-luna/leveldb/MojDbLevelItem.h"
 
 class MojDbLevelSeq : public MojDbStorageSeq
 {

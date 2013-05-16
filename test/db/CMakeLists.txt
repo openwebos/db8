@@ -64,6 +64,7 @@ install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_core DESTINATION ${WEBOS_IN
 set (DB_PERF_TEST_SOURCES
      MojDbPerfTestRunner.cpp
      MojDbPerfTest.cpp
+     MojDbPerfIndexTest.cpp
      MojDbPerfCreateTest.cpp
      MojDbPerfDeleteTest.cpp
      MojDbPerfReadTest.cpp

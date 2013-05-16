@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -22,6 +23,8 @@
 #include "MojDbPerfReadTest.h"
 #include "MojDbPerfUpdateTest.h"
 #include "MojDbPerfDeleteTest.h"
+#include "MojDbPerfIndexTest.h"
+
 
 const MojChar* const MojDbTestDir = _T("mojodb-test-dir");
 
@@ -33,6 +36,7 @@ int main(int argc, char** argv)
 
 void MojDbPerfTestRunner::runTests()
 {
+	test(MojDbPerfIndexTest());
 	test(MojDbPerfCreateTest());
 	test(MojDbPerfReadTest());
 	test(MojDbPerfUpdateTest());

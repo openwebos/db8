@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ MojErr MojDbLevelCursor::del()
     if(m_it->Valid())
     {
         leveldb::Slice key = m_it->key();
-        const size_t recSize = key.size() + m_it->value().size();
+        const size_t delSize = recSize();
 
         //m_it->Next(); - not clear if we need it here
         if(m_txn)
@@ -80,7 +80,7 @@ MojErr MojDbLevelCursor::del()
             MojDbLevelAbstractTxn *txn = static_cast<MojDbLevelAbstractTxn *>(m_txn);
             txn->tableTxn(m_db).Delete(key);
 
-            MojErr err = m_txn->offsetQuota(-(MojInt64) recSize);
+            MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
             MojErrCheck(err);
         }
         else
@@ -196,11 +196,18 @@ MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, 
             break;
         ++count;
         // debug code for verifying index keys
-        size += m_it->key().size() + m_it->value().size();
+        size += recSize();
         m_it->Next();
     }
     sizeOut = size;
     countOut = count;
 
     return MojErrNone;
+}
+
+size_t MojDbLevelCursor::recSize() const
+{
+    if (!m_it->Valid())
+        return 0;
+    return m_it->key().size() + m_it->value().size();
 }

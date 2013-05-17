@@ -22,11 +22,13 @@
 #include "db-luna/leveldb/MojDbLevelTxn.h"
 #include "db-luna/leveldb/MojDbLevelItem.h"
 #include "db-luna/leveldb/defs.h"
+#include "db-luna/leveldb/MojDbLevelTxnIterator.h"
 
 MojDbLevelCursor::MojDbLevelCursor() :
     m_db(0),
     m_txn(0),
-    m_ttxn(0)
+    m_ttxn(0),
+    m_txnIt(0)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 }
@@ -42,18 +44,20 @@ MojDbLevelCursor::~MojDbLevelCursor()
 MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert( !m_it.get() );
+    MojAssert( !m_txnIt );
     MojAssert(db && txn);
     MojAssert(db->impl());
     MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
 
     m_db = db->impl();
-    m_it.reset(new MojDbLevelIterator(m_db));
-    MojLdbErrCheck((*m_it)->status(), _T("db->cursor"));
 
     m_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
     m_ttxn = & m_txn->tableTxn(m_db);
+    m_txnIt = m_ttxn->iterator();
+    MojAssert( m_txnIt );
     m_warnCount = 0;
+
+    m_txnIt->first();
 
     return MojErrNone;
 }
@@ -62,7 +66,7 @@ MojErr MojDbLevelCursor::close()
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    m_it.reset();
+    m_txnIt = 0;
     m_txn = 0;
     m_ttxn = 0;
     return MojErrNone;
@@ -70,88 +74,84 @@ MojErr MojDbLevelCursor::close()
 
 MojErr MojDbLevelCursor::del()
 {
-    MojAssert( m_it.get() );
-    MojAssert( m_txn && m_ttxn );
     MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(m_txn) );
+    MojAssert( m_txn && m_ttxn );
+    MojAssert(m_txnIt);
 
-    leveldb::Slice key = (*m_it)->key();
+    std::string key = m_txnIt->getKey();
     const size_t delSize = recSize();
 
-    //m_it->Next(); - not clear if we need it here
     m_ttxn->Delete(key);
-
     MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
     MojErrCheck(err);
+
     return MojErrNone;
 }
 
 
 MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 {
-    MojAssert( m_it.get() );
+    MojAssert(m_txnIt);
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem key;
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
 
-    m_it->toFirst();
-    m_it->seek(key.impl()->ToString());
-    while (m_it->isValid() && (*m_it)->key().starts_with(*key.impl()))
-    {
+    const std::string& searchKey = (*key.impl()).ToString();
+    m_txnIt->seek(searchKey);
+
+    if (!m_txnIt->isValid()) {
+        return MojErrNone;
+    }
+
+    while (m_txnIt->isValid() && m_txnIt->keyStartsWith(searchKey)) {
         err = del();
         MojErrCheck(err);
-        MojLdbErrCheck((*m_it)->status(), _T("lbb->delPrefix"));
-        ++(*m_it);
+        m_txnIt->next();
     }
     return MojErrNone;
 }
 
 MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags)
 {
-    MojAssert( m_it.get() );
+    MojAssert(m_txnIt);
     MojLogTrace(MojDbLevelEngine::s_log);
+
+    const std::string& lkey = key.impl()->ToString();
 
     foundOut = false;
     switch (flags)
     {
     case e_Set:
-        // TODO: skip deleted inside transaction
-        m_it->seek(key.impl()->ToString());
+        m_txnIt->seek(lkey);
     break;
 
     case e_Next:
-        MojAssert( !m_it->isEnd() );
-        ++(*m_it);
+        m_txnIt->next();
     break;
     case e_Prev:
-        MojAssert( !m_it->isBegin() );
-        --(*m_it);
+        m_txnIt->prev();
     break;
     case e_First:
-        m_it->toFirst();
+        m_txnIt->first();
     break;
     case e_Last:
-        m_it->toLast();
+        m_txnIt->last();
     break;
     default:
     break;
     }
 
-    if(m_it->isValid() )
+    if(m_txnIt->isValid())
     {
         foundOut = true;
-        val.from((*m_it)->value());
-        key.from((*m_it)->key());
-    }
+        key.from(m_txnIt->getKey());
+        val.from(m_txnIt->getValue());
 
-    MojLdbErrCheck((*m_it)->status(), _T("lbb->get"));
-
-    if (!m_it->isValid())
-    {
-        m_it->toLast();
-        MojLdbErrCheck((*m_it)->status(), _T("lbb->get"));
+    } else {
+        MojLogInfo(MojDbLevelEngine::s_log, _T("Transaction is not okey. Get return Not Foun"));
+        MojLdbErrCheck(m_txnIt->status(), _T("lbb->get"));
     }
 
     return MojErrNone;
@@ -159,6 +159,8 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
 
 MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
+    MojAssert(m_txnIt);
+    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
     MojLogInfo(MojDbLevelEngine::s_log, _T("ldbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
@@ -169,28 +171,28 @@ MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 
 MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
 {
+    MojAssert(m_txnIt);
+    MojLogTrace(MojDbLevelEngine::s_log);
+
     countOut = 0;
     sizeOut = 0;
-    m_warnCount = 0;    // debug
+
     MojDbLevelItem val;
     MojDbLevelItem key;
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
 
-    m_it->toFirst();
-
     MojSize count = 0;
     MojSize size = 0;
     MojErrCheck(err);
 
-    for (m_it->seek(key.impl()->ToString()); m_it->isValid(); ++(*m_it))
-    {
-        if((*m_it)->key().starts_with(*key.impl()) == false)
-            break;
+    const std::string& searchKey = key.impl()->ToString();
+    m_txnIt->seek(searchKey);
+
+    while (m_txnIt->isValid() && m_txnIt->keyStartsWith(searchKey)) {
         ++count;
-        // debug code for verifying index keys
         size += recSize();
-        ++(*m_it);
+        m_txnIt->next();
     }
     sizeOut = size;
     countOut = count;
@@ -200,7 +202,7 @@ MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, 
 
 size_t MojDbLevelCursor::recSize() const
 {
-    if (!m_it->isValid())
+    if (!m_txnIt->isValid())
         return 0;
-    return (*m_it)->key().size() + (*m_it)->value().size();
+    return m_txnIt->getKey().size() + m_txnIt->getValue().size();
 }

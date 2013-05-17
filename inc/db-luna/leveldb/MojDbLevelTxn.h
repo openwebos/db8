@@ -32,6 +32,8 @@
 #include <core/MojErr.h>
 #include <db/MojDbStorageEngine.h>
 
+#include <auto_ptr.h>
+
 namespace leveldb
 {
     class DB;
@@ -39,6 +41,7 @@ namespace leveldb
 
 class MojDbLevelEngine;
 class MojDbLevelTableTxn;
+class MojDbLevelTxnIterator;
 
 class MojDbLevelAbstractTxn : public MojDbStorageTxn
 {
@@ -50,11 +53,8 @@ public:
 class MojDbLevelTableTxn
 {
 public:
-    MojDbLevelTableTxn() : m_db(NULL)
-    {}
-
-    ~MojDbLevelTableTxn()
-    { if (m_db) abort(); }
+    MojDbLevelTableTxn();
+    ~MojDbLevelTableTxn();
 
     MojErr begin(
             leveldb::DB* db,
@@ -68,6 +68,7 @@ public:
 
     MojDbLevelTableTxn &tableTxn(leveldb::DB *db);
 
+    // operations
     void Put(const leveldb::Slice& key,
             const leveldb::Slice& val);
 
@@ -75,6 +76,7 @@ public:
                         std::string& val);
 
     void Delete(const leveldb::Slice& key);
+    MojDbLevelTxnIterator* iterator() { return m_transaction.get(); }
 
     MojErr commitImpl();
 
@@ -90,6 +92,9 @@ private:
     typedef std::set<std::string> PendingDeletes;
     PendingValues m_pendingValues;
     PendingDeletes m_pendingDeletes;
+    std::auto_ptr<MojDbLevelTxnIterator> m_transaction;       // holder of data
+
+    friend class MojDbLevelTxnIterator;
 };
 
 class MojDbLevelEnvTxn : public MojDbLevelAbstractTxn

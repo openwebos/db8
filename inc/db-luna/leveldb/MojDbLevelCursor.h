@@ -31,6 +31,7 @@ class MojDbLevelItem;
 
 class MojDbLevelAbstractTxn;
 class MojDbLevelTableTxn;
+class MojDbLevelTxnIterator;
 
 class MojDbLevelCursor : public MojNoCopy
 {
@@ -56,7 +57,7 @@ private:
     leveldb::DB* m_db;
     MojDbLevelAbstractTxn* m_txn;
     MojDbLevelTableTxn* m_ttxn;
-    std::auto_ptr<MojDbLevelIterator> m_it;
+    MojDbLevelTxnIterator* m_txnIt;
 
     MojSize m_warnCount;
 };

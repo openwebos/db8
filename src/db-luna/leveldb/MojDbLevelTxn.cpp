@@ -19,6 +19,17 @@
 #include "db-luna/leveldb/MojDbLevelEngine.h"
 #include "db-luna/leveldb/MojDbLevelTxn.h"
 #include "db-luna/leveldb/defs.h"
+#include "db-luna/leveldb/MojDbLevelTxnIterator.h"
+
+MojDbLevelTableTxn::MojDbLevelTableTxn() : m_db(NULL)
+{
+}
+
+MojDbLevelTableTxn::~MojDbLevelTableTxn()
+{
+    if (m_db)
+        abort();
+}
 
 // class MojDbLevelTableTxn
 MojErr MojDbLevelTableTxn::begin(
@@ -26,14 +37,20 @@ MojErr MojDbLevelTableTxn::begin(
             const leveldb::WriteOptions& options /* = leveldb::WriteOptions() */
             )
 {
+    MojAssert(db);
+
     // TODO: mutex and lock-file serialization
     m_db = db;
     m_writeOptions = options;
+    m_transaction.reset(new MojDbLevelTxnIterator(this));
+
     return MojErrNone;
 }
 
 MojErr MojDbLevelTableTxn::abort()
 {
+    MojAssert( m_db ); // database should exist
+
     cleanup();
     return MojErrNone;
 }
@@ -88,11 +105,13 @@ void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
 
     // XXX: work around for delete by query
     // make this delete visible to cursors
-    m_db->Delete(m_writeOptions, key);
+    //m_db->Delete(m_writeOptions, key);
 }
 
 MojErr MojDbLevelTableTxn::commitImpl()
 {
+    m_transaction->save();
+
     leveldb::WriteBatch writeBatch;
 
     for (PendingDeletes::iterator it = m_pendingDeletes.begin(); it != m_pendingDeletes.end(); ++it) {
@@ -107,6 +126,8 @@ MojErr MojDbLevelTableTxn::commitImpl()
     MojLdbErrCheck(s, _T("db->Write"));
 
     cleanup();
+
+    m_transaction->restore();
 
     return MojErrNone;
 }

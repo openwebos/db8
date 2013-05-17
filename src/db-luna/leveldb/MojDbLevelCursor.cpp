@@ -24,7 +24,7 @@
 #include "db-luna/leveldb/defs.h"
 
 MojDbLevelCursor::MojDbLevelCursor() :
-    m_it(0),
+    m_db(0),
     m_txn(0),
     m_ttxn(0)
 {
@@ -42,14 +42,14 @@ MojDbLevelCursor::~MojDbLevelCursor()
 MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert(!m_it);
+    MojAssert( !m_it.get() );
     MojAssert(db && txn);
     MojAssert(db->impl());
     MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
 
     m_db = db->impl();
-    m_it = m_db->NewIterator(leveldb::ReadOptions());
-    MojLdbErrCheck(m_it->status(), _T("db->cursor"));
+    m_it.reset(new MojDbLevelIterator(m_db));
+    MojLdbErrCheck((*m_it)->status(), _T("db->cursor"));
 
     m_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
     m_ttxn = & m_txn->tableTxn(m_db);
@@ -62,10 +62,7 @@ MojErr MojDbLevelCursor::close()
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    if (m_it) {
-        delete m_it;
-        m_it = NULL;
-    }
+    m_it.reset();
     m_txn = 0;
     m_ttxn = 0;
     return MojErrNone;
@@ -73,51 +70,47 @@ MojErr MojDbLevelCursor::close()
 
 MojErr MojDbLevelCursor::del()
 {
-    MojAssert(m_it);
+    MojAssert( m_it.get() );
     MojAssert( m_txn && m_ttxn );
     MojLogTrace(MojDbLevelEngine::s_log);
+    MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(m_txn) );
 
-    if(m_it->Valid())
-    {
-        leveldb::Slice key = m_it->key();
-        const size_t delSize = recSize();
+    leveldb::Slice key = (*m_it)->key();
+    const size_t delSize = recSize();
 
-        //m_it->Next(); - not clear if we need it here
-        m_ttxn->Delete(key);
+    //m_it->Next(); - not clear if we need it here
+    m_ttxn->Delete(key);
 
-        MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
-        MojErrCheck(err);
-    }
-
+    MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
+    MojErrCheck(err);
     return MojErrNone;
 }
 
 
 MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 {
-    MojAssert(m_it);
+    MojAssert( m_it.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem key;
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
-    leveldb::Iterator * it = m_it;
 
-    it->SeekToFirst();
-    it->Seek(*key.impl());
-    while (it->Valid() && it->key().starts_with(*key.impl()))
+    m_it->toFirst();
+    m_it->seek(key.impl()->ToString());
+    while (m_it->isValid() && (*m_it)->key().starts_with(*key.impl()))
     {
         err = del();
         MojErrCheck(err);
-        MojLdbErrCheck(it->status(), _T("lbb->delPrefix"));
-        it->Next();
+        MojLdbErrCheck((*m_it)->status(), _T("lbb->delPrefix"));
+        ++(*m_it);
     }
     return MojErrNone;
 }
 
 MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags)
 {
-    MojAssert(m_it);
+    MojAssert( m_it.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     foundOut = false;
@@ -125,40 +118,40 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
     {
     case e_Set:
         // TODO: skip deleted inside transaction
-        m_it->Seek(*key.impl());
+        m_it->seek(key.impl()->ToString());
     break;
 
     case e_Next:
-        MojAssert(m_it->Valid());
-        m_it->Next();
+        MojAssert( !m_it->isEnd() );
+        ++(*m_it);
     break;
     case e_Prev:
-        MojAssert(m_it->Valid());
-        m_it->Prev();
+        MojAssert( !m_it->isBegin() );
+        --(*m_it);
     break;
     case e_First:
-        m_it->SeekToFirst();
+        m_it->toFirst();
     break;
     case e_Last:
-        m_it->SeekToLast();
+        m_it->toLast();
     break;
     default:
     break;
     }
 
-    if(m_it->Valid() )
+    if(m_it->isValid() )
     {
         foundOut = true;
-        val.from(m_it->value());
-        key.from(m_it->key());
+        val.from((*m_it)->value());
+        key.from((*m_it)->key());
     }
 
-    MojLdbErrCheck(m_it->status(), _T("lbb->get"));
+    MojLdbErrCheck((*m_it)->status(), _T("lbb->get"));
 
-    if (!m_it->Valid())
+    if (!m_it->isValid())
     {
-        m_it->SeekToLast();
-        MojLdbErrCheck(m_it->status(), _T("lbb->get"));
+        m_it->toLast();
+        MojLdbErrCheck((*m_it)->status(), _T("lbb->get"));
     }
 
     return MojErrNone;
@@ -184,20 +177,20 @@ MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, 
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
 
-    m_it->SeekToFirst();
+    m_it->toFirst();
 
     MojSize count = 0;
     MojSize size = 0;
     MojErrCheck(err);
 
-    for (m_it->Seek(*key.impl()); m_it->Valid(); m_it->Next())
+    for (m_it->seek(key.impl()->ToString()); m_it->isValid(); ++(*m_it))
     {
-        if(m_it->key().starts_with(*key.impl()) == false)
+        if((*m_it)->key().starts_with(*key.impl()) == false)
             break;
         ++count;
         // debug code for verifying index keys
         size += recSize();
-        m_it->Next();
+        ++(*m_it);
     }
     sizeOut = size;
     countOut = count;
@@ -207,7 +200,7 @@ MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, 
 
 size_t MojDbLevelCursor::recSize() const
 {
-    if (!m_it->Valid())
+    if (!m_it->isValid())
         return 0;
-    return m_it->key().size() + m_it->value().size();
+    return (*m_it)->key().size() + (*m_it)->value().size();
 }

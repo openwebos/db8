@@ -19,8 +19,12 @@
 #ifndef MOJDBLEVELCURSOR_H
 #define MOJDBLEVELCURSOR_H
 
+#include <auto_ptr.h>
+
 #include "leveldb/db.h"
 #include "db/MojDbDefs.h"
+
+#include <db-luna/leveldb/MojDbLevelIterator.h>
 
 class MojDbLevelDatabase;
 class MojDbLevelItem;
@@ -42,8 +46,6 @@ public:
     MojErr stats(MojSize& countOut, MojSize& sizeOut);
     MojErr statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut);
 
-    leveldb::Iterator* impl() { return m_it; }
-
     enum LDB_FLAGS
     {
        e_First = 0, e_Last, e_Next, e_Prev, e_Range, e_Set, e_TotalFlags
@@ -51,10 +53,10 @@ public:
     size_t recSize() const;
 
 private:
-    leveldb::Iterator* m_it;
     leveldb::DB* m_db;
     MojDbLevelAbstractTxn* m_txn;
     MojDbLevelTableTxn* m_ttxn;
+    std::auto_ptr<MojDbLevelIterator> m_it;
 
     MojSize m_warnCount;
 };

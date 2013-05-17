@@ -1,6 +1,7 @@
 # @@@LICENSE
 #
 # Copyright (c) 2013 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2013 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,6 +76,7 @@ elseif (WEBOS_DB8_BACKEND STREQUAL "leveldb")
         src/db-luna/leveldb/MojDbLevelEnv.cpp
         src/db-luna/leveldb/MojDbLevelIndex.cpp
         src/db-luna/leveldb/MojDbLevelItem.cpp
+        src/db-luna/leveldb/MojDbLevelIterator.cpp
    )
 
     set (DB_BACKEND_WRAPPER_CFLAGS "-DMOJ_USE_LDB")

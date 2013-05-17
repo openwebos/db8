@@ -39,14 +39,19 @@ MojDbLevelCursor::~MojDbLevelCursor()
 
 MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
-    MojAssert(db && txn);
-    MojAssert(!m_it);
     MojLogTrace(MojDbLevelEngine::s_log);
+    MojAssert(!m_it);
+    MojAssert(db && txn);
+    MojAssert(db->impl());
+    MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
 
     m_db = db->impl();
     m_it = m_db->NewIterator(leveldb::ReadOptions());
-    m_txn = txn;
     MojLdbErrCheck(m_it->status(), _T("db->cursor"));
+
+    MojDbLevelAbstractTxn *casted_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
+    m_txn = & casted_txn->tableTxn(m_db);
+    MojAssert( m_txn );
     m_warnCount = 0;
 
     return MojErrNone;
@@ -77,8 +82,7 @@ MojErr MojDbLevelCursor::del()
         //m_it->Next(); - not clear if we need it here
         if(m_txn)
         {
-            MojDbLevelAbstractTxn *txn = static_cast<MojDbLevelAbstractTxn *>(m_txn);
-            txn->tableTxn(m_db).Delete(key);
+            m_txn->Delete(key);
 
             MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
             MojErrCheck(err);
@@ -97,7 +101,7 @@ MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 {
     MojAssert(m_it);
     MojLogTrace(MojDbLevelEngine::s_log);
-    //MojDbLevelItem val;
+
     MojDbLevelItem key;
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);

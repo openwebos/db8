@@ -48,8 +48,6 @@ MojDbLevelTableTxn &MojDbLevelTableTxn::tableTxn(leveldb::DB *db)
 void MojDbLevelTableTxn::Put(const leveldb::Slice& key,
                              const leveldb::Slice& val)
 {
-    m_writeBatch.Put(key, val);
-
     // populate local view
     std::string keyStr = key.ToString();
 
@@ -82,8 +80,6 @@ leveldb::Status MojDbLevelTableTxn::Get(const leveldb::Slice& key,
 
 void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
 {
-    m_writeBatch.Delete(key);
-
     // populate local view
     std::string keyStr = key.ToString();
 
@@ -97,7 +93,17 @@ void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
 
 MojErr MojDbLevelTableTxn::commitImpl()
 {
-    leveldb::Status s = m_db->Write(m_writeOptions, &m_writeBatch);
+    leveldb::WriteBatch writeBatch;
+
+    for (PendingDeletes::iterator it = m_pendingDeletes.begin(); it != m_pendingDeletes.end(); ++it) {
+        writeBatch.Delete(*it);
+    }
+
+    for (PendingValues::iterator it = m_pendingValues.begin(); it != m_pendingValues.end(); ++it) {
+        writeBatch.Put(it->first, it->second);
+    }
+
+    leveldb::Status s = m_db->Write(m_writeOptions, &writeBatch);
     MojLdbErrCheck(s, _T("db->Write"));
 
     cleanup();
@@ -107,7 +113,6 @@ MojErr MojDbLevelTableTxn::commitImpl()
 
 void MojDbLevelTableTxn::cleanup()
 {
-    m_writeBatch.Clear();
     m_db = NULL;
     m_pendingValues.clear();
     m_pendingDeletes.clear();

@@ -81,8 +81,6 @@ private:
 
     void cleanup();
 
-    leveldb::WriteBatch m_writeBatch;
-
     // where and how to write this batch
     leveldb::DB *m_db;
     leveldb::WriteOptions m_writeOptions;

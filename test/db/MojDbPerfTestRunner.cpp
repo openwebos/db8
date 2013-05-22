@@ -36,7 +36,10 @@ int main(int argc, char** argv)
 
 void MojDbPerfTestRunner::runTests()
 {
-	test(MojDbPerfIndexTest());
+#if MOJ_USE_LDB
+    // TODO: GF-4906
+    test(MojDbPerfIndexTest());
+#endif
 	test(MojDbPerfCreateTest());
 	test(MojDbPerfReadTest());
 	test(MojDbPerfUpdateTest());

@@ -41,16 +41,16 @@ public:
 	virtual void cleanup();
 
 private:
-	static const MojUInt32 BatchSize = 50;
-	static const MojUInt32 NumObjects = 4000;
-	static const MojUInt32 NumIterations = 1;
-	static const MojUInt32 NumFullTests = 0; //10;
-	static const MojUInt32 NumKindTests = 0;
-	static const MojUInt32 NumConcurrentTests = 1;
-	static const MojUInt32 NumConcurrentTestPuts = 50000;
-	static const MojUInt32 NumPutKinds = 50;
-	static const MojUInt32 NumBatches = 0;//(NumObjects / NumFullTests) / BatchSize;
-	static const MojUInt32 NumConcurrentPuts = 3;
+	static const guint32 BatchSize = 50;
+	static const guint32 NumObjects = 4000;
+	static const guint32 NumIterations = 1;
+	static const guint32 NumFullTests = 0; //10;
+	static const guint32 NumKindTests = 0;
+	static const guint32 NumConcurrentTests = 1;
+	static const guint32 NumConcurrentTestPuts = 50000;
+	static const guint32 NumPutKinds = 50;
+	static const guint32 NumBatches = 0;//(NumObjects / NumFullTests) / BatchSize;
+	static const guint32 NumConcurrentPuts = 3;
 	static const MojChar* const KindTestKindId;
 	static const MojChar* const KindTestKindGoodJson;
 	static const MojChar* const KindTestKindBadJson;
@@ -62,7 +62,7 @@ private:
 	class TestHandler : public MojSignalHandler
 	{
 	public:
-		TestHandler(MojDbStressTest* test, const MojChar* name, MojUInt32 kindNum);
+		TestHandler(MojDbStressTest* test, const MojChar* name, guint32 kindNum);
 
 		virtual MojErr init();
 		virtual MojErr run() = 0;
@@ -74,13 +74,13 @@ private:
 		MojString m_kindId;
 		MojString m_owner;
 		const MojChar* m_name;
-		MojUInt32 m_kindNum;
+		guint32 m_kindNum;
 	};
 
 	class KindTest : public TestHandler
 	{
 	public:
-		KindTest(MojDbStressTest* test, MojUInt32 kindNum);
+		KindTest(MojDbStressTest* test, guint32 kindNum);
 
 		virtual MojErr run();
 
@@ -101,13 +101,13 @@ private:
 		MojDbClient::Signal::Slot<KindTest> m_putKindGoodSlot;
 		MojDbClient::Signal::Slot<KindTest> m_putKindBad2Slot;
 		MojDbClient::Signal::Slot<KindTest> m_delKindSlot;
-		MojUInt32 m_numPutsRemaining;
+		guint32 m_numPutsRemaining;
 	};
 
 	class FullTest : public TestHandler
 	{
 	public:
-		FullTest(MojDbStressTest* test, MojUInt32 kindNum);
+		FullTest(MojDbStressTest* test, guint32 kindNum);
 
 		virtual MojErr run();
 
@@ -140,13 +140,13 @@ private:
 		MojDbClient::Signal::Slot<FullTest> m_delKindSlot;
 		MojVector<MojDbClient::Signal::Slot<FullTest> > m_putSlots;
 		MojObject m_lastRev;
-		MojUInt32 m_numBatchesRemaining;
+		guint32 m_numBatchesRemaining;
 	};
 
 	class ConcurrentTest : public TestHandler
 	{
 	public:
-		ConcurrentTest(MojDbStressTest* test, MojUInt32 kindNum);
+		ConcurrentTest(MojDbStressTest* test, guint32 kindNum);
 
 		virtual MojErr run();
 
@@ -170,7 +170,7 @@ private:
 		MojErr done();
 
 		MojDbClient::Signal::Slot<ConcurrentTest> m_putKindSlot;
-		MojUInt32 m_numPutsRemaining;
+		guint32 m_numPutsRemaining;
 		bool m_kindPut;
 	};
 
@@ -184,8 +184,8 @@ private:
 	MojAutoPtr<MojGmainReactor> m_reactor;
 	TestVec m_tests;
 	TestVec m_prevTests;
-	MojUInt32 m_numTests;
-	MojUInt32 m_numIterationsRemaining;
+	guint32 m_numTests;
+	guint32 m_numIterationsRemaining;
 };
 
 #endif /* MOJDBSTRESSTEST_H_ */

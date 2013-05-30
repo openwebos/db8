@@ -42,7 +42,7 @@ MojErr MojDbRevisionSet::fromObject(const MojObject& obj)
 	err = obj.getRequired(PropsKey, props);
 	MojErrCheck(err);
 	MojObject propObj;
-	MojSize i = 0;
+	gsize i = 0;
 	while (props.at(i++, propObj)) {
 		err = addProp(propObj);
 		MojErrCheck(err);

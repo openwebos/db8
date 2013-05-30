@@ -61,7 +61,7 @@ MojErr MojObjectBuilder::endArray()
 	return MojObjectBuilder::endObject();
 }
 
-MojErr MojObjectBuilder::propName(const MojChar* name, MojSize len)
+MojErr MojObjectBuilder::propName(const MojChar* name, gsize len)
 {
 	MojErr err = m_propName.assign(name, len);
 	MojErrCheck(err);
@@ -85,7 +85,7 @@ MojErr MojObjectBuilder::boolValue(bool val)
 	return MojErrNone;
 }
 
-MojErr MojObjectBuilder::intValue(MojInt64 val)
+MojErr MojObjectBuilder::intValue(gint64 val)
 {
 	MojErr err = value(val);
 	MojErrCheck(err);
@@ -101,7 +101,7 @@ MojErr MojObjectBuilder::decimalValue(const MojDecimal& val)
 	return MojErrNone;
 }
 
-MojErr MojObjectBuilder::stringValue(const MojChar* val, MojSize len)
+MojErr MojObjectBuilder::stringValue(const MojChar* val, gsize len)
 {
 	MojString str;
 	MojErr err = str.assign(val, len);

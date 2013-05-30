@@ -29,7 +29,7 @@ public:
 	virtual ~MojServiceApp();
 
 protected:
-	MojServiceApp(MojUInt32 majorVersion = MajorVersion, MojUInt32 minorVersion = MinorVersion, const MojChar* versionString = NULL);
+	MojServiceApp(guint32 majorVersion = MajorVersion, guint32 minorVersion = MinorVersion, const MojChar* versionString = NULL);
 	virtual MojErr open();
 	virtual void shutdown();
 	MojErr initPmLog();

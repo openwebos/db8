@@ -29,28 +29,28 @@ public:
 	typedef MojSignal<MojObject&, MojErr> ReplySignal;
 	typedef MojSignal<MojServiceMessage *, MojObject&, MojErr> ExtendedReplySignal;
 
-	typedef MojUInt32 Token;
+	typedef guint32 Token;
 
-	static const MojUInt32 Unlimited = MojUInt32Max;
+	static const guint32 Unlimited = G_MAXUINT32;
 
 	virtual ~MojServiceRequest();
 	virtual MojObjectVisitor& writer() = 0;
 
-	MojUInt32 numReplies() const { return m_numReplies; }
-	MojUInt32 numRepliesExpected() const { return m_numRepliesExpected; }
+	guint32 numReplies() const { return m_numReplies; }
+	guint32 numRepliesExpected() const { return m_numRepliesExpected; }
 	Token token() const { return m_token; }
 
 	/* Simple/original signals */
 	MojErr send(ReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-				MojUInt32 numReplies = 1);
+				guint32 numReplies = 1);
 	MojErr send(ReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-				const MojObject& payload, MojUInt32 numReplies = 1);
+				const MojObject& payload, guint32 numReplies = 1);
 
 	/* Extended signals */
 	MojErr send(ExtendedReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-				MojUInt32 numReplies = 1);
+				guint32 numReplies = 1);
 	MojErr send(ExtendedReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-				const MojObject& payload, MojUInt32 numReplies = 1);
+				const MojObject& payload, guint32 numReplies = 1);
 
 protected:
 	MojServiceRequest(MojService* service);
@@ -63,8 +63,8 @@ private:
 	virtual MojErr handleCancel();
 
 	MojService* m_service;
-	MojUInt32 m_numReplies;
-	MojUInt32 m_numRepliesExpected;
+	guint32 m_numReplies;
+	guint32 m_numRepliesExpected;
 	Token m_token;
 	ReplySignal m_signal;
 	ExtendedReplySignal m_extSignal;

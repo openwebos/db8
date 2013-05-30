@@ -44,7 +44,7 @@ public:
 	MojObjectReader& reader() { return m_reader; }
 
 private:
-	static const MojUInt8 Version = 1;
+	static const guint8 Version = 1;
 
 	MojErr readHeader();
 	MojErr readRev();
@@ -53,7 +53,7 @@ private:
 	MojObjectReader m_reader;
 	MojObject m_id;
 	MojString m_kindId;
-	MojInt64 m_rev;
+	gint64 m_rev;
 	bool m_del;
 	bool m_read;
 };

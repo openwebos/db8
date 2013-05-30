@@ -37,7 +37,7 @@ MojErr MojStringTest::run()
 	const MojChar* const chars3 = _T(" hi there  ");
 	MojAutoArrayPtr<MojChar> bigFormatStr;
 	MojVector<MojString> vec;
-	MojSize idx;
+	gsize idx;
 
 	// empty strings
 	MojErr err = str2.assign(_T(""));
@@ -381,7 +381,7 @@ MojErr MojStringTest::run()
 	MojTestAssert(str2 == _T("520189"));
 
 	// base64
-	MojVector<MojByte> bv;
+	MojVector<guint8> bv;
 	str1.clear();
 	err = str1.base64Encode(bv);
 	MojTestErrCheck(err);
@@ -389,13 +389,13 @@ MojErr MojStringTest::run()
 	err = str1.base64Decode(bv);
 	MojTestErrCheck(err);
 	MojTestAssert(bv.empty());
-	MojByte input[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
+	guint8 input[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
 	err = bv.assign(input, input + sizeof(input));
 	MojTestErrCheck(err);
 	err = str1.base64Encode(bv);
 	MojTestErrCheck(err);
 	MojTestAssert(str1 == _T("4EiR+xZ="));
-	MojVector<MojByte> bv2;
+	MojVector<guint8> bv2;
 	err = str1.base64Decode(bv2);
 	MojTestErrCheck(err);
 	MojTestAssert(bv == bv2);

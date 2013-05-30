@@ -403,10 +403,10 @@ MojErr MojDbClientTest::testMultiPut()
 	MojRefCountedPtr<MojDbClientTestResultHandler> handler(new MojDbClientTestResultHandler);
 	MojAllocCheck(handler.get());
 
-	MojUInt32 count = 10;
+	guint32 count = 10;
 	MojObject::ObjectVec array;
 
-	for (MojSize i = 0; i < count; i++) {
+	for (gsize i = 0; i < count; i++) {
 		MojObject obj;
 
 		err = obj.putString(_T("_kind"), _T("LunaDbClientTest:1"));
@@ -432,7 +432,7 @@ MojErr MojDbClientTest::testMultiPut()
 	MojTestAssert(handler->m_result.get(_T("results"), results));
 
 	MojObject::ConstArrayIterator iter = results.arrayBegin();
-	for (MojSize i = 0; i < count; i++) {
+	for (gsize i = 0; i < count; i++) {
 		MojTestAssert(iter != results.arrayEnd());
 		MojTestAssert(iter->find("id") != iter->end());
 		MojTestAssert(iter->find("rev") != iter->end());
@@ -514,11 +514,11 @@ MojErr MojDbClientTest::testGet()
 
 MojErr MojDbClientTest::testMultiGet()
 {
-	MojUInt32 itemCount = 10;
+	guint32 itemCount = 10;
 	MojErr err = MojErrNone;
 	MojVector<MojObject> ids;
 
-	for (MojUInt32 i = 0; i < itemCount; i++) {
+	for (guint32 i = 0; i < itemCount; i++) {
 		MojObject id;
 		err = writeTestObj(_T("{\"_kind\":\"LunaDbClientTest:1\",\"foo\":\"test_multiget_foo\",\"bar\":\"test_multiget_bar\"})"), &id);
 		MojTestErrCheck(err);
@@ -530,7 +530,7 @@ MojErr MojDbClientTest::testMultiGet()
 	MojAllocCheck(handler.get());
 
 	MojObject::ObjectVec array;
-	for (MojUInt32 i = 0; i < itemCount; i++)
+	for (guint32 i = 0; i < itemCount; i++)
 	{
 		err = array.push(ids.at(i));
 		MojTestErrCheck(err);
@@ -548,7 +548,7 @@ MojErr MojDbClientTest::testMultiGet()
 	MojObject results;
 	MojTestAssert(handler->m_result.get(_T("results"), results));
 
-	MojUInt32 cReceived = 0;
+	guint32 cReceived = 0;
 	for (MojObject::ConstArrayIterator i = results.arrayBegin(); i != results.arrayEnd(); i++) {
 		MojObject id = -1;
 		MojTestAssert(i->get("_id", id));
@@ -625,7 +625,7 @@ MojErr MojDbClientTest::testQueryDel()
 
 	// verify result
 	MojTestErrCheck(handler->m_dbErr);
-	MojInt64 count = -1;
+	gint64 count = -1;
 	MojTestAssert(handler->m_result.get(_T("count"), count));
 	MojTestAssert(count == 1);
 
@@ -634,11 +634,11 @@ MojErr MojDbClientTest::testQueryDel()
 
 MojErr MojDbClientTest::testMultiDel()
 {
-	MojUInt32 itemCount = 10;
+	guint32 itemCount = 10;
 	MojErr err = MojErrNone;
 	MojVector<MojObject> ids;
 
-	for (MojUInt32 i = 0; i < itemCount; i++) {
+	for (guint32 i = 0; i < itemCount; i++) {
 		MojObject id;
 		err = writeTestObj(_T("{\"_kind\":\"LunaDbClientTest:1\",\"foo\":\"test_multidel_foo\",\"bar\":\"test_multidel_\"})"), &id);
 		MojTestErrCheck(err);
@@ -650,7 +650,7 @@ MojErr MojDbClientTest::testMultiDel()
 	MojAllocCheck(handler.get());
 
 	MojObject::ObjectVec array;
-	for (MojUInt32 i = 0; i < itemCount; i++)
+	for (guint32 i = 0; i < itemCount; i++)
 	{
 		MojObject idObj(ids.at(i));
 		err = array.push(idObj);
@@ -670,7 +670,7 @@ MojErr MojDbClientTest::testMultiDel()
 	MojTestAssert(handler->m_result.get(_T("results"), results));
 
 	MojObject::ConstArrayIterator iter = results.arrayBegin();
-	for (MojSize i = 0; i < itemCount; i++) {
+	for (gsize i = 0; i < itemCount; i++) {
 		MojTestAssert(iter != results.arrayEnd());
 		MojTestAssert(iter->find("id") != iter->end());
 		MojTestAssert(iter->find("rev") != iter->end());
@@ -768,7 +768,7 @@ MojErr MojDbClientTest::testQueryMerge()
 
 	// verify result count
 	MojTestErrCheck(handler->m_dbErr);
-	MojInt64 count = -1;
+	gint64 count = -1;
 	MojTestAssert(handler->m_result.get(_T("count"), count));
 	MojTestAssert(count == 1);
 
@@ -786,11 +786,11 @@ MojErr MojDbClientTest::testQueryMerge()
 
 MojErr MojDbClientTest::testMultiMerge()
 {
-	MojUInt32 itemCount = 10;
+	guint32 itemCount = 10;
 	MojErr err = MojErrNone;
 	MojVector<MojObject> ids;
 
-	for (MojUInt32 i = 0; i < itemCount; i++) {
+	for (guint32 i = 0; i < itemCount; i++) {
 		MojObject id;
 		err = writeTestObj(_T("{\"_kind\":\"LunaDbClientTest:1\",\"foo\":\"test_multimerge_foo\",\"bar\":\"test_multimerge_bar\"})"), &id);
 		MojTestErrCheck(err);
@@ -800,7 +800,7 @@ MojErr MojDbClientTest::testMultiMerge()
 
 	// modify select field in each object
 	MojObject::ObjectVec array;
-	for (MojUInt32 i = 0; i < itemCount; i++) {
+	for (guint32 i = 0; i < itemCount; i++) {
 		MojObject obj;
 		err = obj.put(_T("_id"), ids.at(i));
 		MojTestErrCheck(err);
@@ -826,7 +826,7 @@ MojErr MojDbClientTest::testMultiMerge()
 	MojTestAssert(handler->m_result.get(_T("results"), results));
 
 	MojObject::ConstArrayIterator iter = results.arrayBegin();
-	for (MojSize i = 0; i < itemCount; i++) {
+	for (gsize i = 0; i < itemCount; i++) {
 		MojTestAssert(iter != results.arrayEnd());
 		MojTestAssert(iter->find("id") != iter->end());
 		MojTestAssert(iter->find("rev") != iter->end());
@@ -836,7 +836,7 @@ MojErr MojDbClientTest::testMultiMerge()
 	MojTestAssert(iter == results.arrayEnd());
 
 	// verify objects merged
-	for (MojUInt32 i = 0; i < itemCount; i++) {
+	for (guint32 i = 0; i < itemCount; i++) {
 		MojObject objRetrieved;
 		err = this->getTestObj(ids.at(i), objRetrieved);
 		MojTestErrCheck(err);
@@ -1248,13 +1248,13 @@ MojErr MojDbClientTest::testPurge()
 
 	// verify result has a count attribute
 	MojTestErrCheck(handler->m_dbErr);
-	MojInt64 count = -1;
+	gint64 count = -1;
 	MojTestAssert(handler->m_result.get(_T("count"), count));
 
 	// put 10 objects into the database
 	MojObject::ObjectVec array;
-	MojSize numObjects = 10;
-	for (MojSize i = 0; i < numObjects; i++) {
+	gsize numObjects = 10;
+	for (gsize i = 0; i < numObjects; i++) {
 		MojObject obj;
 
 		err = obj.putString(_T("_kind"), _T("LunaDbClientTest:1"));
@@ -1282,7 +1282,7 @@ MojErr MojDbClientTest::testPurge()
 	MojTestAssert(handler->m_result.get(_T("results"), results));
 
 	MojObject::ConstArrayIterator iter = results.arrayBegin();
-	for (MojSize i = 0; i < numObjects; i++) {
+	for (gsize i = 0; i < numObjects; i++) {
 		MojTestAssert(iter != results.arrayEnd());
 		MojTestAssert(iter->find("id") != iter->end());
 		MojTestAssert(iter->find("rev") != iter->end());
@@ -1294,7 +1294,7 @@ MojErr MojDbClientTest::testPurge()
 	//delete numToDelete of the objects
 	handler.reset(new MojDbClientTestResultHandler);
 	MojAllocCheck(handler.get());
-	MojUInt32 numToDelete = 6;
+	guint32 numToDelete = 6;
 	MojDbQuery q;
 	err = q.from(_T("LunaDbClientTest:1"));
 	MojTestErrCheck(err);
@@ -1436,7 +1436,7 @@ MojErr MojDbClientTest::testPurgeStatus()
 
 	// verify purge count
 	MojTestErrCheck(handler->m_dbErr);
-	MojInt64 count = -1;
+	gint64 count = -1;
 	MojTestAssert(handler->m_result.get(_T("count"), count));
 	MojTestAssert(count == 1);
 
@@ -1628,10 +1628,10 @@ MojErr MojDbClientTest::testBatch()
 	MojObject objId;
 	err = putIter->getRequired(_T("_id"), objId);
 	MojTestErrCheck(err);
-	MojInt64 rev;
+	gint64 rev;
 	err = putIter->getRequired(_T("_rev"), rev);
 	MojTestErrCheck(err);
-	MojInt64 count;
+	gint64 count;
 	err = iter->getRequired(_T("count"), count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 1);

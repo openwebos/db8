@@ -30,8 +30,8 @@
 class MojApp : private MojNoCopy
 {
 public:
-	static const MojUInt32 MajorVersion = 1;
-	static const MojUInt32 MinorVersion = 0;
+	static const guint32 MajorVersion = 1;
+	static const guint32 MinorVersion = 0;
 
 	virtual ~MojApp();
 	const MojString& name() const { return m_name; }
@@ -47,7 +47,7 @@ protected:
 	typedef MojErr (MojApp::*OptionHandler)(const MojString& name, const MojString& val);
 	typedef MojVector<MojString> StringVec;
 
-	MojApp(MojUInt32 majorVersion = MajorVersion, MojUInt32 minorVersion = MinorVersion, const MojChar* versionString = NULL);
+	MojApp(guint32 majorVersion = MajorVersion, guint32 minorVersion = MinorVersion, const MojChar* versionString = NULL);
 	MojErr registerOption(OptionHandler handler, const MojChar* opt, const MojChar* help, bool argRequired = false);
 
 	virtual MojErr displayMessage(const MojChar* format, ...) MOJ_FORMAT_ATTR((printf, 2, 3));
@@ -92,8 +92,8 @@ private:
 	MojObject m_conf;
 	RunMode m_runMode;
 	bool m_errDisplayed;
-	MojUInt32 m_majorVersion;
-	MojUInt32 m_minorVersion;
+	guint32 m_majorVersion;
+	guint32 m_minorVersion;
 	const MojChar* m_versionString;
 };
 

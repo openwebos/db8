@@ -341,7 +341,7 @@ MojErr MojDbCrudTest::mergeArrayTest(MojDb& db)
 
 	MojObject aId;
 	MojObject bId;
-	MojSize count = 0;
+	gsize count = 0;
 	for (MojObject::ConstArrayIterator i = array.arrayBegin(); i != array.arrayEnd(); ++i, ++count) {
 		if (i->type() == MojObject::TypeObject) {
 			MojObject item;
@@ -994,7 +994,7 @@ MojErr MojDbCrudTest::staleUpdateTest(MojDb& db)
 	MojTestErrCheck(err);
 
 	// now object in memory has a rev
-	MojUInt64 rev;
+	guint64 rev;
 	err = obj.getRequired(MojDb::RevKey, rev);
 	MojTestErrCheck(err);
 
@@ -1004,7 +1004,7 @@ MojErr MojDbCrudTest::staleUpdateTest(MojDb& db)
 	err = db.put(obj);
 	MojTestErrCheck(err);
 
-	MojUInt64 rev2;
+	guint64 rev2;
 	err = obj.getRequired(MojDb::RevKey, rev2);
 	MojTestErrCheck(err);
 	MojTestAssert(rev2 > rev);
@@ -1015,7 +1015,7 @@ MojErr MojDbCrudTest::staleUpdateTest(MojDb& db)
 	err = db.merge(obj);
 	MojTestErrCheck(err);
 
-	MojUInt64 rev3;
+	guint64 rev3;
 	err = obj.getRequired(MojDb::RevKey, rev3);
 	MojTestErrCheck(err);
 	MojTestAssert(rev3 > rev2);
@@ -1035,11 +1035,11 @@ MojErr MojDbCrudTest::staleUpdateTest(MojDb& db)
 	MojTestAssert(found);
 
 	// after the delete, the rev in memory did not change but rev in the db did
-	MojUInt64 rev4;
+	guint64 rev4;
 	err = obj.getRequired(MojDb::RevKey, rev4);
 	MojTestErrCheck(err);
 	MojTestAssert(rev3 == rev4);
-	MojUInt64 revFromDb;
+	guint64 revFromDb;
 	err = objFromDb.getRequired(MojDb::RevKey, revFromDb);
 	MojTestErrCheck(err);
 	MojTestAssert(rev3 < revFromDb);
@@ -1080,7 +1080,7 @@ MojErr MojDbCrudTest::largeObjectTest(MojDb& db)
 	MojTestErrCheck(err);
 
 	// stuff a lot of properties into this object
-	for(int i = 0; i < MojUInt8Max + 10; i++) {
+	for(int i = 0; i < G_MAXUINT8 + 10; i++) {
 		MojString str;
 		err = str.format("%d", i);
 		MojTestErrCheck(err);

@@ -19,14 +19,14 @@
 
 #include "core/MojBuffer.h"
 
-MojBuffer::Chunk::Chunk(MojSize size)
-: m_begin((MojByte*) (this + 1)),
+MojBuffer::Chunk::Chunk(gsize size)
+: m_begin((guint8*) (this + 1)),
   m_end(m_begin + size),
   m_dataEnd(m_begin)
 {
 }
 
-void MojBuffer::Chunk::write(const void* data, MojSize size)
+void MojBuffer::Chunk::write(const void* data, gsize size)
 {
 	MojAssert(size <= freeSpace());
 	MojMemCpy(m_dataEnd, data, size);
@@ -57,13 +57,13 @@ bool MojBuffer::empty() const
 			(m_chunks.size() == 1 && m_readPos == m_chunks.front()->dataEnd());
 }
 
-void MojBuffer::iovec(MojIoVecT* vec, MojSize vecSize, MojSize& vecSizeOut) const
+void MojBuffer::iovec(MojIoVecT* vec, gsize vecSize, gsize& vecSizeOut) const
 {
 	vecSizeOut = 0;
 	ChunkList::ConstIterator i = m_chunks.begin();
 	while (vecSizeOut < vecSize && i != m_chunks.end()) {
-		const MojByte* base = (i == m_chunks.begin()) ? m_readPos : (*i)->data();
-		MojSize len = (*i)->dataEnd() - base;
+		const guint8* base = (i == m_chunks.begin()) ? m_readPos : (*i)->data();
+		gsize len = (*i)->dataEnd() - base;
 		if (len > 0) {
 			vec[vecSizeOut].iov_base = (void*) base;
 			vec[vecSizeOut].iov_len = len;
@@ -77,7 +77,7 @@ MojErr MojBuffer::toByteVec(ByteVec& vecOut) const
 {
 	vecOut.clear();
 	for (ChunkList::ConstIterator i = m_chunks.begin(); i != m_chunks.end(); ++i) {
-		const MojByte* base = (i == m_chunks.begin()) ? m_readPos : (*i)->data();
+		const guint8* base = (i == m_chunks.begin()) ? m_readPos : (*i)->data();
 		MojErr err = vecOut.append(base, base + (*i)->dataSize());
 		MojErrCheck(err);
 	}
@@ -91,7 +91,7 @@ void MojBuffer::clear()
 	}
 }
 
-MojErr MojBuffer::writeByte(MojByte b)
+MojErr MojBuffer::writeByte(guint8 b)
 {
 	Chunk* chunk;
 	MojErr err = writeableChunk(chunk, 1);
@@ -102,16 +102,16 @@ MojErr MojBuffer::writeByte(MojByte b)
 	return MojErrNone;
 }
 
-MojErr MojBuffer::write(const void* data, MojSize size)
+MojErr MojBuffer::write(const void* data, gsize size)
 {
 	MojAssert(data || size == 0);
 
-	const MojByte* bytes = static_cast<const MojByte*>(data);
+	const guint8* bytes = static_cast<const guint8*>(data);
 	while (size > 0) {
 		Chunk* chunk;
 		MojErr err = writeableChunk(chunk, size);
 		MojErrCheck(err);
-		MojSize chunkSize = MojMin(size, chunk->freeSpace());
+		gsize chunkSize = MojMin(size, chunk->freeSpace());
 		chunk->write(bytes, chunkSize);
 		bytes += chunkSize;
 		size -= chunkSize;
@@ -119,7 +119,7 @@ MojErr MojBuffer::write(const void* data, MojSize size)
 	return MojErrNone;
 }
 
-MojErr MojBuffer::data(const MojByte*& dataOut, MojSize& sizeOut)
+MojErr MojBuffer::data(const guint8*& dataOut, gsize& sizeOut)
 {
 	dataOut = NULL;
 	sizeOut = 0;
@@ -147,13 +147,13 @@ MojErr MojBuffer::release(MojAutoPtr<Chunk>& chunkOut)
 	return MojErrNone;
 }
 
-void MojBuffer::advance(MojSize size)
+void MojBuffer::advance(gsize size)
 {
 	while (size > 0) {
 		MojAssert(!m_chunks.empty());
 		const Chunk* chunk = m_chunks.front();
 		MojAssert(m_readPos >= chunk->data() && m_readPos <= chunk->dataEnd());
-		MojSize advanceSize = MojMin(size, (MojSize) (chunk->dataEnd() - m_readPos));
+		gsize advanceSize = MojMin(size, (gsize) (chunk->dataEnd() - m_readPos));
 		size -= advanceSize;
 		m_readPos += advanceSize;
 		if (size > 0)
@@ -180,12 +180,12 @@ void MojBuffer::pop()
 	}
 }
 
-MojBuffer::Chunk* MojBuffer::allocChunk(MojSize size) const
+MojBuffer::Chunk* MojBuffer::allocChunk(gsize size) const
 {
 	return new(size) Chunk(size);
 }
 
-MojErr MojBuffer::writeableChunk(Chunk*& chunkOut, MojSize requestedSize)
+MojErr MojBuffer::writeableChunk(Chunk*& chunkOut, gsize requestedSize)
 {
 	if (!m_chunks.empty()) {
 		chunkOut = m_chunks.back();
@@ -205,7 +205,7 @@ MojErr MojBuffer::consolidate()
 {
 	if (m_chunks.size() > 1) {
 		// calc total size
-		MojSize size = 0;
+		gsize size = 0;
 		for (ChunkList::ConstIterator i = m_chunks.begin(); i != m_chunks.end(); ++i) {
 			size += (*i)->dataSize();
 		}

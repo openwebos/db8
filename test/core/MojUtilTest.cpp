@@ -28,7 +28,7 @@ MojUtilTest::MojUtilTest()
 
 MojErr MojUtilTest::run()
 {
-	MojUInt32 flags = 0;
+	guint32 flags = 0;
 	MojFileT file;
 	MojStatT stat;
 
@@ -78,13 +78,13 @@ MojErr MojUtilTest::run()
 	// base64
 	err = testBase64(NULL, 0, _T(""));
 	MojTestErrCheck(err);
-	MojByte input1[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
+	guint8 input1[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
 	err = testBase64(input1, sizeof(input1), _T("4EiR+x_y"));
 	MojTestErrCheck(err);
-	MojByte input2[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
+	guint8 input2[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
 	err = testBase64(input2, sizeof(input2), _T("4EiR+xZ="));
 	MojTestErrCheck(err);
-	MojByte input3[] = {0x14, 0xfb, 0x9c, 0x03};
+	guint8 input3[] = {0x14, 0xfb, 0x9c, 0x03};
 	err = testBase64(input3, sizeof(input3), _T("4EiR+k=="));
 	MojTestErrCheck(err);
 	err = testBase64Err(_T("FPucAw==="));
@@ -97,13 +97,13 @@ MojErr MojUtilTest::run()
 	// base64 MIME
 	err = testBase64Mime(NULL, 0, _T(""));
 	MojTestErrCheck(err);
-	MojByte input4[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
+	guint8 input4[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
 	err = testBase64Mime(input4, sizeof(input4), _T("FPucA9l+"));
 	MojTestErrCheck(err);
-	MojByte input5[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
+	guint8 input5[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
 	err = testBase64Mime(input5, sizeof(input5), _T("FPucA9k="));
 	MojTestErrCheck(err);
-	MojByte input6[] = {0x14, 0xfb, 0x9c, 0x03};
+	guint8 input6[] = {0x14, 0xfb, 0x9c, 0x03};
 	err = testBase64Mime(input6, sizeof(input6), _T("FPucAw=="));
 	MojTestErrCheck(err);
 	err = testBase64MimeErr(_T("Qa6oL8==="));
@@ -135,7 +135,7 @@ MojErr MojUtilTest::run()
 	MojTestAssert(MojBinarySearch(87, array3, 3) == 2);
 	int array4[] = {0,1,2,3,4,5,6,7,8,9};
 	for (int i = 0; i < 10; ++i) {
-		MojTestAssert(MojBinarySearch(i, array4, 10) == (MojSize) i);
+		MojTestAssert(MojBinarySearch(i, array4, 10) == (gsize) i);
 	}
 	const MojChar* array5[] = {_T("a"),_T("ab"),_T("b"),_T("baa")};
 	MojTestAssert(MojBinarySearch(_T("hello"), array5, 4) == MojInvalidIndex);
@@ -188,7 +188,7 @@ MojErr MojUtilTest::run()
 	return MojErrNone;
 }
 
-MojErr MojUtilTest::testBase64(const MojByte* src, MojSize size, const MojChar* expected)
+MojErr MojUtilTest::testBase64(const guint8* src, gsize size, const MojChar* expected)
 {
 	// encode
 	MojString str;
@@ -197,16 +197,16 @@ MojErr MojUtilTest::testBase64(const MojByte* src, MojSize size, const MojChar* 
 	MojString::Iterator iter;
 	err = str.begin(iter);
 	MojTestErrCheck(err);
-	MojSize sizeOut;
+	gsize sizeOut;
 	err = MojBase64Encode(src, size, iter, str.length(), sizeOut);
 	MojTestErrCheck(err);
 	MojTestAssert(str == expected);
 	MojTestAssert(sizeOut == MojStrLen(expected));
 	// decode
-	MojVector<MojByte> vec;
+	MojVector<guint8> vec;
 	err = vec.resize(MojBase64DecodedSizeMax(str.length()));
 	MojTestErrCheck(err);
-	MojVector<MojByte>::Iterator vi;
+	MojVector<guint8>::Iterator vi;
 	err = vec.begin(vi);
 	MojTestErrCheck(err);
 	err = MojBase64Decode(str.begin(), str.length(), vi, vec.size(), sizeOut);
@@ -216,7 +216,7 @@ MojErr MojUtilTest::testBase64(const MojByte* src, MojSize size, const MojChar* 
 	return MojErrNone;
 }
 
-MojErr MojUtilTest::testBase64Mime(const MojByte* src, MojSize size, const MojChar* expected)
+MojErr MojUtilTest::testBase64Mime(const guint8* src, gsize size, const MojChar* expected)
 {
 	// encode
 	MojString str;
@@ -225,16 +225,16 @@ MojErr MojUtilTest::testBase64Mime(const MojByte* src, MojSize size, const MojCh
 	MojString::Iterator iter;
 	err = str.begin(iter);
 	MojTestErrCheck(err);
-	MojSize sizeOut;
+	gsize sizeOut;
 	err = MojBase64EncodeMIME(src, size, iter, str.length(), sizeOut);
 	MojTestErrCheck(err);
 	MojTestAssert(str == expected);
 	MojTestAssert(sizeOut == MojStrLen(expected));
 	// decode
-	MojVector<MojByte> vec;
+	MojVector<guint8> vec;
 	err = vec.resize(MojBase64DecodedSizeMax(str.length()));
 	MojTestErrCheck(err);
-	MojVector<MojByte>::Iterator vi;
+	MojVector<guint8>::Iterator vi;
 	err = vec.begin(vi);
 	MojTestErrCheck(err);
 	err = MojBase64DecodeMIME(str.begin(), str.length(), vi, vec.size(), sizeOut);
@@ -246,14 +246,14 @@ MojErr MojUtilTest::testBase64Mime(const MojByte* src, MojSize size, const MojCh
 
 MojErr MojUtilTest::testBase64Err(const MojChar* str)
 {
-	MojVector<MojByte> vec;
-	MojSize len = MojStrLen(str);
+	MojVector<guint8> vec;
+	gsize len = MojStrLen(str);
 	MojErr err = vec.resize(MojBase64DecodedSizeMax(len));
 	MojTestErrCheck(err);
-	MojVector<MojByte>::Iterator vi;
+	MojVector<guint8>::Iterator vi;
 	err = vec.begin(vi);
 	MojTestErrCheck(err);
-	MojSize sizeOut;
+	gsize sizeOut;
 	err = MojBase64Decode(str, len, vi, vec.size(), sizeOut);
 	MojTestErrExpected(err, MojErrInvalidBase64Data);
 
@@ -262,14 +262,14 @@ MojErr MojUtilTest::testBase64Err(const MojChar* str)
 
 MojErr MojUtilTest::testBase64MimeErr(const MojChar* str)
 {
-	MojVector<MojByte> vec;
-	MojSize len = MojStrLen(str);
+	MojVector<guint8> vec;
+	gsize len = MojStrLen(str);
 	MojErr err = vec.resize(MojBase64DecodedSizeMax(len));
 	MojTestErrCheck(err);
-	MojVector<MojByte>::Iterator vi;
+	MojVector<guint8>::Iterator vi;
 	err = vec.begin(vi);
 	MojTestErrCheck(err);
-	MojSize sizeOut;
+	gsize sizeOut;
 	err = MojBase64DecodeMIME(str, len, vi, vec.size(), sizeOut);
 	MojTestErrExpected(err, MojErrInvalidBase64Data);
 
@@ -283,9 +283,9 @@ MojErr MojUtilTest::writeFile(const MojChar* path, const MojChar* data)
 	MojFileT file = MojInvalidFile;
 	MojErr err = MojFileOpen(file, path, MOJ_O_WRONLY | MOJ_O_CREAT, MOJ_S_IRUSR | MOJ_S_IWUSR);
 	MojErrCheck(err);
-	MojSize len = MojStrLen(data);
+	gsize len = MojStrLen(data);
 	while (len > 0) {
-		MojSize written = 0;
+		gsize written = 0;
 		err = MojFileWrite(file, data, len, written);
 		MojErrGoto(err, Done);
 		len -= written;

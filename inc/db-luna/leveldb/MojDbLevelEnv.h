@@ -35,7 +35,7 @@ public:
     MojErr configure(const MojObject& conf);
     MojErr open(const MojChar* path);
     MojErr close();
-    MojErr postCommit(MojSize updateSize);
+    MojErr postCommit(gsize updateSize);
 
     void* impl() { return m_db; }
     static MojErr translateErr(int dbErr);

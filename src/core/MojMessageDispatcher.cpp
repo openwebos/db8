@@ -63,9 +63,9 @@ MojErr MojMessageDispatcher::schedule(MojMessage* msg)
 	return MojErrNone;
 }
 
-MojErr MojMessageDispatcher::start(MojInt32 numThreads)
+MojErr MojMessageDispatcher::start(gint32 numThreads)
 {
-	for (MojInt32 i = 0; i < numThreads; ++i) {
+	for (gint32 i = 0; i < numThreads; ++i) {
 		MojThreadT thread = MojInvalidThread;
 		MojErr err = MojThreadCreate(thread, threadMain, this);
 		MojErrCheck(err);

@@ -28,11 +28,11 @@
 class MojDbServiceHandlerBase : public MojService::CategoryHandler
 {
 public:
-	static const MojUInt32 DeadlockSleepMillis = 20;
-	static const MojUInt32 MaxDeadlockRetries = 20;
-	static const MojUInt32 MaxIndexlockRetries = 5;
-	static const MojUInt32 MinIndexlockRetries = 3;
-	static const MojUInt32 MaxBatchRetries = 1000;
+	static const guint32 DeadlockSleepMillis = 20;
+	static const guint32 MaxDeadlockRetries = 20;
+	static const guint32 MaxIndexlockRetries = 5;
+	static const guint32 MinIndexlockRetries = 3;
+	static const guint32 MaxBatchRetries = 1000;
 
 	typedef MojErr (CategoryHandler::* DbCallback)(MojServiceMessage* msg, const MojObject& payload, MojDbReq& req);
 
@@ -46,7 +46,7 @@ protected:
 	virtual MojErr invoke(Callback method, MojServiceMessage* msg, MojObject& payload);
 	MojErr invokeImpl(Callback method, MojServiceMessage* msg, MojObject& payload);
 
-	static MojErr formatCount(MojServiceMessage* msg, MojUInt32 count);
+	static MojErr formatCount(MojServiceMessage* msg, guint32 count);
 	static MojErr formatPut(MojServiceMessage* msg, const MojObject* begin, const MojObject* end);
 	static MojErr formatPutAppend(MojObjectVisitor& writer, const MojObject& result);
 

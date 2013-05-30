@@ -35,17 +35,17 @@ private:
 	MojErr testFindAll(MojDb& db);
 	MojErr testFindPaged(MojDb& db);
 
-	MojErr getObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64));
-	MojErr findObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& q);
-	MojErr findObjsPaged(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& query);
+	MojErr getObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, guint64));
+	MojErr findObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, guint64), MojDbQuery& q);
+	MojErr findObjsPaged(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, guint64), MojDbQuery& query);
 
 	MojErr timeGet(MojDb& db, MojObject& id, MojTime& getTime);
 	MojErr timeBatchGet(MojDb& db, const MojObject* begin, const MojObject* end, MojTime& batchGetTime, bool useWriter);
-	MojErr timeFind(MojDb& db, MojDbQuery& query, MojTime& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, MojUInt32& count, MojTime& countTime);
+	MojErr timeFind(MojDb& db, MojDbQuery& query, MojTime& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, guint32& count, MojTime& countTime);
 
 
-	MojErr putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,
-			MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64), MojObject& ids);
+	MojErr putObjs(MojDb& db, const MojChar* kindId, guint64 numInsert,
+			MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64), MojObject& ids);
 
 };
 

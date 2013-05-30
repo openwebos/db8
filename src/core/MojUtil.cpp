@@ -23,27 +23,27 @@
 #include "core/MojFile.h"
 
 #ifdef MOJ_UNALIGNED_MEM_ACCESS
-#	define MojGet16Bits(d) (*((const MojUInt16 *) (d)))
+#	define MojGet16Bits(d) (*((const guint16 *) (d)))
 #else
-#	define MojGet16Bits(d) ((((MojUInt32)(((const MojUInt8 *)(d))[1])) << 8)\
-                       +(MojUInt32)(((const MojUInt8 *)(d))[0]) )
+#	define MojGet16Bits(d) ((((guint32)(((const guint8 *)(d))[1])) << 8)\
+                       +(guint32)(((const guint8 *)(d))[0]) )
 #endif
 
-static const MojSize MojMaxDirDepth = 100;
+static const gsize MojMaxDirDepth = 100;
 
-static MojErr MojRmDirRecursive(const MojChar* path, MojSize depth);
+static MojErr MojRmDirRecursive(const MojChar* path, gsize depth);
 
-static MojErr MojBase64EncodeImpl(const MojChar charset[], const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad = true);
-static MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut);
+static MojErr MojBase64EncodeImpl(const MojChar charset[], const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad = true);
+static MojErr MojBase64DecodeImpl(const guint8 vals[], gsize size, const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut);
 
 // Implementation of SuperFastHash from
 // http://www.azillionmonkeys.com/qed/hash.html
-MojSize MojHash (const void* p, MojSize len)
+gsize MojHash (const void* p, gsize len)
 {
 	MojAssert(p || len == 0);
-	const MojByte* src = (const MojByte*) p;
-	MojSize hash = len;
-	MojSize tmp;
+	const guint8* src = (const guint8*) p;
+	gsize hash = len;
+	gsize tmp;
 	int rem;
 
     if (len == 0)
@@ -55,14 +55,14 @@ MojSize MojHash (const void* p, MojSize len)
         hash  += MojGet16Bits(src);
         tmp    = (MojGet16Bits(src + 2) << 11) ^ hash;
         hash   = (hash << 16) ^ tmp;
-        src  += 2 * sizeof(MojUInt16);
+        src  += 2 * sizeof(guint16);
         hash  += hash >> 11;
     }
     /* Handle end cases */
     switch (rem) {
         case 3: hash += MojGet16Bits(src);
                 hash ^= hash << 16;
-                hash ^= src[sizeof(MojUInt16)] << 18;
+                hash ^= src[sizeof(guint16)] << 18;
                 hash += hash >> 11;
                 break;
         case 2: hash += MojGet16Bits(src);
@@ -84,12 +84,12 @@ MojSize MojHash (const void* p, MojSize len)
     return hash;
 }
 
-MojSize MojHash(const MojChar* str)
+gsize MojHash(const MojChar* str)
 {
 	return MojHash(str, MojStrLen(str) * sizeof(MojChar));
 }
 
-MojErr MojBase64Encode(const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad)
+MojErr MojBase64Encode(const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad)
 {
 	// NOTE: This is not the same set of characters used in mime base-64 encoding.
 	// Unlike mime, this set is valid for file names and is ordered by ascii value.
@@ -97,22 +97,22 @@ MojErr MojBase64Encode(const MojByte* src, MojSize srcSize, MojChar* bufOut, Moj
 	return MojBase64EncodeImpl(chars, src, srcSize, bufOut, bufLen, lenOut, pad);
 }
 
-MojErr MojBase64EncodeMIME(const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad)
+MojErr MojBase64EncodeMIME(const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad)
 {
 	static const MojChar chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	return MojBase64EncodeImpl(chars, src, srcSize, bufOut, bufLen, lenOut, pad);
 }
 
-MojErr MojBase64EncodeImpl(const MojChar chars[], const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad)
+MojErr MojBase64EncodeImpl(const MojChar chars[], const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad)
 {
 	MojAssert ((src || srcSize == 0) && (bufOut || bufLen == 0));
 
-	MojSize maxOut = MojBase64EncodedLenMax(srcSize);
+	gsize maxOut = MojBase64EncodedLenMax(srcSize);
 	if (bufLen < maxOut)
 		MojErrThrow(MojErrInsufficientBuf);
 
 	// encode in 3 byte chunks
-	MojUInt32 chunk;
+	guint32 chunk;
 	MojChar* dest = bufOut;
 	while (srcSize > 2) {
 		chunk = (src[0] << 16) + (src[1] << 8) + src[2];
@@ -152,9 +152,9 @@ MojErr MojBase64EncodeImpl(const MojChar chars[], const MojByte* src, MojSize sr
 	return MojErrNone;
 }
 
-MojErr MojBase64Decode(const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut)
+MojErr MojBase64Decode(const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut)
 {
-	static const MojByte vals[] = {
+	static const guint8 vals[] = {
 		/*       0,  1   2   3   4   5   6   7   8   9   a   b   c   d   e   f */
 		/* 0 */255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
 		/* 1 */255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
@@ -169,9 +169,9 @@ MojErr MojBase64Decode(const MojChar* src, MojSize srcLen, MojByte* bufOut, MojS
 	return MojBase64DecodeImpl(vals, sizeof(vals), src, srcLen, bufOut, bufSize, sizeOut);
 }
 
-MojErr MojBase64DecodeMIME(const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut)
+MojErr MojBase64DecodeMIME(const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut)
 {
-	static const MojByte vals[] = {
+	static const guint8 vals[] = {
 		/*       0,  1   2   3   4   5   6   7   8   9   a   b   c   d   e   f */
 		/* 0 */255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
 		/* 1 */255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
@@ -186,7 +186,7 @@ MojErr MojBase64DecodeMIME(const MojChar* src, MojSize srcLen, MojByte* bufOut, 
 	return MojBase64DecodeImpl(vals, sizeof(vals), src, srcLen, bufOut, bufSize, sizeOut);
 }
 
-MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut)
+MojErr MojBase64DecodeImpl(const guint8 vals[], gsize size, const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut)
 {
 	MojAssert ((src || srcLen == 0) && (bufOut || bufSize == 0));
 
@@ -195,16 +195,16 @@ MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* sr
 		MojErrThrow(MojErrInsufficientBuf);
 
 	// trim padding
-	for (MojSize i = 0; i < 2; ++i) {
+	for (gsize i = 0; i < 2; ++i) {
 		if (srcLen > 0 && src[srcLen - 1] == _T('='))
 			--srcLen;
 	}
 	// decode in 4 byte chunks
-	MojUInt32 chunk = 0;
-	MojByte* dest = bufOut;
-	for (MojSize i = 0; i < srcLen; ++i) {
-		MojUInt32 b;
-		MojUInt32 c = (MojUInt32) src[i];
+	guint32 chunk = 0;
+	guint8* dest = bufOut;
+	for (gsize i = 0; i < srcLen; ++i) {
+		guint32 b;
+		guint32 c = (guint32) src[i];
 		if (c >= size || (b = vals[c]) == 255)
 			MojErrThrow(MojErrInvalidBase64Data);
 		switch (i & 3) {
@@ -219,9 +219,9 @@ MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* sr
 			break;
 		case 3:
 			chunk |= b;
-			(*dest++) = (MojByte) (chunk >> 16);
-			(*dest++) = (MojByte) ((chunk >> 8) & 0xFF);
-			(*dest++) = (MojByte) (chunk & 0xFF);
+			(*dest++) = (guint8) (chunk >> 16);
+			(*dest++) = (guint8) ((chunk >> 8) & 0xFF);
+			(*dest++) = (guint8) (chunk & 0xFF);
 			break;
 		}
 	}
@@ -230,27 +230,27 @@ MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* sr
 	case 0:
 		break;
 	case 2:
-		(*dest++) = (MojByte) (chunk >> 16);
+		(*dest++) = (guint8) (chunk >> 16);
 		sizeOut -= 2;
 		break;
 	case 3:
-		(*dest++) = (MojByte) (chunk >> 16);
-		(*dest++) = (MojByte) ((chunk >> 8) & 0xFF);
+		(*dest++) = (guint8) (chunk >> 16);
+		(*dest++) = (guint8) ((chunk >> 8) & 0xFF);
 		--sizeOut;
 		break;
 	default:
 		MojErrThrow(MojErrInvalidBase64Data);
 		break;
 	}
-	MojAssert((MojSize)(dest - bufOut) == sizeOut);
+	MojAssert((gsize)(dest - bufOut) == sizeOut);
 
 	return MojErrNone;
 }
 
-int MojLexicalCompare(const MojByte* data1, MojSize size1, const MojByte* data2, MojSize size2)
+int MojLexicalCompare(const guint8* data1, gsize size1, const guint8* data2, gsize size2)
 {
 	// lexical comparison of two keys
-	const MojByte* end = data1 + MojMin(size1, size2);
+	const guint8* end = data1 + MojMin(size1, size2);
 	while (data1 != end) {
 		if (*data1 != *data2)
 			return *data1 - *data2;
@@ -260,11 +260,11 @@ int MojLexicalCompare(const MojByte* data1, MojSize size1, const MojByte* data2,
 	return (int) (size1 - size2);
 }
 
-MojSize MojPrefixSize(const MojByte* data1, MojSize size1, const MojByte* data2, MojSize size2)
+gsize MojPrefixSize(const guint8* data1, gsize size1, const guint8* data2, gsize size2)
 {
 	// find length of shared prefix
-	MojSize prefixSize = 0;
-	const MojByte* end = data1 + MojMin(size1, size2);
+	gsize prefixSize = 0;
+	const guint8* end = data1 + MojMin(size1, size2);
 	while (data1 != end) {
 		if (*data1 != *data2)
 			break;
@@ -283,7 +283,7 @@ MojErr MojCreateDirIfNotPresent(const MojChar* path)
 		MojString parentPath;
 		err = parentPath.assign(path);
 		MojErrCheck(err);
-		MojSize sep = parentPath.rfind(MojPathSeparator);
+		gsize sep = parentPath.rfind(MojPathSeparator);
 		if (sep == MojInvalidSize)
 			MojErrThrow(MojErrNotFound);
 		err = parentPath.truncate(sep);
@@ -301,7 +301,7 @@ MojErr MojRmDirRecursive(const MojChar* path)
 	return MojRmDirRecursive(path, 0);
 }
 
-MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
+MojErr MojRmDirRecursive(const MojChar* path, gsize depth)
 {
 	MojAssert(path);
 	MojErr err = MojErrNone;
@@ -310,12 +310,12 @@ MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
 	if (depth >= MojMaxDirDepth)
 		MojErrThrow(MojErrDirCycle);
 	// validate args
-	MojSize pathLen = MojStrLen(path);
+	gsize pathLen = MojStrLen(path);
 	if (pathLen == 0)
 		MojErrThrow(MojErrInvalidArg);
 
 	// setup buf for names
-	MojAutoArrayPtr<MojChar> entName (new MojChar[pathLen + MojNameMax + 2 /* for '/' and '\0' */]);
+	MojAutoArrayPtr<MojChar> entName (new MojChar[pathLen + NAME_MAX + 2 /* for '/' and '\0' */]);
 	MojAllocCheck(entName.get());
 	MojStrCpy(entName.get(), path);
 	if (entName[pathLen - 1] != MojPathSeparator) {
@@ -327,7 +327,7 @@ MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
 	MojErrCheck(err);
 	// read entries
 	for (;;) {
-		MojSize nameLen = 0;
+		gsize nameLen = 0;
 		bool entRead = false;
 		MojDirentT ent;
 		err = MojDirRead(dir, &ent, entRead);
@@ -338,7 +338,7 @@ MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
 			MojStrCmp(ent.d_name, _T("..")) == 0)
 			continue;
 		nameLen = MojStrLen(ent.d_name);
-		MojAssert(nameLen <= MojNameMax);
+		MojAssert(nameLen <= NAME_MAX);
 		MojStrNCpy(entName.get() + pathLen, ent.d_name, nameLen);
 		entName[pathLen + nameLen] = '\0';
 		if (ent.d_type == DT_DIR) {
@@ -375,7 +375,7 @@ MojErr MojFileFromString(const MojChar* path, const MojChar* data)
 	MojFile file;
 	MojErr err = file.open(path, MOJ_O_WRONLY | MOJ_O_CREAT | MOJ_O_TRUNC, MOJ_S_IRUSR | MOJ_S_IWUSR);
 	MojErrCheck(err);
-	MojSize size;
+	gsize size;
 	err = file.writeString(data, size);
 	MojErrCheck(err);
 
@@ -389,11 +389,11 @@ const MojChar* MojFileNameFromPath(const MojChar* path)
 	return sep ? sep + 1 : path;
 }
 
-MojErr MojByteArrayToHex(const MojByte *bytes, MojSize len, MojChar *s) 
+MojErr MojUInt8ArrayToHex(const guint8 *bytes, gsize len, MojChar *s) 
 {
 	// Convert a byte array to Hex String for printing 
 	char hexval[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-	for(MojSize j = 0; j < len; j++){
+	for(gsize j = 0; j < len; j++){
 		s[j*2] = hexval[((bytes[j] >> 4) & 0xF)];
 		s[(j*2) + 1] = hexval[(bytes[j]) & 0x0F];
 	}

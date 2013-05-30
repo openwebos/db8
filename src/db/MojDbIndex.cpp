@@ -82,7 +82,7 @@ MojErr MojDbIndex::fromObject(const MojObject& obj, const MojString& locale)
 	err = obj.getRequired(PropsKey, props);
 	MojErrCheck(err);
 	MojObject propObj;
-	MojSize j = 0;
+	gsize j = 0;
 	while (props.at(j++, propObj)) {
 		err = addProp(propObj);
 		MojErrCheck(err);
@@ -176,13 +176,13 @@ MojErr MojDbIndex::close()
 	return MojErrNone;
 }
 
-MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
+MojErr MojDbIndex::stats(MojObject& objOut, gsize& usageOut, MojDbReq& req)
 {
 	MojAssert(isOpen());
 	MojLogTrace(s_log);
 	
-	MojSize count = 0;
-	MojSize size = 0;
+	gsize count = 0;
+	gsize size = 0;
 	MojErr err = m_index->stats(req.txn(), count, size);
 
 	MojLogInfo(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err); 
@@ -190,18 +190,18 @@ MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
 	MojErrCheck(err);
 	usageOut += size;
 
-	err = objOut.put(SizeKey, (MojInt64) size);
+	err = objOut.put(SizeKey, (gint64) size);
 	MojErrCheck(err);
-	err = objOut.put(CountKey, (MojInt64) count);
+	err = objOut.put(CountKey, (gint64) count);
 	MojErrCheck(err);
-	err = objOut.put(DelMissesKey, (MojInt64) m_delMisses); // cumulative since start
+	err = objOut.put(DelMissesKey, (gint64) m_delMisses); // cumulative since start
 	MojErrCheck(err);
 
 	MojThreadReadGuard guard(m_lock);
 	if (!m_watcherMap.empty()) {
 		MojObject watcherInfo;
 		for (WatcherMap::ConstIterator i = m_watcherMap.begin(); i != m_watcherMap.end(); ++i) {
-			err = watcherInfo.put(i.key(), (MojInt64) i.value());
+			err = watcherInfo.put(i.key(), (gint64) i.value());
 			MojErrCheck(err);
 		}
 		err = objOut.put(WatchesKey, watcherInfo);
@@ -367,7 +367,7 @@ bool MojDbIndex::canAnswer(const MojDbQuery& query) const
 	// and the order prop is either the last referenced prop or, if all ops are equality ops,
 	// the prop following the last referenced prop.
 	const MojDbQuery::WhereMap& map = query.where();
-	MojSize numQueryProps = map.size();
+	gsize numQueryProps = map.size();
 	// if there are more props in the query than in our index, no can do
 	if (numQueryProps > m_propNames.size())
 		return false;
@@ -428,8 +428,8 @@ MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 				this->name().data(), watcher->domain().data());
 
 	MojThreadWriteGuard guard(m_lock);
-	MojSize idx;
-	MojSize size = m_watcherVec.size();
+	gsize idx;
+	gsize size = m_watcherVec.size();
 	for (idx = 0; idx < size; ++idx) {
 		if (m_watcherVec.at(idx).get() == watcher) {
 			MojErr err = m_watcherVec.erase(idx);
@@ -609,7 +609,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		if (m_kind)
 			s2 = (char *)(m_kind->id().data());
 		size_t size = (*i).size();
-		MojErr err2 = MojByteArrayToHex((*i).data(), size, s); 
+		MojErr err2 = MojUInt8ArrayToHex((*i).data(), size, s); 
 		MojErrCheck(err2); 
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
@@ -643,7 +643,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 #if defined(MOJ_DEBUG_LOGGING)
 		char s[1024];
 		size_t size = (*i).size();
-		MojErr err2 = MojByteArrayToHex((*i).data(), size, s); 
+		MojErr err2 = MojUInt8ArrayToHex((*i).data(), size, s); 
 		MojErrCheck(err2);
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
@@ -664,7 +664,7 @@ MojErr MojDbIndex::getKeys(const MojObject& obj, KeySet& keysOut) const
 	MojDbKeyBuilder builder;
 	MojErr err = builder.push(m_idSet);
 	MojErrCheck(err);
-	MojSize idx = 0;
+	gsize idx = 0;
 	for (PropVec::ConstIterator i = m_props.begin();
 		 i != m_props.end();
 		 ++i, ++idx) {
@@ -746,7 +746,7 @@ MojErr MojDbIndex::validateName(const MojString& name)
 	}
 	for (MojString::ConstIterator i = name.begin(); i < name.end(); ++i) {
 		if (!MojIsAlNum(*i) && *i != _T('_')) {
-			MojErrThrowMsg(MojErrDbInvalidIndexName, _T("db: index name '%s' invalid: char at position %zd not allowed"), name.data(), (MojSize) (i - name.begin()));
+			MojErrThrowMsg(MojErrDbInvalidIndexName, _T("db: index name '%s' invalid: char at position %zd not allowed"), name.data(), (gsize) (i - name.begin()));
 		}
 	}
 	return MojErrNone;

@@ -39,10 +39,10 @@ private:
 	MojErr pageTest(MojDb& db);
 	MojErr limitTest(MojDb& db);
 
-	MojErr put(MojDb& db, const MojObject& fooVal, const MojObject& barVal, MojObject& idOut, MojInt64& revOut);
+	MojErr put(MojDb& db, const MojObject& fooVal, const MojObject& barVal, MojObject& idOut, gint64& revOut);
 	MojErr merge(MojDb& db, const MojObject& id, const MojObject& barVal);
 
-	MojInt64 m_rev;
+	gint64 m_rev;
 };
 
 #endif /* MOJDBWATCHTEST_H_ */

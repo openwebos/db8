@@ -36,8 +36,8 @@ private:
 	MojErr testEnforce(MojDb& db);
 	MojErr testErrors();
 	MojErr put(MojDb& db, const MojChar* objJson);
-	MojErr getKindUsage(MojDb& db, const MojChar* kindId, MojInt64& usageOut);
-	MojErr getQuotaUsage(MojDb& db, const MojChar* owner, MojInt64& usageOut);
+	MojErr getKindUsage(MojDb& db, const MojChar* kindId, gint64& usageOut);
+	MojErr getQuotaUsage(MojDb& db, const MojChar* owner, gint64& usageOut);
 };
 
 #endif /* MOJDBQUOTATEST_H_ */

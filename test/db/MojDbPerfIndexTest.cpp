@@ -118,7 +118,7 @@ MojErr MojDbPerfIndexTest::run()
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
 
-	for (MojUInt32 i = 0; i < 5; ++i)
+	for (guint32 i = 0; i < 5; ++i)
 	{
 		_runPhaseTest(db, i);
 		MojTestErrCheck(err);
@@ -130,11 +130,11 @@ MojErr MojDbPerfIndexTest::run()
 	return MojErrNone;
 }
 
-MojErr MojDbPerfIndexTest::_runPhaseTest (MojDb& db, MojUInt32 i_phase_number)
+MojErr MojDbPerfIndexTest::_runPhaseTest (MojDb& db, guint32 i_phase_number)
 {
 	MojErr err;
-	MojUInt32 number_records;
-	MojUInt32 arr_number_records[] = { PHASE_1_RECORDS_NUMBER, PHASE_2_RECORDS_NUMBER, PHASE_3_RECORDS_NUMBER, PHASE_4_RECORDS_NUMBER, PHASE_5_RECORDS_NUMBER };
+	guint32 number_records;
+	guint32 arr_number_records[] = { PHASE_1_RECORDS_NUMBER, PHASE_2_RECORDS_NUMBER, PHASE_3_RECORDS_NUMBER, PHASE_4_RECORDS_NUMBER, PHASE_5_RECORDS_NUMBER };
 
 	if( i_phase_number > 4 )
 	{
@@ -180,7 +180,7 @@ MojErr MojDbPerfIndexTest::_runPhaseTest (MojDb& db, MojUInt32 i_phase_number)
 	return err;
 }
 
-MojErr MojDbPerfIndexTest::_generateNewRecords (MojDb& db, MojUInt32 i_number_records)
+MojErr MojDbPerfIndexTest::_generateNewRecords (MojDb& db, guint32 i_number_records)
 {
 	MojErr err = MojErrNone;
 	MojString str_value;
@@ -190,7 +190,7 @@ MojErr MojDbPerfIndexTest::_generateNewRecords (MojDb& db, MojUInt32 i_number_re
 
 	obj_description.pushString(Description);
 
-	for(MojUInt32 i = 0; i < i_number_records; ++i)
+	for(guint32 i = 0; i < i_number_records; ++i)
 	{
 		MojErr err = obj.putString(_T("_kind"), _T("Test1:1"));
 		MojTestErrCheck(err);
@@ -279,7 +279,7 @@ MojErr MojDbPerfIndexTest::_performThreeQueries (MojDb& db)
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count1;
+		guint32 count1;
 		err = cursor1.count(count1); // not used, but require to spend time for exec!
 		MojTestErrCheck(err);
 		err = cursor1.close();
@@ -298,7 +298,7 @@ MojErr MojDbPerfIndexTest::_performThreeQueries (MojDb& db)
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count2;
+		guint32 count2;
 		err = cursor2.count(count2); // not used, but require to spend time for exec!
 		MojTestErrCheck(err);
 		err = cursor2.close();
@@ -320,7 +320,7 @@ MojErr MojDbPerfIndexTest::_performThreeQueries (MojDb& db)
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count3;
+		guint32 count3;
 		err = cursor3.count(count3); // not used, but require to spend time for exec!
 		MojTestErrCheck(err);
 		err = cursor3.close();
@@ -338,7 +338,7 @@ MojErr MojDbPerfIndexTest::_delete10PersentsRecords (MojDb& db)
 	str_value.assign("");
 	MojObject nullable(str_value);
 	MojDbQuery query;
-	MojUInt32 count = 0;
+	guint32 count = 0;
 
 	err = query.from(_T("Test1:1"));
 	MojTestErrCheck(err);
@@ -355,7 +355,7 @@ MojErr MojDbPerfIndexTest::_change10PersentsRecords (MojDb& db)
 {
 	MojErr err = MojErrNone;
 	MojDbQuery query;
-	MojUInt32 count = 0;
+	guint32 count = 0;
 
 	err = query.from(_T("Test1:1"));
 	MojTestErrCheck(err);
@@ -377,7 +377,7 @@ MojErr MojDbPerfIndexTest::_change10PersentsRecords (MojDb& db)
 				break;
 
 			// update
-			MojInt32 value;
+			gint32 value;
 			MojObject update;
 			err = dbObj.get(_T("Limit"), value, found);
 
@@ -411,8 +411,8 @@ void MojDbPerfIndexTest::cleanup()
 
 MojErr MojDbPerfIndexTest::_generateStreetAddress (MojString& o_string)
 {
-	MojInt32 index = abs( rand() ) % 10;
-	MojInt32 value = abs( rand() ) % 9999 + 1;
+	gint32 index = abs( rand() ) % 10;
+	gint32 value = abs( rand() ) % 9999 + 1;
 	MojErr err = o_string.format("%d %s", value, StreetNames[index]);
 
 	return err;
@@ -420,7 +420,7 @@ MojErr MojDbPerfIndexTest::_generateStreetAddress (MojString& o_string)
 
 MojErr MojDbPerfIndexTest::_generateCityName (MojString& o_string)
 {
-	MojInt32 index = abs( rand() ) % 10;
+	gint32 index = abs( rand() ) % 10;
 	MojErr err = o_string.format("%s", CityNames[index]);
 
 	return err;
@@ -428,7 +428,7 @@ MojErr MojDbPerfIndexTest::_generateCityName (MojString& o_string)
 
 MojErr MojDbPerfIndexTest::_generateStateName (MojString& o_string)
 {
-	MojInt32 index = abs( rand() ) % 9;
+	gint32 index = abs( rand() ) % 9;
 	MojErr err = o_string.format("%s", StateNames[index]);
 
 	return err;
@@ -436,7 +436,7 @@ MojErr MojDbPerfIndexTest::_generateStateName (MojString& o_string)
 
 MojErr MojDbPerfIndexTest::_generateZipCode (MojString& o_string)
 {
-	MojInt32 value = abs( rand() ) % 9999 + 1;
+	gint32 value = abs( rand() ) % 9999 + 1;
 	MojErr err = o_string.format("%04d", value);
 
 	return err;
@@ -444,7 +444,7 @@ MojErr MojDbPerfIndexTest::_generateZipCode (MojString& o_string)
 
 void MojDbPerfIndexTest::_generateLimitCode (MojObject& o_object)
 {
-	MojInt32 value = abs( rand() ) % 99999999 + 1;
+	gint32 value = abs( rand() ) % 99999999 + 1;
 	MojObject obj(value);
 	o_object = obj;
 }
@@ -474,8 +474,8 @@ MojErr MojDbPerfIndexTest::_add3monthToDate (MojString& o_string, time_t& i_valu
 {
 	time_t gen = i_value;
 	struct tm const *tmr = gmtime(&gen);
-	MojInt32 tm_mon = (tmr->tm_mon + 3) % 12;
-	MojInt32 tm_year = tmr->tm_year + ((tmr->tm_mon + 3) < 12 ? 0 : 1);
+	gint32 tm_mon = (tmr->tm_mon + 3) % 12;
+	gint32 tm_year = tmr->tm_year + ((tmr->tm_mon + 3) < 12 ? 0 : 1);
 	// tmr->tm_year = The number of years since 1900
 	MojErr err = o_string.format("%s %d, %d", Monthes[tm_mon], tmr->tm_mday, tm_year + 1900);
 

@@ -36,7 +36,7 @@ public:
 
 	MojErr init(const MojChar* locale, MojDbCollationStrength strength);
 	MojErr sortKey(const MojString& str, MojDbKey& keyOut) const;
-	MojErr sortKey(const UChar* chars, MojSize size, MojDbKey& keyOut) const;
+	MojErr sortKey(const UChar* chars, gsize size, MojDbKey& keyOut) const;
 
 private:
 	UCollator* m_ucol;

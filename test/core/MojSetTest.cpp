@@ -104,7 +104,7 @@ MojErr MojSetTest::run()
 		err = intSet1.put(i);
 		MojTestErrCheck(err);
 		MojTestAssert(intSet1.contains(i));
-		MojTestAssert(intSet1.size() == (MojSize) i + 1);
+		MojTestAssert(intSet1.size() == (gsize) i + 1);
 		MojTestAssert(intSet1 != intSet2);
 		err = intSet1.del(i, found);
 		MojTestErrCheck(err);
@@ -123,7 +123,7 @@ MojErr MojSetTest::run()
 		MojTestErrCheck(err);
 		err = strSet1.put(str);
 		MojTestErrCheck(err);
-		MojTestAssert(strSet1.size() == (MojSize) i + 1);
+		MojTestAssert(strSet1.size() == (gsize) i + 1);
 		MojTestAssert(strSet1.contains(str));
 		err = strSet1.del(str, found);
 		MojTestErrCheck(err);
@@ -249,9 +249,9 @@ MojErr MojSetTest::run()
 	return MojErrNone;
 }
 
-MojSize MojSetTest::count(MojSet<int>& set)
+gsize MojSetTest::count(MojSet<int>& set)
 {
-	MojSize size = 0;
+	gsize size = 0;
 	for (MojSet<int>::ConstIterator i = set.begin(); i != set.end(); ++i) {
 		++size;
 	}

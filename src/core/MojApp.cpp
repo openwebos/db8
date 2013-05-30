@@ -22,7 +22,7 @@
 
 MojLogger MojApp::s_log(_T("core.app"));
 
-MojApp::MojApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* versionString)
+MojApp::MojApp(guint32 majorVersion, guint32 minorVersion, const MojChar* versionString)
 : m_runMode(ModeDefault),
   m_errDisplayed(false),
   m_majorVersion(majorVersion),

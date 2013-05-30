@@ -40,7 +40,7 @@ MojDbWhereTest::MojDbWhereTest()
 
 MojErr MojDbWhereTest::run()
 {
-	MojByte success = 1;
+	guint8 success = 1;
 	MojDb db;
 
 	// open
@@ -92,7 +92,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count1;
+		guint32 count1;
 		err = cursor1.count(count1);
 		MojTestErrCheck(err);
 		err = cursor1.close();
@@ -128,7 +128,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count2;
+		guint32 count2;
 		err = cursor2.count(count2);
 		MojTestErrCheck(err);
 		err = cursor2.close();
@@ -162,7 +162,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-		MojUInt32 count3;
+		guint32 count3;
 		err = cursor3.count(count3);
 		MojTestErrCheck(err);
 		err = cursor3.close();
@@ -196,7 +196,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count4;
+	    guint32 count4;
 	    err = cursor4.count(count4);
 	    MojTestErrCheck(err);
 		err = cursor4.close();
@@ -230,7 +230,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count5;
+	    guint32 count5;
 	    err = cursor5.count(count5);
 	    MojTestErrCheck(err);
 		err = cursor5.close();
@@ -264,7 +264,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count6;
+	    guint32 count6;
 	    err = cursor6.count(count6);
 	    MojTestErrCheck(err);
 		err = cursor6.close();
@@ -302,7 +302,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count7;
+	    guint32 count7;
 	    err = cursor7.count(count7);
 	    MojTestErrCheck(err);
 		err = cursor7.close();
@@ -338,7 +338,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count9;
+	    guint32 count9;
 	    err = cursor9.count(count9);
 	    MojTestErrCheck(err);
 		err = cursor9.close();
@@ -374,7 +374,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count10;
+	    guint32 count10;
 	    err = cursor10.count(count10);
 	    MojTestErrCheck(err);
 		err = cursor10.close();
@@ -410,7 +410,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count11;
+	    guint32 count11;
 	    err = cursor11.count(count11);
 	    MojTestErrCheck(err);
 		err = cursor11.close();
@@ -446,7 +446,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count12;
+	    guint32 count12;
 	    err = cursor12.count(count12);
 	    MojTestErrCheck(err);
 		err = cursor12.close();
@@ -482,7 +482,7 @@ MojErr MojDbWhereTest::run()
 
 	if (err == MojErrNone)
 	{
-	    MojUInt32 count13;
+	    guint32 count13;
 	    err = cursor13.count(count13);
 	    MojTestErrCheck(err);
 		err = cursor13.close();

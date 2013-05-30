@@ -24,9 +24,9 @@
 #include "db/MojDbQueryPlan.h"
 #include "core/MojObjectSerialization.h"
 
-const MojUInt32 MojDbLevelQuery::SeekFlags = MojDbLevelCursor::e_Set;
-const MojUInt32 MojDbLevelQuery::SeekEmptyFlags[2] = {MojDbLevelCursor::e_First, MojDbLevelCursor::e_Last};
-const MojUInt32 MojDbLevelQuery::NextFlags[2] = {MojDbLevelCursor::e_Next, MojDbLevelCursor::e_Prev};
+const guint32 MojDbLevelQuery::SeekFlags = MojDbLevelCursor::e_Set;
+const guint32 MojDbLevelQuery::SeekEmptyFlags[2] = {MojDbLevelCursor::e_First, MojDbLevelCursor::e_Last};
+const guint32 MojDbLevelQuery::NextFlags[2] = {MojDbLevelCursor::e_Next, MojDbLevelCursor::e_Prev};
 
 MojDbLevelQuery::MojDbLevelQuery()
 {
@@ -86,7 +86,7 @@ MojErr MojDbLevelQuery::getById(const MojObject& id, MojDbStorageItem*& itemOut,
         if (!foundOut) {
             char s[1024];
             size_t size = primaryKey.size();
-            (void) MojByteArrayToHex(primaryKey.data(), size, s);
+            (void) MojUInt8ArrayToHex(primaryKey.data(), size, s);
             MojLogInfo(MojDbLevelEngine::s_log, _T("bdbq_byId_warnindex: KeySize: %zu; %s ;id: %s \n"),
                                  size, s, primaryKey.data()+1);
 
@@ -152,7 +152,7 @@ MojErr MojDbLevelQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
     return MojErrNone;
 }
 
-MojErr MojDbLevelQuery::getKey(bool& foundOut, MojUInt32 flags)
+MojErr MojDbLevelQuery::getKey(bool& foundOut, guint32 flags)
 {
     MojErr err = m_cursor.get(m_key, m_val, foundOut, flags);
     MojErrCheck(err);

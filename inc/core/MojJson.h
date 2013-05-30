@@ -35,19 +35,19 @@ public:
 	virtual MojErr endObject();
 	virtual MojErr beginArray();
 	virtual MojErr endArray();
-	virtual MojErr propName(const MojChar* name, MojSize len);
+	virtual MojErr propName(const MojChar* name, gsize len);
 	virtual MojErr nullValue();
 	virtual MojErr boolValue(bool val);
-	virtual MojErr intValue(MojInt64 val);
+	virtual MojErr intValue(gint64 val);
 	virtual MojErr decimalValue(const MojDecimal& val);
-	virtual MojErr stringValue(const MojChar* val, MojSize len);
+	virtual MojErr stringValue(const MojChar* val, gsize len);
 
 	const MojString& json() const { return m_str; }
 
 private:
-	static const MojSize InitialSize = 1024;
+	static const gsize InitialSize = 1024;
 
-	MojErr writeString(const MojChar* val, MojSize len);
+	MojErr writeString(const MojChar* val, gsize len);
 	MojErr writeComma();
 
 	bool m_writeComma;
@@ -63,15 +63,15 @@ public:
 	void begin();
 	MojErr end(MojObjectVisitor& visitor);
 	bool finished();
-	static MojErr parse(MojObjectVisitor& visitor, const MojChar* str) { return parse(visitor, str, MojSizeMax); }
-	static MojErr parse(MojObjectVisitor& visitor, const MojChar* chars, MojSize len);
-	MojErr parseChunk(MojObjectVisitor& visitor, const MojChar* chars, MojSize len, const MojChar*& parseEnd);
+	static MojErr parse(MojObjectVisitor& visitor, const MojChar* str) { return parse(visitor, str, G_MAXSIZE); }
+	static MojErr parse(MojObjectVisitor& visitor, const MojChar* chars, gsize len);
+	MojErr parseChunk(MojObjectVisitor& visitor, const MojChar* chars, gsize len, const MojChar*& parseEnd);
 
-	MojUInt32 line() { return m_line; }
-	MojUInt32 column() { return m_col; }
+	guint32 line() { return m_line; }
+	guint32 column() { return m_col; }
 
 private:
-	static const MojSize MaxDepth = 32;
+	static const gsize MaxDepth = 32;
 
 	typedef enum {
 		StateEatWhitespace,
@@ -108,11 +108,11 @@ private:
 	MojErr push();
 	void resetRec();
 
-	MojUInt32 m_line;
-	MojUInt32 m_col;
-	MojSize m_strPos;
-	MojSize m_depth;
-	MojUInt32 m_ucsChar;
+	guint32 m_line;
+	guint32 m_col;
+	gsize m_strPos;
+	gsize m_depth;
+	guint32 m_ucsChar;
 	const MojChar* m_matchStr;
 	bool m_isDecimal;
 	MojString m_str;

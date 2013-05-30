@@ -31,7 +31,7 @@ public:
 	virtual MojErr run();
 
 private:
-	MojSize count(MojMap<int, MojString>& set);
+	gsize count(MojMap<int, MojString>& set);
 };
 
 #endif /* MOJMAPTEST_H_ */

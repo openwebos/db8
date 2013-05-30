@@ -125,7 +125,7 @@ MojErr MojDbLevelDatabase::mutexStats(int * total_mutexes, int * mutexes_free, i
     return MojErrNone;
 }
 
-MojErr MojDbLevelDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbLevelDatabase::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
@@ -154,7 +154,7 @@ MojErr MojDbLevelDatabase::update(const MojObject& id, MojBuffer& val, MojDbStor
 {
     MojAssert(oldVal && txn);
 
-    MojErr err = txn->offsetQuota(-(MojInt64) oldVal->size());
+    MojErr err = txn->offsetQuota(-(gint64) oldVal->size());
     MojErrCheck(err);
 
     // add/replace with a new one
@@ -236,7 +236,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
     MojErr err;
     if (txn)
     {
-        MojInt64 quotaOffset = val.size();
+        gint64 quotaOffset = val.size();
         if (updateIdQuota)
             quotaOffset += key.size();
         err = txn->offsetQuota(quotaOffset);
@@ -258,7 +258,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
     char str_buf[1024];
     size_t size1 = key.size();
     size_t size2 = val.size();
-    MojErr err2 = MojByteArrayToHex(key.data(), size1, str_buf);
+    MojErr err2 = MojUInt8ArrayToHex(key.data(), size1, str_buf);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size1 - 17), 16);
@@ -300,7 +300,7 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
     if(s.IsNotFound() == false)
     {
         foundOut = true;
-        valOut.fromBytes(reinterpret_cast<const MojByte*>(str.data()), str.size());
+        valOut.fromBytes(reinterpret_cast<const guint8*>(str.data()), str.size());
     }
 
     return MojErrNone;
@@ -340,7 +340,7 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
     MojLogTrace(MojDbLevelEngine::s_log);
 
     foundOut = false;
-    MojErr err = txn->offsetQuota(-(MojInt64) key.size());
+    MojErr err = txn->offsetQuota(-(gint64) key.size());
     MojErrCheck(err);
 
     MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
@@ -357,7 +357,7 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
 #if defined(MOJ_DEBUG)
     char str_buf[1024];     // big enough for any key
     size_t size = key.size();
-    MojErr err2 = MojByteArrayToHex(key.data(), size, str_buf);
+    MojErr err2 = MojUInt8ArrayToHex(key.data(), size, str_buf);
     MojErrCheck(err2);
     if (size > 16)  // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size - 17), 16);
@@ -383,7 +383,7 @@ MojErr MojDbLevelDatabase::closeImpl()
     return MojErrNone;
 }
 
-void MojDbLevelDatabase::postUpdate(MojDbStorageTxn* txn, MojSize size)
+void MojDbLevelDatabase::postUpdate(MojDbStorageTxn* txn, gsize size)
 {
     if (txn) {
         // TODO: implement quotas

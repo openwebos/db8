@@ -133,7 +133,7 @@ MojErr MojDbSliceTest::queryNothingExists(MojDb& db)
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojSize count;
+	gsize count;
 	err = cursor.count(count);
 	MojTestErrCheck(err);
 	err = cursor.close();
@@ -157,7 +157,7 @@ MojErr MojDbSliceTest::querySlicesExist(MojDb& db, MojVector<MojString> slices, 
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojSize count;
+	gsize count;
 	err = cursor.count(count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == expectedObjects.size());

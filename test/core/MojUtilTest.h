@@ -31,8 +31,8 @@ public:
 	virtual void cleanup();
 
 private:
-	MojErr testBase64(const MojByte* src, MojSize size, const MojChar* expected);
-	MojErr testBase64Mime(const MojByte* src, MojSize size, const MojChar* expected);
+	MojErr testBase64(const guint8* src, gsize size, const MojChar* expected);
+	MojErr testBase64Mime(const guint8* src, gsize size, const MojChar* expected);
 	MojErr testBase64Err(const MojChar* str);
 	MojErr testBase64MimeErr(const MojChar* str);
 	MojErr writeFile(const MojChar* path, const MojChar* data);

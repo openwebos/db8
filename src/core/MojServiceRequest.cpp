@@ -35,7 +35,7 @@ MojServiceRequest::~MojServiceRequest()
 }
 
 MojErr MojServiceRequest::send(ReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-							   MojUInt32 numReplies)
+							   guint32 numReplies)
 {
 	MojAssert(service && method && numReplies);
 	// reusing a request is not allowed
@@ -53,7 +53,7 @@ MojErr MojServiceRequest::send(ReplySignal::SlotRef handler, const MojChar* serv
 }
 
 MojErr MojServiceRequest::send(ReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-							   const MojObject& payload, MojUInt32 numReplies)
+							   const MojObject& payload, guint32 numReplies)
 {
 	MojAssert(service && method && numReplies);
 
@@ -66,7 +66,7 @@ MojErr MojServiceRequest::send(ReplySignal::SlotRef handler, const MojChar* serv
 }
 
 MojErr MojServiceRequest::send(ExtendedReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-							   MojUInt32 numReplies)
+							   guint32 numReplies)
 {
 	MojAssert(service && method && numReplies);
 	// reusing a request is not allowed
@@ -84,7 +84,7 @@ MojErr MojServiceRequest::send(ExtendedReplySignal::SlotRef handler, const MojCh
 }
 
 MojErr MojServiceRequest::send(ExtendedReplySignal::SlotRef handler, const MojChar* service, const MojChar* method,
-							   const MojObject& payload, MojUInt32 numReplies)
+							   const MojObject& payload, guint32 numReplies)
 {
 	MojAssert(service && method && numReplies);
 

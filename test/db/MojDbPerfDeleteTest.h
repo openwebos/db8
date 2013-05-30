@@ -33,17 +33,17 @@ public:
 private:
 	MojErr testDelete();
 
-	MojErr delObjects(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
+	MojErr delObjects(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64));
 
-	MojErr putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,
-			MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64), MojObject& objs);
+	MojErr putObjs(MojDb& db, const MojChar* kindId, guint64 numInsert,
+			MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64), MojObject& objs);
 
 	MojErr mergeObj(MojDb& db, MojObject& obj, MojTime& objTime);
-	MojErr batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
-	MojErr queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
-	MojErr delObj(MojDb& db, MojObject& id, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
+	MojErr batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, guint32& countOut, MojTime& objTime, guint32 flags = MojDb::FlagNone);
+	MojErr queryDelObj(MojDb& db, MojDbQuery& query, guint32& countOut, MojTime& objTime, guint32 flags = MojDb::FlagNone);
+	MojErr delObj(MojDb& db, MojObject& id, MojTime& objTime, guint32 flags = MojDb::FlagNone);
 	MojErr batchPutObj(MojDb& db, MojObject* begin, const MojObject* end, MojTime& objTime);
-	MojErr updateKind(const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
+	MojErr updateKind(const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64));
 	MojErr timeUpdateKind(MojDb& db, const MojChar* kindJson, MojObject& kindObj, MojTime& addIndexTime, MojTime& dropIndexTime);
 };
 

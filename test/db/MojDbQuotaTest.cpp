@@ -127,22 +127,22 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	err = db.putQuotas(&obj, &obj + 1);
 	MojErrCheck(err);
 	// empty
-	MojInt64 kindUsage = 0;
+	gint64 kindUsage = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage == 0);
-	MojInt64 quotaUsage = 0;
+	gint64 quotaUsage = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage == 0);
 	// new obj
 	err = put(db, MojTestKind1Objects[0]);
 	MojTestErrCheck(err);
-	MojInt64 kindUsage1 = 0;
+	gint64 kindUsage1 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage1);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage1 > 0);
-	MojInt64 quotaUsage1 = 0;
+	gint64 quotaUsage1 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage1);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage1 > 0);
@@ -153,22 +153,22 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.put(obj, MojDb::FlagForce);
 	MojTestErrCheck(err);
-	MojInt64 kindUsage2 = 0;
+	gint64 kindUsage2 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage2);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage2 > kindUsage1);
-	MojInt64 quotaUsage2 = 0;
+	gint64 quotaUsage2 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage2);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage2 > quotaUsage1);
 	// add 2nd obj
 	err = put(db, MojTestKind1Objects[1]);
 	MojTestErrCheck(err);
-	MojInt64 kindUsage3 = 0;
+	gint64 kindUsage3 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage3);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage3 > kindUsage2);
-	MojInt64 quotaUsage3 = 0;
+	gint64 quotaUsage3 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage3);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage3 > quotaUsage2);
@@ -177,11 +177,11 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	err = db.del(1, found, MojDb::FlagPurge);
 	MojTestErrCheck(err);
 	MojTestAssert(found);
-	MojInt64 kindUsage4 = 0;
+	gint64 kindUsage4 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage4);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage4 == kindUsage3 - kindUsage2);
-	MojInt64 quotaUsage4 = 0;
+	gint64 quotaUsage4 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage4);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage4 == quotaUsage3 - quotaUsage2);
@@ -190,11 +190,11 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
-	MojInt64 kindUsage5 = 0;
+	gint64 kindUsage5 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage5);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage5 > kindUsage4);
-	MojInt64 quotaUsage5 = 0;
+	gint64 quotaUsage5 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage5);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage5 > quotaUsage4);
@@ -203,11 +203,11 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.updateLocale(_T("EN_us"));
 	MojTestErrCheck(err);
-	MojInt64 kindUsage6 = 0;
+	gint64 kindUsage6 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage6);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage6 == kindUsage5);
-	MojInt64 quotaUsage6 = 0;
+	gint64 quotaUsage6 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage6);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage6 == quotaUsage5);
@@ -216,11 +216,11 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
-	MojInt64 kindUsage7 = 0;
+	gint64 kindUsage7 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage7);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage7 == kindUsage4);
-	MojInt64 quotaUsage7 = 0;
+	gint64 quotaUsage7 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage7);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage7 == quotaUsage4);
@@ -231,11 +231,11 @@ MojErr MojDbQuotaTest::testUsage(MojDb& db)
 	err = db.delKind(kindStr, found);
 	MojTestErrCheck(err);
 	MojTestAssert(found);
-	MojInt64 kindUsage8 = 0;
+	gint64 kindUsage8 = 0;
 	err = getKindUsage(db, _T("Test:1"), kindUsage8);
 	MojTestErrCheck(err);
 	MojTestAssert(kindUsage8 == 0);
-	MojInt64 quotaUsage8 = 0;
+	gint64 quotaUsage8 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage8);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage8 == 0);
@@ -267,10 +267,10 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 	MojTestErrCheck(err);
 	err = put(db, MojTestKind2Objects[0]);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage1 = 0;
+	gint64 quotaUsage1 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage1);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage2 = 0;
+	gint64 quotaUsage2 = 0;
 	err = getQuotaUsage(db, _T("com.foo.baz"), quotaUsage2);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage1 > 0);
@@ -280,10 +280,10 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage3 = 0;
+	gint64 quotaUsage3 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage3);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage4 = 0;
+	gint64 quotaUsage4 = 0;
 	err = getQuotaUsage(db, _T("com.foo.baz"), quotaUsage4);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage3 > 0);
@@ -293,10 +293,10 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 	MojTestErrCheck(err);
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage5 = 0;
+	gint64 quotaUsage5 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage5);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage6 = 0;
+	gint64 quotaUsage6 = 0;
 	err = getQuotaUsage(db, _T("com.foo.baz"), quotaUsage6);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage5 > quotaUsage1);
@@ -308,7 +308,7 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 	MojTestErrCheck(err);
 	err = put(db, MojTestKind3Objects[0]);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage7 = 0;
+	gint64 quotaUsage7 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage7);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage7 == quotaUsage5);
@@ -317,10 +317,10 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 	MojErrCheck(err);
 	err = db.putQuotas(&obj, &obj + 1);
 	MojErrCheck(err);
-	MojInt64 quotaUsage8 = 0;
+	gint64 quotaUsage8 = 0;
 	err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage8);
 	MojTestErrCheck(err);
-	MojInt64 quotaUsage9 = 0;
+	gint64 quotaUsage9 = 0;
 	err = getQuotaUsage(db, _T("com.foo.*"), quotaUsage9);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage8 == quotaUsage5);
@@ -332,7 +332,7 @@ MojErr MojDbQuotaTest::testMultipleQuotas(MojDb& db)
 MojErr MojDbQuotaTest::testEnforce(MojDb& db)
 {
 	// set quota size to current usage
-	MojInt64 quotaUsage1 = 0;
+	gint64 quotaUsage1 = 0;
 	MojErr err = getQuotaUsage(db, _T("com.foo.bar"), quotaUsage1);
 	MojTestErrCheck(err);
 	MojObject obj;
@@ -378,14 +378,14 @@ MojErr MojDbQuotaTest::testErrors()
 	MojTestErrCheck(err);
 
 	// test that failed put does not affect quota
-	MojInt64 quotaUsage1 = 0;
+	gint64 quotaUsage1 = 0;
 	err = getQuotaUsage(db, _T("com.foo.*"), quotaUsage1);
 	MojTestErrCheck(err);
 	err = testEngine->setNextError(_T("txn.commit"), MojErrDbDeadlock);
 	MojTestErrCheck(err);
 	err = put(db, MojTestKind3Objects[1]);
 	MojTestErrExpected(err, MojErrDbDeadlock);
-	MojInt64 quotaUsage2 = 0;
+	gint64 quotaUsage2 = 0;
 	err = getQuotaUsage(db, _T("com.foo.*"), quotaUsage2);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage2 == quotaUsage1);
@@ -397,7 +397,7 @@ MojErr MojDbQuotaTest::testErrors()
 	MojErrCheck(err);
 	err = db.putQuotas(&obj, &obj + 1);
 	MojTestErrExpected(err, MojErrDbDeadlock);
-	MojInt64 quotaUsage3 = 0;
+	gint64 quotaUsage3 = 0;
 	err = getQuotaUsage(db, _T("com.foo.*"), quotaUsage3);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage3 == quotaUsage1);
@@ -408,7 +408,7 @@ MojErr MojDbQuotaTest::testErrors()
 	MojTestErrCheck(err);
 	err = db.putKind(obj);
 	MojTestErrExpected(err, MojErrDbDeadlock);
-	MojInt64 quotaUsage4 = 0;
+	gint64 quotaUsage4 = 0;
 	err = getQuotaUsage(db, _T("com.foo.*"), quotaUsage4);
 	MojTestErrCheck(err);
 	MojTestAssert(quotaUsage4 == quotaUsage1);
@@ -430,7 +430,7 @@ MojErr MojDbQuotaTest::put(MojDb& db, const MojChar* objJson)
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaTest::getKindUsage(MojDb& db, const MojChar* kindId, MojInt64& usageOut)
+MojErr MojDbQuotaTest::getKindUsage(MojDb& db, const MojChar* kindId, gint64& usageOut)
 {
 	MojRefCountedPtr<MojDbStorageTxn> txn;
 	MojErr err = db.storageEngine()->beginTxn(txn);
@@ -441,9 +441,9 @@ MojErr MojDbQuotaTest::getKindUsage(MojDb& db, const MojChar* kindId, MojInt64& 
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaTest::getQuotaUsage(MojDb& db, const MojChar* owner, MojInt64& usageOut)
+MojErr MojDbQuotaTest::getQuotaUsage(MojDb& db, const MojChar* owner, gint64& usageOut)
 {
-	MojInt64 size;
+	gint64 size;
 	MojErr err = db.quotaEngine()->quotaUsage(owner, size, usageOut);
 	MojTestErrCheck(err);
 

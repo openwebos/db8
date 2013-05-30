@@ -42,7 +42,7 @@ MojErr MojDbKey::increment()
 	MojErr err = m_vec.end(iter);
 	MojErrCheck(err);
 	while (iter > m_vec.begin()) {
-		if (*(--iter) < MojUInt8Max) {
+		if (*(--iter) < G_MAXUINT8) {
 			++(*iter);
 			break;
 		}
@@ -70,7 +70,7 @@ bool MojDbKey::stringPrefixOf(const MojDbKey& key) const
 	return (key.size() >= size() && MojMemCmp(data(), key.data(), size() - 1) == 0);
 }
 
-MojDbKeyRange::MojDbKeyRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, MojUInt32 group)
+MojDbKeyRange::MojDbKeyRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, guint32 group)
 : m_group(group)
 {
 	m_keys[IdxLower] = lowerKey;

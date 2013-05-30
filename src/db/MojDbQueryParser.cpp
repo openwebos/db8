@@ -24,7 +24,7 @@ MojDbQueryParser::MojDbQueryParser()
 {
 }
 
-MojErr MojDbQueryParser::parse(const MojChar* str, MojSize len)
+MojErr MojDbQueryParser::parse(const MojChar* str, gsize len)
 {
 	return MojErrNone;
 }

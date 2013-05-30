@@ -37,7 +37,7 @@ MojDbLevelCursor::~MojDbLevelCursor()
     MojErrCatchAll(err);
 }
 
-MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
+MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, guint32 flags)
 {
     MojAssert(db && txn);
     MojAssert(!m_it);
@@ -80,7 +80,7 @@ MojErr MojDbLevelCursor::del()
             MojDbLevelAbstractTxn *txn = static_cast<MojDbLevelAbstractTxn *>(m_txn);
             txn->tableTxn(m_db).Delete(key);
 
-            MojErr err = m_txn->offsetQuota(-(MojInt64) recSize);
+            MojErr err = m_txn->offsetQuota(-(gint64) recSize);
             MojErrCheck(err);
         }
         else
@@ -115,7 +115,7 @@ MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
     return MojErrNone;
 }
 
-MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags)
+MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, guint32 flags)
 {
     MojAssert(m_it);
     MojLogTrace(MojDbLevelEngine::s_log);
@@ -164,7 +164,7 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
     return MojErrNone;
 }
 
-MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbLevelCursor::stats(gsize& countOut, gsize& sizeOut)
 {
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
@@ -174,7 +174,7 @@ MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
     return MojErrNone;
 }
 
-MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, gsize& countOut, gsize& sizeOut)
 {
     countOut = 0;
     sizeOut = 0;
@@ -186,8 +186,8 @@ MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, 
 
     m_it->SeekToFirst();
 
-    MojSize count = 0;
-    MojSize size = 0;
+    gsize count = 0;
+    gsize size = 0;
     MojErrCheck(err);
 
     for (m_it->Seek(*key.impl()); m_it->Valid(); m_it->Next())

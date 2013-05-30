@@ -31,7 +31,7 @@ class MojSharedTokenSet : public MojRefCounted
 public:
 	typedef MojVector<MojString> TokenVec;
 
-	virtual MojErr addToken(const MojChar* str, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut) = 0;
+	virtual MojErr addToken(const MojChar* str, guint8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut) = 0;
 	virtual MojErr tokenSet(TokenVec& vecOut, MojObject& tokenObjOut) const = 0;
 };
 

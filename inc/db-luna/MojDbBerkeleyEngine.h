@@ -48,21 +48,21 @@ public:
     MojDbBerkeleyCursor();
     ~MojDbBerkeleyCursor();
 
-    MojErr open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags);
+    MojErr open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn, guint32 flags);
     MojErr close();
     MojErr del();
     MojErr delPrefix(const MojDbKey& prefix);
-    MojErr get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, bool& foundOut, MojUInt32 flags);
-    MojErr stats(MojSize& countOut, MojSize& sizeOut);
-    MojErr statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut);
+    MojErr get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, bool& foundOut, guint32 flags);
+    MojErr stats(gsize& countOut, gsize& sizeOut);
+    MojErr statsPrefix(const MojDbKey& prefix, gsize& countOut, gsize& sizeOut);
 
     DBC* impl() { return m_dbc; }
 
 private:
     DBC* m_dbc;
     MojDbStorageTxn* m_txn;
-    MojSize m_recSize;
-    MojSize m_warnCount;
+    gsize m_recSize;
+    gsize m_warnCount;
 };
 
 class MojDbBerkeleyDatabase : public MojDbStorageDatabase
@@ -74,7 +74,7 @@ public:
     MojErr open(const MojChar* dbName, MojDbBerkeleyEngine* env, bool& createdOut, MojDbStorageTxn* txn);
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
     virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
     virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
     virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
@@ -100,7 +100,7 @@ private:
 
     MojErr verify();
     MojErr closeImpl();
-    void postUpdate(MojDbStorageTxn* txn, MojSize updateSize);
+    void postUpdate(MojDbStorageTxn* txn, gsize updateSize);
 
     DB* m_db;
     MojDbBerkeleyEngine* m_engine;
@@ -120,18 +120,18 @@ public:
     MojErr configure(const MojObject& conf);
     MojErr open(const MojChar* path);
     MojErr close();
-    MojErr postCommit(MojSize updateSize);
-    MojErr checkpoint(MojUInt32 minKB);
+    MojErr postCommit(gsize updateSize);
+    MojErr checkpoint(guint32 minKB);
 
-    const MojUInt32 compactStepSize(void) const { return m_compactStepSize; }
+    const guint32 compactStepSize(void) const { return m_compactStepSize; }
     DB_ENV* impl() { return m_env; }
     static MojErr translateErr(int dbErr);
 
 private:
     static const MojChar* const LockFileName;
 
-    MojErr tryCheckpoint(MojUInt32 minKB);
-    MojErr checkpointImpl(MojUInt32 minKB);
+    MojErr tryCheckpoint(guint32 minKB);
+    MojErr checkpointImpl(guint32 minKB);
     MojErr create(const MojChar* dir);
     MojErr purgeLogs();
     MojErr lockDir(const MojChar* path);
@@ -147,15 +147,15 @@ private:
     DB_ENV* m_env;
 
     MojString m_logDir;
-    MojUInt32 m_flags;
-    MojUInt32 m_logFlags;
-    MojUInt32 m_logFileSize;
-    MojUInt32 m_logRegionSize;
-    MojUInt32 m_cacheSize;
-    MojUInt32 m_maxLocks;
-    MojUInt32 m_maxLockers;
-    MojUInt32 m_checkpointMinKb;
-    MojUInt32 m_compactStepSize;
+    guint32 m_flags;
+    guint32 m_logFlags;
+    guint32 m_logFileSize;
+    guint32 m_logRegionSize;
+    guint32 m_cacheSize;
+    guint32 m_maxLocks;
+    guint32 m_maxLockers;
+    guint32 m_checkpointMinKb;
+    guint32 m_compactStepSize;
 };
 
 class MojDbBerkeleyEngine : public MojDbStorageEngine
@@ -207,7 +207,7 @@ public:
     MojErr open(const MojObject& id, MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn);
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
     virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr del(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
@@ -230,18 +230,18 @@ public:
     virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine);
     virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
     virtual const MojObject& id() const { return m_header.id(); }
-    virtual MojSize size() const { return m_dbt.size; }
+    virtual gsize size() const { return m_dbt.size; }
 
     void clear();
-    const MojByte* data() const { return (const MojByte*) m_dbt.data; }
+    const guint8* data() const { return (const guint8*) m_dbt.data; }
     bool hasPrefix(const MojDbKey& prefix) const;
     MojErr toArray(MojObject& arrayOut) const;
     MojErr toObject(MojObject& objOut) const;
 
     void id(const MojObject& id);
-    void fromBytesNoCopy(const MojByte* bytes, MojSize size);
+    void fromBytesNoCopy(const guint8* bytes, gsize size);
     MojErr fromBuffer(MojBuffer& buf);
-    MojErr fromBytes(const MojByte* bytes, MojSize size);
+    MojErr fromBytes(const guint8* bytes, gsize size);
     MojErr fromObject(const MojObject& obj);
     MojErr fromObjectVector(const MojVector<MojObject>& vec);
 
@@ -249,7 +249,7 @@ public:
 
 private:
     void freeData();
-    void setData(MojByte* bytes, MojSize size, void (*free)(void*));
+    void setData(guint8* bytes, gsize size, void (*free)(void*));
 
     DBT m_dbt;
     MojAutoPtr<MojBuffer::Chunk> m_chunk;
@@ -265,7 +265,7 @@ public:
 
     MojErr open(const MojChar* name, MojDbBerkeleyDatabase* db);
     virtual MojErr close();
-    virtual MojErr get(MojInt64& valOut);
+    virtual MojErr get(gint64& valOut);
 
     DB_SEQUENCE* impl() { return m_seq; }
 
@@ -290,15 +290,15 @@ public:
 
     DB_TXN* impl() { return m_txn; }
     MojDbBerkeleyEngine* engine() { return m_engine; }
-    void didUpdate(MojSize size) { m_updateSize += size; }
-    MojSize updateSize() const { return m_updateSize; }
+    void didUpdate(gsize size) { m_updateSize += size; }
+    gsize updateSize() const { return m_updateSize; }
 
 private:
     virtual MojErr commitImpl();
 
     MojDbBerkeleyEngine* m_engine;
     DB_TXN* m_txn;
-    MojSize m_updateSize;
+    gsize m_updateSize;
 };
 
 #endif /* MOJDBBERKELEYENGINE_H_ */

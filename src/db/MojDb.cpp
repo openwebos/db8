@@ -48,8 +48,8 @@ const MojChar* const MojDb::LastPurgedRevKey = _T("lastPurgedRev");
 const MojChar* const MojDb::LocaleKey = _T("locale");
 const MojChar* const MojDb::DbStateObjId = _T("_internal/dbstate");
 const MojChar* const MojDb::VersionFileName = _T("_version");
-const MojUInt32 MojDb::AutoBatchSize = 1000;
-const MojUInt32 MojDb::AutoCompactSize = 5000;
+const guint32 MojDb::AutoBatchSize = 1000;
+const guint32 MojDb::AutoCompactSize = 5000;
 
 MojLogger MojDb::s_log(_T("db.mojodb"));
 
@@ -225,12 +225,12 @@ MojErr MojDb::close()
     return err;
 }
 
-MojErr MojDb::del(const MojObject& id, bool& foundOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::del(const MojObject& id, bool& foundOut, guint32 flags, MojDbReqRef req)
 {
     MojLogTrace(s_log);
 
     foundOut = false;
-    MojUInt32 count = 0;
+    guint32 count = 0;
     MojObject delObj;
     MojErr err = del(&id, &id + 1, count, delObj, flags, req);
     MojErrCheck(err);
@@ -239,7 +239,7 @@ MojErr MojDb::del(const MojObject& id, bool& foundOut, MojUInt32 flags, MojDbReq
     return MojErrNone;
 }
 
-MojErr MojDb::del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32& countOut, MojObject& arrOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::del(const MojObject* idsBegin, const MojObject* idsEnd, guint32& countOut, MojObject& arrOut, guint32 flags, MojDbReqRef req)
 {
     MojAssert(idsBegin || idsBegin == idsEnd);
     MojAssert(idsEnd >= idsBegin);
@@ -250,7 +250,7 @@ MojErr MojDb::del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32&
     MojErrCheck(err);
 
     // do the dels
-    MojUInt32 count= 0;
+    guint32 count= 0;
     for (const MojObject* i = idsBegin; i != idsEnd; ++i) {
         MojObject foundObj;
         bool found = false;
@@ -270,7 +270,7 @@ MojErr MojDb::del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32&
     return MojErrNone;
 }
 
-MojErr MojDb::del(const MojDbQuery& query, MojUInt32& countOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::del(const MojDbQuery& query, guint32& countOut, guint32 flags, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     countOut = 0;
@@ -287,7 +287,7 @@ MojErr MojDb::del(const MojDbQuery& query, MojUInt32& countOut, MojUInt32 flags,
     return MojErrNone;
 }
 
-MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::delKind(const MojObject& id, bool& foundOut, guint32 flags, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     foundOut = false;
@@ -333,7 +333,7 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
         MojErrCheck(err);
         err = query.includeDeleted(true);
         MojErrCheck(err);
-        MojUInt32 count;
+        guint32 count;
         req->fixmode(true);
         err = delImpl(query, count, req, flags | FlagPurge);
         MojErrCheck(err);
@@ -397,7 +397,7 @@ MojErr MojDb::get(const MojObject* idsBegin, const MojObject* idsEnd, MojObjectV
     return MojErrNone;
 }
 
-MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, MojUInt32& countOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, guint32& countOut, guint32 flags, MojDbReqRef req)
 {
     MojLogTrace(s_log);
 
@@ -410,8 +410,8 @@ MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, MojUInt32& 
     MojErrCheck(err);
     MojAssert(cursor.txn());
 
-    MojUInt32 count = 0;
-    MojUInt32 warns = 0;
+    guint32 count = 0;
+    guint32 warns = 0;
     bool found = false;
     MojObject prev;
     for (;;) {
@@ -449,7 +449,7 @@ MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, MojUInt32& 
     return MojErrNone;
 }
 
-MojErr MojDb::put(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::put(MojObject& obj, guint32 flags, MojDbReqRef req)
 {
     MojLogTrace(s_log);
 
@@ -459,7 +459,7 @@ MojErr MojDb::put(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
     return MojErrNone;
 }
 
-MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::put(MojObject* begin, const MojObject* end, guint32 flags, MojDbReqRef req)
 {
     MojAssert(begin || begin == end);
     MojAssert(end >= begin);
@@ -478,7 +478,7 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
     return MojErrNone;
 }
 
-MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::putKind(MojObject& obj, guint32 flags, MojDbReqRef req)
 {
     MojErr err = beginReq(req, true);
     MojErrCheck(err);
@@ -704,7 +704,7 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
         return MojErrNone;
 
     // update revision
-    MojInt64 rev;
+    gint64 rev;
     MojErr err = nextId(rev);
     MojErrCheck(err);
     err = obj.put(RevKey, rev);
@@ -763,7 +763,7 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
     return MojErrNone;
 }
 
-MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags)
+MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, guint32 flags)
 {
     MojAssert(item);
     MojLogTrace(s_log);
@@ -776,7 +776,7 @@ MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem
         MojErr err = m_kindEngine.update(NULL, &obj, req, OpDelete, tokenSet);
         MojErrCheck(err);
         // gross layering violation
-        err = req.txn()->offsetQuota(-(MojInt64) item->size());
+        err = req.txn()->offsetQuota(-(gint64) item->size());
         MojErrCheck(err);
         // permanently delete
         bool found = false;
@@ -798,7 +798,7 @@ MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem
     return MojErrNone;
 }
 
-MojErr MojDb::delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags)
+MojErr MojDb::delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, guint32 flags)
 {
     MojLogTrace(s_log);
 
@@ -819,14 +819,14 @@ MojErr MojDb::delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOu
     return MojErrNone;
 }
 
-MojErr MojDb::delImpl(const MojDbQuery& quer, MojUInt32& countOut, MojDbReq& req, MojUInt32 flags)
+MojErr MojDb::delImpl(const MojDbQuery& quer, guint32& countOut, MojDbReq& req, guint32 flags)
 {
     MojLogTrace(s_log);
 
     countOut = 0;
-    MojInt32 warns = 0;
+    gint32 warns = 0;
     MojDbQuery newQuery = quer;
-    MojUInt32 queryLimit = newQuery.limit();
+    guint32 queryLimit = newQuery.limit();
 
     if(newQuery.limit() == MojDbQuery::LimitDefault)
         newQuery.limit(AutoBatchSize);
@@ -839,8 +839,8 @@ MojErr MojDb::delImpl(const MojDbQuery& quer, MojUInt32& countOut, MojDbReq& req
         MojErrCheck(err);
         MojAssert(cursor.txn());
 
-        MojUInt32 count = 0;
-        MojUInt32 numberInBatch = 0;
+        guint32 count = 0;
+        guint32 numberInBatch = 0;
 
         bool found = false;
 
@@ -927,7 +927,7 @@ MojErr MojDb::getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op
     return MojErrNone;
 }
 
-MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema)
+MojErr MojDb::putImpl(MojObject& obj, guint32 flags, MojDbReq& req, bool checkSchema)
 {
     MojLogTrace(s_log);
 
@@ -965,7 +965,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
         } else if (!MojFlagGet(flags, FlagForce)) {
             // if the force flag is not set, throw error if we are updating
             // an existing, non-deleted object and no rev was specified
-            MojInt64 rev;
+            gint64 rev;
             if (obj.get(RevKey, rev) == false) {
                 bool deleted = false;
                 if (!prev.get(DelKey, deleted) || !deleted)
@@ -975,9 +975,9 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
     }
 
     // if the new object has a rev and it doesn't match the old rev, don't do the update
-    MojInt64 newRev;
+    gint64 newRev;
     if (prevPtr != NULL && obj.get(RevKey, newRev)) {
-        MojInt64 oldRev;
+        gint64 oldRev;
         MojErr err = prevPtr->getRequired(RevKey, oldRev);
         MojErrCheck(err);
         if (!MojFlagGet(flags, FlagForce) && newRev != oldRev)
@@ -995,7 +995,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
     return MojErrNone;
 }
 
-MojErr MojDb::nextId(MojInt64& idOut)
+MojErr MojDb::nextId(gint64& idOut)
 {
     MojErr err = m_idSeq->get(idOut);
     MojErrCheck(err);
@@ -1199,7 +1199,7 @@ MojErr MojDb::assignIds(MojObject& obj)
                 if (arrayIter->type() == MojObject::TypeObject) {
                     // assign an id to this object, and call assignIds recursively
                     if (!arrayIter->contains(IdKey)) {
-                        MojInt64 id;
+                        gint64 id;
                         MojErr err = nextId(id);
                         MojErrCheck(err);
                         MojString idStr;

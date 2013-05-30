@@ -94,7 +94,7 @@ MojErr MojDbPutHandler::validateWildcard(const MojString& val, MojErr errToThrow
 {
 	if (val.empty())
 		MojErrThrow(errToThrow);
-	MojSize wildcardPos = val.find(_T('*'));
+	gsize wildcardPos = val.find(_T('*'));
 	if (wildcardPos != MojInvalidSize) {
 		if (wildcardPos != val.length() - 1 ||
 			(wildcardPos != 0 && val.at(wildcardPos - 1) != _T('.'))) {
@@ -104,7 +104,7 @@ MojErr MojDbPutHandler::validateWildcard(const MojString& val, MojErr errToThrow
 	return MojErrNone;
 }
 
-bool MojDbPutHandler::matchWildcard(const MojString& expr, const MojChar* val, MojSize len)
+bool MojDbPutHandler::matchWildcard(const MojString& expr, const MojChar* val, gsize len)
 {
 	if (expr.last() == _T('*') &&
 		len >= (expr.length() - 1) &&

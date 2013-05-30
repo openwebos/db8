@@ -40,7 +40,7 @@ MojErr MojDbLevelSeq::open(const MojChar* name, MojDbLevelDatabase* db)
     MojErr err;
 
     m_db = db;
-    err = m_key.fromBytes(reinterpret_cast<const MojByte  *>(name), strlen(name));
+    err = m_key.fromBytes(reinterpret_cast<const guint8  *>(name), strlen(name));
     MojErrCheck(err);
 
     MojDbLevelItem val;
@@ -77,7 +77,7 @@ MojErr MojDbLevelSeq::close()
     return MojErrNone;
 }
 
-MojErr MojDbLevelSeq::get(MojInt64& valOut)
+MojErr MojDbLevelSeq::get(gint64& valOut)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
@@ -97,7 +97,7 @@ MojErr MojDbLevelSeq::allocateMore()
     return store(m_allocated + 100);
 }
 
-MojErr MojDbLevelSeq::store(MojInt64 next)
+MojErr MojDbLevelSeq::store(gint64 next)
 {
     MojAssert( next >= m_next );
     MojErr err;

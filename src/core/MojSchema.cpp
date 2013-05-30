@@ -589,7 +589,7 @@ MojErr MojSchema::StringLenRule<COMP>::validate(const MojObject& val, const MojO
 		MojString str;
 		MojErr err = val.stringValue(str);
 		MojErrCheck(err);
-		MojInt64 len = (MojInt64) str.length();
+		gint64 len = (gint64) str.length();
 		if (!COMP()(len, m_val)) {
 			resOut.valid(false);
 			MojErr err = resOut.m_msg.assign(_T("string length out of range"));

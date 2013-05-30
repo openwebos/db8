@@ -97,7 +97,7 @@ MojErr MojFileAppender::append(MojLogger::Level level, MojLogger* logger, const 
 	err =  m_buf.format(_T("[%04d-%02d-%02d %02d:%02d:%02d:%03d] [%p] [%s]"),
 			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour,
 			tm.tm_min, tm.tm_sec, time.millisecsPart(),
-			(void*) (MojIntPtr) MojThreadCurrentId(),
+			(void*) (gintptr) MojThreadCurrentId(),
 			MojLogger::stringFromLevel(level));
 	MojErrCheckNoLog(err);
 	if (logger) {
@@ -113,10 +113,10 @@ MojErr MojFileAppender::append(MojLogger::Level level, MojLogger* logger, const 
 	MojErrCheckNoLog(err);
 
 	// append to file
-	const MojByte* begin = (const MojByte*) m_buf.begin();
-	const MojByte* end = (const MojByte*) m_buf.end();
+	const guint8* begin = (const guint8*) m_buf.begin();
+	const guint8* end = (const guint8*) m_buf.end();
 	while (begin < end) {
-		MojSize written = 0;
+		gsize written = 0;
 		err = MojFileWrite(m_file, begin, end - begin, written);
 		MojErrCheckNoLog(err);
 		begin += written;
@@ -338,11 +338,11 @@ void MojLogEngine::updateLoggerLevel(MojLogger* logger)
 
 	bool matched = false;
 	const MojChar* loggerName = logger->name();
-	MojSize loggerLen = MojStrLen(loggerName);
+	gsize loggerLen = MojStrLen(loggerName);
 
 	for (LevelMap::ConstIterator i = m_levels.begin(); i != m_levels.end(); ++i) {
 		const MojChar* confName = i.key().data();
-		MojSize confLen = i.key().length();
+		gsize confLen = i.key().length();
 
 		if (loggerLen >= confLen &&
 			!MojStrNCmp(loggerName, confName, confLen) &&

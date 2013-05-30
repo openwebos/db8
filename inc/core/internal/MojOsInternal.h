@@ -21,7 +21,7 @@
 #define MOJOSINTERNAL_H_
 
 #ifdef MOJ_NEED_ATOMIC_INIT
-inline void MojAtomicInit(MojAtomicT* a, MojInt32 i)
+inline void MojAtomicInit(MojAtomicT* a, gint32 i)
 {
 	MojAssert(a);
 	MojAtomicSet(a, i);
@@ -36,7 +36,7 @@ inline void MojAtomicDestroy(MojAtomicT* a)
 #endif /* MOJ_NEED_ATOMIC_DESTROY */
 
 #ifdef MOJ_NEED_ATOMIC_GET
-inline MojInt32 MojAtomicGet(const MojAtomicT* a)
+inline gint32 MojAtomicGet(const MojAtomicT* a)
 {
 	MojAssert(a);
 	return a->val;
@@ -44,7 +44,7 @@ inline MojInt32 MojAtomicGet(const MojAtomicT* a)
 #endif /* MOJ_NEED_ATOMIC_GET */
 
 #ifdef MOJ_NEED_ATOMIC_SET
-inline void MojAtomicSet(MojAtomicT* a, MojInt32 i)
+inline void MojAtomicSet(MojAtomicT* a, gint32 i)
 {
 	MojAssert(a);
 	a->val = i;
@@ -59,14 +59,14 @@ inline MojErr MojErrno()
 #endif /* MOJ_USE_ERRNO */
 
 #ifdef MOJ_USE_GNU_STRERROR_R
-inline const MojChar* MojStrError(int err, MojChar* buf, MojSize bufLen)
+inline const MojChar* MojStrError(int err, MojChar* buf, gsize bufLen)
 {
 	return strerror_r(err, buf, bufLen);
 }
 #endif /* MOJ_USE_GNU_STRERROR_R */
 
 #ifdef MOJ_USE_POSIX_STRERROR_R
-inline const MojChar* MojStrError(int err, MojChar* buf, MojSize bufLen)
+inline const MojChar* MojStrError(int err, MojChar* buf, gsize bufLen)
 {
 	strerror_r(err, buf, bufLen);
 	return buf;
@@ -97,14 +97,14 @@ inline void MojFree(void* p)
 #endif /* MOJ_USE_FREE */
 
 #ifdef MOJ_USE_MALLOC
-inline void* MojMalloc(MojSize size)
+inline void* MojMalloc(gsize size)
 {
 	return malloc(size);
 }
 #endif /* MOJ_USE_MALLOC */
 
 #ifdef MOJ_USE_REALLOC
-inline void* MojRealloc(void* p, MojSize size)
+inline void* MojRealloc(void* p, gsize size)
 {
 	return realloc(p, size);
 }
@@ -118,14 +118,14 @@ inline int MojRand(unsigned int* seed)
 #endif /* MOJ_USE_RAND_R */
 
 #ifdef MOJ_USE_BZERO
-inline void MojZero(void* dest, MojSize size)
+inline void MojZero(void* dest, gsize size)
 {
 	bzero(dest, size);
 }
 #endif /* MOJ_USE_BZERO */
 
 #ifdef MOJ_USE_MEMCHR
-inline const MojChar* MojMemChr(const MojChar* data, MojChar c, MojSize len)
+inline const MojChar* MojMemChr(const MojChar* data, MojChar c, gsize len)
 {
 	MojAssert(data || len == 0);
 	return (const MojChar*) memchr(data, c, len);
@@ -133,7 +133,7 @@ inline const MojChar* MojMemChr(const MojChar* data, MojChar c, MojSize len)
 #endif /* MOJ_USE_MEMCHR */
 
 #ifdef MOJ_USE_MEMRCHR
-inline const MojChar* MojMemChrReverse(const MojChar* data, MojChar c, MojSize len)
+inline const MojChar* MojMemChrReverse(const MojChar* data, MojChar c, gsize len)
 {
 	MojAssert(data || len == 0);
 	return (const MojChar*) memrchr(data, c, len);
@@ -141,7 +141,7 @@ inline const MojChar* MojMemChrReverse(const MojChar* data, MojChar c, MojSize l
 #endif /* MOJ_USE_MEMRCHR */
 
 #ifdef MOJ_USE_MEMCMP
-inline int MojMemCmp(const void* p1, const void* p2, MojSize size)
+inline int MojMemCmp(const void* p1, const void* p2, gsize size)
 {
 	MojAssert((p1 && p2) || size == 0);
 	return memcmp(p1, p2, size);
@@ -149,7 +149,7 @@ inline int MojMemCmp(const void* p1, const void* p2, MojSize size)
 #endif /* MOJ_USE_MEMCMP */
 
 #ifdef MOJ_USE_MEMCPY
-inline void* MojMemCpy(void* dest, const void* src, MojSize size)
+inline void* MojMemCpy(void* dest, const void* src, gsize size)
 {
 	MojAssert((dest && src) || size == 0);
 	return memcpy(dest, (void*) src, size);
@@ -157,7 +157,7 @@ inline void* MojMemCpy(void* dest, const void* src, MojSize size)
 #endif /* MOJ_USE_MEMCPY */
 
 #ifdef MOJ_USE_MEMMOVE
-inline void* MojMemMove(void* dest, const void* src, MojSize size)
+inline void* MojMemMove(void* dest, const void* src, gsize size)
 {
 	MojAssert((dest && src) || size == 0);
 	return memmove(dest, (void*) src, size);
@@ -194,7 +194,7 @@ inline int MojStrCaseCmp(const MojChar* str1, const MojChar* str2)
 #endif /* MOJ_USE_STRCASECMP */
 
 #ifdef MOJ_USE_STRNCASECMP
-inline int MojStrNCaseCmp(const MojChar* str1, const MojChar* str2, MojSize len)
+inline int MojStrNCaseCmp(const MojChar* str1, const MojChar* str2, gsize len)
 {
 	MojAssert(str1 && str2);
 	return strncasecmp(str1, str2, len);
@@ -210,7 +210,7 @@ inline int MojStrCmp(const MojChar* str1, const MojChar* str2)
 #endif /* MOJ_USE_STRCMP */
 
 #ifdef MOJ_USE_STRNCMP
-inline int MojStrNCmp(const MojChar* str1, const MojChar* str2, MojSize len)
+inline int MojStrNCmp(const MojChar* str1, const MojChar* str2, gsize len)
 {
 	MojAssert(str1 && str2);
 	return strncmp(str1, str2, len);
@@ -226,7 +226,7 @@ inline MojChar* MojStrCpy(MojChar* strDest, const MojChar* strSrc)
 #endif /* MOJ_USE_STRCMP */
 
 #ifdef MOJ_USE_STRNCPY
-inline MojChar* MojStrNCpy(MojChar* strDest, const MojChar* strSrc, MojSize n)
+inline MojChar* MojStrNCpy(MojChar* strDest, const MojChar* strSrc, gsize n)
 {
 	MojAssert(strDest && strSrc);
 	return strncpy(strDest, strSrc, n);
@@ -234,15 +234,15 @@ inline MojChar* MojStrNCpy(MojChar* strDest, const MojChar* strSrc, MojSize n)
 #endif /* MOJ_USE_STRNCPY */
 
 #ifdef MOJ_USE_STRLEN
-inline MojSize MojStrLen(const MojChar* str)
+inline gsize MojStrLen(const MojChar* str)
 {
 	MojAssert(str);
-	return (MojSize) strlen(str);
+	return (gsize) strlen(str);
 }
 #endif /* MOJ_USE_STRLEN */
 
 #ifdef MOJ_USE_STRTOD
-inline MojDouble MojStrToDouble(const MojChar* str, const MojChar** end)
+inline gdouble MojStrToDouble(const MojChar* str, const MojChar** end)
 {
 	MojAssert(str);
 	return strtod(str, (MojChar**) end);
@@ -250,7 +250,7 @@ inline MojDouble MojStrToDouble(const MojChar* str, const MojChar** end)
 #endif /* MOJ_USE_STRTOD */
 
 #ifdef MOJ_USE_STRTOLL
-inline MojInt64 MojStrToInt64(const MojChar* str, const MojChar** end, int base)
+inline gint64 MojStrToInt64(const MojChar* str, const MojChar** end, int base)
 {
 	MojAssert(str);
 	return strtoll(str, (MojChar**) end, base);
@@ -300,18 +300,18 @@ inline MojChar MojToUpper(MojChar c)
 #endif /* MOJ_USE_TOUPPER */
 
 #ifdef MOJ_LITTLE_ENDIAN
-inline MojUInt16 MojUInt16ToBigEndian(MojUInt16 val)
+inline guint16 MojUInt16ToBigEndian(guint16 val)
 {
-	return (MojUInt16) (((val & 0xFF00) >> 8) + ((val & 0xFF) << 8));
+	return (guint16) (((val & 0xFF00) >> 8) + ((val & 0xFF) << 8));
 }
 
-inline MojUInt32 MojUInt32ToBigEndian(MojUInt32 val)
+inline guint32 MojUInt32ToBigEndian(guint32 val)
 {
 	return ((val & 0xFF000000) >> 24) + ((val & 0xFF0000) >> 8)
 		+ ((val & 0xFF00) << 8) + ((val & 0xFF) << 24);
 }
 
-inline MojInt64 MojInt64ToBigEndian(MojInt64 val)
+inline gint64 MojInt64ToBigEndian(gint64 val)
 {
 	return ((val & 0xFF00000000000000LL) >> 56) + ((val & 0xFF000000000000LL) >> 40)
 		+ ((val & 0xFF0000000000LL) >> 24) + ((val & 0xFF00000000LL) >> 8)
@@ -319,17 +319,17 @@ inline MojInt64 MojInt64ToBigEndian(MojInt64 val)
 		+ ((val & 0xFF00) << 40) + ((val & 0xFF) << 56);
 }
 #else /* MOJ_LITTLE_ENDIAN */
-inline MojUInt16 MojUInt16ToBigEndian(MojUInt16 val)
+inline guint16 MojUInt16ToBigEndian(guint16 val)
 {
 	return val;
 }
 
-inline MojUInt32 MojUInt32ToBigEndian(MojUInt32 val)
+inline guint32 MojUInt32ToBigEndian(guint32 val)
 {
 	return val;
 }
 
-inline MojInt64 MojInt64ToBigEndian(MojInt64 val)
+inline gint64 MojInt64ToBigEndian(gint64 val)
 {
 	return val;
 }

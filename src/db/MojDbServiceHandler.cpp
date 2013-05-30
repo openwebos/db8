@@ -162,8 +162,8 @@ MojErr MojDbServiceHandler::handleDel(MojServiceMessage* msg, MojObject& payload
 	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
-	MojUInt32 count = 0;
-	MojUInt32 flags = MojDb::FlagNone;
+	guint32 count = 0;
+	guint32 flags = MojDb::FlagNone;
 
 	bool purge = false;
 	if (payload.get(MojDbServiceDefs::PurgeKey, purge) && purge) {
@@ -184,7 +184,7 @@ MojErr MojDbServiceHandler::handleDel(MojServiceMessage* msg, MojObject& payload
 		MojDbQuery query;
 		err = query.fromObject(obj);
 		MojErrCheck(err);
-		MojUInt32 queryCount = 0;
+		guint32 queryCount = 0;
 		err = m_db.del(query, queryCount, flags, req);
 		MojErrCheck(err);
 		count += queryCount;
@@ -227,7 +227,7 @@ MojErr MojDbServiceHandler::handleDump(MojServiceMessage* msg, MojObject& payloa
 	bool incDel = true;
 	payload.get(MojDbServiceDefs::IncludeDeletedKey, incDel);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = m_db.dump(path, count, incDel, req);
 	MojErrCheck(err);
 
@@ -289,7 +289,7 @@ MojErr MojDbServiceHandler::handleLoad(MojServiceMessage* msg, MojObject& payloa
 	MojErr err = payload.getRequired(MojDbServiceDefs::PathKey, path);
 	MojErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = m_db.load(path, count, MojDb::FlagNone, req);
 	MojErrCheck(err);
 
@@ -305,7 +305,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojObject obj;
 	
 
@@ -315,7 +315,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 		MojObject::ArrayIterator begin;
 		bool ignoreM = false;
 		payload.get(MojDbServiceDefs::IgnoreMissingKey, ignoreM);
-		MojUInt32 mflags = MojDb::FlagNone;
+		guint32 mflags = MojDb::FlagNone;
 		if (ignoreM)
 			mflags = mflags | MojDb::FlagIgnoreMissing;
 		err = obj.arrayBegin(begin);
@@ -337,7 +337,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 		MojDbQuery query;
 		err = query.fromObject(obj);
 		MojErrCheck(err);
-		MojUInt32 queryCount = 0;
+		guint32 queryCount = 0;
 		err = m_db.merge(query, props, queryCount, MojDb::FlagNone, req);
 		MojErrCheck(err);
 		count += queryCount;
@@ -356,10 +356,10 @@ MojErr MojDbServiceHandler::handlePurge(MojServiceMessage* msg, MojObject& paylo
 	MojAssert(msg);
 	MojLogTrace(s_log);
 
-	MojInt64 window = -1;
+	gint64 window = -1;
 	payload.get(MojDbServiceDefs::WindowKey, window);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojErr err = m_db.purge(count, window, req);
 	MojLogInfo(s_log, _T("PurgeComplete: Count: %d \n"), count);
 	MojErrCheck(err);
@@ -510,7 +510,7 @@ MojErr MojDbServiceHandler::handleReserveIds(MojServiceMessage* msg, MojObject& 
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
-	MojInt64 count;
+	gint64 count;
 	MojErr err = payload.getRequired(MojDbServiceDefs::CountKey, count);
 	MojErrCheck(err);
 
@@ -524,10 +524,10 @@ MojErr MojDbServiceHandler::handleReserveIds(MojServiceMessage* msg, MojObject& 
 	err = writer.beginArray();
 	MojErrCheck(err);
 
-	if (count > (MojInt64) MaxReserveIdCount) {
+	if (count > (gint64) MaxReserveIdCount) {
 		MojErrThrowMsg(MojErrDbMaxCountExceeded, _T("cannot reserve more than %d ids"), MaxReserveIdCount);
 	}
-	for (MojInt64 i = 0; i < count; ++i) {
+	for (gint64 i = 0; i < count; ++i) {
 		MojObject id;
 		err = m_db.reserveId(id);
 		MojErrCheck(err);
@@ -643,7 +643,7 @@ MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload,
 	MojDbQuery query;
 	err = query.fromObject(queryObj);
 	MojErrCheck(err);
-	MojUInt32 limit = query.limit();
+	guint32 limit = query.limit();
 	if (limit == MojDbQuery::LimitDefault){
 		query.limit(MaxQueryLimit);
 	} else if (limit > MaxQueryLimit) {
@@ -689,10 +689,10 @@ MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload,
 
 	// append count
 	if (doCount) {
-		MojUInt32 count = 0;
+		guint32 count = 0;
 		err = cursor.count(count);
 		MojErrCheck(err);
-		err = writer.intProp(MojDbServiceDefs::CountKey, (MojInt64) count);
+		err = writer.intProp(MojDbServiceDefs::CountKey, (gint64) count);
 		MojErrCheck(err);
 	}
 

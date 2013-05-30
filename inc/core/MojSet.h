@@ -83,7 +83,7 @@ public:
 	MojSet(const MojSet& set) : MojRbTreeBase(set) {}
 	~MojSet() { MojRbTreeBase::release(); }
 
-	MojSize size() const { return MojRbTreeBase::size(); }
+	gsize size() const { return MojRbTreeBase::size(); }
 	bool empty() const { return MojRbTreeBase::empty(); }
 
 	ConstIterator begin() const { return ConstIterator(MojRbTreeBase::begin()); }

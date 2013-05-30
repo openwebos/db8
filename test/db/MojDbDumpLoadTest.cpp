@@ -53,7 +53,7 @@ MojErr MojDbDumpLoadTest::run()
 	// load
 	err = MojFileFromString(MojLoadTestFileName, MojTestStr);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = db.load(MojLoadTestFileName, count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 11);
@@ -105,7 +105,7 @@ MojErr MojDbDumpLoadTest::checkCount(MojDb& db)
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = cursor.count(count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 10);

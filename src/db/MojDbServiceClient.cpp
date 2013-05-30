@@ -97,7 +97,7 @@ MojErr MojDbServiceClient::getPermissions(Signal::SlotRef handler, const MojChar
 }
 
 MojErr MojDbServiceClient::put(Signal::SlotRef handler, const MojObject* begin,
-							   const MojObject* end, MojUInt32 flags)
+							   const MojObject* end, guint32 flags)
 {
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::PutMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
@@ -114,7 +114,7 @@ MojErr MojDbServiceClient::get(Signal::SlotRef handler, const MojObject* idsBegi
 }
 
 MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojObject* idsBegin,
-							   const MojObject* idsEnd, MojUInt32 flags)
+							   const MojObject* idsEnd, guint32 flags)
 {
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::DelMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd, flags);
 	MojErrCheck(err);
@@ -122,7 +122,7 @@ MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojObject* idsBegi
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojDbQuery& query, MojUInt32 flags)
+MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojDbQuery& query, guint32 flags)
 {
 	MojErr err = queryRequest(handler, MojDbServiceDefs::DelMethod, query, flags);
 	MojErrCheck(err);
@@ -131,7 +131,7 @@ MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojDbQuery& query,
 }
 
 MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojObject* begin,
-								 const MojObject* end, MojUInt32 flags)
+								 const MojObject* end, guint32 flags)
 {
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::MergeMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
@@ -140,7 +140,7 @@ MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojObject* begin
 }
 
 MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojDbQuery& query,
-								 const MojObject& props, MojUInt32 flags)
+								 const MojObject& props, guint32 flags)
 {
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
@@ -218,7 +218,7 @@ MojErr MojDbServiceClient::compact(Signal::SlotRef handler)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::purge(Signal::SlotRef handler, MojUInt32 window)
+MojErr MojDbServiceClient::purge(Signal::SlotRef handler, guint32 window)
 {
 	MojErr err = intRequest(handler, MojDbServiceDefs::PurgeMethod, MojDbServiceDefs::WindowKey, window);
 	MojErrCheck(err);
@@ -234,7 +234,7 @@ MojErr MojDbServiceClient::purgeStatus(Signal::SlotRef handler)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::reserveIds(Signal::SlotRef handler, MojUInt32 count)
+MojErr MojDbServiceClient::reserveIds(Signal::SlotRef handler, guint32 count)
 {
 	MojErr err = intRequest(handler, MojDbServiceDefs::ReserveIdsMethod, MojDbServiceDefs::CountKey, count);
 	MojErrCheck(err);
@@ -254,7 +254,7 @@ MojErr MojDbServiceClient::emptyRequest(Signal::SlotRef handler, const MojChar* 
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::intRequest(Signal::SlotRef handler, const MojChar* method, const MojChar* prop, MojInt64 val)
+MojErr MojDbServiceClient::intRequest(Signal::SlotRef handler, const MojChar* method, const MojChar* prop, gint64 val)
 {
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
@@ -270,7 +270,7 @@ MojErr MojDbServiceClient::intRequest(Signal::SlotRef handler, const MojChar* me
 }
 
 MojErr MojDbServiceClient::arrayRequest(Signal::SlotRef handler, const MojChar* method, const MojChar* prop,
-										const MojObject* begin, const MojObject* end, MojUInt32 flags)
+										const MojObject* begin, const MojObject* end, guint32 flags)
 {
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
@@ -288,7 +288,7 @@ MojErr MojDbServiceClient::arrayRequest(Signal::SlotRef handler, const MojChar* 
 
 
 MojErr MojDbServiceClient::queryRequest(Signal::SlotRef handler, const MojChar* method,
-										const MojDbQuery& query, MojUInt32 flags, bool watch, bool count, MojUInt32 numReplies)
+										const MojDbQuery& query, guint32 flags, bool watch, bool count, guint32 numReplies)
 {
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
@@ -306,7 +306,7 @@ MojErr MojDbServiceClient::queryRequest(Signal::SlotRef handler, const MojChar* 
 
 
 MojErr MojDbServiceClient::formatArrayParams(MojObjectVisitor& writer, const MojChar* prop,
-											const MojObject* begin, const MojObject* end, MojUInt32 flags)
+											const MojObject* begin, const MojObject* end, guint32 flags)
 {
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
@@ -328,7 +328,7 @@ MojErr MojDbServiceClient::formatArrayParams(MojObjectVisitor& writer, const Moj
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::formatIntParams(MojObjectVisitor& writer, const MojChar* prop, MojInt64 val)
+MojErr MojDbServiceClient::formatIntParams(MojObjectVisitor& writer, const MojChar* prop, gint64 val)
 {
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
@@ -350,7 +350,7 @@ MojErr MojDbServiceClient::formatEmptyParams(MojObjectVisitor& writer)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::formatQueryParams(MojObjectVisitor& writer, const MojDbQuery& query, MojUInt32 flags, bool watch, bool count)
+MojErr MojDbServiceClient::formatQueryParams(MojObjectVisitor& writer, const MojDbQuery& query, guint32 flags, bool watch, bool count)
 {
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
@@ -374,7 +374,7 @@ MojErr MojDbServiceClient::formatQueryParams(MojObjectVisitor& writer, const Moj
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClient::formatFlags(MojObjectVisitor& writer, MojUInt32 flags)
+MojErr MojDbServiceClient::formatFlags(MojObjectVisitor& writer, guint32 flags)
 {
 	if (MojFlagGet(flags, MojDb::FlagPurge)) {
 		MojErr err = writer.boolProp(MojDbServiceDefs::PurgeKey, true);
@@ -403,7 +403,7 @@ MojErr MojDbServiceClientBatch::execute(Signal::SlotRef handler)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::put(const MojObject* begin, const MojObject* end, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::put(const MojObject* begin, const MojObject* end, guint32 flags)
 {
 	MojErr err = arrayRequest(MojDbServiceDefs::PutMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
@@ -419,7 +419,7 @@ MojErr MojDbServiceClientBatch::get(const MojObject* idsBegin, const MojObject* 
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::del(const MojObject* idsBegin, const MojObject* idsEnd, guint32 flags)
 {
 	MojErr err = arrayRequest(MojDbServiceDefs::DelMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd, flags);
 	MojErrCheck(err);
@@ -427,7 +427,7 @@ MojErr MojDbServiceClientBatch::del(const MojObject* idsBegin, const MojObject* 
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::del(const MojDbQuery& query, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::del(const MojDbQuery& query, guint32 flags)
 {
 	MojErr err = queryRequest(MojDbServiceDefs::DelMethod, query, flags);
 	MojErrCheck(err);
@@ -435,7 +435,7 @@ MojErr MojDbServiceClientBatch::del(const MojDbQuery& query, MojUInt32 flags)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::merge(const MojObject* begin, const MojObject* end, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::merge(const MojObject* begin, const MojObject* end, guint32 flags)
 {
 	MojErr err = arrayRequest(MojDbServiceDefs::MergeMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
@@ -443,7 +443,7 @@ MojErr MojDbServiceClientBatch::merge(const MojObject* begin, const MojObject* e
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::merge(const MojDbQuery& query, const MojObject& props, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::merge(const MojDbQuery& query, const MojObject& props, guint32 flags)
 {
 	MojObjectVisitor& writer = m_req->writer();
 
@@ -503,7 +503,7 @@ MojErr MojDbServiceClientBatch::emptyRequest(const MojChar* method)
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::intRequest(const MojChar* method, const MojChar* prop, MojInt64 val)
+MojErr MojDbServiceClientBatch::intRequest(const MojChar* method, const MojChar* prop, gint64 val)
 {
 	MojObjectVisitor& writer = m_req->writer();
 
@@ -517,7 +517,7 @@ MojErr MojDbServiceClientBatch::intRequest(const MojChar* method, const MojChar*
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::arrayRequest(const MojChar* method, const MojChar* prop, const MojObject* begin, const MojObject* end, MojUInt32 flags)
+MojErr MojDbServiceClientBatch::arrayRequest(const MojChar* method, const MojChar* prop, const MojObject* begin, const MojObject* end, guint32 flags)
 {
 	MojObjectVisitor& writer = m_req->writer();
 
@@ -531,7 +531,7 @@ MojErr MojDbServiceClientBatch::arrayRequest(const MojChar* method, const MojCha
 	return MojErrNone;
 }
 
-MojErr MojDbServiceClientBatch::queryRequest(const MojChar* method, const MojDbQuery& query, MojUInt32 flags, bool count)
+MojErr MojDbServiceClientBatch::queryRequest(const MojChar* method, const MojDbQuery& query, guint32 flags, bool count)
 {
 	MojObjectVisitor& writer = m_req->writer();
 

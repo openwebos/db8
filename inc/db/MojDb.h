@@ -54,8 +54,8 @@ public:
 	static const MojChar* const KindKey;
 	static const MojChar* const RevKey;
 	static const MojChar* const SyncKey;
-	static const MojUInt32 AutoBatchSize;
-	static const MojUInt32 AutoCompactSize;
+	static const guint32 AutoBatchSize;
+	static const guint32 AutoCompactSize;
 	static MojLogger s_log;
 
 	MojDb();
@@ -70,26 +70,26 @@ public:
 	MojErr updateLocale(const MojChar* locale, MojDbReqRef req = MojDbReq());
 	MojErr getLocale(MojString& valOut, MojDbReq& req);
 	MojErr compact();
-	MojErr purge(MojUInt32& countOut, MojInt64 numDays = -1, MojDbReqRef req = MojDbReq());
+	MojErr purge(guint32& countOut, gint64 numDays = -1, MojDbReqRef req = MojDbReq());
 	MojErr purgeStatus(MojObject& revOut, MojDbReqRef req = MojDbReq());
-	MojErr dump(const MojChar* path, MojUInt32& countOut, bool incDel = true, MojDbReqRef req = MojDbReq(), bool backup = false,
-			MojUInt32 maxBytes = 0, const MojObject* incrementalKey = NULL, MojObject* backupResponse = NULL);
-	MojErr load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr dump(const MojChar* path, guint32& countOut, bool incDel = true, MojDbReqRef req = MojDbReq(), bool backup = false,
+			guint32 maxBytes = 0, const MojObject* incrementalKey = NULL, MojObject* backupResponse = NULL);
+	MojErr load(const MojChar* path, guint32& countOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
 
-	MojErr del(const MojObject& id, bool& foundOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32& countOut, MojObject& arrOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr del(const MojDbQuery& query, MojUInt32& countOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr delKind(const MojObject& id, bool& foundOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr del(const MojObject& id, bool& foundOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr del(const MojObject* idsBegin, const MojObject* idsEnd, guint32& countOut, MojObject& arrOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr del(const MojDbQuery& query, guint32& countOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr delKind(const MojObject& id, bool& foundOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
 	MojErr get(const MojObject& id, MojObject& objOut, bool& foundOut, MojDbReqRef req = MojDbReq());
 	MojErr get(const MojObject* idsBegin, const MojObject* idsEnd, MojObjectVisitor& visitor, MojDbReqRef req = MojDbReq());
 	MojErr find(const MojDbQuery& query, MojDbCursor& cursor, MojDbReqRef req = MojDbReq());
 	MojErr find(const MojDbQuery& query, MojDbCursor& cursor, WatchSignal::SlotRef watchHandler, MojDbReqRef req = MojDbReq());
-	MojErr merge(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(obj, flags | FlagMerge, req); }
-	MojErr merge(MojObject* begin, const MojObject* end, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(begin, end, flags | FlagMerge, req); }
-	MojErr merge(const MojDbQuery& query, const MojObject& props, MojUInt32& countOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr put(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr put(MojObject* begin, const MojObject* end, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr putKind(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr merge(MojObject& obj, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(obj, flags | FlagMerge, req); }
+	MojErr merge(MojObject* begin, const MojObject* end, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(begin, end, flags | FlagMerge, req); }
+	MojErr merge(const MojDbQuery& query, const MojObject& props, guint32& countOut, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr put(MojObject& obj, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr put(MojObject* begin, const MojObject* end, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+	MojErr putKind(MojObject& obj, guint32 flags = FlagNone, MojDbReqRef req = MojDbReq());
 	MojErr putPermissions(MojObject* begin, const MojObject* end, MojDbReqRef req = MojDbReq()) { return putConfig(begin, end, req, m_permissionEngine); }
 	MojErr putQuotas(MojObject* begin, const MojObject* end, MojDbReqRef req = MojDbReq()) { return putConfig(begin, end, req, m_quotaEngine); }
 	MojErr reserveId(MojObject& idOut);
@@ -101,9 +101,9 @@ public:
 	MojDbQuotaEngine* quotaEngine() { return &m_quotaEngine; }
 	MojDbStorageEngine* storageEngine() { return m_storageEngine.get(); }
 	MojDbStorageDatabase* storageDatabase() { return m_objDb.get(); }
-	MojInt64 version() { return DatabaseVersion; }
+	gint64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
-    MojInt64 purgeWindow() {return m_purgeWindow;}
+    gint64 purgeWindow() {return m_purgeWindow;}
 
 private:
 	friend class MojDbKindEngine;
@@ -120,11 +120,11 @@ private:
 	static const MojChar* const TimestampKey;
 	static const MojChar* const VersionFileName;
 	
-	static const MojInt64 DatabaseVersion = 8;
+	static const gint64 DatabaseVersion = 8;
 	static const int PurgeNumDaysDefault = 14;
         // The magic number 173 is just an arbitrary number in the high hundreds, which is prime. Primality is
         // not required, just handy to avoid any likliehood of synchronizing with loaded data sets.
-	static const MojInt64 LoadStepSizeDefault = 173;
+	static const gint64 LoadStepSizeDefault = 173;
 
 	void readLock() { m_schemaLock.readLock(); }
 	void writeLock() { m_schemaLock.writeLock(); }
@@ -137,24 +137,24 @@ private:
 	MojErr mergeArray(MojObject& dest, const MojObject& obj, MojObject& prev);
 	MojErr putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
 				  MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema = true);
-	MojErr delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
-	MojErr delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
-	MojErr delImpl(const MojDbQuery& query, MojUInt32& countOut, MojDbReq& req, MojUInt32 flags = FlagNone);
-	MojErr putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema = true);
+	MojErr delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, guint32 flags);
+	MojErr delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, guint32 flags);
+	MojErr delImpl(const MojDbQuery& query, guint32& countOut, MojDbReq& req, guint32 flags = FlagNone);
+	MojErr putImpl(MojObject& obj, guint32 flags, MojDbReq& req, bool checkSchema = true);
 	MojErr putConfig(MojObject* begin, const MojObject* end, MojDbReq& req, MojDbPutHandler& handler);
 
 	MojErr updateLocaleImpl(const MojString& oldLocale, const MojString& newLocale, MojDbReq& req);
-	MojErr dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject& revParam, const MojObject& delRevParam, bool skipKinds, MojUInt32& countOut, MojDbReq& req,
-			MojObject* response, const MojChar* keyName, MojSize& bytesWritten, MojSize& warns, MojUInt32 maxBytes = 0);
-	MojErr dumpObj(MojFile& file, MojObject obj, MojSize& bytesWrittenOut, MojUInt32 maxBytes = 0);
+	MojErr dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject& revParam, const MojObject& delRevParam, bool skipKinds, guint32& countOut, MojDbReq& req,
+			MojObject* response, const MojChar* keyName, gsize& bytesWritten, gsize& warns, guint32 maxBytes = 0);
+	MojErr dumpObj(MojFile& file, MojObject obj, gsize& bytesWrittenOut, guint32 maxBytes = 0);
 	MojErr findImpl(const MojDbQuery& query, MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req, MojDbOp op);
 	MojErr getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op, MojDbReq& req);
 	MojErr handleBackupFull(const MojObject& revParam, const MojObject& delRevParam, MojObject& response, const MojChar* keyName);
 	MojErr insertIncrementalKey(MojObject& response, const MojChar* keyName, const MojObject& curRev);
-	MojErr loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req);
-	MojErr purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req);
+	MojErr loadImpl(MojObject& obj, guint32 flags, MojDbReq& req);
+	MojErr purgeImpl(MojObject& obj, guint32& countOut, MojDbReq& req);
 
-	MojErr nextId(MojInt64& idOut);
+	MojErr nextId(gint64& idOut);
 	MojErr getState(const MojChar* key, MojObject& valOut, MojDbReq& req);
 	MojErr updateState(const MojChar* key, const MojObject& val, MojDbReq& req);
 	MojErr checkDbVersion(const MojChar* path);
@@ -175,8 +175,8 @@ private:
 	MojThreadRwLock m_schemaLock;
 	MojString m_engineName;
 	MojObject m_conf;
-	MojInt64 m_purgeWindow;
-	MojInt64 m_loadStepSize;
+	gint64 m_purgeWindow;
+	gint64 m_loadStepSize;
 	bool m_isOpen;
 
 	

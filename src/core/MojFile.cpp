@@ -35,7 +35,7 @@ MojErr MojFile::readString(MojString& strOut)
 {
 	MojString str;
 	MojChar buf[MojFileBufSize];
-	MojSize bytesRead = 0;
+	gsize bytesRead = 0;
 	do {
 		MojErr err = read(buf, sizeof(buf), bytesRead);
 		MojErrCheck(err);
@@ -47,12 +47,12 @@ MojErr MojFile::readString(MojString& strOut)
 	return MojErrNone;
 }
 
-MojErr MojFile::writeString(const MojChar* data, MojSize& sizeOut)
+MojErr MojFile::writeString(const MojChar* data, gsize& sizeOut)
 {
-	MojSize len = MojStrLen(data) * sizeof(MojChar);
-	const MojByte* bytes = (const MojByte*)data;
+	gsize len = MojStrLen(data) * sizeof(MojChar);
+	const guint8* bytes = (const guint8*)data;
 	while (len > 0) {
-		MojSize written = 0;
+		gsize written = 0;
 		MojErr err = write(bytes, len, written);
 		MojErrCheck(err);
 		len -= written;

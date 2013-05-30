@@ -83,7 +83,7 @@ MojErr MojDbLevelIndex::drop(MojDbStorageTxn* txn)
     return err;
 }
 
-MojErr MojDbLevelIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbLevelIndex::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
@@ -114,7 +114,7 @@ MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     char s[1024];
     size_t size1 = keyItem.size();
     size_t size2 = valItem.size();
-    MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
+    MojErr err2 = MojUInt8ArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
@@ -141,7 +141,7 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 #ifdef MOJ_DEBUG
     char s[1024];
     size_t size1 = keyItem.size();
-    MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
+    MojErr err2 = MojUInt8ArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);

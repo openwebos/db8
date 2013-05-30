@@ -68,7 +68,7 @@ MojErr MojDbPurgeTest::run()
 	}
 
 	//purge now, there are no RevTimestamp entries
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = db.purge(count, 30);
 	MojTestErrCheck(err);
 
@@ -94,7 +94,7 @@ MojErr MojDbPurgeTest::run()
 	//create a RevTimestamp entry for more than PurgeNumDays days ago
 	err = MojGetCurrentTime(time);
 	MojTestErrCheck(err);
-	err = createRevTimestamp(db, revNums[9], time.microsecs() - (((MojInt64)40) * MojTime::UnitsPerDay));
+	err = createRevTimestamp(db, revNums[9], time.microsecs() - (((gint64)40) * MojTime::UnitsPerDay));
 	MojTestErrCheck(err);
 
 	//purge now, since nothing has been deleted, nothing should be purged,
@@ -153,7 +153,7 @@ MojErr MojDbPurgeTest::run()
 
 	err = MojGetCurrentTime(time);
 	MojTestErrCheck(err);
-	err = createRevTimestamp(db, revFromDb, time.microsecs() - (((MojInt64)35) * MojTime::UnitsPerDay));
+	err = createRevTimestamp(db, revFromDb, time.microsecs() - (((gint64)35) * MojTime::UnitsPerDay));
 	MojTestErrCheck(err);
 
 	//now purge, only id[0] should be purged
@@ -178,7 +178,7 @@ MojErr MojDbPurgeTest::delKindTest(MojDb& db)
 {
 
 	// start from scratch - purge everything
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojErr err = db.purge(count, 0);
 	MojTestErrCheck(err);
 	MojTestAssert(count > 0);
@@ -196,7 +196,7 @@ MojErr MojDbPurgeTest::delKindTest(MojDb& db)
 	err = db.find(q, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 objCount;
+	guint32 objCount;
 	err = cursor.count(objCount);
 	MojTestErrCheck(err);
 	err = cursor.close();
@@ -216,7 +216,7 @@ MojErr MojDbPurgeTest::delKindTest(MojDb& db)
 	// delete half the objects
 	q.limit(objCount / 2);
 
-	MojUInt32 delCount;
+	guint32 delCount;
 	err = db.del(q, delCount);
 	MojTestErrCheck(err);
 
@@ -230,7 +230,7 @@ MojErr MojDbPurgeTest::delKindTest(MojDb& db)
 	MojTestErrCheck(err);
 	MojTestAssert(found);
 
-	/*MojUInt32 deletedObjCount;
+	/*guint32 deletedObjCount;
 	err = q.where(_T("_del"), MojDbQuery::OpEq, true);
 	MojTestErrCheck(err);
 	q.includeDeleted(true);
@@ -251,8 +251,8 @@ MojErr MojDbPurgeTest::delKindTest(MojDb& db)
 	return MojErrNone;
 }
 
-MojErr MojDbPurgeTest::checkObjectsPurged(MojDb& db, const MojUInt32& count, const MojSize& expectedCount,
-		const MojSize& expectedNumObjects, const MojSize& expectedNumRevTimestampObjects, const MojObject& expectedLastPurgeRevNum)
+MojErr MojDbPurgeTest::checkObjectsPurged(MojDb& db, const guint32& count, const gsize& expectedCount,
+		const gsize& expectedNumObjects, const gsize& expectedNumRevTimestampObjects, const MojObject& expectedLastPurgeRevNum)
 {
 	//check number of objects purged
 	MojTestAssert(count == expectedCount);
@@ -266,7 +266,7 @@ MojErr MojDbPurgeTest::checkObjectsPurged(MojDb& db, const MojUInt32& count, con
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 objCount;
+	guint32 objCount;
 	err = cursor.count(objCount);
 	MojTestErrCheck(err);
 	err = cursor.close();
@@ -283,7 +283,7 @@ MojErr MojDbPurgeTest::checkObjectsPurged(MojDb& db, const MojUInt32& count, con
 	err = db.find(revQuery, revCursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 revTimestampObjCount;
+	guint32 revTimestampObjCount;
 	err = revCursor.count(revTimestampObjCount);
 	MojTestErrCheck(err);
 	err = revCursor.close();
@@ -301,7 +301,7 @@ MojErr MojDbPurgeTest::checkObjectsPurged(MojDb& db, const MojUInt32& count, con
 	return MojErrNone;
 }
 
-MojErr MojDbPurgeTest::createRevTimestamp(MojDb& db, MojObject& revNum, MojInt64 timestamp)
+MojErr MojDbPurgeTest::createRevTimestamp(MojDb& db, MojObject& revNum, gint64 timestamp)
 {
 	MojObject revTimeObj;
 	MojErr err = revTimeObj.put(_T("rev"), revNum);

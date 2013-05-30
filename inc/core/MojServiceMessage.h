@@ -27,7 +27,7 @@
 class MojServiceMessage : public MojMessage
 {
 public:
-	typedef MojUInt32 Token;
+	typedef guint32 Token;
 	typedef MojSignal<MojServiceMessage*> CancelSignal;
 
 	static const MojChar* const ReturnValueKey;
@@ -36,7 +36,7 @@ public:
 
 	virtual ~MojServiceMessage();
 
-	MojSize numReplies() const { return m_numReplies; }
+	gsize numReplies() const { return m_numReplies; }
 	MojService::Category* serviceCategory() const { return m_category; }
 	bool subscribed() const { return m_subscribed; }
 	bool fixmode() const { return m_fixmode; }
@@ -75,7 +75,7 @@ protected:
 	virtual MojErr dispatch();
 	void dispatchMethod(MojService::DispatchMethod method) { m_dispatchMethod = method; }
 
-	MojSize m_numReplies;
+	gsize m_numReplies;
 	CancelSignal m_cancelSignal;
 	MojService* m_service;
 	MojService::Category* m_category;

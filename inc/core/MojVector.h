@@ -37,17 +37,17 @@ public:
 	MojVector(const MojVector& v);
 	~MojVector() { release(); }
 
-	MojSize size() const { return end() - begin(); }
-	MojSize capacity() const { return m_endAlloc - begin(); }
+	gsize size() const { return end() - begin(); }
+	gsize capacity() const { return m_endAlloc - begin(); }
 	bool empty() const { return end() == begin(); }
 
 	ConstIterator begin() const { return ConstIterator(m_begin); }
 	ConstIterator end() const { return ConstIterator(m_end); }
 
-	const ValueType& at(MojSize idx) const { MojAssert(idx < size()); return begin()[idx]; }
+	const ValueType& at(gsize idx) const { MojAssert(idx < size()); return begin()[idx]; }
 	const ValueType& front() const { MojAssert(!empty()); return *begin(); }
 	const ValueType& back() const { MojAssert(!empty()); return *(end() - 1); }
-	MojSize find(const ValueType& ValueType, MojSize startIdx = 0) const;
+	gsize find(const ValueType& ValueType, gsize startIdx = 0) const;
 
 	void clear();
 	void swap(MojVector& v) { MojSwap(*this, v); }
@@ -58,20 +58,20 @@ public:
 
 	MojErr begin(Iterator& i);
 	MojErr end(Iterator& i);
-	MojErr reserve(MojSize numElems);
-	MojErr resize(MojSize numElems, const ValueType& val = ValueType());
+	MojErr reserve(gsize numElems);
+	MojErr resize(gsize numElems, const ValueType& val = ValueType());
 	MojErr push(const ValueType& ValueType);
 	MojErr pop() { MojAssert(!empty()); return erase(size() - 1); }
-	MojErr setAt(MojSize idx, const ValueType& val);
+	MojErr setAt(gsize idx, const ValueType& val);
 	MojErr append(ConstIterator rangeBegin, ConstIterator rangeEnd);
-	MojErr insert(MojSize idx, MojSize numElems, const ValueType& val);
-	MojErr insert(MojSize idx, ConstIterator rangeBegin, ConstIterator rangeEnd);
-	MojErr erase(MojSize idx, MojSize numElems = 1);
+	MojErr insert(gsize idx, gsize numElems, const ValueType& val);
+	MojErr insert(gsize idx, ConstIterator rangeBegin, ConstIterator rangeEnd);
+	MojErr erase(gsize idx, gsize numElems = 1);
 	MojErr reverse();
 	MojErr sort();
 
 	MojVector& operator=(const MojVector& rhs) { assign(rhs); return *this; }
-	const ValueType& operator[](MojSize idx) const { return at(idx); }
+	const ValueType& operator[](gsize idx) const { return at(idx); }
 	bool operator==(const MojVector& rhs) const;
 	bool operator!=(const MojVector& rhs) const { return !operator==(rhs); }
 	bool operator<(const MojVector& rhs) const { return compare(rhs) < 0; }
@@ -80,12 +80,12 @@ public:
 	bool operator>=(const MojVector& rhs) const { return compare(rhs) >= 0; }
 
 private:
-	static const MojSize InitialSize;
+	static const gsize InitialSize;
 
-	MojErr shift(MojSize idx, MojSize numElems);
-	MojErr realloc(MojSize numElems);
+	MojErr shift(gsize idx, gsize numElems);
+	MojErr realloc(gsize numElems);
 	MojErr ensureWritable();
-	MojErr ensureSpace(MojSize numElems);
+	MojErr ensureSpace(gsize numElems);
 	void reset(Iterator begin, Iterator end, Iterator endAlloc);
 	void release();
 

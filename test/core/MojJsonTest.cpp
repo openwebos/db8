@@ -39,10 +39,10 @@ MojErr MojJsonTest::run()
 	const MojChar* intStr2 = _T("8");
 	const MojChar* boolStrTrue = _T("true");
 	const MojChar* boolStrFalse = _T("false");
-	const MojChar* MojDoubleStr1 = _T("-2.6e0");
-	const MojChar* MojDoubleStr2 = _T("-2.6");
-	const MojChar* MojDoubleStr3 = _T("2.6e-1");
-	const MojChar* MojDoubleStr4 = _T("0.26");
+	const MojChar* gdoubleStr1 = _T("-2.6e0");
+	const MojChar* gdoubleStr2 = _T("-2.6");
+	const MojChar* gdoubleStr3 = _T("2.6e-1");
+	const MojChar* gdoubleStr4 = _T("0.26");
 	const MojChar* escapeStr1 = _T("\"\\bh\\r\\ne\\tll\\u0020\\u001F\\u0001\\\\o\\/\\\"\"");
 	const MojChar* escapeStr2 = _T("\"\\bh\\r\\ne\\tll \\u001F\\u0001\\\\o/\\\"\"");
 	const MojChar  negativeChars[] = {'"',(MojChar) 0xE2, (MojChar) 0x80, (MojChar) 0x99,'"',0x0};
@@ -61,9 +61,9 @@ MojErr MojJsonTest::run()
 	MojTestErrCheck(err);
 	err = test(boolStrFalse, boolStrFalse);
 	MojTestErrCheck(err);
-	err = test(MojDoubleStr1, MojDoubleStr2);
+	err = test(gdoubleStr1, gdoubleStr2);
 	MojTestErrCheck(err);
-	err = test(MojDoubleStr3, MojDoubleStr4);
+	err = test(gdoubleStr3, gdoubleStr4);
 	MojTestErrCheck(err);
 	err = test(escapeStr1, escapeStr2);
 	MojTestErrCheck(err);

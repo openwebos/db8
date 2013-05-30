@@ -546,14 +546,14 @@ void MojRbTreeBase::validate() const
 
 	MojAssert(m_impl->m_root);
 	MojAssert(m_impl->m_root->m_parent == NULL);
-	MojSize blackHeight = 0;
-	MojSize size = 0;
+	gsize blackHeight = 0;
+	gsize size = 0;
 	validate(m_impl->m_root, blackHeight, size);
 	MojAssert(blackHeight > 0);
 	MojAssert(size == m_impl->m_size);
 }
 
-void MojRbTreeBase::validate(Node* node, MojSize& blackHeight, MojSize& size) const
+void MojRbTreeBase::validate(Node* node, gsize& blackHeight, gsize& size) const
 {
 	if (node == NULL) {
 		blackHeight++;
@@ -572,8 +572,8 @@ void MojRbTreeBase::validate(Node* node, MojSize& blackHeight, MojSize& size) co
 		MojAssert(!isRed(leftNode) && !isRed(rightNode));
 	}
 	// validate children
-	MojSize leftHeight = 0;
-	MojSize rightHeight = 0;
+	gsize leftHeight = 0;
+	gsize rightHeight = 0;
 	validate(leftNode, leftHeight, size);
 	validate(rightNode, rightHeight, size);
 	MojAssert(leftNode == NULL || leftNode->m_parent == node);

@@ -45,12 +45,12 @@ const MojChar* const MojDbServiceHandlerInternal::ScheduledPurgeMethod = _T("int
 const MojChar* const MojDbServiceHandlerInternal::SpaceCheckMethod = _T("internal/spaceCheck");
 const MojChar* const MojDbServiceHandlerInternal::ScheduledSpaceCheckMethod = _T("internal/scheduledSpaceCheck");
 
-const MojInt32 MojDbServiceHandlerInternal::SpaceCheckInterval = 60;
+const gint32 MojDbServiceHandlerInternal::SpaceCheckInterval = 60;
 const MojChar* const MojDbServiceHandlerInternal::DatabaseRoot = "/var/db";
-const MojDouble MojDbServiceHandlerInternal::SpaceAlertLevels[] = { 85.0, 90.0, 95.0 };
+const gdouble MojDbServiceHandlerInternal::SpaceAlertLevels[] = { 85.0, 90.0, 95.0 };
 const MojChar* const MojDbServiceHandlerInternal::SpaceAlertNames[] = {"none",  "low", "medium", "high" };
-const MojInt32 MojDbServiceHandlerInternal::NumSpaceAlertLevels =
-	sizeof(MojDbServiceHandlerInternal::SpaceAlertLevels) / sizeof(MojDouble);
+const gint32 MojDbServiceHandlerInternal::NumSpaceAlertLevels =
+	sizeof(MojDbServiceHandlerInternal::SpaceAlertLevels) / sizeof(gdouble);
 
 MojDbServiceHandlerInternal::AlertLevel MojDbServiceHandlerInternal::m_spaceAlertLevel = NeverSentSpaceAlert;
 bool MojDbServiceHandlerInternal::m_compactRunning = false;
@@ -131,7 +131,7 @@ MojErr MojDbServiceHandlerInternal::handlePostRestore(MojServiceMessage* msg, Mo
 
 	// load each file, in order
 	for (MojObject::ConstArrayIterator i = files.arrayBegin(); i != files.arrayEnd(); ++i) {
-		MojUInt32 count = 0;
+		guint32 count = 0;
 		MojString fileName;
 		err = i->stringValue(fileName);
 		MojErrCheck(err);
@@ -160,7 +160,7 @@ MojErr MojDbServiceHandlerInternal::handlePreBackup(MojServiceMessage* msg, MojO
 	MojObject dumpResponse;
 
 	MojObject backupParams;
-	MojUInt32 bytes = 0;
+	guint32 bytes = 0;
 	err = payload.getRequired(MojDbServiceDefs::BytesKey, bytes);
 	MojErrCheck(err);
 	MojObject incrementalKey;
@@ -173,7 +173,7 @@ MojErr MojDbServiceHandlerInternal::handlePreBackup(MojServiceMessage* msg, MojO
 	err = backupFileName.format(_T("%s-%llu.%s"), _T("backup"), curTime.microsecs(), _T("json"));
 	MojErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojString backupPath;
 	err = backupPath.format(_T("%s/%s"), dir.data(), backupFileName.data());
 	MojErrCheck(err);
@@ -346,7 +346,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
 		err = message.putInt(_T("bytesAvailable"), bytesAvailable);
 		MojErrCheck(err);
 
-		for (MojSize i = 0; i < m_spaceCheckHandlers.size(); i++)
+		for (gsize i = 0; i < m_spaceCheckHandlers.size(); i++)
 			m_spaceCheckHandlers.at(i)->dispatchUpdate(message);
 	}
     
@@ -355,7 +355,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
     // otherwise purge and compact everything
     // we do the purge/compact procedure ONLY once per each alertLevel change
     {
-       MojUInt32 count = 0;
+       guint32 count = 0;
        m_compactRunning = true;
        if( (alertLevel >= AlertLevelLow) && (alertLevel != m_spaceAlertLevel) )
        {
@@ -407,11 +407,11 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 
 	fsblkcnt_t blocksUsed = dbFsStat.f_blocks - dbFsStat.f_bfree;
 
-    MojInt64 bigBytesUsed = (MojInt64)blocksUsed * dbFsStat.f_frsize;
-    MojInt64 bigBytesAvailable = (MojInt64)dbFsStat.f_blocks * dbFsStat.f_frsize;
+    gint64 bigBytesUsed = (gint64)blocksUsed * dbFsStat.f_frsize;
+    gint64 bigBytesAvailable = (gint64)dbFsStat.f_blocks * dbFsStat.f_frsize;
 
-	MojDouble percentUsed =
-		((MojDouble)blocksUsed / (MojDouble)dbFsStat.f_blocks) * 100.0;
+	gdouble percentUsed =
+		((gdouble)blocksUsed / (gdouble)dbFsStat.f_blocks) * 100.0;
 
 	MojLogInfo(s_log, _T("Database volume %.1f full"), percentUsed);
 
@@ -437,8 +437,8 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 	}
 
     // On embedded devices, available/used space normally well below 2GB, but on desktop environments cap to 2GB
-    bytesUsed = (int)(bigBytesUsed > MojInt32Max ? MojInt32Max : bigBytesUsed);
-    bytesAvailable = (int)(bigBytesAvailable > MojInt32Max ? MojInt32Max : bigBytesAvailable);
+    bytesUsed = (int)(bigBytesUsed > G_MAXINT32 ? G_MAXINT32 : bigBytesUsed);
+    bytesAvailable = (int)(bigBytesAvailable > G_MAXINT32 ? G_MAXINT32 : bigBytesAvailable);
 
 	return MojErrNone;
 }
@@ -533,7 +533,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleAdopt(MojObject& payload
         }
         else
         {
-           MojUInt32 count = 0;
+           guint32 count = 0;
            err = m_serviceHandler->m_db.purge(count);
            MojErrCheck(err);
            err = m_serviceHandler->m_db.compact();
@@ -699,9 +699,9 @@ MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::handleCancel(MojServiceMe
 
 	m_msg.reset();
 
-	MojSize index = 0;
+	gsize index = 0;
         bool isFound = false;
-	for (MojSize i = 0; i < m_parent->m_spaceCheckHandlers.size(); i++) {
+	for (gsize i = 0; i < m_parent->m_spaceCheckHandlers.size(); i++) {
 		if (m_parent->m_spaceCheckHandlers.at(i).get() == this) {
 			index = i;
                         isFound = true;

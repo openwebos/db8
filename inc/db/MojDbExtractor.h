@@ -74,8 +74,8 @@ private:
 	static const MojChar* const WildcardKey;
 
 	MojErr fromObjectImpl(const MojObject& obj, const MojDbPropExtractor& defaultConfig, const MojChar* locale);
-	MojErr valsImpl(const MojObject& obj, KeySet& valsOut, MojSize idx) const;
-	MojErr handleVal(const MojObject& val, KeySet& valsOut, MojSize idx) const;
+	MojErr valsImpl(const MojObject& obj, KeySet& valsOut, gsize idx) const;
+	MojErr handleVal(const MojObject& val, KeySet& valsOut, gsize idx) const;
 
 	KeySet m_default;
 	StringVec m_prop;

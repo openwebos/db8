@@ -27,7 +27,7 @@ class MojDbQueryParser
 public:
 	MojDbQueryParser();
 
-	MojErr parse(const MojChar* str, MojSize len = MojSizeMax);
+	MojErr parse(const MojChar* str, gsize len = G_MAXSIZE);
 
 private:
 	typedef enum {
@@ -38,10 +38,10 @@ private:
 		StateComp
 	} State;
 
-	static const MojSize MaxStackDepth = 3;
+	static const gsize MaxStackDepth = 3;
 
 	State m_stack[MaxStackDepth];
-	MojSize m_depth;
+	gsize m_depth;
 };
 
 #endif /* MOJDBQUERYPARSER_H_ */

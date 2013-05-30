@@ -45,8 +45,8 @@ public:
 	void setMethod(const MojString& method) { m_method = method; }
 	void setToken(const Token& token) { m_token = token; }
 
-	MojErr extract(const MojByte* data, MojSize len, MojSize& dataConsumed);
-	MojSize serializedSize() const;
+	MojErr extract(const guint8* data, gsize len, gsize& dataConsumed);
+	gsize serializedSize() const;
 	MojErr serialize(MojDataWriter& writer) const;
 
 	void setReplyInfo(MojSockT sock, MojSocketService* service);
@@ -60,7 +60,7 @@ private:
 		None = 0,
 		Response = 1
 	};
-	typedef MojUInt32 Flags;
+	typedef guint32 Flags;
 
 	MojErr extractString(MojDataReader& reader, MojString& strOut);
 	MojErr serializeString(MojDataWriter& writer, const MojString& str) const;

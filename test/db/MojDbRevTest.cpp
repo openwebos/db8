@@ -116,7 +116,7 @@ MojErr MojDbRevTest::run()
 	MojTestErrCheck(err);
 	err = obj.fromJson(MojTestObjStr4);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = db.merge(query, obj, count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 1);

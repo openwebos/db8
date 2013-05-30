@@ -76,8 +76,8 @@ MojErr MojDbTextTokenizerTest::check(const MojChar* text, const MojChar* tokens)
 	MojObject obj;
 	err = obj.fromJson(tokens);
 	MojTestErrCheck(err);
-	MojSize objSize = obj.size();
-	MojSize setSize = set.size();
+	gsize objSize = obj.size();
+	gsize setSize = set.size();
 	MojTestAssert(objSize == setSize);
 	for (MojObject::ConstArrayIterator i = obj.arrayBegin(); i != obj.arrayEnd(); ++i) {
 		MojDbKey key;

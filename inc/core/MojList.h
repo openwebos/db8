@@ -83,7 +83,7 @@ public:
 	MojList(MojList& list) { init(list); }
 	~MojList();
 
-	MojSize size() const { return m_size; }
+	gsize size() const { return m_size; }
 	bool empty() const { return m_size == 0; }
 	bool contains(const T* val) const;
 
@@ -108,12 +108,12 @@ public:
 	MojList& operator=(MojList& rhs);
 
 private:
-	static T* entryToVal(const MojListEntry* entry) { return (T*)((MojByte*)entry - (MojSize)&(((T*)NULL)->*ENTRY)); }
+	static T* entryToVal(const MojListEntry* entry) { return (T*)((guint8*)entry - (gsize)&(((T*)NULL)->*ENTRY)); }
 	void init();
 	void init(MojList& list);
 
 	MojListEntry m_entry;
-	MojSize m_size;
+	gsize m_size;
 };
 
 #include "core/internal/MojListInternal.h"

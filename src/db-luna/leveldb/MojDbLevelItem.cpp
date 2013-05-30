@@ -102,12 +102,12 @@ MojErr MojDbLevelItem::toObject(MojObject& objOut) const
     return MojErrNone;
 }
 
-void MojDbLevelItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
+void MojDbLevelItem::fromBytesNoCopy(const guint8* bytes, gsize size)
 {
     MojAssert(bytes || size == 0);
-    MojAssert(size <= MojUInt32Max);
+    MojAssert(size <= G_MAXUINT32);
 
-    setData(const_cast<MojByte*> (bytes), size, NULL);
+    setData(const_cast<guint8*> (bytes), size, NULL);
 }
 
 MojErr MojDbLevelItem::fromBuffer(MojBuffer& buf)
@@ -124,14 +124,14 @@ MojErr MojDbLevelItem::fromBuffer(MojBuffer& buf)
     return MojErrNone;
 }
 
-MojErr MojDbLevelItem::fromBytes(const MojByte* bytes, MojSize size)
+MojErr MojDbLevelItem::fromBytes(const guint8* bytes, gsize size)
 {
     MojAssert (bytes || size == 0);
 
     if (size == 0) {
         clear();
     } else {
-        MojByte* newBytes = (MojByte*)MojMalloc(size);
+        guint8* newBytes = (guint8*)MojMalloc(size);
         MojAllocCheck(newBytes);
         MojMemCpy(newBytes, bytes, size);
         setData(newBytes, size, MojFree);
@@ -187,7 +187,7 @@ void MojDbLevelItem::freeData()
     m_chunk.reset();
 }
 
-void MojDbLevelItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
+void MojDbLevelItem::setData(guint8* bytes, gsize size, void (*free)(void*))
 {
     MojAssert(bytes);
     freeData();

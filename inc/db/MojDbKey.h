@@ -29,13 +29,13 @@
 class MojDbKey
 {
 public:
-	typedef MojVector<MojByte> ByteVec;
+	typedef MojVector<guint8> ByteVec;
 
 	MojDbKey() {}
 	explicit MojDbKey(const ByteVec& vec) : m_vec(vec) {}
 
 	void clear() { m_vec.clear(); }
-	MojErr assign(const MojByte* data, MojSize size) { return m_vec.assign(data, data + size); }
+	MojErr assign(const guint8* data, gsize size) { return m_vec.assign(data, data + size); }
 	MojErr assign(const MojBuffer& buf) { return buf.toByteVec(m_vec); }
 	MojErr assign(const MojObject& obj, MojDbTextCollator* coll = NULL);
 	MojErr increment();
@@ -43,9 +43,9 @@ public:
 
 	const ByteVec& byteVec() const { return m_vec; }
 	ByteVec& byteVec() { return m_vec; }
-	const MojByte* data() const { return m_vec.begin(); }
+	const guint8* data() const { return m_vec.begin(); }
 	bool empty() const { return m_vec.empty(); }
-	MojSize size() const { return m_vec.size(); }
+	gsize size() const { return m_vec.size(); }
 	int compare(const MojDbKey& rhs) const { return m_vec.compare(rhs.m_vec); }
 	bool prefixOf(const MojDbKey& key) const;
 	bool stringPrefixOf(const MojDbKey& key) const;
@@ -70,23 +70,23 @@ public:
 		IdxUpper
 	} Index;
 
-	MojDbKeyRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, MojUInt32 group);
+	MojDbKeyRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, guint32 group);
 
 	bool contains(const MojDbKey& key) const;
 	bool contains(const MojDbKeyRange& range) const;
-	const MojDbKey& key(MojSize idx) const { MojAssert(idx <= IdxUpper); return m_keys[idx]; }
+	const MojDbKey& key(gsize idx) const { MojAssert(idx <= IdxUpper); return m_keys[idx]; }
 	const MojDbKey& lowerKey() const { return key(IdxLower); }
 	const MojDbKey& upperKey() const { return key(IdxUpper); }
-	MojUInt32 group() const { return m_group; }
+	guint32 group() const { return m_group; }
 
-	MojDbKey& key(MojSize idx) { MojAssert(idx <= IdxUpper); return m_keys[idx]; }
+	MojDbKey& key(gsize idx) { MojAssert(idx <= IdxUpper); return m_keys[idx]; }
 	MojDbKey& lowerKey() { return key(IdxLower); }
 	MojDbKey& upperKey() { return key(IdxUpper); }
 	MojErr prepend(const MojDbKey& key);
 
 private:
 	MojDbKey m_keys[2];
-	MojUInt32 m_group;
+	guint32 m_group;
 };
 
 class MojDbKeyBuilder : private MojNoCopy

@@ -21,8 +21,8 @@
 #include "core/MojMessage.h"
 #include "core/MojMessageDispatcher.h"
 
-static const MojInt32 MojTestNumThreads = 5;
-static const MojInt32 MojTestNumMessages = 50000;
+static const gint32 MojTestNumThreads = 5;
+static const gint32 MojTestNumMessages = 50000;
 static MojAtomicInt s_messageCount;
 
 class MojTestMessage : public MojMessage

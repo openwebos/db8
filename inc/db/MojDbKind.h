@@ -39,7 +39,7 @@ public:
 	typedef MojHashMap<MojString, MojRefCountedPtr<MojDbKind>, const MojChar*> KindMap;
 	typedef MojVector<MojString> StringVec;
 	typedef MojVector<MojDbKind*> KindVec;
-	typedef MojVector<MojByte> ByteVec;
+	typedef MojVector<guint8> ByteVec;
 
 	static const MojChar* const CountKey;
 	static const MojChar* const DelCountKey;
@@ -71,11 +71,11 @@ public:
 	const StringVec& superIds() const { return m_superIds; }
 	const KindVec& supers() const { return m_supers; }
 	MojDbKindEngine* kindEngine() const { return m_kindEngine; }
-	MojInt64 token() const { return m_state->token(); }
-	MojUInt32 version() const { return m_version; }
-	MojUInt32 nsubkinds() const {return (MojUInt32)m_subs.size(); }
+	gint64 token() const { return m_state->token(); }
+	guint32 version() const { return m_version; }
+	guint32 nsubkinds() const {return (guint32)m_subs.size(); }
 
-	MojErr stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, bool verify);
+	MojErr stats(MojObject& objOut, gsize& usageOut, MojDbReq& req, bool verify);
 	MojErr verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& req);
 	MojErr init(const MojString& id);
 	MojErr configure(const MojObject& obj, const KindMap& map, const MojString& locale, MojDbReq& req);
@@ -108,14 +108,14 @@ private:
 
 	static const MojChar* const IdIndexJson;
 	static const MojChar VersionSeparator;
-	static const MojSize KindIdLenMax = 256;
+	static const gsize KindIdLenMax = 256;
 
 	bool hasOwnerPermission(MojDbReq& req);
 	MojDbIndex* indexForQuery(const MojDbQuery& query) const;
 	MojDbPermissionEngine::Value objectPermission(const MojChar* op, MojDbReq& req);
 	MojErr deny(MojDbReq& req);
-	MojErr updateIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojDbOp op, MojVector<MojDbKind*>& kindVec, MojInt32& idxcount);
-	MojErr updateOwnIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojInt32& idxcount);
+	MojErr updateIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojDbOp op, MojVector<MojDbKind*>& kindVec, gint32& idxcount);
+	MojErr updateOwnIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, gint32& idxcount);
 	MojErr preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq& req);
 	MojErr configureIndexes(const MojObject& obj, const MojString& locale, MojDbReq& req);
 	MojErr configureRevSets(const MojObject& obj);
@@ -138,7 +138,7 @@ private:
 	StringVec m_superIds;
 	KindVec m_supers;
 	KindVec m_subs;
-	MojUInt32 m_version;
+	guint32 m_version;
 	MojDbStorageDatabase* m_db;
 	MojDbKindEngine* m_kindEngine;
 	MojRefCountedPtr<MojDbKindState> m_state;

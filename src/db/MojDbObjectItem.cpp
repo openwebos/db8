@@ -56,7 +56,7 @@ const MojObject& MojDbObjectItem::id() const
 	}
 }
 
-MojSize MojDbObjectItem::size() const
+gsize MojDbObjectItem::size() const
 {
 	return m_obj.size();
 }

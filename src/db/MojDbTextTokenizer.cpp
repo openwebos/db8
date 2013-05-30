@@ -54,24 +54,24 @@ MojErr MojDbTextTokenizer::tokenize(const MojString& text, MojDbTextCollator* co
 	MojErrCheck(err);
 
 	// clone break iterator and set text
-	MojByte buf[U_BRK_SAFECLONE_BUFFERSIZE];
+	guint8 buf[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode status = U_ZERO_ERROR;
-	MojInt32 size = sizeof(buf);
+	gint32 size = sizeof(buf);
 	IterPtr ubrk(ubrk_safeClone(m_ubrk.get(), buf, &size, &status));
 	MojUnicodeErrCheck(status);
 	MojAssert(ubrk.get());
-	ubrk_setText(ubrk.get(), unicodeStr.begin(), (MojInt32) unicodeStr.size(), &status);
+	ubrk_setText(ubrk.get(), unicodeStr.begin(), (gint32) unicodeStr.size(), &status);
 	MojUnicodeErrCheck(status);
 
-	MojInt32 tokBegin = -1;
-	MojInt32 pos = ubrk_first(ubrk.get());
+	gint32 tokBegin = -1;
+	gint32 pos = ubrk_first(ubrk.get());
 	while (pos != UBRK_DONE) {
 		UWordBreak status = (UWordBreak) ubrk_getRuleStatus(ubrk.get());
 		if (status != UBRK_WORD_NONE) {
 			MojAssert(tokBegin != -1);
 			MojDbKey key;
 			const UChar* tokChars = unicodeStr.begin() + tokBegin;
-			MojSize tokSize = (MojSize) (pos - tokBegin);
+			gsize tokSize = (gsize) (pos - tokBegin);
 			if (collator) {
 				err = collator->sortKey(tokChars, tokSize, key);
 				MojErrCheck(err);

@@ -157,7 +157,7 @@ MojErr MojDbKindEngine::stats(MojObject& objOut, MojDbReq& req, bool verify, Moj
 
 	for (KindMap::ConstIterator i = m_kinds.begin(); i != m_kinds.end(); ++i) {
 		MojObject kindAnalysis;
-		MojSize usage = 0;
+		gsize usage = 0;
 		if (pKind && *pKind != (*i)->id())
 			continue;		// get stats for only one kind
 		MojErr err = (*i)->stats(kindAnalysis, usage, req, verify);
@@ -355,7 +355,7 @@ MojDbQuotaEngine* MojDbKindEngine::quotaEngine()
 	return m_db->quotaEngine();
 }
 
-MojErr MojDbKindEngine::tokenFromId(const MojChar* id, MojInt64& tokOut)
+MojErr MojDbKindEngine::tokenFromId(const MojChar* id, gint64& tokOut)
 {
 	MojAssert(id);
 
@@ -367,7 +367,7 @@ MojErr MojDbKindEngine::tokenFromId(const MojChar* id, MojInt64& tokOut)
 	return MojErrNone;
 }
 
-MojErr MojDbKindEngine::idFromToken(MojInt64 tok, MojString& idOut)
+MojErr MojDbKindEngine::idFromToken(gint64 tok, MojString& idOut)
 {
 	TokMap::ConstIterator i = m_tokens.find(tok);
 	if (i == m_tokens.end())

@@ -22,8 +22,8 @@
 
 #define MojHashBaseAssertWritable() MojAssert(!m_impl || m_impl->m_refcount == 1)
 
-const MojSize MojHashBase::FillFactor = 2;
-const MojSize MojHashBase::InitialSize = 8;
+const gsize MojHashBase::FillFactor = 2;
+const gsize MojHashBase::InitialSize = 8;
 
 
 MojHashBase::Node::Node()
@@ -65,7 +65,7 @@ MojHashBase::Impl::Impl()
 {
 }
 
-void MojHashBase::Impl::put(Node* node, MojSize idx)
+void MojHashBase::Impl::put(Node* node, gsize idx)
 {
 	MojAssert(m_buckets.get() && idx < m_numBuckets);
 
@@ -109,12 +109,12 @@ void MojHashBase::assign(const MojHashBase& hb)
 }
 
 const MojHashBase::Node*
-MojHashBase::find(const void* key, MojSize* idxOut) const
+MojHashBase::find(const void* key, gsize* idxOut) const
 {
 	if (empty())
 		return NULL;
 
-	MojSize idx = bucketForKey(key, m_impl->m_numBuckets);
+	gsize idx = bucketForKey(key, m_impl->m_numBuckets);
 	if (idxOut)
 		*idxOut = idx;
 	Bucket& bucket = m_impl->m_buckets[idx];
@@ -127,7 +127,7 @@ MojHashBase::find(const void* key, MojSize* idxOut) const
 	return NULL;
 }
 
-MojErr MojHashBase::find(const void* key, Node*& nodeOut, MojSize* idxOut)
+MojErr MojHashBase::find(const void* key, Node*& nodeOut, gsize* idxOut)
 {
 	MojErr err = ensureWritable();
 	MojErrCheck(err);
@@ -136,13 +136,13 @@ MojErr MojHashBase::find(const void* key, Node*& nodeOut, MojSize* idxOut)
 	return MojErrNone;
 }
 
-MojErr MojHashBase::put(MojAutoPtr<Node> node, MojSize idx, const void* key)
+MojErr MojHashBase::put(MojAutoPtr<Node> node, gsize idx, const void* key)
 {
 	MojAssert(node.get());
 	MojHashBaseAssertWritable();
 
 	// grow if necessary
-	MojSize numBuckets = empty() ? 0 : m_impl->m_numBuckets;
+	gsize numBuckets = empty() ? 0 : m_impl->m_numBuckets;
 	if (size() >= (numBuckets * FillFactor)) {
 		MojErr err = realloc(MojMax(InitialSize, numBuckets * 2));
 		MojErrCheck(err);
@@ -157,7 +157,7 @@ MojErr MojHashBase::del(const void* key, bool& foundOut)
 {
 	foundOut = false;
 	Node* node = NULL;
-	MojSize idx = 0;
+	gsize idx = 0;
 	MojErr err = find(key, node, &idx);
 	MojErrCheck(err);
 	MojHashBaseAssertWritable();
@@ -226,7 +226,7 @@ MojErr MojHashBase::clone()
 		if (newNode == NULL)
 			deleteNodeList(impl->m_begin);
 		MojAllocCheck(newNode);
-		MojSize idx = bucketForKey(key(node), impl->m_numBuckets);
+		gsize idx = bucketForKey(key(node), impl->m_numBuckets);
 		impl->put(newNode, idx);
 	}
 
@@ -236,7 +236,7 @@ MojErr MojHashBase::clone()
 	return MojErrNone;
 }
 
-MojErr MojHashBase::realloc(MojSize numBuckets)
+MojErr MojHashBase::realloc(gsize numBuckets)
 {
 	MojHashBaseAssertWritable();
 
@@ -255,16 +255,16 @@ MojErr MojHashBase::realloc(MojSize numBuckets)
 		 node != NULL;
 		 node = node->m_iterNext) {
 		node->m_bucketNext = NULL;
-		MojSize idx = bucketForKey(key(node), numBuckets);
+		gsize idx = bucketForKey(key(node), numBuckets);
 		m_impl->m_buckets[idx].insert(node);
 	}
 
 	return MojErrNone;
 }
 
-MojSize MojHashBase::bucketForKey(const void* key, MojSize numBuckets) const
+gsize MojHashBase::bucketForKey(const void* key, gsize numBuckets) const
 {
-	MojSize hashCode = hash(key);
+	gsize hashCode = hash(key);
 	return hashCode % numBuckets;
 }
 

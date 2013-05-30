@@ -91,7 +91,7 @@ public:
 	MojMap(const MojMap& map) : MojRbTreeBase(map) {}
 	~MojMap() { MojRbTreeBase::release(); }
 
-	MojSize size() const { return MojRbTreeBase::size(); }
+	gsize size() const { return MojRbTreeBase::size(); }
 	bool empty() const { return MojRbTreeBase::empty(); }
 
 	ConstIterator begin() const { return ConstIterator(MojRbTreeBase::begin()); }

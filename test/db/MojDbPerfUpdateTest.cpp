@@ -21,13 +21,13 @@
 #include "db/MojDb.h"
 #include "core/MojTime.h"
 
-static const MojUInt64 numInsertForPut = 1000;
-static const MojUInt64 numPutIterations = 1000;
-static const MojUInt64 numBatchPutIterations = 100;
-static const MojUInt64 numMergeIterations = 1000;
-static const MojUInt64 numBatchMergeIterations = 100;
-static const MojUInt64 numObjectsBeforeUpdateKind = 1000;
-static const MojUInt64 numUpdateKindIterations = 50;
+static const guint64 numInsertForPut = 1000;
+static const guint64 numPutIterations = 1000;
+static const guint64 numBatchPutIterations = 100;
+static const guint64 numMergeIterations = 1000;
+static const guint64 numBatchMergeIterations = 100;
+static const guint64 numObjectsBeforeUpdateKind = 1000;
+static const guint64 numUpdateKindIterations = 50;
 
 const MojChar* const UpdateTestFileName = _T("MojDbPerfUpdateTest.csv");
 static MojTime totalTestTime;
@@ -172,7 +172,7 @@ MojErr MojDbPerfUpdateTest::testPut(MojDb& db)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfUpdateTest::updateKind(MojDb& db, const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64))
+MojErr MojDbPerfUpdateTest::updateKind(MojDb& db, const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64))
 {
 	// register all the kinds
 	MojTime time;
@@ -205,8 +205,8 @@ MojErr MojDbPerfUpdateTest::updateKind(MojDb& db, const MojChar* kindId, const M
 	err = timeUpdateKind(db, kindJson, kindObj, addIndexTime, dropIndexTime);
 	MojTestErrCheck(err);
 
-	MojUInt64 addTime = addIndexTime.microsecs();
-	MojUInt64 dropTime = dropIndexTime.microsecs();
+	guint64 addTime = addIndexTime.microsecs();
+	guint64 dropTime = dropIndexTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
 	err = MojPrintF("   updating kind %s - adding index %s %llu times took: %llu microsecs\n", kindId, extraIdxJson, numUpdateKindIterations, addTime);
@@ -239,7 +239,7 @@ MojErr MojDbPerfUpdateTest::timeUpdateKind(MojDb& db, const MojChar* kindJson, M
 	MojErr err = origKindObj.fromJson(kindJson);
 	MojTestErrCheck(err);
 
-	for (MojUInt64 i = 0; i < numUpdateKindIterations; i++) {
+	for (guint64 i = 0; i < numUpdateKindIterations; i++) {
 		err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		bool found;
@@ -267,7 +267,7 @@ MojErr MojDbPerfUpdateTest::timeUpdateKind(MojDb& db, const MojChar* kindJson, M
 	return MojErrNone;
 }
 
-MojErr MojDbPerfUpdateTest::updateObjsViaMerge(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64))
+MojErr MojDbPerfUpdateTest::updateObjsViaMerge(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64))
 {
 	// register all the kinds
 	MojTime time;
@@ -286,7 +286,7 @@ MojErr MojDbPerfUpdateTest::updateObjsViaMerge(MojDb& db, const MojChar* kindId,
 	MojTime objTime;
 	err = mergeObj(db, midObj, objTime);
 	MojTestErrCheck(err);
-	MojUInt64 mergeTime = objTime.microsecs();
+	guint64 mergeTime = objTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
 	err = MojPrintF("   merging single object - index %llu - of kind %s %llu times took: %llu microsecs\n", numInsertForPut/2, kindId, numMergeIterations, mergeTime);
@@ -341,7 +341,7 @@ MojErr MojDbPerfUpdateTest::updateObjsViaMerge(MojDb& db, const MojChar* kindId,
 	MojObject props;
 	err = props.putString(_T("newKey"), _T("here's a new value"));
 	MojTestErrCheck(err);
-	MojUInt32 count;
+	guint32 count;
 	err = queryMergeObj(db, query, props, count, mergeQueryTime);
 	MojTestErrCheck(err);
 	mergeTime = mergeQueryTime.microsecs();
@@ -367,7 +367,7 @@ MojErr MojDbPerfUpdateTest::mergeObj(MojDb& db, MojObject& obj, MojTime& objTime
 	MojTime startTime;
 	MojTime endTime;
 
-	for (MojUInt64 i = 0; i < numMergeIterations; i++) {
+	for (guint64 i = 0; i < numMergeIterations; i++) {
 		MojErr err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		err = obj.putInt(_T("newProp"), i);
@@ -388,7 +388,7 @@ MojErr MojDbPerfUpdateTest::batchMergeObj(MojDb& db, MojObject* begin, const Moj
 	MojTime startTime;
 	MojTime endTime;
 
-	for (MojUInt64 i = 0; i < numBatchMergeIterations; i++) {
+	for (guint64 i = 0; i < numBatchMergeIterations; i++) {
 		MojErr err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		err = db.merge(begin, end);
@@ -402,12 +402,12 @@ MojErr MojDbPerfUpdateTest::batchMergeObj(MojDb& db, MojObject* begin, const Moj
 	return MojErrNone;
 }
 
-MojErr MojDbPerfUpdateTest::queryMergeObj(MojDb& db, MojDbQuery& query, MojObject& props, MojUInt32& count, MojTime& objTime)
+MojErr MojDbPerfUpdateTest::queryMergeObj(MojDb& db, MojDbQuery& query, MojObject& props, guint32& count, MojTime& objTime)
 {
 	MojTime startTime;
 	MojTime endTime;
 
-	for (MojUInt64 i = 0; i < numBatchMergeIterations; i++) {
+	for (guint64 i = 0; i < numBatchMergeIterations; i++) {
 		MojErr err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		err = db.merge(query, props, count);
@@ -421,7 +421,7 @@ MojErr MojDbPerfUpdateTest::queryMergeObj(MojDb& db, MojDbQuery& query, MojObjec
 	return MojErrNone;
 }
 
-MojErr MojDbPerfUpdateTest::updateObjsViaPut(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64))
+MojErr MojDbPerfUpdateTest::updateObjsViaPut(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64))
 {
 	// register all the kinds
 	MojTime time;
@@ -440,7 +440,7 @@ MojErr MojDbPerfUpdateTest::updateObjsViaPut(MojDb& db, const MojChar* kindId, M
 	MojTime objTime;
 	err = putObj(db, midObj, objTime);
 	MojTestErrCheck(err);
-	MojUInt64 putTime = objTime.microsecs();
+	guint64 putTime = objTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
 	err = MojPrintF("   putting single object - index %llu - of kind %s %llu times took: %llu microsecs\n", numInsertForPut/2, kindId, numPutIterations, putTime);
@@ -485,7 +485,7 @@ MojErr MojDbPerfUpdateTest::putObj(MojDb& db, MojObject& obj, MojTime& objTime)
 	MojTime startTime;
 	MojTime endTime;
 
-	for (MojUInt64 i = 0; i < numPutIterations; i++) {
+	for (guint64 i = 0; i < numPutIterations; i++) {
 		MojErr err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		err = db.put(obj);
@@ -504,7 +504,7 @@ MojErr MojDbPerfUpdateTest::batchPutObj(MojDb& db, MojObject* begin, const MojOb
 	MojTime startTime;
 	MojTime endTime;
 
-	for (MojUInt64 i = 0; i < numBatchPutIterations; i++) {
+	for (guint64 i = 0; i < numBatchPutIterations; i++) {
 		MojErr err = MojGetCurrentTime(startTime);
 		MojTestErrCheck(err);
 		err = db.put(begin, end);
@@ -518,10 +518,10 @@ MojErr MojDbPerfUpdateTest::batchPutObj(MojDb& db, MojObject* begin, const MojOb
 	return MojErrNone;
 }
 
-MojErr MojDbPerfUpdateTest::putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,
-		MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64), MojObject& objs)
+MojErr MojDbPerfUpdateTest::putObjs(MojDb& db, const MojChar* kindId, guint64 numInsert,
+		MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64), MojObject& objs)
 {
-	for (MojUInt64 i = 0; i < numInsert; i++) {
+	for (guint64 i = 0; i < numInsert; i++) {
 		MojObject obj;
 		MojErr err = obj.putString(MojDb::KindKey, kindId);
 		MojTestErrCheck(err);

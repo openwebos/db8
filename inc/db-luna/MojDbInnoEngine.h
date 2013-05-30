@@ -77,15 +77,15 @@ public:
 
 	MojErr openReadWrite(MojDbInnoCursor& cur);
 	MojErr openSearch(MojDbInnoCursor& cur);
-	MojErr set(const MojByte* data, MojSize size, ib_ulint_t col);
+	MojErr set(const guint8* data, gsize size, ib_ulint_t col);
 	MojErr set(const MojObject& val, ib_ulint_t col);
-	MojErr setKey(const MojByte* data, MojSize size) { return set(data, size, KeyCol); }
+	MojErr setKey(const guint8* data, gsize size) { return set(data, size, KeyCol); }
 	MojErr setKey(const MojObject& key) { return set(key, KeyCol); }
 	MojErr setKeyVal(const MojObject& key, const MojObject& val);
 	MojErr visit(MojObjectVisitor& visitor) const;
 
-	void get(const MojByte*& dataOut, MojSize& sizeOut, ib_ulint_t col);
-	void getKey(const MojByte*& dataOut, MojSize& sizeOut) { return get(dataOut, sizeOut, KeyCol); }
+	void get(const guint8*& dataOut, gsize& sizeOut, ib_ulint_t col);
+	void getKey(const guint8*& dataOut, gsize& sizeOut) { return get(dataOut, sizeOut, KeyCol); }
 
 	ib_tpl_t impl() { return m_tpl; }
 	const ib_tpl_t impl() const { return m_tpl; }
@@ -131,12 +131,12 @@ class MojDbInnoEngine : public MojDbStorageEngine
 {
 public:
 	static const MojChar* const SequenceDbName;
-	static const MojSize CfgAdditionalMemPoolSizeDefault;
-	static const MojSize CfgBufferPoolSizeDefault;
-	static const MojSize CfgLogFileSizeDefault;
-	static const MojUInt32 CfgFileIoThreadsDefault;
-	static const MojUInt32 CfgReadIoThreadsDefault;
-	static const MojUInt32 CfgWriteIoThreadsDefault;
+	static const gsize CfgAdditionalMemPoolSizeDefault;
+	static const gsize CfgBufferPoolSizeDefault;
+	static const gsize CfgLogFileSizeDefault;
+	static const guint32 CfgFileIoThreadsDefault;
+	static const guint32 CfgReadIoThreadsDefault;
+	static const guint32 CfgWriteIoThreadsDefault;
 	static MojLogger s_log;
 
 	MojDbInnoEngine();
@@ -164,12 +164,12 @@ private:
 	MojString m_path;
 	MojString m_name;
 	MojDbInnoDatabase m_sequences;
-	MojSize m_cfgAdditionalMemPoolSize;
-	MojSize m_cfgBufferPoolSize;
-	MojSize m_cfgLogFileSize;
-	MojUInt32 m_cfgFileIoThreads;
-	MojUInt32 m_cfgReadIoThreads;
-	MojUInt32 m_cfgWriteIoThreads;
+	gsize m_cfgAdditionalMemPoolSize;
+	gsize m_cfgBufferPoolSize;
+	gsize m_cfgLogFileSize;
+	guint32 m_cfgFileIoThreads;
+	guint32 m_cfgReadIoThreads;
+	guint32 m_cfgWriteIoThreads;
 	bool m_started;
 	static bool s_started;
 };
@@ -215,14 +215,14 @@ protected:
 class MojDbInnoSeq : public MojDbStorageSeq
 {
 public:
-	static const MojInt64 Increment = 50;
+	static const gint64 Increment = 50;
 
 	MojDbInnoSeq();
 	~MojDbInnoSeq();
 
 	MojErr open(const MojChar* name, MojDbInnoDatabase* db, MojDbStorageTxn* txn);
 	virtual MojErr close();
-	virtual MojErr get(MojInt64& valOut);
+	virtual MojErr get(gint64& valOut);
 
 private:
 	void reset();
@@ -230,8 +230,8 @@ private:
 
 	MojThreadMutex m_mutex;
 	MojObject m_key;
-	MojInt64 m_val;
-	MojInt64 m_savedVal;
+	gint64 m_val;
+	gint64 m_savedVal;
 	MojDbInnoDatabase* m_db;
 };
 
@@ -239,8 +239,8 @@ class MojDbInnoTableSchema : private MojNoCopy
 {
 public:
 	static const ib_tbl_fmt_t TableFormat;
-	static const MojSize PageSize;
-	static const MojSize MaxKeySize;
+	static const gsize PageSize;
+	static const gsize MaxKeySize;
 
 	MojDbInnoTableSchema() : m_sch(NULL) {}
 	~MojDbInnoTableSchema();

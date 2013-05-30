@@ -25,7 +25,7 @@
 #define MojRefCountPtrToAtomic(P) (((MojAtomicT*) P) - 1)
 
 template<class T>
-T* MojRefCountNew(MojSize numElems)
+T* MojRefCountNew(gsize numElems)
 {
 	T* t = (T*) MojRefCountAlloc(numElems * sizeof(T));
 	if (t)
@@ -33,7 +33,7 @@ T* MojRefCountNew(MojSize numElems)
 	return t;
 }
 
-inline MojInt32 MojRefCountGet(void* p)
+inline gint32 MojRefCountGet(void* p)
 {
 	MojAssert(p);
 	return MojAtomicGet(MojRefCountPtrToAtomic(p));
@@ -46,7 +46,7 @@ inline void MojRefCountRetain(void* p)
 }
 
 template<class T>
-void MojRefCountRelease(T* p, MojSize numElems)
+void MojRefCountRelease(T* p, gsize numElems)
 {
 	if (p) {
 		MojAtomicT* a = MojRefCountPtrToAtomic(p);

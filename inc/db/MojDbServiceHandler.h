@@ -25,8 +25,8 @@
 class MojDbServiceHandler : public MojDbServiceHandlerBase
 {
 public:
-	static const MojUInt32 MaxQueryLimit = MojDbQuery::MaxQueryLimit;
-	static const MojUInt32 MaxReserveIdCount = MaxQueryLimit * 2;
+	static const guint32 MaxQueryLimit = MojDbQuery::MaxQueryLimit;
+	static const guint32 MaxReserveIdCount = MaxQueryLimit * 2;
 
 	MojDbServiceHandler(MojDb& db, MojReactor& reactor);
 

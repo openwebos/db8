@@ -21,7 +21,7 @@
 #include "core/MojTime.h"
 
 #ifdef MOJ_NEED_MEMRCHR
-const MojChar* MojMemChrReverse(const MojChar* data, MojChar c, MojSize len)
+const MojChar* MojMemChrReverse(const MojChar* data, MojChar c, gsize len)
 {
 	MojAssert(data || len == 0);
 	if (data == NULL)
@@ -68,7 +68,7 @@ MojErr MojVPrintF(const MojChar* format, va_list args)
 #endif /* MOJ_USE_VPRINTF */
 
 #ifdef MOJ_USE_VSNPRINTF
-MojErr MojVsnPrintF(MojChar* buf, MojSize bufLen, MojSize& lenOut,
+MojErr MojVsnPrintF(MojChar* buf, gsize bufLen, gsize& lenOut,
 		const MojChar* format, va_list args)
 {
 	MojAssert(buf || bufLen == 0);
@@ -81,7 +81,7 @@ MojErr MojVsnPrintF(MojChar* buf, MojSize bufLen, MojSize& lenOut,
 			*buf = _T('\0');
 		MojErrThrow(MojErrFormat);
 	}
-	lenOut = (MojSize) res;
+	lenOut = (gsize) res;
 
 	return MojErrNone;
 }
@@ -184,7 +184,7 @@ MojErr MojFileOpen(MojFileT& fileOut, const MojChar* path, int flags, MojModeT m
 #endif /* MOJ_USE_FILE_OPEN */
 
 #ifdef MOJ_USE_FILE_READ
-MojErr MojFileRead(MojFileT file, void* buf, MojSize bufSize, MojSize& sizeOut)
+MojErr MojFileRead(MojFileT file, void* buf, gsize bufSize, gsize& sizeOut)
 {
 	MojAssert(buf || bufSize == 0);
 	MojAssert(file != MojInvalidFile);
@@ -192,14 +192,14 @@ MojErr MojFileRead(MojFileT file, void* buf, MojSize bufSize, MojSize& sizeOut)
 	ssize_t res = read(file, buf, bufSize);
 	if (res < 0)
 		MojErrThrowErrno(_T("read"));
-	sizeOut = (MojSize) res;
+	sizeOut = (gsize) res;
 
 	return MojErrNone;
 }
 #endif /* MOJ_USE_FILE_READ */
 
 #ifdef MOJ_USE_FILE_WRITE
-MojErr MojFileWrite(MojFileT file, const void* data, MojSize size, MojSize& sizeOut)
+MojErr MojFileWrite(MojFileT file, const void* data, gsize size, gsize& sizeOut)
 {
 	MojAssert(data || size == 0);
 	MojAssert(file != MojInvalidFile);
@@ -207,7 +207,7 @@ MojErr MojFileWrite(MojFileT file, const void* data, MojSize size, MojSize& size
 	ssize_t res = write(file, data, size);
 	if (res < 0)
 		MojErrThrowErrno(_T("write"));
-	sizeOut = (MojSize) res;
+	sizeOut = (gsize) res;
 
 	return MojErrNone;
 }
@@ -334,7 +334,7 @@ MojErr MojSockOpen(MojSockT& sockOut, int domain, int type, int protocol)
 #endif /* MOJ_USE_SOCK_SOCKET */
 
 #ifdef MOJ_USE_SOCK_RECV
-MojErr MojSockRecv(MojSockT sock, void* buf, MojSize bufSize, MojSize& sizeOut, int flags)
+MojErr MojSockRecv(MojSockT sock, void* buf, gsize bufSize, gsize& sizeOut, int flags)
 {
 	MojAssert(sock != MojInvalidSock && (buf || bufSize == 0));
 
@@ -342,14 +342,14 @@ MojErr MojSockRecv(MojSockT sock, void* buf, MojSize bufSize, MojSize& sizeOut, 
 	ssize_t ret = recv(sock, buf, bufSize, flags);
 	if (ret < 0)
 		MojErrThrowErrno(_T("recv"));
-	sizeOut = (MojSize) ret;
+	sizeOut = (gsize) ret;
 
 	return MojErrNone;
 }
 #endif /* MOJ_USE_SOCK_RECV */
 
 #ifdef MOJ_USE_SOCK_SEND
-MojErr MojSockSend(MojSockT sock, const void* data, MojSize size, MojSize& sizeOut, int flags)
+MojErr MojSockSend(MojSockT sock, const void* data, gsize size, gsize& sizeOut, int flags)
 {
 	MojAssert(sock != MojInvalidSock && (data || size == 0));
 
@@ -357,7 +357,7 @@ MojErr MojSockSend(MojSockT sock, const void* data, MojSize size, MojSize& sizeO
 	ssize_t ret = send(sock, data, size, flags);
 	if (ret < 0)
 		MojErrThrowErrno(_T("send"));
-	sizeOut = (MojSize) ret;
+	sizeOut = (gsize) ret;
 
 	return MojErrNone;
 }
@@ -393,7 +393,7 @@ MojErr MojPipe(MojSockT fds[2])
 #endif /* MOJ_USE_PIPE */
 
 #ifdef MOJ_USE_SRANDOM_R
-MojErr MojInitRandom(MojUInt32 seed, MojChar* stateBuf, MojSize stateBufLen, MojRandomDataT* buf)
+MojErr MojInitRandom(guint32 seed, MojChar* stateBuf, gsize stateBufLen, MojRandomDataT* buf)
 {
 	if (initstate_r(seed, stateBuf, stateBufLen, buf) < 0)
 		MojErrThrowErrno(_T("initstate_r"));
@@ -403,7 +403,7 @@ MojErr MojInitRandom(MojUInt32 seed, MojChar* stateBuf, MojSize stateBufLen, Moj
 #endif /* MOJ_USE_SRANDOM_R */
 
 #ifdef MOJ_USE_SRANDOM
-MojErr MojInitRandom(MojUInt32 seed, MojChar*, MojSize, MojRandomDataT*)
+MojErr MojInitRandom(guint32 seed, MojChar*, gsize, MojRandomDataT*)
 {
 	srandom(seed);
 
@@ -412,9 +412,9 @@ MojErr MojInitRandom(MojUInt32 seed, MojChar*, MojSize, MojRandomDataT*)
 #endif /* MOJ_USE_SRANDOM_R */
 
 #ifdef MOJ_USE_RANDOM_R
-MojErr MojRandom(MojRandomDataT* buf, MojUInt32* result)
+MojErr MojRandom(MojRandomDataT* buf, guint32* result)
 {
-	if (random_r(buf, (MojInt32*) result) < 0)
+	if (random_r(buf, (gint32*) result) < 0)
 		MojErrThrowErrno(_T("random_r"));
 
 	return MojErrNone;
@@ -422,7 +422,7 @@ MojErr MojRandom(MojRandomDataT* buf, MojUInt32* result)
 #endif /* MOJ_USE_SRANDOM_R */
 
 #ifdef MOJ_USE_RANDOM
-MojErr MojRandom(MojRandomDataT*, MojUInt32* result)
+MojErr MojRandom(MojRandomDataT*, guint32* result)
 {
 	*result = random();
 
@@ -510,7 +510,7 @@ static void* MojThreadStart(void* arg)
 	delete params;
 
 	MojErr err = fn(threadArg);
-	return (void*) (MojIntPtr) err;
+	return (void*) (gintptr) err;
 }
 
 MojErr MojThreadCreate(MojThreadT& threadOut, MojThreadFn fn, void* arg)
@@ -526,7 +526,7 @@ MojErr MojThreadJoin(MojThreadT thread, MojErr& errOut)
 	errOut = MojErrNone;
 	MojErr err = (MojErr) pthread_join(thread, &retVal);
 	MojErrCheck(err);
-	errOut = (MojErr) (MojIntPtr) retVal;
+	errOut = (MojErr) (gintptr) retVal;
 
 	return MojErrNone;
 }

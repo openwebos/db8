@@ -28,12 +28,12 @@ const MojChar* const MojDbQuotaEngine::UsageDbName = _T("quotaUsage");
 class MojDbQuotaCommitHandler : public MojSignalHandler
 {
 public:
-	MojDbQuotaCommitHandler(MojDbQuotaEngine* engine, MojString& owner, MojInt64 size, MojDbStorageTxn* txn);
+	MojDbQuotaCommitHandler(MojDbQuotaEngine* engine, MojString& owner, gint64 size, MojDbStorageTxn* txn);
 	MojErr handleCommit(MojDbStorageTxn* txn);
 
 	MojDbQuotaEngine* m_engine;
 	MojString m_owner;
-	MojInt64 m_size;
+	gint64 m_size;
 	MojDbStorageTxn::CommitSignal::Slot<MojDbQuotaCommitHandler> m_slot;
 };
 
@@ -104,7 +104,7 @@ MojErr MojDbQuotaEngine::put(MojObject& obj, MojDbReq& req, bool putObj)
 	MojString owner;
 	MojErr err = obj.getRequired(MojDbServiceDefs::OwnerKey, owner);
 	MojErrCheck(err);
-	MojInt64 size = 0;
+	gint64 size = 0;
 	err = obj.getRequired(MojDbServiceDefs::SizeKey, size);
 	MojErrCheck(err);
 
@@ -185,7 +185,7 @@ MojErr MojDbQuotaEngine::applyQuota(MojDbStorageTxn* txn)
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::kindUsage(const MojChar* kindId, MojInt64& usageOut, MojDbStorageTxn* txn)
+MojErr MojDbQuotaEngine::kindUsage(const MojChar* kindId, gint64& usageOut, MojDbStorageTxn* txn)
 {
 	MojLogTrace(s_log);
 
@@ -199,7 +199,7 @@ MojErr MojDbQuotaEngine::kindUsage(const MojChar* kindId, MojInt64& usageOut, Mo
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::quotaUsage(const MojChar* owner, MojInt64& sizeOut, MojInt64& usageOut)
+MojErr MojDbQuotaEngine::quotaUsage(const MojChar* owner, gint64& sizeOut, gint64& usageOut)
 {
 	sizeOut = 0;
 	usageOut = 0;
@@ -265,7 +265,7 @@ MojErr MojDbQuotaEngine::refreshImpl(MojDbStorageTxn* txn)
 		MojErr err = quotaForKind(i->get(), quota);
 		MojErrCheck(err);
 		if (quota.get()) {
-			MojInt64 usage = 0;
+			gint64 usage = 0;
 			err = kindUsage((*i)->id(), usage, txn);
 			MojErrCheck(err);
 			quota->offset(usage);
@@ -302,17 +302,17 @@ MojErr MojDbQuotaEngine::quotaForKind(const MojDbKind* kind, MojRefCountedPtr<Qu
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, MojInt64 offset, MojDbStorageTxn* txn)
+MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, gint64 offset, MojDbStorageTxn* txn)
 {
 	MojAssert(txn);
 
 	// get old value
 	MojRefCountedPtr<MojDbStorageItem> item;
-	MojInt64 usage = 0;
+	gint64 usage = 0;
 	MojErr err = getUsage(kindId, txn, true, usage, item);
 	MojErrCheck(err);
 	if (item.get()) {
-		MojInt64 newUsage = offset + usage;
+		gint64 newUsage = offset + usage;
 
 		MojAssert(newUsage >= 0);
 		MojObject newVal(newUsage);
@@ -331,7 +331,7 @@ MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, MojInt64 offset, M
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::getUsage(const MojString& kindId, MojDbStorageTxn* txn, bool forUpdate, MojInt64& usageOut, MojRefCountedPtr<MojDbStorageItem>& itemOut)
+MojErr MojDbQuotaEngine::getUsage(const MojString& kindId, MojDbStorageTxn* txn, bool forUpdate, gint64& usageOut, MojRefCountedPtr<MojDbStorageItem>& itemOut)
 {
 	MojAssert(txn);
 
@@ -356,16 +356,16 @@ MojErr MojDbQuotaEngine::initUsage(MojDbKind* kind, MojDbReq& req)
 	MojErrCheck(err);
 	if (!item.get()) {
 		MojObject stats;
-		MojSize usage = 0;
+		gsize usage = 0;
 		err = kind->stats(stats, usage, req, false);
 		MojErrCheck(err);
-		err = insertUsage(kind->id(), (MojInt64) usage, req.txn());
+		err = insertUsage(kind->id(), (gint64) usage, req.txn());
 		MojErrCheck(err);
 	}
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::insertUsage(const MojString& kindId, MojInt64 usage, MojDbStorageTxn* txn)
+MojErr MojDbQuotaEngine::insertUsage(const MojString& kindId, gint64 usage, MojDbStorageTxn* txn)
 {
 	MojAssert(txn);
 	MojAssert(usage >= 0);
@@ -384,7 +384,7 @@ MojErr MojDbQuotaEngine::insertUsage(const MojString& kindId, MojInt64 usage, Mo
 	return MojErrNone;
 }
 
-MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, MojInt64 size)
+MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, gint64 size)
 {
 	MojLogTrace(s_log);
 	MojAssertWriteLocked(m_db->schemaLock());
@@ -409,40 +409,40 @@ MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, MojInt64 size)
 	return MojErrNone;
 }
 
-MojInt64 MojDbQuotaEngine::Quota::size() const
+gint64 MojDbQuotaEngine::Quota::size() const
 {
 	MojThreadGuard guard(m_mutex);
-	MojInt64 size = m_size;
+	gint64 size = m_size;
 	return size;
 }
 
-MojInt64 MojDbQuotaEngine::Quota::available() const
+gint64 MojDbQuotaEngine::Quota::available() const
 {
 	MojThreadGuard guard(m_mutex);
-	MojInt64 available = m_size - m_usage;
+	gint64 available = m_size - m_usage;
 	return available;
 }
 
-MojInt64 MojDbQuotaEngine::Quota::usage() const
+gint64 MojDbQuotaEngine::Quota::usage() const
 {
 	MojThreadGuard guard(m_mutex);
-	MojInt64 usage = m_usage;
+	gint64 usage = m_usage;
 	return usage;
 }
 
-void MojDbQuotaEngine::Quota::size(MojInt64 val)
+void MojDbQuotaEngine::Quota::size(gint64 val)
 {
 	MojThreadGuard guard(m_mutex);
 	m_size = val;
 }
 
-void MojDbQuotaEngine::Quota::usage(MojInt64 val)
+void MojDbQuotaEngine::Quota::usage(gint64 val)
 {
 	MojThreadGuard guard(m_mutex);
 	m_usage = val;
 }
 
-void MojDbQuotaEngine::Quota::offset(MojInt64 off)
+void MojDbQuotaEngine::Quota::offset(gint64 off)
 {
 	MojThreadGuard guard(m_mutex);
 	m_usage += off;
@@ -454,9 +454,9 @@ MojDbQuotaEngine::Offset::Offset(const MojString& kindId)
 {
 }
 
-MojErr MojDbQuotaEngine::Offset::apply(MojInt64 offset)
+MojErr MojDbQuotaEngine::Offset::apply(gint64 offset)
 {
-	MojInt64 newOffset = m_offset + offset;
+	gint64 newOffset = m_offset + offset;
 	if (m_quota.get() && newOffset > m_quota->available())
 		MojErrThrow(MojErrDbQuotaExceeded);
 	m_offset = newOffset;
@@ -464,7 +464,7 @@ MojErr MojDbQuotaEngine::Offset::apply(MojInt64 offset)
 	return MojErrNone;
 }
 
-MojDbQuotaCommitHandler::MojDbQuotaCommitHandler(MojDbQuotaEngine* engine, MojString& owner, MojInt64 size, MojDbStorageTxn* txn)
+MojDbQuotaCommitHandler::MojDbQuotaCommitHandler(MojDbQuotaEngine* engine, MojString& owner, gint64 size, MojDbStorageTxn* txn)
 : m_engine(engine),
   m_owner(owner),
   m_size(size),

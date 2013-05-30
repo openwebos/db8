@@ -35,7 +35,7 @@ struct MojErrMessageValue
 
 static MojErr MojErrGetLocal(MojErrMessageValue*& valOut);
 
-static const MojSize MojStrErrorBufSize = 256;
+static const gsize MojStrErrorBufSize = 256;
 static const MojErrStr s_errStrings[] = {
 	// INTERNAL ERRORS
 	{MojErrInternal, _T("generic internal fault")},
@@ -211,7 +211,7 @@ MojErr MojErrLogDebug(const MojChar* function, const MojChar* file, int line, co
 	MojString msg;
 	MojErr err = msg.format(_T("%s: %s:%d - %s() - "), action, MojFileNameFromPath(file), line, function);
 	MojErrCheckNoLog(err);
-	MojSize len = msg.length();
+	gsize len = msg.length();
 	if (format) {
 		va_list args;
 		va_start(args, format);

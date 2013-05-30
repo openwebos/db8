@@ -33,18 +33,18 @@ public:
     MojVector() : Base() {}
     MojVector(const MojVector& v) : Base(v) {}
 
-    MojSize size() const { return Base::size(); }
-    MojSize capacity() const { return Base::capacity(); }
+    gsize size() const { return Base::size(); }
+    gsize capacity() const { return Base::capacity(); }
     bool empty() const { return Base::empty(); }
 
     ConstIterator begin() const { return (ConstIterator) Base::begin(); }
     ConstIterator end() const { return (ConstIterator) Base::end(); }
 
-    const ValueType& at(MojSize idx) const { return (ValueType&) Base::at(idx); }
+    const ValueType& at(gsize idx) const { return (ValueType&) Base::at(idx); }
     const ValueType& front() const { return (ValueType&) Base::front(); }
     const ValueType& back() const { return (ValueType&) Base::back(); }
 
-    MojSize find(const ValueType& t, MojSize startIdx = 0) const { return Base::find(t, startIdx); }
+    gsize find(const ValueType& t, gsize startIdx = 0) const { return Base::find(t, startIdx); }
 
     void clear() { Base::clear(); }
     void swap(MojVector& v) { Base::swap(v); }
@@ -54,18 +54,18 @@ public:
 
     MojErr begin(Iterator& i) { return Base::begin((Base::Iterator&) i); }
     MojErr end(Iterator& i) { return Base::end((Base::Iterator&) i); }
-    MojErr reserve(MojSize numElems) { return Base::reserve(numElems); }
-    MojErr resize(MojSize numElems, const ValueType& val = NULL) { return Base::resize(numElems, val); }
+    MojErr reserve(gsize numElems) { return Base::reserve(numElems); }
+    MojErr resize(gsize numElems, const ValueType& val = NULL) { return Base::resize(numElems, val); }
     MojErr push(const ValueType& t) { return Base::push(t); }
     MojErr pop() { return Base::pop(); }
-    MojErr setAt(MojSize idx, const ValueType& val) { return Base::setAt(idx, val); }
+    MojErr setAt(gsize idx, const ValueType& val) { return Base::setAt(idx, val); }
     MojErr append(ConstIterator rangeBegin, ConstIterator rangeEnd) { return Base::append((Base::ConstIterator) rangeBegin, (Base::ConstIterator) rangeEnd); }
-    MojErr insert(MojSize idx, MojSize numElems, const ValueType& val) { return Base::insert(idx, numElems, val); }
-    MojErr insert(MojSize idx, ConstIterator rangeBegin, ConstIterator rangeEnd) { return Base::insert(idx, (Base::ConstIterator) rangeBegin, (Base::ConstIterator) rangeEnd); }
-    MojErr erase(MojSize idx, MojSize numElems = 1) { return Base::erase(idx, numElems); }
+    MojErr insert(gsize idx, gsize numElems, const ValueType& val) { return Base::insert(idx, numElems, val); }
+    MojErr insert(gsize idx, ConstIterator rangeBegin, ConstIterator rangeEnd) { return Base::insert(idx, (Base::ConstIterator) rangeBegin, (Base::ConstIterator) rangeEnd); }
+    MojErr erase(gsize idx, gsize numElems = 1) { return Base::erase(idx, numElems); }
 
     MojVector& operator=(const MojVector& rhs) { Base::assign(rhs); return *this; }
-    const ValueType& operator[](MojSize idx) const { return (const ValueType&) Base::operator[](idx); }
+    const ValueType& operator[](gsize idx) const { return (const ValueType&) Base::operator[](idx); }
     bool operator==(const MojVector& rhs) const { return Base::operator==(rhs); }
     bool operator!=(const MojVector& rhs) const { return Base::operator!=(rhs); }
     bool operator<(const MojVector& rhs) const { return Base::operator<(rhs); }
@@ -78,7 +78,7 @@ private:
 };
 
 template<class T, class EQ, class COMP>
-const MojSize MojVector<T, EQ, COMP>::InitialSize = 8;
+const gsize MojVector<T, EQ, COMP>::InitialSize = 8;
 
 template<class T, class EQ, class COMP>
 MojVector<T, EQ, COMP>::MojVector(const MojVector& v)
@@ -91,7 +91,7 @@ MojVector<T, EQ, COMP>::MojVector(const MojVector& v)
 }
 
 template<class T, class EQ, class COMP>
-MojSize MojVector<T, EQ, COMP>::find(const T& t, MojSize startIdx) const
+gsize MojVector<T, EQ, COMP>::find(const T& t, gsize startIdx) const
 {
     MojAssert(startIdx == 0 || startIdx < size());
 
@@ -178,7 +178,7 @@ MojErr MojVector<T, EQ, COMP>::end(Iterator& i)
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::reserve(MojSize numElems)
+MojErr MojVector<T, EQ, COMP>::reserve(gsize numElems)
 {
     if (numElems > capacity()) {
         MojErr err = realloc(numElems);
@@ -188,9 +188,9 @@ MojErr MojVector<T, EQ, COMP>::reserve(MojSize numElems)
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::resize(MojSize numElems, const T& val)
+MojErr MojVector<T, EQ, COMP>::resize(gsize numElems, const T& val)
 {
-    MojSize curSize = size();
+    gsize curSize = size();
     if (numElems > curSize) {
         MojErr err = insert(curSize, numElems - curSize, val);
         MojErrCheck(err);
@@ -211,7 +211,7 @@ MojErr MojVector<T, EQ, COMP>::push(const T& val) {
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::setAt(MojSize idx, const T& val)
+MojErr MojVector<T, EQ, COMP>::setAt(gsize idx, const T& val)
 {
     MojAssert(idx < size());
     MojErr err = ensureWritable();
@@ -233,7 +233,7 @@ MojErr MojVector<T, EQ, COMP>::append(ConstIterator rangeBegin, ConstIterator ra
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::insert(MojSize idx, MojSize numElems, const T& val)
+MojErr MojVector<T, EQ, COMP>::insert(gsize idx, gsize numElems, const T& val)
 {
     MojAssert(idx <= size());
 
@@ -248,7 +248,7 @@ MojErr MojVector<T, EQ, COMP>::insert(MojSize idx, MojSize numElems, const T& va
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::insert(MojSize idx, ConstIterator rangeBegin, ConstIterator rangeEnd)
+MojErr MojVector<T, EQ, COMP>::insert(gsize idx, ConstIterator rangeBegin, ConstIterator rangeEnd)
 {
     MojAssert(idx <= size());
     MojAssert((rangeBegin && rangeEnd >= rangeBegin) || (rangeBegin == NULL && rangeEnd == NULL));
@@ -263,17 +263,17 @@ MojErr MojVector<T, EQ, COMP>::insert(MojSize idx, ConstIterator rangeBegin, Con
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::erase(MojSize idx, MojSize numElems)
+MojErr MojVector<T, EQ, COMP>::erase(gsize idx, gsize numElems)
 {
     MojAssert(idx + numElems <= size());
 
    // may invalidate iters
    MojErr err = ensureWritable();
    MojErrCheck(err);
-   MojSize numMove = size() - (idx + numElems);
+   gsize numMove = size() - (idx + numElems);
    Iterator pos = m_begin + idx;
    // do moves
-   for (MojSize i = 0; i < numMove; ++i, ++pos) {
+   for (gsize i = 0; i < numMove; ++i, ++pos) {
        *pos = *(pos + numElems);
    }
    // then destroy elems hanging off the end
@@ -331,28 +331,28 @@ bool MojVector<T, EQ, COMP>::operator==(const MojVector& rhs) const
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::shift(MojSize idx, MojSize numElems)
+MojErr MojVector<T, EQ, COMP>::shift(gsize idx, gsize numElems)
 {
     MojAssert(idx <= size());
-    MojSize numMove = size() - idx;
-    MojSize numCopyConstruct = MojMin(numElems, numMove);
-    MojSize numDefaultConstruct = numElems - numCopyConstruct;
-    MojSize numAssign = numMove - numCopyConstruct;
+    gsize numMove = size() - idx;
+    gsize numCopyConstruct = MojMin(numElems, numMove);
+    gsize numDefaultConstruct = numElems - numCopyConstruct;
+    gsize numAssign = numMove - numCopyConstruct;
 
     // make space (possibly invalidating iterator)
-    MojSize err = ensureSpace(size() + numElems);
+    gsize err = ensureSpace(size() + numElems);
     MojErrCheck(err);
     Iterator elem = m_end - 1;
     // incrementing end as we go to make sure  newly created elems
     // get destroyed if a constructor throws
-    for (MojSize i = 0; i < numDefaultConstruct; ++i, ++m_end) {
+    for (gsize i = 0; i < numDefaultConstruct; ++i, ++m_end) {
         new(m_end) T();
     }
-    for (MojSize i = 0; i < numCopyConstruct; ++i, ++m_end) {
+    for (gsize i = 0; i < numCopyConstruct; ++i, ++m_end) {
         ConstIterator src = m_end - numElems;
         new(m_end) T(*src);
     }
-    for (MojSize i = 0; i < numAssign; ++i, --elem) {
+    for (gsize i = 0; i < numAssign; ++i, --elem) {
         ConstIterator src = elem - numElems;
         *elem = *src;
     }
@@ -371,10 +371,10 @@ MojErr MojVector<T, EQ, COMP>::ensureWritable()
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::ensureSpace(MojSize numElems)
+MojErr MojVector<T, EQ, COMP>::ensureSpace(gsize numElems)
 {
     if (numElems > capacity()) {
-        MojSize newSize = MojMax(InitialSize, capacity() * 2);
+        gsize newSize = MojMax(InitialSize, capacity() * 2);
         newSize = MojMax(numElems, newSize);
         MojErr err = realloc(newSize);
         MojErrCheck(err);
@@ -387,7 +387,7 @@ MojErr MojVector<T, EQ, COMP>::ensureSpace(MojSize numElems)
 }
 
 template<class T, class EQ, class COMP>
-MojErr MojVector<T, EQ, COMP>::realloc(MojSize numElems)
+MojErr MojVector<T, EQ, COMP>::realloc(gsize numElems)
 {
     // we use a temporary vector and keep it valid at all times to make
     // sure that proper cleanup happens if a constructor throws an exception

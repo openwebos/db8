@@ -71,14 +71,14 @@ public:
 	MojDbStorageDatabase* kindDb() { return m_kindDb.get(); }
 	KindMap& kindMap() { return m_kinds; }
 	MojErr tokenSet(const MojChar* kindName, MojTokenSet& tokenSetOut);
-	MojErr tokenFromId(const MojChar* id, MojInt64& tokOut);
-	MojErr idFromToken(MojInt64 tok, MojString& idOut);
+	MojErr tokenFromId(const MojChar* id, gint64& tokOut);
+	MojErr idFromToken(gint64 tok, MojString& idOut);
 	MojErr getKind(const MojObject& obj, MojDbKind*& kind);
 	MojErr getKind(const MojChar* kindName, MojDbKind*& kind);
 
 
 private:
-	typedef MojHashMap<MojInt64, MojString> TokMap;
+	typedef MojHashMap<gint64, MojString> TokMap;
 	typedef MojErr (MojDbKind::* ConfigUpdateHandler)(const MojObject& obj, const KindMap& map, MojDbStorageTxn* txn);
 	typedef MojErr (MojDbKind::* ConfigDeleteHandler)(const KindMap& map, MojDbStorageTxn* txn);
 

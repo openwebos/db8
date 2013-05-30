@@ -32,9 +32,9 @@ public:
 
 private:
 	MojErr delKindTest(MojDb& db);
-	MojErr checkObjectsPurged(MojDb& db, const MojUInt32& count, const MojSize& expectedCount,
-			const MojSize& expectedNumObjects, const MojSize& expectedNumRevTimestampObjects, const MojObject& expectedLastPurgeRevNum);
-	MojErr createRevTimestamp(MojDb& db, MojObject& revNum, MojInt64 timestamp);
+	MojErr checkObjectsPurged(MojDb& db, const guint32& count, const gsize& expectedCount,
+			const gsize& expectedNumObjects, const gsize& expectedNumRevTimestampObjects, const MojObject& expectedLastPurgeRevNum);
+	MojErr createRevTimestamp(MojDb& db, MojObject& revNum, gint64 timestamp);
 };
 
 #endif /* MOJDBPURGETEST_H_ */

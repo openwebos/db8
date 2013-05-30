@@ -44,7 +44,7 @@ protected:
 	virtual ~MojHashBase() {}
 	void release();
 
-	MojSize size() const { return m_impl ? m_impl->m_size : 0; }
+	gsize size() const { return m_impl ? m_impl->m_size : 0; }
 	bool empty() const { return size() == 0; }
 	const Node* begin() const { return m_impl ? m_impl->m_begin : NULL; }
 	MojErr begin(Node*& node);
@@ -55,14 +55,14 @@ protected:
 	void assign(const MojHashBase& hb);
 	bool equals(const MojHashBase& hb) const;
 
-	const Node* find(const void* key, MojSize* idxOut = NULL) const;
-	MojErr find(const void* key, Node*& nodeOut, MojSize* idxOut = NULL);
-	MojErr put(MojAutoPtr<Node> node, MojSize idx, const void* key);
+	const Node* find(const void* key, gsize* idxOut = NULL) const;
+	MojErr find(const void* key, Node*& nodeOut, gsize* idxOut = NULL);
+	MojErr put(MojAutoPtr<Node> node, gsize idx, const void* key);
 	MojErr del(const void* key, bool& foundOut);
 
 private:
-	static const MojSize FillFactor;
-	static const MojSize InitialSize;
+	static const gsize FillFactor;
+	static const gsize InitialSize;
 
 	struct Bucket
 	{
@@ -76,12 +76,12 @@ private:
 	struct Impl
 	{
 		Impl();
-		void put(Node* node, MojSize idx);
+		void put(Node* node, gsize idx);
 
 		MojAutoArrayPtr<Bucket> m_buckets;
 		Node* m_begin;
-		MojSize m_numBuckets;
-		MojSize m_size;
+		gsize m_numBuckets;
+		gsize m_size;
 		MojAtomicInt m_refcount;
 	};
 
@@ -90,13 +90,13 @@ private:
 	virtual void deleteNode(Node* node) const = 0;
 	virtual Node* cloneNode(const Node* node) const = 0;
 	virtual const void* key(const Node* node) const = 0;
-	virtual MojSize hash(const void* key) const = 0;
+	virtual gsize hash(const void* key) const = 0;
 
 	void init(Impl* impl);
 	MojErr ensureWritable();
 	MojErr clone();
-	MojErr realloc(MojSize numBuckets);
-	MojSize bucketForKey(const void* key, MojSize numBuckets) const;
+	MojErr realloc(gsize numBuckets);
+	gsize bucketForKey(const void* key, gsize numBuckets) const;
 	void deleteNodeList(Node* node);
 
 	Impl* m_impl;

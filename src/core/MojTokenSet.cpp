@@ -33,18 +33,18 @@ MojErr MojTokenSet::init(MojSharedTokenSet* sharedSet)
 	return MojErrNone;
 }
 
-MojErr MojTokenSet::tokenFromString(const MojChar* str, MojUInt8& tokenOut, bool add)
+MojErr MojTokenSet::tokenFromString(const MojChar* str, guint8& tokenOut, bool add)
 {
 	tokenOut = InvalidToken;
 
 	// check if we've already added the prop
-	MojUInt32 token;
+	guint32 token;
 	bool found;
 	MojErr err = m_obj.get(str, token, found);
 	MojErrCheck(err);
 	if (found) {
-		MojAssert(token <= MojUInt8Max && token != InvalidToken);
-		tokenOut = (MojUInt8) token;
+		MojAssert(token <= G_MAXUINT8 && token != InvalidToken);
+		tokenOut = (guint8) token;
 	} else if (add) {
 		TokenVec updatedVec;
 		MojObject updatedObj;
@@ -56,10 +56,10 @@ MojErr MojTokenSet::tokenFromString(const MojChar* str, MojUInt8& tokenOut, bool
 	return MojErrNone;
 }
 
-MojErr MojTokenSet::stringFromToken(MojUInt8 token, MojString& propNameOut) const
+MojErr MojTokenSet::stringFromToken(guint8 token, MojString& propNameOut) const
 {
 	if (token < MojObjectWriter::TokenStartMarker ||
-		(MojSize)(token - MojObjectWriter::TokenStartMarker) >= m_tokenVec.size()) {
+		(gsize)(token - MojObjectWriter::TokenStartMarker) >= m_tokenVec.size()) {
 		MojErrThrow(MojErrDbInvalidToken);
 	}
 	propNameOut = m_tokenVec.at(token - MojObjectWriter::TokenStartMarker);

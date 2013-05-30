@@ -67,7 +67,7 @@ MojErr MojDbSearchTest::run()
 	MojTestErrCheck(err);
 
 	// put test objects
-	for (MojSize i = 0; i < sizeof(MojSearchTestObjects) / sizeof(MojChar*); ++i) {
+	for (gsize i = 0; i < sizeof(MojSearchTestObjects) / sizeof(MojChar*); ++i) {
 		MojObject obj;
 		err = obj.fromJson(MojSearchTestObjects[i]);
 		MojTestErrCheck(err);

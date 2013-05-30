@@ -32,7 +32,7 @@ public:
 	virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine);
 	virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
 	virtual const MojObject& id() const;
-	virtual MojSize size() const;
+	virtual gsize size() const;
 
 	const MojObject& obj() const { return m_obj; }
 	const MojDbKeyBuilder::KeySet sortKeys() const { return m_sortKeys; }

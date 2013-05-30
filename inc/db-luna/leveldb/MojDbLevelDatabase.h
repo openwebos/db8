@@ -35,7 +35,7 @@ public:
     MojErr open(const MojChar* dbName, MojDbLevelEngine* env, bool& createdOut, MojDbStorageTxn* txn);
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
     virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
     virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
     virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
@@ -61,7 +61,7 @@ private:
 
     //MojErr verify();
     MojErr closeImpl();
-    void postUpdate(MojDbStorageTxn* txn, MojSize updateSize);
+    void postUpdate(MojDbStorageTxn* txn, gsize updateSize);
 
     leveldb::DB* m_db;
     MojDbLevelEngine* m_engine;

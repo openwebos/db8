@@ -67,7 +67,7 @@ MojErr MojDbRevisionSetTest::standAloneTest()
 	MojTestErrCheck(err);
 	err = rs1.update(&obj1, NULL);
 	MojTestErrCheck(err);
-	MojInt64 rev;
+	gint64 rev;
 	MojTestAssert(obj1.get(_T("revFoo"), rev) && rev == 1);
 
 	// one prop, unchanged
@@ -300,9 +300,9 @@ MojErr MojDbRevisionSetTest::dbTest()
 
 MojErr MojDbRevisionSetTest::checkRev(const MojObject& obj, const MojChar* propName, bool eq)
 {
-	MojInt64 rev;
+	gint64 rev;
 	MojTestAssert(obj.get(MojDb::RevKey, rev));
-	MojInt64 rev2;
+	gint64 rev2;
 	MojTestAssert(obj.get(propName, rev2));
 	if (eq) {
 		MojTestAssert(rev == rev2);

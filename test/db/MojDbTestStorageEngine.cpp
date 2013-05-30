@@ -208,7 +208,7 @@ MojErr MojDbTestStorageDatabase::drop(MojDbStorageTxn* txn)
     return m_db->drop(MojTestTxn(txn));
 }
 
-MojErr MojDbTestStorageDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbTestStorageDatabase::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
 {
     MojErr err = m_testEngine->checkErrMap(_T("db.size"));
     MojErrCheck(err);
@@ -333,7 +333,7 @@ MojErr MojDbTestStorageIndex::drop(MojDbStorageTxn* txn)
     return m_idx->drop(MojTestTxn(txn));
 }
 
-MojErr MojDbTestStorageIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbTestStorageIndex::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
 {
     MojErr err = m_testEngine->checkErrMap(_T("index.size"));
     MojErrCheck(err);
@@ -464,7 +464,7 @@ MojErr MojDbTestStorageQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
     return m_query->get(itemOut, foundOut);
 }
 
-MojErr MojDbTestStorageQuery::getId(MojObject& objOut, MojUInt32& groupOut, bool& foundOut)
+MojErr MojDbTestStorageQuery::getId(MojObject& objOut, guint32& groupOut, bool& foundOut)
 {
     MojErr err = m_testEngine->checkErrMap(_T("query.getId"));
     MojErrCheck(err);
@@ -482,7 +482,7 @@ MojErr MojDbTestStorageQuery::getById(const MojObject& id, MojDbStorageItem*& it
     return m_query->getById(id, itemOut, foundOut);
 }
 
-MojErr MojDbTestStorageQuery::count(MojUInt32& countOut)
+MojErr MojDbTestStorageQuery::count(guint32& countOut)
 {
     MojErr err = m_testEngine->checkErrMap(_T("query.count"));
     MojErrCheck(err);
@@ -519,7 +519,7 @@ MojErr MojDbTestStorageSeq::close()
     return m_seq->close();
 }
 
-MojErr MojDbTestStorageSeq::get(MojInt64& valOut)
+MojErr MojDbTestStorageSeq::get(gint64& valOut)
 {
     MojErr err = m_testEngine->checkErrMap(_T("seq.get"));
     MojErrCheck(err);

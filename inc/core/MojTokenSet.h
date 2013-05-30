@@ -27,14 +27,14 @@
 class MojTokenSet : public MojNoCopy
 {
 public:
-	static const MojUInt8 InvalidToken = 0;
+	static const guint8 InvalidToken = 0;
 	typedef MojSharedTokenSet::TokenVec TokenVec;
 
 	MojTokenSet();
 
 	MojErr init(MojSharedTokenSet* sharedSet);
-	MojErr tokenFromString(const MojChar* str, MojUInt8& tokenOut, bool add);
-	MojErr stringFromToken(MojUInt8 token, MojString& propNameOut) const;
+	MojErr tokenFromString(const MojChar* str, guint8& tokenOut, bool add);
+	MojErr stringFromToken(guint8 token, MojString& propNameOut) const;
 
 private:
 	MojRefCountedPtr<MojSharedTokenSet> m_sharedTokenSet;

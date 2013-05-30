@@ -80,7 +80,7 @@ MojErr MojDbTextCollator::sortKey(const MojString& str, MojDbKey& keyOut) const
 	return MojErrNone;
 }
 
-MojErr MojDbTextCollator::sortKey(const UChar* chars, MojSize size, MojDbKey& keyOut) const
+MojErr MojDbTextCollator::sortKey(const UChar* chars, gsize size, MojDbKey& keyOut) const
 {
 	MojErr err = MojErrNone;
 	MojObjectWriter writer;
@@ -90,17 +90,17 @@ MojErr MojDbTextCollator::sortKey(const UChar* chars, MojSize size, MojDbKey& ke
 		MojErrCheck(err);
 	} else {
 		// get sort key
-		MojInt32 destCapacity = 0;
-		MojInt32 destLength = 0;
+		gint32 destCapacity = 0;
+		gint32 destLength = 0;
 		MojDbKey::ByteVec vec;
 		err = vec.resize(size * 3);
 		MojErrCheck(err);
 		do {
-			MojByte* dest = NULL;
+			guint8* dest = NULL;
 			err = vec.begin(dest);
 			MojErrCheck(err);
-			destCapacity = (MojInt32) vec.size();
-			destLength = ucol_getSortKey(m_ucol, chars, (MojInt32) size, dest, destCapacity);
+			destCapacity = (gint32) vec.size();
+			destLength = ucol_getSortKey(m_ucol, chars, (gint32) size, dest, destCapacity);
 			if (destLength == 0) {
 				MojErrThrow(MojErrDbUnicode);
 			}

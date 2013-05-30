@@ -35,7 +35,7 @@ public:
 	virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
 	virtual MojErr get(MojObject& objOut, bool& foundOut);
 	virtual MojErr visit(MojObjectVisitor& visitor);
-	virtual MojErr count(MojUInt32& countOut);
+	virtual MojErr count(guint32& countOut);
 	virtual MojErr nextPage(MojDbQuery::Page& pageOut);
 
 	bool isOpen() const { return m_storageQuery.get() != NULL; }

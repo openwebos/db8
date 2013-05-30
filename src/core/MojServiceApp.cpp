@@ -21,7 +21,7 @@
 
 MojServiceApp* MojServiceApp::s_instance = NULL;
 
-MojServiceApp::MojServiceApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* versionString)
+MojServiceApp::MojServiceApp(guint32 majorVersion, guint32 minorVersion, const MojChar* versionString)
 : MojApp(majorVersion, minorVersion, versionString),
   m_shutdown(false)
 {

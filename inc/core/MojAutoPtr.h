@@ -113,8 +113,8 @@ public:
 	MojAutoArrayPtr(MojAutoPtrRef<T, MojArrayDeleteDtor<T> > ref) : Base(ref) {}
 
 	T& operator*() const { MojAssert(Base::m_p); return *Base::m_p; }
-	T& operator[](MojSize idx) { return Base::m_p[idx]; }
-	const T& operator[](MojSize idx) const { return Base::m_p[idx]; }
+	T& operator[](gsize idx) { return Base::m_p[idx]; }
+	const T& operator[](gsize idx) const { return Base::m_p[idx]; }
 };
 
 struct MojFreeDtor
@@ -178,7 +178,7 @@ public:
 	MojSharedPtrBase(MojSharedPtrRef<T, DTOR> ref) : m_impl(ref.m_impl) { init(); }
 	~MojSharedPtrBase() { destroy(); }
 
-	MojInt32 refcount() { return m_impl ? m_impl->m_refcount.value() : 0; }
+	gint32 refcount() { return m_impl ? m_impl->m_refcount.value() : 0; }
 	T* get() const { return m_impl ? m_impl->m_p : NULL; }
 	void reset() { destroy(); m_impl = NULL; }
 	MojErr reset(T* p);

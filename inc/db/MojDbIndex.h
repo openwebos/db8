@@ -40,7 +40,7 @@ public:
 	static const MojChar* const SizeKey;
 	static const MojChar* const TypeKey;
 	static const MojChar* const WatchesKey;
-	static const MojSize MaxIndexNameLen = 128;
+	static const gsize MaxIndexNameLen = 128;
 
 	typedef MojVector<MojString> StringVec;
 
@@ -53,7 +53,7 @@ public:
 
 	MojErr open(MojDbStorageIndex* index, const MojObject& id, MojDbReq& req, bool created = false);
 	MojErr close();
-	MojErr stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req);
+	MojErr stats(MojObject& objOut, gsize& usageOut, MojDbReq& req);
 	MojErr drop(MojDbReq& req);
 	MojErr updateLocale(const MojChar* locale, MojDbReq& req);
 
@@ -63,8 +63,8 @@ public:
 
 	bool canAnswer(const MojDbQuery& query) const;
 	bool includeDeleted() const { return m_includeDeleted; }
-	MojSize idIndex() const { return m_idIndex; }
-	MojSize size() const { return m_props.size(); }
+	gsize idIndex() const { return m_idIndex; }
+	gsize size() const { return m_props.size(); }
 	const MojObject& id() const { return m_id; }
 	const MojObject& object() const { return m_obj; }
 	const StringVec& props() const { return m_propNames; }
@@ -73,16 +73,16 @@ public:
 	const MojString& name() const { return m_name; }
 
 private:
-	static const MojSize WatchWarningThreshold = 20;
+	static const gsize WatchWarningThreshold = 20;
 
 	typedef MojVector<MojDbKeyRange> RangeVec;
 	typedef MojVector<MojRefCountedPtr<MojDbExtractor> > PropVec;
-	typedef MojVector<MojByte> ByteVec;
+	typedef MojVector<guint8> ByteVec;
 	typedef MojSet<MojDbKey> KeySet;
 	typedef MojSet<MojObject> ObjectSet;
 	typedef MojVector<MojObject> ObjectVec;
 	typedef MojVector<MojRefCountedPtr<MojDbWatcher> > WatcherVec;
-	typedef MojMap<MojString, MojSize> WatcherMap;
+	typedef MojMap<MojString, gsize> WatcherMap;
 	typedef MojDbStorageTxn::CommitSignal::Slot<MojDbIndex> CommitSlot;
 
 	bool isOpen() const { return m_collection != NULL; }
@@ -118,10 +118,10 @@ private:
 	MojDbKind* m_kind;
 	MojDbKindEngine* m_kindEngine;
 	MojDbStorageCollection* m_collection;
-	MojSize m_idIndex;
+	gsize m_idIndex;
 	bool m_includeDeleted;
 	bool m_ready;
-	MojUInt32 m_delMisses;
+	guint32 m_delMisses;
 
 	static MojLogger s_log;
 };

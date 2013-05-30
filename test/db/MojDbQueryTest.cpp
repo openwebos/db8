@@ -382,11 +382,11 @@ MojErr MojDbQueryTest::ltTest(MojDb& db)
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), -1, 0);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), MojInt64Min, 0);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), G_MININT64, 0);
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), MojTestNumObjects, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), MojInt64Max, MojTestNumObjects);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, TestLessThan(), G_MAXINT64, MojTestNumObjects);
 	MojTestErrCheck(err);
 	// bar
 	err = check(db, _T("QueryTest1:1"), _T("bar"), MojDbQuery::OpLessThan, TestLessThan(), 8, 8);
@@ -429,11 +429,11 @@ MojErr MojDbQueryTest::lteTest(MojDb& db)
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), -1, 0);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), MojInt64Min, 0);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), G_MININT64, 0);
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), MojTestNumObjects, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), MojInt64Max, MojTestNumObjects);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThanEq, TestLessThanEq(), G_MAXINT64, MojTestNumObjects);
 	MojTestErrCheck(err);
 	// bar
 	err = check(db, _T("QueryTest1:1"), _T("bar"), MojDbQuery::OpLessThanEq, TestLessThanEq(), 8, 10);
@@ -478,9 +478,9 @@ MojErr MojDbQueryTest::gtTest(MojDb& db)
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThan, TestGreaterThan(), -1, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThan, TestGreaterThan(), MojInt64Min, MojTestNumObjects);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThan, TestGreaterThan(), G_MININT64, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThan, TestGreaterThan(), MojInt64Max, 0);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThan, TestGreaterThan(), G_MAXINT64, 0);
 	MojTestErrCheck(err);
 	// bar
 	err = check(db, _T("QueryTest1:1"), _T("bar"), MojDbQuery::OpGreaterThan, TestGreaterThan(), 8, MojTestNumObjects - 10);
@@ -523,9 +523,9 @@ MojErr MojDbQueryTest::gteTest(MojDb& db)
 	MojTestErrCheck(err);
 	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), -1, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), MojInt64Min, MojTestNumObjects);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), G_MININT64, MojTestNumObjects);
 	MojTestErrCheck(err);
-	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), MojInt64Max, 0);
+	err = check(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), G_MAXINT64, 0);
 	MojTestErrCheck(err);
 	// bar
 	err = check(db, _T("QueryTest1:1"), _T("bar"), MojDbQuery::OpGreaterThanEq, TestGreaterThanEq(), 8, MojTestNumObjects - 8);
@@ -644,9 +644,9 @@ MojErr MojDbQueryTest::countTest(MojDb& db)
 	MojTestErrCheck(err);
 	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpEq, 8, 1, 0);
 	MojTestErrCheck(err);
-	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, MojInt64Min, 0);
+	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, G_MININT64, 0);
 	MojTestErrCheck(err);
-	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, MojInt64Min, 0, 0);
+	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, G_MININT64, 0, 0);
 	MojTestErrCheck(err);
 	err = checkCount(db, _T("QueryTest1:1"), _T("foo"), MojDbQuery::OpLessThan, MojTestNumObjects, MojTestNumObjects);
 	MojTestErrCheck(err);
@@ -737,7 +737,7 @@ MojErr MojDbQueryTest::multiTest(MojDb& db)
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		bool found = false;
 		MojObject obj;
@@ -865,7 +865,7 @@ MojErr MojDbQueryTest::delTest(MojDb& db)
 {
 	// add some objects and delete half of them
 	bool found = false;
-	for (MojSize i = 0; i < 10; ++i) {
+	for (gsize i = 0; i < 10; ++i) {
 		MojObject obj;
 		MojErr err = obj.putInt(_T("foo"), 45);
 		MojTestErrCheck(err);
@@ -896,7 +896,7 @@ MojErr MojDbQueryTest::delTest(MojDb& db)
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = cursor.count(count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 5);
@@ -982,7 +982,7 @@ MojErr MojDbQueryTest::isolationTest(MojDb& db)
 	MojDbQuery query;
 	MojErr err = query.from(_T("QueryTest3:1"));
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	// del old objs
 	err = db.del(query, count);
 	MojTestErrCheck(err);
@@ -1223,21 +1223,21 @@ MojErr MojDbQueryTest::put4(MojDb& db, const MojObject& val1, const MojChar* val
 
 template<class COMP>
 MojErr MojDbQueryTest::check(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-		const COMP& comp, const MojObject& expectedVal, MojSize expectedCount, MojUInt32 limit)
+		const COMP& comp, const MojObject& expectedVal, gsize expectedCount, guint32 limit)
 {
 	MojDbQuery query;
 	MojErr err = query.from(kind);
 	MojTestErrCheck(err);
 	err = query.where(prop, op, expectedVal);
 	MojTestErrCheck(err);
-	if (limit != MojUInt32Max)
+	if (limit != G_MAXUINT32)
 		query.limit(limit);
 
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		bool found = false;
 		MojObject obj;
@@ -1260,7 +1260,7 @@ MojErr MojDbQueryTest::check(MojDb& db, const MojChar* kind, const MojChar* prop
 template <class COMP>
 MojErr MojDbQueryTest::check(MojDb& db, const MojChar* kind, const MojChar* prop1, const MojObject& expectedVal1,
 		const MojChar* prop2, MojDbQuery::CompOp op, const COMP& comp, const MojObject& expectedVal2,
-		MojSize expectedCount, MojUInt32 limit)
+		gsize expectedCount, guint32 limit)
 {
 	MojDbQuery query;
 	MojErr err = query.from(kind);
@@ -1269,14 +1269,14 @@ MojErr MojDbQueryTest::check(MojDb& db, const MojChar* kind, const MojChar* prop
 	MojTestErrCheck(err);
 	err = query.where(prop2, op, expectedVal2);
 	MojTestErrCheck(err);
-	if (limit != MojUInt32Max)
+	if (limit != G_MAXUINT32)
 		query.limit(limit);
 
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		bool found = false;
 		MojObject obj;
@@ -1321,7 +1321,7 @@ MojErr MojDbQueryTest::checkVal(const MojObject& obj, const MojChar* prop, const
 
 template<class COMP>
 MojErr MojDbQueryTest::checkOrder(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-		const COMP& comp, const MojObject& expectedVal, MojSize expectedCount, const MojChar* order, bool desc)
+		const COMP& comp, const MojObject& expectedVal, gsize expectedCount, const MojChar* order, bool desc)
 {
 	MojDbQuery query;
 	MojErr err = query.from(kind);
@@ -1338,7 +1338,7 @@ MojErr MojDbQueryTest::checkOrder(MojDb& db, const MojChar* kind, const MojChar*
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojObject prev;
 	for (;;) {
 		bool found = false;
@@ -1373,11 +1373,11 @@ MojErr MojDbQueryTest::checkOrder(MojDb& db, const MojChar* kind, const MojChar*
 
 template<class COMP>
 MojErr MojDbQueryTest::checkPage(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-		const COMP& comp, const MojObject& expectedVal, MojSize expectedCount, const MojChar* order, bool desc)
+		const COMP& comp, const MojObject& expectedVal, gsize expectedCount, const MojChar* order, bool desc)
 {
 	MojDbQuery::Page page;
-	MojUInt32 count = 0;
-	MojSize pageCount = 0;
+	guint32 count = 0;
+	gsize pageCount = 0;
 
 	do {
 		MojDbQuery query;
@@ -1420,7 +1420,7 @@ MojErr MojDbQueryTest::checkPage(MojDb& db, const MojChar* kind, const MojChar* 
 }
 
 MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop, MojDbQuery::CompOp lowerOp, MojDbQuery::CompOp upperOp,
-		const MojObject& lowerVal, const MojObject& upperVal, MojSize expectedCount)
+		const MojObject& lowerVal, const MojObject& upperVal, gsize expectedCount)
 {
 	MojDbQuery query;
 	MojErr err = query.from(_T("QueryTest1:1"));
@@ -1434,7 +1434,7 @@ MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop, MojDbQuery::Co
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		bool found = false;
 		MojObject obj;
@@ -1467,7 +1467,7 @@ MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop, MojDbQuery::Co
 
 MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop1, const MojObject& val1,
 		const MojChar* prop2, MojDbQuery::CompOp lowerOp, MojDbQuery::CompOp upperOp,
-		const MojObject& lowerVal, const MojObject& upperVal, MojSize expectedCount)
+		const MojObject& lowerVal, const MojObject& upperVal, gsize expectedCount)
 {
 	MojDbQuery query;
 	MojErr err = query.from(_T("QueryTest1:1"));
@@ -1483,7 +1483,7 @@ MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop1, const MojObje
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		bool found = false;
 		MojObject obj;
@@ -1515,22 +1515,22 @@ MojErr MojDbQueryTest::checkRange(MojDb& db, const MojChar* prop1, const MojObje
 }
 
 MojErr MojDbQueryTest::checkCount(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-		const MojObject& expectedVal, MojSize expectedCount, MojUInt32 limit)
+		const MojObject& expectedVal, gsize expectedCount, guint32 limit)
 {
 	MojDbQuery query;
 	MojErr err = query.from(kind);
 	MojTestErrCheck(err);
 	err = query.where(prop, op, expectedVal);
 	MojTestErrCheck(err);
-	if (limit != MojUInt32Max)
+	if (limit != G_MAXUINT32)
 		query.limit(limit);
 
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
-	if (limit != MojUInt32Max) {
+	guint32 count = 0;
+	if (limit != G_MAXUINT32) {
 		bool found = false;
 		while (count < limit) {
 			MojObject obj;
@@ -1550,7 +1550,7 @@ MojErr MojDbQueryTest::checkCount(MojDb& db, const MojChar* kind, const MojChar*
 	return MojErrNone;
 }
 
-MojErr MojDbQueryTest::checkKind(MojDb& db, const MojChar* kind, MojSize expectedCount, const MojChar* orderBy)
+MojErr MojDbQueryTest::checkKind(MojDb& db, const MojChar* kind, gsize expectedCount, const MojChar* orderBy)
 {
 	MojDbQuery query;
 	MojErr err = query.from(kind);
@@ -1564,7 +1564,7 @@ MojErr MojDbQueryTest::checkKind(MojDb& db, const MojChar* kind, MojSize expecte
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	MojString kindStr;
 	err = kindStr.assign(kind);
 	MojErrCheck(err);

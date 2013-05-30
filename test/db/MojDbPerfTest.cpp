@@ -335,7 +335,7 @@ MojErr MojDbPerfTest::timePutKind(MojDb& db, MojTime& putKindTime, MojObject kin
 }
 
 
-MojErr MojDbPerfTest::createSmallObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createSmallObj(MojObject& obj, guint64 i)
 {
 
 
@@ -356,7 +356,7 @@ MojErr MojDbPerfTest::createSmallObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createMedObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createMedObj(MojObject& obj, guint64 i)
 {
 	MojErr err = createSmallObj(obj, i);
 	MojTestErrCheck(err);
@@ -374,7 +374,7 @@ MojErr MojDbPerfTest::createMedObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createLargeObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createLargeObj(MojObject& obj, guint64 i)
 {
 	MojErr err = createMedObj(obj, i);
 	MojTestErrCheck(err);
@@ -402,7 +402,7 @@ MojErr MojDbPerfTest::createLargeObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createMedNestedObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createMedNestedObj(MojObject& obj, guint64 i)
 {
 	MojObject name;
 	MojErr err = createSmallObj(name, i);
@@ -424,7 +424,7 @@ MojErr MojDbPerfTest::createMedNestedObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createLargeNestedObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createLargeNestedObj(MojObject& obj, guint64 i)
 {
 	MojObject med;
 	MojErr err = createMedNestedObj(med, i);
@@ -456,7 +456,7 @@ MojErr MojDbPerfTest::createLargeNestedObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createMedArrayObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createMedArrayObj(MojObject& obj, guint64 i)
 {
 	MojErr err = createSmallObj(obj, i);
 	MojTestErrCheck(err);
@@ -473,7 +473,7 @@ MojErr MojDbPerfTest::createMedArrayObj(MojObject& obj, MojUInt64 i)
 	MojTestErrCheck(err);
 
 	MojObject array;
-	MojUInt64 j = i;
+	guint64 j = i;
 	for(; j < (i + 5); j++) {
 		err = array.pushString(s_firstNames[j % 50]);
 		MojTestErrCheck(err);
@@ -485,7 +485,7 @@ MojErr MojDbPerfTest::createMedArrayObj(MojObject& obj, MojUInt64 i)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::createLargeArrayObj(MojObject& obj, MojUInt64 i)
+MojErr MojDbPerfTest::createLargeArrayObj(MojObject& obj, guint64 i)
 {
 	MojErr err = createMedArrayObj(obj, i);
 	MojTestErrCheck(err);
@@ -512,7 +512,7 @@ MojErr MojDbPerfTest::createLargeArrayObj(MojObject& obj, MojUInt64 i)
 	MojTestErrCheck(err);
 
 	MojObject array;
-	MojUInt64 j = i;
+	guint64 j = i;
 	for(; j < (i + 5); j++) {
 		err = array.pushString(s_lastNames[j % 50]);
 		MojTestErrCheck(err);
@@ -526,6 +526,6 @@ MojErr MojDbPerfTest::createLargeArrayObj(MojObject& obj, MojUInt64 i)
 
 MojErr MojDbPerfTest::fileWrite(MojFile& file, MojString buf)
 {
-	MojSize size;
+	gsize size;
 	return file.writeString(buf, size);
 }

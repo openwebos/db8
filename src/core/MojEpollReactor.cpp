@@ -223,8 +223,8 @@ MojErr MojEpollReactor::control(MojSockT sock, int op, int events)
 MojErr MojEpollReactor::wake()
 {
 	if (m_pipe[1] != MojInvalidSock) {
-		MojByte b = 1;
-		MojSize sent = 0;
+		guint8 b = 1;
+		gsize sent = 0;
 		MojErr err = MojSockSend(m_pipe[1], &b, sizeof(b), sent);
 		MojErrCheck(err);
 	}

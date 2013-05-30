@@ -24,8 +24,8 @@
 class TestConnection : public MojSignalHandler
 {
 public:
-	static const MojSize NumBytes;
-	static const MojSize BufSize;
+	static const gsize NumBytes;
+	static const gsize BufSize;
 	static const MojChar* SockName;
 
 	TestConnection(MojReactor& reactor, MojReactorTest& test)
@@ -95,7 +95,7 @@ public:
 	MojErr handleReadable(MojSockT sock)
 	{
 		MojErr err = MojErrNone;
-		MojByte buf[BufSize];
+		guint8 buf[BufSize];
 
 		for (;;) {
 			if (m_bytesToRead == 0) {
@@ -103,8 +103,8 @@ public:
 				MojTestErrCheck(err);
 				break;
 			}
-			MojSize readSize = MojMin(BufSize, m_bytesToRead);
-			MojSize bytesRead = 0;
+			gsize readSize = MojMin(BufSize, m_bytesToRead);
+			gsize bytesRead = 0;
 			err = MojSockRecv(m_sock, buf, readSize, bytesRead);
 			MojErrCatch(err, MojErrWouldBlock) {
 				err = m_reactor.notifyReadable(sock, m_readSlot);
@@ -120,7 +120,7 @@ public:
 	MojErr handleWriteable(MojSockT sock)
 	{
 		MojErr err = MojErrNone;
-		MojByte buf[BufSize];
+		guint8 buf[BufSize];
 		MojZero(buf, BufSize);
 
 		for (;;) {
@@ -129,8 +129,8 @@ public:
 				MojTestErrCheck(err);
 				break;
 			}
-			MojSize writeSize = MojMin(BufSize, m_bytesToWrite);
-			MojSize bytesWritten = 0;
+			gsize writeSize = MojMin(BufSize, m_bytesToWrite);
+			gsize bytesWritten = 0;
 			err = MojSockSend(m_sock, buf, writeSize, bytesWritten);
 			MojErrCatch(err, MojErrWouldBlock) {
 				err = m_reactor.notifyWriteable(sock, m_writeSlot);
@@ -159,15 +159,15 @@ private:
 	MojSockT m_sock;
 	MojReactor& m_reactor;
 	MojReactorTest& m_test;
-	MojSize m_bytesToRead;
-	MojSize m_bytesToWrite;
+	gsize m_bytesToRead;
+	gsize m_bytesToWrite;
 	MojReactor::SockSignal::Slot<TestConnection> m_connectSlot;
 	MojReactor::SockSignal::Slot<TestConnection> m_readSlot;
 	MojReactor::SockSignal::Slot<TestConnection> m_writeSlot;
 };
 
-const MojSize TestConnection::NumBytes = 1024 * 1024 * 10;
-const MojSize TestConnection::BufSize = 1024;
+const gsize TestConnection::NumBytes = 1024 * 1024 * 10;
+const gsize TestConnection::BufSize = 1024;
 const char* TestConnection::SockName = "mojreactortestsock";
 
 MojReactorTest::MojReactorTest()

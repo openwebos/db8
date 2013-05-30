@@ -61,12 +61,12 @@ MojErr MojDataSerializationTest::run()
 	err = writer.writeDecimal(MojDecimal(-9999, 888888));
 	MojTestErrCheck(err);
 
-	const MojByte* data = NULL;
-	MojSize size;
+	const guint8* data = NULL;
+	gsize size;
 	err = writer.buf().data(data, size);
 	MojTestErrCheck(err);
 	MojDataReader reader(data, size);
-	MojUInt8 ui8val = 98;
+	guint8 ui8val = 98;
 	err = reader.readUInt8(ui8val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui8val == 0);
@@ -76,7 +76,7 @@ MojErr MojDataSerializationTest::run()
 	err = reader.readUInt8(ui8val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui8val == 0xFF);
-	MojUInt16 ui16val = 9999;
+	guint16 ui16val = 9999;
 	err = reader.readUInt16(ui16val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui16val == 0);
@@ -86,7 +86,7 @@ MojErr MojDataSerializationTest::run()
 	err = reader.readUInt16(ui16val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui16val == 0xFFFF);
-	MojUInt32 ui32val = 89765;
+	guint32 ui32val = 89765;
 	err = reader.readUInt32(ui32val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui32val == 0);
@@ -96,7 +96,7 @@ MojErr MojDataSerializationTest::run()
 	err = reader.readUInt32(ui32val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui32val == 0xFFFFFFFF);
-	MojInt64 i64val = -98765432;
+	gint64 i64val = -98765432;
 	err = reader.readInt64(i64val);
 	MojTestErrCheck(err);
 	MojTestAssert(i64val == 0);

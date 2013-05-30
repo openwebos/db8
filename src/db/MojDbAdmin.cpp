@@ -115,7 +115,7 @@ MojErr MojDb::purgeStatus(MojObject& revOut, MojDbReqRef req)
 	return MojErrNone;
 }
 
-MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
+MojErr MojDb::purge(guint32& countOut, gint64 numDays, MojDbReqRef req)
 {
 	MojLogTrace(s_log);
 
@@ -135,7 +135,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 
 	// store the revision number to current timestamp mapping
 	MojObject revTimeMapping;
-	MojInt64 rev;
+	gint64 rev;
 	err = nextId(rev);
 	MojErrCheck(err);
 	err = revTimeMapping.put(RevNumKey, rev);
@@ -149,7 +149,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	MojErrCheck(err);
 
 	// find the revision number for numDays prior to now
-	MojInt64 purgeTime = time.microsecs() - (MojTime::UnitsPerDay * numDays);
+	gint64 purgeTime = time.microsecs() - (MojTime::UnitsPerDay * numDays);
 	MojDbQuery query;
 	err = query.from(MojDbKindEngine::RevTimestampId);
 	MojErrCheck(err);
@@ -170,8 +170,8 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	err = cursor.close();
 	MojErrCheck(err);
 
-	MojUInt32 batchCount = 0;
-	MojUInt32 totalCount = 0;
+	guint32 batchCount = 0;
+	guint32 totalCount = 0;
 
 	while ((found)) 
 	{
@@ -201,8 +201,8 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	return MojErrNone;
 }
 
-MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbReqRef req, bool backup,
-		MojUInt32 maxBytes, const MojObject* incrementalKey, MojObject* backupResponse)
+MojErr MojDb::dump(const MojChar* path, guint32& countOut, bool incDel, MojDbReqRef req, bool backup,
+		guint32 maxBytes, const MojObject* incrementalKey, MojObject* backupResponse)
 {
 	MojAssert(path);
 	MojLogTrace(s_log);
@@ -220,9 +220,9 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 	MojErrCheck(err);
 
 	// write out kinds first, then existing objects, then deleted objects
-	MojSize bytesWritten = 0;
-	MojSize totalwarns = 0;
-	MojSize newwarns = 0;
+	gsize bytesWritten = 0;
+	gsize totalwarns = 0;
+	gsize newwarns = 0;
 	MojDbQuery objQuery;
 	MojVector<MojObject> kindVec;
 	MojObject revParam = -1;
@@ -254,7 +254,7 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 			MojDbCursor cursor;
 			err = find(countQuery, cursor, req);
 			MojErrCheck(err);
-			MojUInt32 count = 0;
+			guint32 count = 0;
 			err = cursor.count(count);
 			MojErrCheck(err);
 			if (count > 0) {
@@ -298,7 +298,7 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 		MojErrCheck(err);
 		err = backupResponse->put(MojDbServiceDefs::VersionKey, DatabaseVersion);
 		MojErrCheck(err);
-		err = backupResponse->put(MojDbServiceDefs::WarningsKey, (MojInt32)totalwarns);
+		err = backupResponse->put(MojDbServiceDefs::WarningsKey, (gint32)totalwarns);
 		MojErrCheck(err);
 		MojString description;
 		err = description.format(_T("incremental=%u"), countOut);
@@ -317,7 +317,7 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 	return MojErrNone;
 }
 
-MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::load(const MojChar* path, guint32& countOut, guint32 flags, MojDbReqRef req)
 {
 	MojAssert(path);
 	MojLogTrace(s_log);
@@ -331,7 +331,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 
 	MojJsonParser parser;
 	parser.begin();
-	MojSize bytesRead = 0;
+	gsize bytesRead = 0;
 	MojObjectBuilder visitor;
 
 	int total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize;
@@ -458,8 +458,8 @@ MojErr MojDb::updateLocaleImpl(const MojString& oldLocale, const MojString& newL
 	return MojErrNone;
 }
 
-MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject& revParam, const MojObject& delRevParam, bool skipKinds, MojUInt32& countOut, MojDbReq& req,
-		MojObject* response, const MojChar* keyName, MojSize& bytesWritten, MojSize& warns, MojUInt32 maxBytes)
+MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject& revParam, const MojObject& delRevParam, bool skipKinds, guint32& countOut, MojDbReq& req,
+		MojObject* response, const MojChar* keyName, gsize& bytesWritten, gsize& warns, guint32 maxBytes)
 {
 	// query for objects, adding the backup key and rev key if necessary
 	MojDbQuery query;
@@ -544,7 +544,7 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 	return MojErrNone;
 }
 
-MojErr MojDb::dumpObj(MojFile& file, MojObject obj, MojSize& bytesWrittenOut, MojUInt32 maxBytes)
+MojErr MojDb::dumpObj(MojFile& file, MojObject obj, gsize& bytesWrittenOut, guint32 maxBytes)
 {
 	// remove the rev key before dumping the object
 	bool found = false;
@@ -556,7 +556,7 @@ MojErr MojDb::dumpObj(MojFile& file, MojObject obj, MojSize& bytesWrittenOut, Mo
 	MojErrCheck(err);
 	err = str.append(_T("\n"));
 	MojErrCheck(err);
-	MojSize len = str.length() * sizeof(MojChar);
+	gsize len = str.length() * sizeof(MojChar);
 	// if writing this object will put us over the max length, throw an error
 	if (maxBytes && bytesWrittenOut + len > maxBytes) {
 		MojErrThrow(MojErrDbBackupFull);
@@ -606,7 +606,7 @@ MojErr MojDb::insertIncrementalKey(MojObject& response, const MojChar* keyName, 
 	return MojErrNone;
 }
 
-MojErr MojDb::loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req)
+MojErr MojDb::loadImpl(MojObject& obj, guint32 flags, MojDbReq& req)
 {
 	bool found = false;
 	MojString kindName;
@@ -648,7 +648,7 @@ MojErr MojDb::loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req)
 	return MojErrNone;
 }
 
-MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
+MojErr MojDb::purgeImpl(MojObject& obj, guint32& countOut, MojDbReq& req)
 {
 	MojLogTrace(s_log);
 
@@ -672,7 +672,7 @@ MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
 	err = objQuery.where(RevKey, MojDbQuery::OpLessThanEq, val);
 	MojErrCheck(err);
 
-	MojUInt32 backupCount = 0;
+	guint32 backupCount = 0;
 	req.autobatch(true);	
 	req.fixmode(true);
 	objQuery.limit(AutoBatchSize);
@@ -688,8 +688,8 @@ MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
 	MojErrCheck(err);
 	err = objQuery2.where(RevKey, MojDbQuery::OpLessThanEq, val);
 	MojErrCheck(err);
-	MojUInt32 count = 0;
-	MojUInt32 batchRemain = 0;
+	guint32 count = 0;
+	guint32 batchRemain = 0;
 	if (backupCount <= AutoBatchSize)
 		batchRemain = AutoBatchSize - backupCount;
 	req.autobatch(true);		// enable auto batch

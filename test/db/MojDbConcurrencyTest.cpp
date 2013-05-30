@@ -28,7 +28,7 @@ static const MojChar* const TestKind =
 	_T("\"indexes\":[{\"name\":\"foo\",\"props\":[{\"name\":\"foo\"}]},{\"name\":\"barfoo\",\"props\":[{\"name\":\"bar\"},{\"name\":\"foo\"}]}]}");
 static const MojChar* const TestJson =
 	_T("{\"_kind\":\"Test:1\",\"foo\":100,\"bar\":5000}");
-static const MojUInt32 TestNumObjects = 10000;
+static const guint32 TestNumObjects = 10000;
 
 static MojErr delThread(void* arg)
 {
@@ -36,7 +36,7 @@ static MojErr delThread(void* arg)
 	MojDbQuery query;
 	MojErr err = query.from(_T("Test:1"));
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	err = db->del(query, count);
 	MojErrCheck(err); // not TestErrCheck, since failure is expected
 	MojTestAssert(count == TestNumObjects);
@@ -55,7 +55,7 @@ static MojErr queryThread(void* arg)
 	MojDbCursor cursor;
 	err = db->find(query, cursor);
 	MojTestErrCheck(err);
-	MojUInt32 count = 0;
+	guint32 count = 0;
 	for (;;) {
 		MojObject obj;
 		bool found = false;
@@ -87,7 +87,7 @@ MojErr MojDbConcurrencyTest::run()
 	err = db.putKind(kind);
 	MojTestErrCheck(err);
 
-	for (MojUInt32 i = 0; i < TestNumObjects; ++i) {
+	for (guint32 i = 0; i < TestNumObjects; ++i) {
 		MojObject obj;
 		err = obj.fromJson(TestJson);
 		MojTestErrCheck(err);

@@ -38,18 +38,18 @@ public:
 	MojString(const MojString& str) { init(str); }
 	~MojString() { release(); }
 
-	MojSize length() const { return m_end - m_begin; }
-	MojSize capacity() const { return m_endAlloc - m_begin; }
+	gsize length() const { return m_end - m_begin; }
+	gsize capacity() const { return m_endAlloc - m_begin; }
 	bool empty() const { return m_end == m_begin; }
 	const MojChar* data() const { return m_begin; }
-	MojChar at(MojSize idx) const { MojAssert(idx < length()); return data()[idx]; }
+	MojChar at(gsize idx) const { MojAssert(idx < length()); return data()[idx]; }
 	MojChar first() const { MojAssert(!empty()); return *m_begin; }
 	MojChar last() const { MojAssert(!empty()); return *(m_end - 1); }
-	MojSize find(const MojChar* str, MojSize startIdx = 0) const;
-	MojSize find(MojChar c, MojSize startIdx = 0) const;
-	MojSize rfind(MojChar c, MojSize startIdx = MojInvalidIndex) const;
+	gsize find(const MojChar* str, gsize startIdx = 0) const;
+	gsize find(MojChar c, gsize startIdx = 0) const;
+	gsize rfind(MojChar c, gsize startIdx = MojInvalidIndex) const;
 	MojErr split(MojChar c, MojVector<MojString>& vecOut) const;
-	MojErr substring(MojSize idx, MojSize len, MojString& strOut) const;
+	MojErr substring(gsize idx, gsize len, MojString& strOut) const;
 
 	ConstIterator begin() const { return m_begin; }
 	ConstIterator end() const { return m_end; }
@@ -58,14 +58,14 @@ public:
 	MojErr end(Iterator& iterOut);
 
 	int compare(const MojChar* str) const { return MojStrCmp(data(), str); }
-	int compare(const MojChar* str, MojSize len) const { return MojStrNCmp(data(), str, len); }
+	int compare(const MojChar* str, gsize len) const { return MojStrNCmp(data(), str, len); }
 	int compareCaseless(const MojChar* str) const { return MojStrCaseCmp(data(), str); }
-	int compareCaseless(const MojChar* str, MojSize len) const { return MojStrNCaseCmp(data(), str, len); }
+	int compareCaseless(const MojChar* str, gsize len) const { return MojStrNCaseCmp(data(), str, len); }
 	bool startsWith(const MojChar* str) const;
 
-	MojErr reserve(MojSize len);
-	MojErr truncate(MojSize len);
-	MojErr resize(MojSize len);
+	MojErr reserve(gsize len);
+	MojErr truncate(gsize len);
+	MojErr resize(gsize len);
 	MojErr toLower();
 	MojErr toUpper();
 
@@ -73,20 +73,20 @@ public:
 	void swap(MojString& str) { MojSwap(*this, str); }
 	void assign(const MojString& str);
 	MojErr assign(const MojChar* str);
-	MojErr assign(const MojChar* chars, MojSize len);
-	MojErr setAt(MojSize idx, MojChar c);
+	MojErr assign(const MojChar* chars, gsize len);
+	MojErr setAt(gsize idx, MojChar c);
 	MojErr format(const MojChar* formatStr, ...) MOJ_FORMAT_ATTR((printf, 2, 3));
 	MojErr vformat(const MojChar* formatStr, va_list args) MOJ_FORMAT_ATTR((printf, 2, 0));
 
 	MojErr append(MojChar c);
 	MojErr append(const MojChar* str);
-	MojErr append(const MojChar* chars, MojSize len);
+	MojErr append(const MojChar* chars, gsize len);
 	MojErr append(const MojString& str) { return append(str, str.length()); }
 	MojErr appendFormat(const MojChar* formatStr, ...) MOJ_FORMAT_ATTR((printf, 2, 3));
 	MojErr appendVFormat(const MojChar* formatStr, va_list args) MOJ_FORMAT_ATTR((printf, 2, 0));
 
-	MojErr base64Encode(const MojVector<MojByte>& vec, bool pad = true);
-	MojErr base64Decode(MojVector<MojByte>& vecOut) const;
+	MojErr base64Encode(const MojVector<guint8>& vec, bool pad = true);
+	MojErr base64Decode(MojVector<guint8>& vecOut) const;
 
 	MojString& operator=(const MojString& rhs) { assign(rhs); return *this; }
 	bool operator==(const MojChar* rhs) const { return compare(rhs) == 0; }
@@ -95,22 +95,22 @@ public:
 	bool operator<=(const MojChar* rhs) const { return compare(rhs) <= 0; }
 	bool operator>(const MojChar* rhs) const { return compare(rhs) > 0; }
 	bool operator>=(const MojChar* rhs) const { return compare(rhs) >= 0; }
-	MojChar operator[](MojSize idx) const { return at(idx); }
+	MojChar operator[](gsize idx) const { return at(idx); }
 	operator const MojChar*() const { return data(); }
 
 private:
 	void init(const MojString& str);
 	void init(MojChar* begin, MojChar* end, MojChar* endAlloc);
 	void release();
-	void reset(MojChar* chars, MojSize len) { reset(chars, chars + len, chars + len); }
+	void reset(MojChar* chars, gsize len) { reset(chars, chars + len, chars + len); }
 	void reset(MojChar* begin, MojChar* end, MojChar* endAlloc);
 	bool isWritable() { return MojRefCountGet(m_begin) == 1; }
-	static MojChar* alloc(MojSize len);
-	MojErr realloc(MojSize allocLen);
-	MojSize freeSpace() { return m_endAlloc - m_end; }
+	static MojChar* alloc(gsize len);
+	MojErr realloc(gsize allocLen);
+	gsize freeSpace() { return m_endAlloc - m_end; }
 	MojErr ensureWritable();
-	MojErr ensureSpace(MojSize len);
-	void setEnd(MojSize len);
+	MojErr ensureSpace(gsize len);
+	void setEnd(gsize len);
 
 	MojChar* m_begin;
 	MojChar* m_end;

@@ -126,7 +126,7 @@ private:
 	MojErr doSpaceCheck();
     static MojErr doSpaceCheck(AlertLevel& level, int& bytesUsed, int& bytesAvailable);
 	static gboolean periodicSpaceCheck(gpointer data);
-	MojErr generateSpaceAlert(AlertLevel level, MojInt64 bytesUsed, MojInt64 bytesAvailable);
+	MojErr generateSpaceAlert(AlertLevel level, gint64 bytesUsed, gint64 bytesAvailable);
 	MojErr generateFatalAlert();
 	MojErr generateAlert(const MojChar* event, const MojObject& msg);
 
@@ -140,11 +140,11 @@ private:
 	static const Method s_privMethods[];
 
 	// Some of these need to be changed to configuration items
-	static const MojInt32 SpaceCheckInterval;
+	static const gint32 SpaceCheckInterval;
 	static const MojChar* const DatabaseRoot;
-	static const MojDouble SpaceAlertLevels[];
+	static const gdouble SpaceAlertLevels[];
 	static const MojChar* const SpaceAlertNames[];
-	static const MojInt32 NumSpaceAlertLevels;
+	static const gint32 NumSpaceAlertLevels;
 };
 
 #endif /* MOJDBSERVICEHANDLERINTERNAL_H_ */

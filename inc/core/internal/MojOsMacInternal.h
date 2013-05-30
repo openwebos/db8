@@ -22,19 +22,19 @@
 
 #include <libkern/OSAtomic.h>
 
-inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
+inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 {
 	MojAssert(a);
 	return OSAtomicAdd32(incr, &a->val);
 }
 
-inline MojInt32 MojAtomicIncrement(MojAtomicT* a)
+inline gint32 MojAtomicIncrement(MojAtomicT* a)
 {
 	MojAssert(a);
 	return OSAtomicIncrement32(&a->val);
 }
 
-inline MojInt32 MojAtomicDecrement(MojAtomicT* a)
+inline gint32 MojAtomicDecrement(MojAtomicT* a)
 {
 	MojAssert(a);
 	return OSAtomicDecrement32(&a->val);

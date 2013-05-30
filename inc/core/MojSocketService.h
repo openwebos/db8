@@ -70,14 +70,14 @@ private:
 
 		MojErr open(MojSockT sock);
 		MojErr open(const MojChar* path);
-		MojErr open(const MojChar* host, MojInt32 port);
+		MojErr open(const MojChar* host, gint32 port);
 
 		MojErr writeRequest(Message* msg);
 		MojErr writeResponse(Message* msg);
 		MojErr writeCancel(Message* msg);
 
 	private:
-		static const MojSize IoVecSize = 16;
+		static const gsize IoVecSize = 16;
 
 		enum MsgType {
 			TypeOpen = 0,
@@ -125,11 +125,11 @@ private:
 		~Server();
 
 		MojErr listen(const MojChar* path);
-		MojErr listen(const MojChar* host, MojInt32 port);
-		MojErr listen(MojSockAddrT* addr, MojSize addrSize);
+		MojErr listen(const MojChar* host, gint32 port);
+		MojErr listen(MojSockAddrT* addr, gsize addrSize);
 
 	private:
-		static const MojInt32 ListenBacklog = 1024;
+		static const gint32 ListenBacklog = 1024;
 
 		MojErr accept(MojSockT sock);
 
@@ -152,7 +152,7 @@ private:
 
 	ConMap m_conMap;
 	RequestMap m_activeRequests;
-	MojInt64 m_nextToken;
+	gint64 m_nextToken;
 	MojSockT m_listenSocket;
 	MojReactor& m_reactor;
 };

@@ -21,10 +21,10 @@
 #define MOJOSLINUXINTERNAL_H_
 
 #if defined(MOJ_X86)
-inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
+inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 {
 	MojAssert(a);
-	MojInt32 i = incr;
+	gint32 i = incr;
 	asm volatile(
 			"lock xaddl %0, %1"
 				: "+r" (i), "+m" (a->val)
@@ -32,17 +32,16 @@ inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 	return incr + i;
 }
 #elif defined(MOJ_ARM)
-inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
+inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 {
 	MojAssert(a);
-#if __LINUX_ARM_ARCH__ < 6
-	/* This could be used for all of the assembly language blocks, but we
-         * don't want to perturb the code at the moment */
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3)
+	/* Use for GCC 4.4 and greater */
 	return  __sync_add_and_fetch(&a->val, incr);
 #else
-	/* This only assembles for ARMv6 and later */
-	MojUInt32 tmp;
-	MojInt32 res;
+	/* Keep this in case we have to build using OE Classic */
+	guint32 tmp;
+	gint32 res;
 	asm volatile(
 			"1:	ldrex %0, [%2]\n"
 			"add %0, %0, %3\n"
@@ -57,12 +56,12 @@ inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 }
 #endif
 
-inline MojInt32 MojAtomicIncrement(MojAtomicT* a)
+inline gint32 MojAtomicIncrement(MojAtomicT* a)
 {
 	return MojAtomicAdd(a, 1);
 }
 
-inline MojInt32 MojAtomicDecrement(MojAtomicT* a)
+inline gint32 MojAtomicDecrement(MojAtomicT* a)
 {
 	return MojAtomicAdd(a, -1);
 }

@@ -25,7 +25,11 @@
 static const MojChar* const TestKind =
 	_T("{\"id\":\"Test:1\",")
 	_T("\"owner\":\"mojodb.admin\",")
-	_T("\"indexes\":[{\"name\":\"testindex1\",\"props\":[{\"name\":\"data1\"}]},{\"name\":\"testindex2\",\"props\":[{\"name\":\"data1\"},{\"name\":\"data2\"}]}]}");
+	_T("\"indexes\":[{\"name\":\"testindex1\",\"props\":[{\"name\":\"data1\"},{\"name\":\"data2\"},{\"name\":\"data3\"}]}, \
+		{\"name\":\"testindex2\",\"props\":[{\"name\":\"data2\"},{\"name\":\"data1\"}]}, \
+		{\"name\":\"testindex3\",\"props\":[{\"name\":\"data2\"},{\"name\":\"data3\"},{\"name\":\"data1\"}]}, \
+		{\"name\":\"testindex4\",\"props\":[{\"name\":\"data1\"},{\"name\":\"data3\"},{\"name\":\"data2\"}]}  \
+		]}");
 static const MojChar* const TestJson1 =
 	_T("{\"_kind\":\"Test:1\",\"data1\":1000,\"data2\":1100,\"data3\":1200}");
 static const MojChar* const TestJson2 =
@@ -103,7 +107,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -139,7 +143,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -173,7 +177,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -207,7 +211,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -241,7 +245,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -275,9 +279,9 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("query contains inequality operations on multiple properties: not supported\n"));
 		MojErrCheck(err);
-		success = 0;
+		//success = 0; //not supported == no error
 	}
 
 	/* 3 columns test
@@ -307,13 +311,13 @@ MojErr MojDbWhereTest::run()
 	    MojTestErrCheck(err);
 		err = cursor7.close();
 		MojTestErrCheck(err);
-	    MojTestAssert(count7 == 1);
+	    MojTestAssert(count7 == 0);
 		err = displayMessage(_T("OK\n"));
 		MojErrCheck(err);
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -349,7 +353,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -385,7 +389,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -421,7 +425,7 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("Failed\n"));
 		MojErrCheck(err);
 		success = 0;
 	}
@@ -457,9 +461,9 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("query contains inequality operations on multiple properties: not supported\n"));
 		MojErrCheck(err);
-		success = 0;
+		//success = 0; //not supported == no error
 	}
 
 	/* (6) where:[{data1 < 1000},{data2 < 2000},{data3 < 3000}]
@@ -493,9 +497,9 @@ MojErr MojDbWhereTest::run()
 	}
 	else
 	{
-		err = displayMessage(_T("FAILED\n"));
+		err = displayMessage(_T("query contains inequality operations on multiple properties: not supported\n"));
 		MojErrCheck(err);
-		success = 0;
+		//success = 0; //not supported == no error
 	}
 
 	err = db.close();

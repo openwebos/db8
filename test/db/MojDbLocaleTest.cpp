@@ -70,9 +70,18 @@ MojErr MojDbLocaleTest::run()
     err = checkOrder(db, _T("[1,2,3,4]"));
     MojTestErrCheck(err);
 
+    /*
+     * According to: http://userguide.icu-project.org/collation
+     *   French requires that letters sorted with accents at the end of the string
+     *   be sorted ahead of accents in the beginning of the string. For example,
+     *   the word "côte" sorts before "coté" because the acute accent on the final
+     *   "e" is more significant than the circumflex on the "o".
+     *
+     * Note that icu shipped with Ubuntu 12.04 doesn't follow this requirements.
+     */
     err = db.updateLocale(_T("fr_FR"));
     MojTestErrCheck(err);
-    err = checkOrder(db, _T("[1,2,3,4]"));
+    err = checkOrder(db, _T("[1,3,2,4]"));
     MojTestErrCheck(err);
 
 	// close and reopen with test engine
@@ -95,7 +104,7 @@ MojErr MojDbLocaleTest::run()
 
 	err = put(db);
 	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,2,3,4]"));
+	err = checkOrder(db, _T("[1,3,2,4]"));
 	MojTestErrCheck(err);
 
 	// fail txn commit
@@ -104,11 +113,11 @@ MojErr MojDbLocaleTest::run()
 	err = db.updateLocale(_T("en_US"));
 	MojTestErrExpected(err, MojErrDbDeadlock);
 	// make sure we still have fr ordering
-	err = checkOrder(db, _T("[1,2,3,4]"));
+	err = checkOrder(db, _T("[1,3,2,4]"));
 	MojTestErrCheck(err);
 	err = put(db);
 	MojTestErrCheck(err);
-	err = checkOrder(db, _T("[1,2,3,4]"));
+	err = checkOrder(db, _T("[1,3,2,4]"));
 	MojTestErrCheck(err);
 
 	err = db.close();

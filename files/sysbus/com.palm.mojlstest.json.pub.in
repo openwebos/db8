@@ -1,0 +1,14 @@
+{
+    "role": {
+        "exeName":"@WEBOS_INSTALL_LIBDIR@/@CMAKE_PROJECT_NAME@/tests/test_luna_service",
+        "type": "regular",
+        "allowedNames": ["com.palm.mojlstest"]
+    },
+    "permissions": [
+        {
+            "service":"com.palm.mojlstest",
+            "inbound":["*"],
+            "outbound":["*"]
+        }
+    ]
+}

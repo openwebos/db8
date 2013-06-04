@@ -32,8 +32,6 @@
 #include <core/MojErr.h>
 #include <db/MojDbStorageEngine.h>
 
-#include <auto_ptr.h>
-
 namespace leveldb
 {
     class DB;
@@ -76,7 +74,8 @@ public:
                         std::string& val);
 
     void Delete(const leveldb::Slice& key);
-    MojDbLevelTxnIterator* iterator() { return m_transaction.get(); }
+    MojDbLevelTxnIterator* createIterator();
+    void detach(MojDbLevelTxnIterator *it);
 
     MojErr commitImpl();
 
@@ -92,7 +91,7 @@ private:
     typedef std::set<std::string> PendingDeletes;
     PendingValues m_pendingValues;
     PendingDeletes m_pendingDeletes;
-    std::auto_ptr<MojDbLevelTxnIterator> m_transaction;       // holder of data
+    std::set<MojDbLevelTxnIterator*> m_iterators;
 
     friend class MojDbLevelTxnIterator;
 };

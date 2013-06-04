@@ -29,6 +29,22 @@ MojDbLevelTableTxn::~MojDbLevelTableTxn()
 {
     if (m_db)
         abort();
+    cleanup();
+}
+
+void MojDbLevelTableTxn::detach(MojDbLevelTxnIterator *it)
+{
+    MojAssert( it );
+    size_t detached = m_iterators.erase(it);
+    MojAssert( detached == 1 );
+}
+
+MojDbLevelTxnIterator* MojDbLevelTableTxn::createIterator()
+{
+    MojAssert( m_db );
+    MojDbLevelTxnIterator* it = new MojDbLevelTxnIterator(this);
+    m_iterators.insert(it);
+    return it;
 }
 
 // class MojDbLevelTableTxn
@@ -38,11 +54,11 @@ MojErr MojDbLevelTableTxn::begin(
             )
 {
     MojAssert(db);
+    MojAssert( m_iterators.empty() );
 
     // TODO: mutex and lock-file serialization
     m_db = db;
     m_writeOptions = options;
-    m_transaction.reset(new MojDbLevelTxnIterator(this));
 
     return MojErrNone;
 }
@@ -110,7 +126,12 @@ void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
 
 MojErr MojDbLevelTableTxn::commitImpl()
 {
-    m_transaction->save();
+    for(std::set<MojDbLevelTxnIterator*>::const_iterator i = m_iterators.begin();
+        i != m_iterators.end();
+        ++i)
+    {
+        (*i)->save();
+    }
 
     leveldb::WriteBatch writeBatch;
 
@@ -127,7 +148,12 @@ MojErr MojDbLevelTableTxn::commitImpl()
 
     cleanup();
 
-    m_transaction->restore();
+    for(std::set<MojDbLevelTxnIterator*>::const_iterator i = m_iterators.begin();
+        i != m_iterators.end();
+        ++i)
+    {
+        (*i)->restore();
+    }
 
     return MojErrNone;
 }
@@ -137,6 +163,14 @@ void MojDbLevelTableTxn::cleanup()
     m_db = NULL;
     m_pendingValues.clear();
     m_pendingDeletes.clear();
+
+    for(std::set<MojDbLevelTxnIterator*>::const_iterator i = m_iterators.begin();
+        i != m_iterators.end();
+        ++i)
+    {
+        (*i)->detach();
+    }
+    m_iterators.clear();
 }
 
 // class MojDbLevelEnvTxn

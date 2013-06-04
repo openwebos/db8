@@ -54,6 +54,13 @@ MojDbLevelTxnIterator::MojDbLevelTxnIterator(MojDbLevelTableTxn *txn) :
 
 MojDbLevelTxnIterator::~MojDbLevelTxnIterator()
 {
+    if (m_txn) m_txn->detach(this);
+}
+
+void MojDbLevelTxnIterator::detach()
+{
+    MojAssert( m_txn );
+    m_txn = 0;
 }
 
 void MojDbLevelTxnIterator::skipDeleted()

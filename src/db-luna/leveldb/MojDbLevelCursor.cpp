@@ -44,7 +44,7 @@ MojDbLevelCursor::~MojDbLevelCursor()
 MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert( !m_txnIt );
+    MojAssert( !m_txnIt.get() );
     MojAssert(db && txn);
     MojAssert(db->impl());
     MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
@@ -53,8 +53,8 @@ MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojU
 
     m_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
     m_ttxn = & m_txn->tableTxn(m_db);
-    m_txnIt = m_ttxn->iterator();
-    MojAssert( m_txnIt );
+    m_txnIt.reset(m_ttxn->createIterator());
+    MojAssert( m_txnIt.get() );
     m_warnCount = 0;
 
     m_txnIt->first();
@@ -66,9 +66,11 @@ MojErr MojDbLevelCursor::close()
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 
-    m_txnIt = 0;
     m_txn = 0;
     m_ttxn = 0;
+    m_txnIt.reset();
+    m_db = 0;
+
     return MojErrNone;
 }
 
@@ -76,7 +78,7 @@ MojErr MojDbLevelCursor::del()
 {
     MojLogTrace(MojDbLevelEngine::s_log);
     MojAssert( m_txn && m_ttxn );
-    MojAssert(m_txnIt);
+    MojAssert( m_txnIt.get() );
 
     std::string key = m_txnIt->getKey();
     const size_t delSize = recSize();
@@ -91,7 +93,7 @@ MojErr MojDbLevelCursor::del()
 
 MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 {
-    MojAssert(m_txnIt);
+    MojAssert( m_txnIt.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem key;
@@ -115,7 +117,7 @@ MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 
 MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags)
 {
-    MojAssert(m_txnIt);
+    MojAssert( m_txnIt.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     const std::string& lkey = key.impl()->ToString();
@@ -159,7 +161,7 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
 
 MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
-    MojAssert(m_txnIt);
+    MojAssert( m_txnIt.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
@@ -171,7 +173,7 @@ MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 
 MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
 {
-    MojAssert(m_txnIt);
+    MojAssert( m_txnIt.get() );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     countOut = 0;

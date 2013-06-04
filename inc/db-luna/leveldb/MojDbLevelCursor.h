@@ -57,7 +57,7 @@ private:
     leveldb::DB* m_db;
     MojDbLevelAbstractTxn* m_txn;
     MojDbLevelTableTxn* m_ttxn;
-    MojDbLevelTxnIterator* m_txnIt;
+    std::auto_ptr<MojDbLevelTxnIterator> m_txnIt;
 
     MojSize m_warnCount;
 };

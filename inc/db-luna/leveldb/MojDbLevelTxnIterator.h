@@ -58,6 +58,7 @@ public:
     void seek(const std::string& key);
     void save() { m_it.save(); }
     void restore() { m_it.restore(); }
+    void detach();
 
     leveldb::Status status() const;
 private:

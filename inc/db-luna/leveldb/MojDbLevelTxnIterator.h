@@ -60,6 +60,7 @@ public:
     void restore() { m_it.restore(); }
     void detach();
 
+    bool inTransaction() const;
     leveldb::Status status() const;
 private:
     void skipDeleted();

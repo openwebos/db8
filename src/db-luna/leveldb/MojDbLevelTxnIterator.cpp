@@ -76,46 +76,43 @@ void MojDbLevelTxnIterator::skipDeleted()
     }
 }
 
-std::string MojDbLevelTxnIterator::getValue()
+bool MojDbLevelTxnIterator::inTransaction() const
 {
-    if (m_it.isEnd() || m_it.isBegin())
-        return m_insertsItertor->second;
+    if (!m_it.isValid())
+        return true;
 
-    if (m_insertsItertor.isEnd() || m_insertsItertor.isBegin())
-        return m_it->value().ToString();
+    if (!m_insertsItertor.isValid())
+        return false;
 
+    // Note that in case when both iterators points to the records with same
+    // key we prefer to take one from transaction
     if (m_fwd) {
         if (m_it->key().ToString() < m_insertsItertor->first)
-            return m_it->value().ToString();
+            return false;
         else
-            return m_insertsItertor->second;
+            return true;
     } else {
         if (m_it->key().ToString() > m_insertsItertor->first)
-            return m_it->value().ToString();
+            return false;
         else
-            return m_insertsItertor->second;
+            return true;
     }
+}
+
+std::string MojDbLevelTxnIterator::getValue()
+{
+    if (inTransaction())
+        return m_insertsItertor->second;
+    else
+        return m_it->value().ToString();
 }
 
 const std::string MojDbLevelTxnIterator::getKey() const
 {
-    if (m_it.isEnd() || m_it.isBegin())
+    if (inTransaction())
         return m_insertsItertor->first;
-
-    if (m_insertsItertor.isEnd() || m_insertsItertor.isBegin())
+    else
         return m_it->key().ToString();
-
-    if (m_fwd) {
-        if (m_it->key().ToString() < m_insertsItertor->first)
-            return m_it->key().ToString();
-        else
-            return m_insertsItertor->first;
-    } else {
-        if (m_it->key().ToString() > m_insertsItertor->first)
-            return m_it->key().ToString();
-        else
-            return m_insertsItertor->first;
-    }
 }
 
 bool MojDbLevelTxnIterator::keyStartsWith(const std::string& key) const
@@ -193,6 +190,12 @@ void MojDbLevelTxnIterator::prev()
     if (m_it->key().ToString() > m_insertsItertor->first) {
         --m_it;
         skipDeleted();
+
+    } else if (m_it->key().ToString() == m_insertsItertor->first) {
+        // advance both iterators to the next key value
+        --m_insertsItertor;
+        --m_it;
+        skipDeleted();
     } else {
         --m_insertsItertor;
     }
@@ -231,6 +234,11 @@ void MojDbLevelTxnIterator::next()
     }
 
     if (m_it->key().ToString() < m_insertsItertor->first) {
+        ++m_it;
+        skipDeleted();
+    } else if (m_it->key().ToString() == m_insertsItertor->first) {
+        // advance both iterators to the next key value
+        ++m_insertsItertor;
         ++m_it;
         skipDeleted();
     } else {

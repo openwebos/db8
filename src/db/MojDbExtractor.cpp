@@ -158,7 +158,7 @@ MojErr MojDbPropExtractor::fromObjectImpl(const MojObject& obj, const MojDbPropE
 	return MojErrNone;
 }
 
-MojErr MojDbPropExtractor::valsImpl(const MojObject& obj, KeySet& valsOut, gsize idx) const
+MojErr MojDbPropExtractor::valsImpl(const MojObject& obj, KeySet& valsOut, MojSize idx) const
 {
 	MojAssert(!m_prop.empty() && idx < m_prop.size());
 
@@ -194,7 +194,7 @@ MojErr MojDbPropExtractor::valsImpl(const MojObject& obj, KeySet& valsOut, gsize
 	return MojErrNone;
 }
 
-MojErr MojDbPropExtractor::handleVal(const MojObject& val, KeySet& valsOut, gsize idx) const
+MojErr MojDbPropExtractor::handleVal(const MojObject& val, KeySet& valsOut, MojSize idx) const
 {
 	MojAssert(idx < m_prop.size());
 

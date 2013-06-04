@@ -83,7 +83,7 @@ MojErr MojDbIsamQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
 	return MojErrNone;
 }
 
-MojErr MojDbIsamQuery::getId(MojObject& idOut, guint32& groupOut, bool& foundOut)
+MojErr MojDbIsamQuery::getId(MojObject& idOut, MojUInt32& groupOut, bool& foundOut)
 {
 	MojErr err = getKey(groupOut, foundOut);
 	MojErrCheck(err);
@@ -94,13 +94,13 @@ MojErr MojDbIsamQuery::getId(MojObject& idOut, guint32& groupOut, bool& foundOut
 	return MojErrNone;
 }
 
-MojErr MojDbIsamQuery::count(guint32& countOut)
+MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 {
 	MojAssert(m_isOpen);
 
 	countOut = 0;
-	gint32 warns = 0;
-	m_plan->limit(G_MAXUINT32);
+	MojInt32 warns = 0;
+	m_plan->limit(MojUInt32Max);
 	bool found = false;
 	do {
 		// Iterate over all the db results but only count
@@ -137,7 +137,7 @@ MojErr MojDbIsamQuery::nextPage(MojDbQuery::Page& pageOut)
 	return MojErrNone;
 }
 
-guint32 MojDbIsamQuery::groupCount() const
+MojUInt32 MojDbIsamQuery::groupCount() const
 {
 	return m_plan->groupCount();
 }
@@ -145,7 +145,7 @@ guint32 MojDbIsamQuery::groupCount() const
 MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool getItem)
 {
 	itemOut = NULL;
-	guint32 group = 0;
+	MojUInt32 group = 0;
 	MojErr err = getKey(group, foundOut);
 	MojErrCheck(err);
 	if (foundOut && getItem) {
@@ -154,11 +154,11 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 #if defined (MOJ_DEBUG)
 			char s[1024];
 			char *s2 = NULL;
-			MojErr err2 =  MojUInt8ArrayToHex(m_keyData, m_keySize, s);
+			MojErr err2 =  MojByteArrayToHex(m_keyData, m_keySize, s);
 			MojErrCheck(err2);
 			if (m_keySize > 17)
 				s2 = ((char *)m_keyData) + m_keySize - 17;
-			gsize idIndex = m_plan->idIndex();
+			MojSize idIndex = m_plan->idIndex();
 			const MojChar * from = m_plan->query().from().data();
 			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"),
 								 from, idIndex, (int)group, m_keySize, s, (s2?s2:"NULL"));
@@ -236,7 +236,7 @@ MojErr MojDbIsamQuery::seek(bool& foundOut)
 	return MojErrNone;
 }
 
-MojErr MojDbIsamQuery::getKey(guint32& groupOut, bool& foundOut)
+MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 {
 	MojAssert(m_isOpen);
 
@@ -293,7 +293,7 @@ MojErr MojDbIsamQuery::parseId(MojObject& idOut)
 	// parse id out of key
 	MojObjectEater eater;
 	MojObjectReader reader(m_keyData, m_keySize);
-	for (gsize i = 0; i < m_plan->idIndex(); ++i) {
+	for (MojSize i = 0; i < m_plan->idIndex(); ++i) {
 		MojErr err = reader.nextObject(eater);
 		MojErrCheck(err);
 	}

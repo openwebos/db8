@@ -22,11 +22,11 @@
 #include "db/MojDbQueryPlan.h"
 #include "core/MojObjectSerialization.h"
 
-const guint32 MojDbBerkeleyQuery::OpenFlags = 0; //DB_TXN_SNAPSHOT;
-const guint32 MojDbBerkeleyQuery::SeekFlags = DB_SET_RANGE;
-const guint32 MojDbBerkeleyQuery::SeekIdFlags = DB_GET_BOTH_RANGE;
-const guint32 MojDbBerkeleyQuery::SeekEmptyFlags[2] = {DB_FIRST, DB_LAST};
-const guint32 MojDbBerkeleyQuery::NextFlags[2] = {DB_NEXT, DB_PREV};
+const MojUInt32 MojDbBerkeleyQuery::OpenFlags = 0; //DB_TXN_SNAPSHOT;
+const MojUInt32 MojDbBerkeleyQuery::SeekFlags = DB_SET_RANGE;
+const MojUInt32 MojDbBerkeleyQuery::SeekIdFlags = DB_GET_BOTH_RANGE;
+const MojUInt32 MojDbBerkeleyQuery::SeekEmptyFlags[2] = {DB_FIRST, DB_LAST};
+const MojUInt32 MojDbBerkeleyQuery::NextFlags[2] = {DB_NEXT, DB_PREV};
 
 MojDbBerkeleyQuery::MojDbBerkeleyQuery()
 {
@@ -85,7 +85,7 @@ MojErr MojDbBerkeleyQuery::getById(const MojObject& id, MojDbStorageItem*& itemO
 		if (!foundOut) {
 			char s[1024];
 			int size = (int)primaryKey.size();
-			(void) MojUInt8ArrayToHex(primaryKey.data(), size, s); 
+			(void) MojByteArrayToHex(primaryKey.data(), size, s); 
 			MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbq_byId_warnindex: KeySize: %d; %s ;id: %s \n"), 
 								 size, s, primaryKey.data()+1);
 		
@@ -151,7 +151,7 @@ MojErr MojDbBerkeleyQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
 	return MojErrNone;
 }
 
-MojErr MojDbBerkeleyQuery::getKey(bool& foundOut, guint32 flags)
+MojErr MojDbBerkeleyQuery::getKey(bool& foundOut, MojUInt32 flags)
 {
 	MojErr err = m_cursor.get(m_key, m_val, foundOut, flags);
 	MojErrCheck(err);

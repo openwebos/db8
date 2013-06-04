@@ -89,7 +89,7 @@ public:
 	MojHashMap(const MojHashMap& map) : MojHashBase(map) {}
 	~MojHashMap() { release(); }
 
-	gsize size() const { return MojHashBase::size(); }
+	MojSize size() const { return MojHashBase::size(); }
 	bool empty() const { return MojHashBase::empty(); }
 
 	ConstIterator begin() const { return ConstIterator(MojHashBase::begin()); }
@@ -129,7 +129,7 @@ private:
 	virtual void deleteNode(Node* node) const;
 	virtual Node* cloneNode(const Node* node) const;
 	virtual const void* key(const Node* node) const;
-	virtual gsize hash(const void* key) const;
+	virtual MojSize hash(const void* key) const;
 };
 
 #include "core/internal/MojHashMapInternal.h"

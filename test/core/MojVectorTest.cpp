@@ -67,7 +67,7 @@ MojErr MojVectorTest::intTest()
 	static const int array7[] = {1, 2, 3, 4, 5, 6, 7, 8};
 	static const int array8[] = {1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8};
 	static const int array9[] = {8, 7, 6, 5, 4, 3, 2, 1};
-	gsize idx;
+	MojSize idx;
 
 	// empty test
 	MojTestAssert(v1.size() == 0);
@@ -367,13 +367,13 @@ MojErr MojVectorTest::stringTest()
 	err = v1.insert(0, v3.begin(), v3.begin() + 8);
 	MojTestErrCheck(err);
 	MojTestAssert(v1.size() == 8);
-	for (gsize i = 0; i < v1.size(); ++i) {
+	for (MojSize i = 0; i < v1.size(); ++i) {
 		MojTestAssert(v1.at(i) == v3.at(i));
 	}
 	// erase
 	err = v1.erase(0);
 	MojTestErrCheck(err);
-	for (gsize i = 0; i < v1.size(); ++i) {
+	for (MojSize i = 0; i < v1.size(); ++i) {
 		MojTestAssert(v1.at(i) == v3.at(i + 1));
 	}
 

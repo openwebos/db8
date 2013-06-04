@@ -34,7 +34,7 @@ MojErr MojDbIdGenerator::init()
 	MojErr err = MojGetCurrentTime(time);
 	MojErrCheck(err);
 	MojZero(&m_randBuf, sizeof(m_randBuf));
-	err = MojInitRandom((guint32) time.microsecs(), m_randStateBuf, sizeof(m_randStateBuf), &m_randBuf);
+	err = MojInitRandom((MojUInt32) time.microsecs(), m_randStateBuf, sizeof(m_randStateBuf), &m_randBuf);
 	MojErrCheck(err);
 
 	return MojErrNone;
@@ -48,7 +48,7 @@ MojErr MojDbIdGenerator::id(MojObject& idOut)
 	// to minimize db fragmentation.
 
 	MojThreadGuard guard(m_mutex);
-	guint32 randNum;
+	MojUInt32 randNum;
 	MojErr err = MojRandom(&m_randBuf, &randNum);
 	MojErrCheck(err);
 	guard.unlock();
@@ -64,7 +64,7 @@ MojErr MojDbIdGenerator::id(MojObject& idOut)
 	err = writer.writeUInt32(randNum);
 	MojErrCheck(err);
 
-	MojVector<guint8> byteVec;
+	MojVector<MojByte> byteVec;
 	err = buf.toByteVec(byteVec);
 	MojErrCheck(err);
 	MojString str;

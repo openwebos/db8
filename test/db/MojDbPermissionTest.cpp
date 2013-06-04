@@ -312,7 +312,7 @@ MojErr MojDbPermissionTest::checkPermissions(MojDb& db)
 	MojTestAssert(found);
 
 	// del query
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	err = db.del(query, count, MojDb::FlagNone, reqOwner);
 	MojTestErrCheck(err);
 	err = db.del(query, count, MojDb::FlagNone, reqGranted);

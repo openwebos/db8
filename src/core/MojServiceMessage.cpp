@@ -123,7 +123,7 @@ MojErr MojServiceMessage::replyError(MojErr code, const MojChar* text)
 	MojObject payload;
 	MojErr err = payload.putBool(ReturnValueKey, false);
 	MojErrCheck(err);
-	err = payload.putInt(ErrorCodeKey, (gint64) code);
+	err = payload.putInt(ErrorCodeKey, (MojInt64) code);
 	MojErrCheck(err);
 	err = payload.putString(ErrorTextKey, text);
 	MojErrCheck(err);

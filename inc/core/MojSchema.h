@@ -233,10 +233,10 @@ private:
 		virtual MojErr validate(const MojObject& val, const MojObject& parent, Result& resOut) const;
 
 	private:
-		gint64 m_val;
+		MojInt64 m_val;
 	};
-	typedef ArrayLenRule<MojLessThanEq<gint64> > MaxItemsRule;
-	typedef ArrayLenRule<MojGreaterThanEq<gint64> > MinItemsRule;
+	typedef ArrayLenRule<MojLessThanEq<MojInt64> > MaxItemsRule;
+	typedef ArrayLenRule<MojGreaterThanEq<MojInt64> > MinItemsRule;
 
 	class UniqueItemsRule : public Rule
 	{
@@ -254,10 +254,10 @@ private:
 		virtual MojErr validate(const MojObject& val, const MojObject& parent, Result& resOut) const;
 
 	private:
-		gint64 m_val;
+		MojInt64 m_val;
 	};
-	typedef StringLenRule<MojLessThanEq<gint64> > MaxLenRule;
-	typedef StringLenRule<MojGreaterThanEq<gint64> > MinLenRule;
+	typedef StringLenRule<MojLessThanEq<MojInt64> > MaxLenRule;
+	typedef StringLenRule<MojGreaterThanEq<MojInt64> > MinLenRule;
 
 	class EnumRule : public Rule
 	{
@@ -282,7 +282,7 @@ private:
 	private:
 		typedef MojSet<MojObject> ObjectSet;
 
-		gint64 m_val;
+		MojInt64 m_val;
 	};
 
 	MojRefCountedPtr<Rule> m_rule;

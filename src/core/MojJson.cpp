@@ -96,7 +96,7 @@ MojErr MojJsonWriter::endArray()
 	return MojErrNone;
 }
 
-MojErr MojJsonWriter::propName(const MojChar* name, gsize len)
+MojErr MojJsonWriter::propName(const MojChar* name, MojSize len)
 {
 	MojAssert(name);
 
@@ -128,7 +128,7 @@ MojErr MojJsonWriter::boolValue(bool val)
 	return MojErrNone;
 }
 
-MojErr MojJsonWriter::intValue(gint64 val)
+MojErr MojJsonWriter::intValue(MojInt64 val)
 {
 	MojErr err = writeComma();
 	MojErrCheck(err);
@@ -149,7 +149,7 @@ MojErr MojJsonWriter::decimalValue(const MojDecimal& val)
 	return MojErrNone;
 }
 
-MojErr MojJsonWriter::stringValue(const MojChar* val, gsize len)
+MojErr MojJsonWriter::stringValue(const MojChar* val, MojSize len)
 {
 	MojErr err = writeComma();
 	MojErrCheck(err);
@@ -158,7 +158,7 @@ MojErr MojJsonWriter::stringValue(const MojChar* val, gsize len)
 	return MojErrNone;
 }
 
-MojErr MojJsonWriter::writeString(const MojChar* val, gsize len)
+MojErr MojJsonWriter::writeString(const MojChar* val, MojSize len)
 {
 	MojAssert(val || len == 0);
 	static const char escape[] = {
@@ -251,7 +251,7 @@ bool MojJsonParser::finished()
 	return (state() == StateFinish && m_depth == 0);
 }
 
-MojErr MojJsonParser::parse(MojObjectVisitor& visitor, const MojChar* chars, gsize len)
+MojErr MojJsonParser::parse(MojObjectVisitor& visitor, const MojChar* chars, MojSize len)
 {
 	MojAssert(chars || len == 0);
 
@@ -272,10 +272,10 @@ MojErr MojJsonParser::parse(MojObjectVisitor& visitor, const MojChar* chars, gsi
 	return MojErrNone;
 }
 
-MojErr MojJsonParser::parseChunk(MojObjectVisitor& visitor, const MojChar* chars, gsize len, const MojChar*& parseEnd)
+MojErr MojJsonParser::parseChunk(MojObjectVisitor& visitor, const MojChar* chars, MojSize len, const MojChar*& parseEnd)
 {
 	MojErr err = MojErrNone;
-	const MojChar* end = (len == G_MAXSIZE) ? NULL : chars + len;
+	const MojChar* end = (len == MojSizeMax) ? NULL : chars + len;
 
 	MojChar c;
 	while (chars != end) {
@@ -449,10 +449,10 @@ Redo:	switch (state()) {
 
 		case StateEscapeUnicode:
 			if (MojIsHexDigit(c)) {
-				m_ucsChar += ((guint32) hexDigit(c) << ((3 - m_strPos++) * 4));
+				m_ucsChar += ((MojUInt32) hexDigit(c) << ((3 - m_strPos++) * 4));
 				if (m_strPos == 4) {
 					MojChar utfOut[3];
-					gsize utfLen = 0;
+					MojSize utfLen = 0;
 					if (m_ucsChar == 0) {
 						MojErrThrowMsg(MojErrJsonParseEscape, _T("json: error parsing escape sequence - null character not allowed at %d:%d"), m_line, m_col);
 					}
@@ -520,7 +520,7 @@ Redo:	switch (state()) {
 					err = visitor.decimalValue(d);
 					MojErrCheck(err);
 				} else {
-					gint64 i = MojStrToInt64(m_str, &numberEnd, 0);
+					MojInt64 i = MojStrToInt64(m_str, &numberEnd, 0);
 					err = visitor.intValue(i);
 					MojErrCheck(err);
 					if (numberEnd != m_str.end())

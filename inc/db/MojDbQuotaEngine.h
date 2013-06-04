@@ -32,17 +32,17 @@ public:
 	class Quota : public MojRefCounted
 	{
 	public:
-		Quota(gint64 size) : m_size(size), m_usage(0) {}
-		gint64 size() const;
-		gint64 available() const;
-		gint64 usage() const;
-		void size(gint64 val);
-		void usage(gint64 val);
-		void offset(gint64 off);
+		Quota(MojInt64 size) : m_size(size), m_usage(0) {}
+		MojInt64 size() const;
+		MojInt64 available() const;
+		MojInt64 usage() const;
+		void size(MojInt64 val);
+		void usage(MojInt64 val);
+		void offset(MojInt64 off);
 
 	private:
-		gint64 m_size;
-		gint64 m_usage;
+		MojInt64 m_size;
+		MojInt64 m_usage;
 		mutable MojThreadMutex m_mutex;
 	};
 
@@ -50,14 +50,14 @@ public:
 	{
 	public:
 		Offset(const MojString& kindId);
-		MojErr apply(gint64 offset);
-		gint64 offset() const { return m_offset; }
+		MojErr apply(MojInt64 offset);
+		MojInt64 offset() const { return m_offset; }
 
 	private:
 		friend class MojDbQuotaEngine;
 
 		MojString m_kindId;
-		gint64 m_offset;
+		MojInt64 m_offset;
 		MojRefCountedPtr<Quota> m_quota;
 	};
 
@@ -74,8 +74,8 @@ public:
 	MojErr curKind(const MojDbKind* kind, MojDbStorageTxn* txn);
 	MojErr applyUsage(MojDbStorageTxn* txn);
 	MojErr applyQuota(MojDbStorageTxn* txn);
-	MojErr kindUsage(const MojChar* kindId, gint64& usageOut, MojDbStorageTxn* txn);
-	MojErr quotaUsage(const MojChar* owner, gint64& sizeOut, gint64& usageOut);
+	MojErr kindUsage(const MojChar* kindId, MojInt64& usageOut, MojDbStorageTxn* txn);
+	MojErr quotaUsage(const MojChar* owner, MojInt64& sizeOut, MojInt64& usageOut);
 	MojErr refresh();
 	MojErr stats(MojObject& objOut, MojDbReq& req);
 
@@ -89,11 +89,11 @@ private:
 
 	MojErr refreshImpl(MojDbStorageTxn* txn);
 	MojErr quotaForKind(const MojDbKind* kind, MojRefCountedPtr<Quota>& quotaOut);
-	MojErr applyOffset(const MojString& kindId, gint64 offset, MojDbStorageTxn* txn);
-	MojErr getUsage(const MojString& kindId, MojDbStorageTxn* txn, bool forUpdate, gint64& usageOut, MojRefCountedPtr<MojDbStorageItem>& itemOut);
+	MojErr applyOffset(const MojString& kindId, MojInt64 offset, MojDbStorageTxn* txn);
+	MojErr getUsage(const MojString& kindId, MojDbStorageTxn* txn, bool forUpdate, MojInt64& usageOut, MojRefCountedPtr<MojDbStorageItem>& itemOut);
 	MojErr initUsage(MojDbKind* kind, MojDbReq& req);
-	MojErr insertUsage(const MojString& kindId, gint64 usage, MojDbStorageTxn* txn);
-	MojErr commitQuota(const MojString& owner, gint64 size);
+	MojErr insertUsage(const MojString& kindId, MojInt64 usage, MojDbStorageTxn* txn);
+	MojErr commitQuota(const MojString& owner, MojInt64 size);
 
 	bool m_isOpen;
 	QuotaMap m_quotas;

@@ -67,7 +67,7 @@ MojErr MojObject::coerce(Type toType)
 	return MojErrNone;
 }
 
-MojErr MojObject::fromJson(const MojChar* chars, gsize len)
+MojErr MojObject::fromJson(const MojChar* chars, MojSize len)
 {
 	MojObjectBuilder builder;
 	MojErr err = MojJsonParser::parse(builder, chars, len);
@@ -86,7 +86,7 @@ MojErr MojObject::toJson(MojString& strOut) const
 	return MojErrNone;
 }
 
-MojErr MojObject::fromBytes(const guint8* data, gsize size)
+MojErr MojObject::fromBytes(const MojByte* data, MojSize size)
 {
 	MojObjectBuilder builder;
 	MojErr err = MojObjectReader::read(builder, data, size);
@@ -228,7 +228,7 @@ bool MojObject::get(const MojChar* key, bool& valOut) const
 	return false;
 }
 
-bool MojObject::get(const MojChar* key, gint64& valOut) const
+bool MojObject::get(const MojChar* key, MojInt64& valOut) const
 {
 	MojObject obj;
 	if (get(key, obj)) {
@@ -238,13 +238,13 @@ bool MojObject::get(const MojChar* key, gint64& valOut) const
 	return false;
 }
 
-MojErr MojObject::get(const MojChar* key, gint32& valOut, bool& foundOut) const
+MojErr MojObject::get(const MojChar* key, MojInt32& valOut, bool& foundOut) const
 {
 	foundOut = false;
-	gint64 val;
+	MojInt64 val;
 	if (get(key, val)) {
-		if (val >= G_MININT32 && val <= G_MAXINT32) {
-			valOut = (gint32) val;
+		if (val >= MojInt32Min && val <= MojInt32Max) {
+			valOut = (MojInt32) val;
 			foundOut= true;
 		} else {
 			MojErrThrowMsg(MojErrValueOutOfRange, _T("value out of range for prop: '%s'"), key);
@@ -253,13 +253,13 @@ MojErr MojObject::get(const MojChar* key, gint32& valOut, bool& foundOut) const
 	return MojErrNone;
 }
 
-MojErr MojObject::get(const MojChar* key, guint32& valOut, bool& foundOut) const
+MojErr MojObject::get(const MojChar* key, MojUInt32& valOut, bool& foundOut) const
 {
 	foundOut = false;
-	gint64 val;
+	MojInt64 val;
 	if (get(key, val)) {
-		if (val >= 0 && val <= G_MAXUINT32) {
-			valOut = (guint32) val;
+		if (val >= 0 && val <= MojUInt32Max) {
+			valOut = (MojUInt32) val;
 			foundOut= true;
 		} else {
 			MojErrThrowMsg(MojErrValueOutOfRange, _T("value out of range for prop: '%s'"), key);
@@ -268,13 +268,13 @@ MojErr MojObject::get(const MojChar* key, guint32& valOut, bool& foundOut) const
 	return MojErrNone;
 }
 
-MojErr MojObject::get(const MojChar* key, guint64& valOut, bool& foundOut) const
+MojErr MojObject::get(const MojChar* key, MojUInt64& valOut, bool& foundOut) const
 {
 	foundOut = false;
-	gint64 val;
+	MojInt64 val;
 	if (get(key, val)) {
 		if (val >= 0) {
-			valOut = (guint64) val;
+			valOut = (MojUInt64) val;
 			foundOut= true;
 		} else {
 			MojErrThrowMsg(MojErrValueOutOfRange, _T("value out of range for prop: '%s'"), key);
@@ -336,22 +336,22 @@ MojErr MojObject::getRequired(const MojChar* key, bool& valOut) const
 	return getRequiredT(key, valOut);
 }
 
-MojErr MojObject::getRequired(const MojChar* key, gint32& valOut) const
+MojErr MojObject::getRequired(const MojChar* key, MojInt32& valOut) const
 {
 	return getRequiredErrT(key, valOut);
 }
 
-MojErr MojObject::getRequired(const MojChar* key, guint32& valOut) const
+MojErr MojObject::getRequired(const MojChar* key, MojUInt32& valOut) const
 {
 	return getRequiredErrT(key, valOut);
 }
 
-MojErr MojObject::getRequired(const MojChar* key, gint64& valOut) const
+MojErr MojObject::getRequired(const MojChar* key, MojInt64& valOut) const
 {
 	return getRequiredT(key, valOut);
 }
 
-MojErr MojObject::getRequired(const MojChar* key, guint64& valOut) const
+MojErr MojObject::getRequired(const MojChar* key, MojUInt64& valOut) const
 {
 	return getRequiredErrT(key, valOut);
 }
@@ -385,7 +385,7 @@ MojErr MojObject::pushString(const MojChar* val)
 	return MojErrNone;
 }
 
-MojErr MojObject::setAt(gsize idx, const MojObject& val)
+MojErr MojObject::setAt(MojSize idx, const MojObject& val)
 {
 	ArrayImpl& array = ensureArray();
 
@@ -398,7 +398,7 @@ MojErr MojObject::setAt(gsize idx, const MojObject& val)
 	return MojErrNone;
 }
 
-bool MojObject::at(gsize idx, bool& valOut) const
+bool MojObject::at(MojSize idx, bool& valOut) const
 {
 	MojObject obj;
 	bool found = at(idx, obj);
@@ -410,7 +410,7 @@ bool MojObject::at(gsize idx, bool& valOut) const
 	return found;
 }
 
-bool MojObject::at(gsize idx, gint64& valOut) const
+bool MojObject::at(MojSize idx, MojInt64& valOut) const
 {
 	MojObject obj;
 	bool found = at(idx, obj);
@@ -422,7 +422,7 @@ bool MojObject::at(gsize idx, gint64& valOut) const
 	return found;
 }
 
-bool MojObject::at(gsize idx, MojDecimal& valOut) const
+bool MojObject::at(MojSize idx, MojDecimal& valOut) const
 {
 	MojObject obj;
 	bool found = at(idx, obj);
@@ -434,7 +434,7 @@ bool MojObject::at(gsize idx, MojDecimal& valOut) const
 	return found;
 }
 
-MojErr MojObject::at(gsize idx, MojString& valOut, bool& foundOut) const
+MojErr MojObject::at(MojSize idx, MojString& valOut, bool& foundOut) const
 {
 	MojObject obj;
 	foundOut = at(idx, obj);
@@ -567,7 +567,7 @@ bool MojObject::NullImpl::equals(const MojObject::Impl& rhs) const
 	return true;
 }
 
-gsize MojObject::NullImpl::hashCode() const
+MojSize MojObject::NullImpl::hashCode() const
 {
 	return TypeNull;
 }
@@ -579,7 +579,7 @@ MojErr MojObject::NullImpl::visit(MojObjectVisitor& visitor) const
 	return MojErrNone;
 }
 
-gsize MojObject::UndefinedImpl::hashCode() const
+MojSize MojObject::UndefinedImpl::hashCode() const
 {
 	return TypeUndefined;
 }
@@ -598,9 +598,9 @@ bool MojObject::ObjectImpl::equals(const MojObject::Impl& rhs) const
 	return m_props == rhsImpl.m_props;
 }
 
-gsize MojObject::ObjectImpl::hashCode() const
+MojSize MojObject::ObjectImpl::hashCode() const
 {
-	gsize hash = TypeObject;
+	MojSize hash = TypeObject;
 	for (ConstIterator i = m_props.begin(); i != m_props.end(); ++i) {
 		hash ^= MojHash(i.key());
 		hash ^= i.value().hashCode();
@@ -608,7 +608,7 @@ gsize MojObject::ObjectImpl::hashCode() const
 	return hash;
 }
 
-gsize MojObject::ObjectImpl::containerSize() const
+MojSize MojObject::ObjectImpl::containerSize() const
 {
 	return m_props.size();
 }
@@ -668,16 +668,16 @@ bool MojObject::ArrayImpl::equals(const MojObject::Impl& rhs) const
 	return m_vec == rhsImpl.m_vec;
 }
 
-gsize MojObject::ArrayImpl::hashCode() const
+MojSize MojObject::ArrayImpl::hashCode() const
 {
-	gsize hash = TypeArray;
+	MojSize hash = TypeArray;
 	for (ConstArrayIterator i = m_vec.begin(); i != m_vec.end(); ++i) {
 		hash ^= i->hashCode();
 	}
 	return hash;
 }
 
-gsize MojObject::ArrayImpl::containerSize() const
+MojSize MojObject::ArrayImpl::containerSize() const
 {
 	return m_vec.size();
 }
@@ -717,7 +717,7 @@ MojObject::ConstArrayIterator MojObject::ArrayImpl::arrayEnd() const
 	return m_vec.end();
 }
 
-bool MojObject::ArrayImpl::at(gsize idx, MojObject& objOut) const
+bool MojObject::ArrayImpl::at(MojSize idx, MojObject& objOut) const
 {
 	if (idx >= m_vec.size())
 		return false;
@@ -739,7 +739,7 @@ bool MojObject::StringImpl::equals(const MojObject::Impl& rhs) const
 	return m_val == rhsImpl.m_val;
 }
 
-gsize MojObject::StringImpl::hashCode() const
+MojSize MojObject::StringImpl::hashCode() const
 {
 	return MojHasher<MojString>()(m_val);
 }
@@ -749,7 +749,7 @@ bool MojObject::StringImpl::boolValue() const
 	return !m_val.empty();
 }
 
-gint64 MojObject::StringImpl::intValue() const
+MojInt64 MojObject::StringImpl::intValue() const
 {
 	return MojStrToInt64(m_val, NULL, 0);
 }
@@ -757,7 +757,7 @@ gint64 MojObject::StringImpl::intValue() const
 MojDecimal MojObject::StringImpl::decimalValue() const
 {
 	// TODO: skip double conversion
-	gdouble d = MojStrToDouble(m_val, NULL);
+	MojDouble d = MojStrToDouble(m_val, NULL);
 	return MojDecimal(d);
 }
 
@@ -788,7 +788,7 @@ bool MojObject::BoolImpl::equals(const MojObject::Impl& rhs) const
 	return m_val == rhsImpl.m_val;
 }
 
-gsize MojObject::BoolImpl::hashCode() const
+MojSize MojObject::BoolImpl::hashCode() const
 {
 	return TypeBool + m_val;
 }
@@ -814,7 +814,7 @@ bool MojObject::DecimalImpl::equals(const MojObject::Impl& rhs) const
 	return m_val == rhsImpl.m_val;
 }
 
-gsize MojObject::DecimalImpl::hashCode() const
+MojSize MojObject::DecimalImpl::hashCode() const
 {
 	return MojHasher<MojDecimal>()(m_val);
 }
@@ -830,7 +830,7 @@ int MojObject::IntImpl::compare(const MojObject::Impl& rhs) const
 {
 	MojAssert(rhs.type() == type());
 	const IntImpl& rhsImpl = static_cast<const IntImpl&>(rhs);
-	return MojComp<gint64>()(m_val, rhsImpl.m_val);
+	return MojComp<MojInt64>()(m_val, rhsImpl.m_val);
 }
 
 bool MojObject::IntImpl::equals(const MojObject::Impl& rhs) const
@@ -840,9 +840,9 @@ bool MojObject::IntImpl::equals(const MojObject::Impl& rhs) const
 	return m_val == rhsImpl.m_val;
 }
 
-gsize MojObject::IntImpl::hashCode() const
+MojSize MojObject::IntImpl::hashCode() const
 {
-	return MojHasher<gint64>()(m_val);
+	return MojHasher<MojInt64>()(m_val);
 }
 
 MojErr MojObject::IntImpl::visit(MojObjectVisitor& visitor) const
@@ -862,7 +862,7 @@ MojErr MojObjectVisitor::boolProp(const MojChar* name, bool val)
 	return MojErrNone;
 }
 
-MojErr MojObjectVisitor::intProp(const MojChar* name, gint64 val)
+MojErr MojObjectVisitor::intProp(const MojChar* name, MojInt64 val)
 {
 	MojAssert(name);
 	MojErr err = propName(name);

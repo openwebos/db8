@@ -32,32 +32,32 @@ public:
     virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine);
     virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
     virtual const MojObject& id() const { return m_header.id(); }
-    virtual gsize size() const { return m_slice.size(); }
+    virtual MojSize size() const { return m_slice.size(); }
 
     void clear();
-    const guint8* data() const { return (const guint8*) m_slice.data(); }
+    const MojByte* data() const { return (const MojByte*) m_slice.data(); }
     bool hasPrefix(const MojDbKey& prefix) const;
     MojErr toArray(MojObject& arrayOut) const;
     MojErr toObject(MojObject& objOut) const;
 
     void id(const MojObject& id);
-    void fromBytesNoCopy(const guint8* bytes, gsize size);
+    void fromBytesNoCopy(const MojByte* bytes, MojSize size);
     MojErr fromBuffer(MojBuffer& buf);
-    MojErr fromBytes(const guint8* bytes, gsize size);
+    MojErr fromBytes(const MojByte* bytes, MojSize size);
     MojErr fromObject(const MojObject& obj);
     MojErr fromObjectVector(const MojVector<MojObject>& vec);
-    MojErr from(const leveldb::Slice &slice) { return fromBytes(reinterpret_cast<const guint8*>(slice.data()), slice.size()); }
+    MojErr from(const leveldb::Slice &slice) { return fromBytes(reinterpret_cast<const MojByte*>(slice.data()), slice.size()); }
 
     const leveldb::Slice* impl() { return &m_slice; }
 
 private:
     void freeData();
-    void setData(guint8* bytes, gsize size, void (*free)(void*));
+    void setData(MojByte* bytes, MojSize size, void (*free)(void*));
 
     // either points to m_chunk or to m_data
     leveldb::Slice m_slice;
     MojAutoPtr<MojBuffer::Chunk> m_chunk;
-    guint8 *m_data;
+    MojByte *m_data;
     mutable MojDbObjectHeader m_header;
     void (*m_free)(void*);
 };

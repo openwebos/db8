@@ -40,12 +40,12 @@ public:
 	MojErr indexId(const MojChar* indexName, MojDbReq& req, MojObject& idOut, bool& createdOut);
 	MojErr delIndex(const MojChar* indexName, MojDbReq& req);
 
-	gint64 token() const { return m_kindToken; }
+	MojInt64 token() const { return m_kindToken; }
 	virtual MojErr tokenSet(TokenVec& vecOut, MojObject& tokensObjOut) const;
-	virtual MojErr addToken(const MojChar* propName, guint8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut);
+	virtual MojErr addToken(const MojChar* propName, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut);
 
 private:
-	MojErr addPropImpl(const MojChar* propName, bool write, guint8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut);
+	MojErr addPropImpl(const MojChar* propName, bool write, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut);
 	MojErr initKindToken(MojDbReq& req);
 	MojErr initTokens(MojDbReq& req, const StringSet& strings);
 	MojErr id(const MojChar* name, const MojChar* objKey, MojDbReq& req, MojObject& idOut, bool& createdOut);
@@ -62,8 +62,8 @@ private:
 	MojString m_kindId;
 	MojObject m_tokensObj;
 	TokenVec m_tokenVec;
-	gint64 m_kindToken;
-	guint8 m_nextToken;
+	MojInt64 m_kindToken;
+	MojUInt8 m_nextToken;
 	MojDbKindEngine* m_kindEngine;
 };
 

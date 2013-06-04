@@ -27,7 +27,7 @@ MojErr MojDbClient::putPermission(Signal::SlotRef handler, const MojObject& obj)
 	return MojErrNone;
 }
 
-MojErr MojDbClient::put(Signal::SlotRef handler, const MojObject& obj, guint32 flags)
+MojErr MojDbClient::put(Signal::SlotRef handler, const MojObject& obj, MojUInt32 flags)
 {
 	MojErr err = put(handler, &obj, &obj+1, flags);
 	MojErrCheck(err);
@@ -43,7 +43,7 @@ MojErr MojDbClient::get(Signal::SlotRef handler, const MojObject& id)
 	return MojErrNone;
 }
 
-MojErr MojDbClient::del(Signal::SlotRef handler, const MojObject& id, guint32 flags)
+MojErr MojDbClient::del(Signal::SlotRef handler, const MojObject& id, MojUInt32 flags)
 {
 	MojErr err = del(handler, &id, &id + 1, flags);
 	MojErrCheck(err);
@@ -51,7 +51,7 @@ MojErr MojDbClient::del(Signal::SlotRef handler, const MojObject& id, guint32 fl
 	return MojErrNone;
 }
 
-MojErr MojDbClient::merge(Signal::SlotRef handler, const MojObject& obj, guint32 flags)
+MojErr MojDbClient::merge(Signal::SlotRef handler, const MojObject& obj, MojUInt32 flags)
 {
 	MojErr err = merge(handler, &obj, &obj + 1, flags);
 	MojErrCheck(err);
@@ -59,7 +59,7 @@ MojErr MojDbClient::merge(Signal::SlotRef handler, const MojObject& obj, guint32
 	return MojErrNone;
 }
 
-MojErr MojDbBatch::put(const MojObject& obj, guint32 flags)
+MojErr MojDbBatch::put(const MojObject& obj, MojUInt32 flags)
 {
 	MojErr err = put(&obj, &obj + 1, flags);
 	MojErrCheck(err);
@@ -75,7 +75,7 @@ MojErr MojDbBatch::get(const MojObject& id)
 	return MojErrNone;
 }
 
-MojErr MojDbBatch::del(const MojObject& id, guint32 flags)
+MojErr MojDbBatch::del(const MojObject& id, MojUInt32 flags)
 {
 	MojErr err = del(&id, &id + 1, flags);
 	MojErrCheck(err);
@@ -83,7 +83,7 @@ MojErr MojDbBatch::del(const MojObject& id, guint32 flags)
 	return MojErrNone;
 }
 
-MojErr MojDbBatch::merge(const MojObject& obj, guint32 flags)
+MojErr MojDbBatch::merge(const MojObject& obj, MojUInt32 flags)
 {
 	MojErr err = merge(&obj, &obj + 1, flags);
 	MojErrCheck(err);

@@ -26,8 +26,8 @@
 class MojSocketMessageHeader
 {
 public:
-	static const guint32 s_protocolVersion = 1;
-	static const guint32 s_maxMsgSize = 32768;
+	static const MojUInt32 s_protocolVersion = 1;
+	static const MojUInt32 s_maxMsgSize = 32768;
 
 	MojSocketMessageHeader();
 	MojSocketMessageHeader(const 	MojSocketMessage& message);
@@ -36,12 +36,12 @@ public:
 	MojErr read(MojDataReader& reader);
 	void reset();
 
-	guint32 version() const { return m_version; }
-	guint32 messageLen() const { return m_messageLen; }
+	MojUInt32 version() const { return m_version; }
+	MojUInt32 messageLen() const { return m_messageLen; }
 
 private:
-	guint32 m_version;
-	guint32 m_messageLen;
+	MojUInt32 m_version;
+	MojUInt32 m_messageLen;
 };
 
 class MojSocketMessageParser : private MojNoCopy
@@ -51,17 +51,17 @@ public:
 	~MojSocketMessageParser();
 
 	MojErr readFromSocket(MojSockT sock, MojRefCountedPtr<MojSocketMessage>& msgOut, bool& completeOut);
-	MojErr writeToBuffer(const MojSocketMessage& msg, MojVector<guint8> buffer, const guint8* begin);
+	MojErr writeToBuffer(const MojSocketMessage& msg, MojVector<MojByte> buffer, const MojByte* begin);
 
 	void reset();
 	bool inProgress() const;
 
 private:
-	guint8 m_headerBuf[sizeof(MojSocketMessageHeader)];
-	gsize m_headerBytes;
+	MojByte m_headerBuf[sizeof(MojSocketMessageHeader)];
+	MojSize m_headerBytes;
 	MojSocketMessageHeader m_header;
-	guint8* m_messageData;
-	gsize m_messageBytesRead;
+	MojByte* m_messageData;
+	MojSize m_messageBytesRead;
 };
 
 class MojSocketMessageEncoder : private MojNoCopy

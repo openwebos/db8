@@ -29,7 +29,7 @@ const MojChar* const MojDbKindState::TokensKey = _T("tokens");
 
 MojDbKindState::MojDbKindState(const MojString& kindId, MojDbKindEngine* kindEngine)
 : m_kindId(kindId),
-  m_kindToken(G_MAXINT64),
+  m_kindToken(MojInt64Max),
   m_nextToken(MojObjectWriter::TokenStartMarker),
   m_kindEngine(kindEngine)
 {
@@ -91,7 +91,7 @@ MojErr MojDbKindState::tokenSet(TokenVec& vecOut, MojObject& tokensObjOut) const
 	return MojErrNone;
 }
 
-MojErr MojDbKindState::addToken(const MojChar* propName, guint8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
+MojErr MojDbKindState::addToken(const MojChar* propName, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
 {
 	MojAssert(propName);
 
@@ -103,7 +103,7 @@ MojErr MojDbKindState::addToken(const MojChar* propName, guint8& tokenOut, Token
 	return MojErrNone;
 }
 
-MojErr MojDbKindState::addPropImpl(const MojChar* propName, bool write, guint8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
+MojErr MojDbKindState::addPropImpl(const MojChar* propName, bool write, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
 {
 	MojAssert(propName);
 	MojAssertMutexLocked(m_lock);
@@ -111,17 +111,17 @@ MojErr MojDbKindState::addPropImpl(const MojChar* propName, bool write, guint8& 
 	tokenOut = MojTokenSet::InvalidToken;
 
 	// check if we've already added the prop
-	guint32 token;
+	MojUInt32 token;
 	bool found = false;
 	MojErr err = m_tokensObj.get(propName, token, found);
 	MojErrCheck(err);
 	if (found) {
-		MojAssert(token <= G_MAXUINT8);
-		tokenOut = (guint8) token;
+		MojAssert(token <= MojUInt8Max);
+		tokenOut = (MojUInt8) token;
 		return MojErrNone;
 	}
 	// update the db and our in-memory state
-	if (m_nextToken < G_MAXUINT8) {
+	if (m_nextToken < MojUInt8Max) {
 		// update copies of obj and vec
 		MojObject obj(m_tokensObj);
 		TokenVec tokenVec(m_tokenVec);
@@ -173,24 +173,24 @@ MojErr MojDbKindState::initTokens(MojDbReq& req, const StringSet& strings)
 	MojErrCheck(err);
 
 	// populate token vec
-	guint8 maxToken = 0;
+	MojUInt8 maxToken = 0;
 	err = m_tokenVec.resize(m_tokensObj.size());
 	MojErrCheck(err);
 	for (MojObject::ConstIterator i = m_tokensObj.begin(); i != m_tokensObj.end(); ++i) {
 		MojString key = i.key();
-		gint64 value = i.value().intValue();
-		gsize idx = (gsize) (value - MojObjectWriter::TokenStartMarker);
-		if (value < MojObjectWriter::TokenStartMarker || value >= G_MAXUINT8 || idx >= m_tokenVec.size()) {
+		MojInt64 value = i.value().intValue();
+		MojSize idx = (MojSize) (value - MojObjectWriter::TokenStartMarker);
+		if (value < MojObjectWriter::TokenStartMarker || value >= MojUInt8Max || idx >= m_tokenVec.size()) {
 			MojErrThrow(MojErrDbInvalidToken);
 		}
 		if (value > maxToken) {
-			maxToken = (guint8) value;
+			maxToken = (MojUInt8) value;
 		}
 		err = m_tokenVec.setAt(idx, key);
 		MojErrCheck(err);
 	}
 	if (maxToken > 0) {
-		m_nextToken = (guint8) (maxToken + 1);
+		m_nextToken = (MojUInt8) (maxToken + 1);
 	}
 
 	// add strings
@@ -198,7 +198,7 @@ MojErr MojDbKindState::initTokens(MojDbReq& req, const StringSet& strings)
 	for (StringSet::ConstIterator i = strings.begin(); i != strings.end(); ++i) {
 		if (!m_tokensObj.contains(*i)) {
 			updated = true;
-			guint8 token = 0;
+			MojUInt8 token = 0;
 			TokenVec tokenVec;
 			MojObject tokenObj;
 			err = addPropImpl(*i, false, token, tokenVec, tokenObj);
@@ -229,7 +229,7 @@ MojErr MojDbKindState::id(const MojChar* name, const MojChar* objKey, MojDbReq& 
 		// get next id from seq
 		MojDbStorageSeq* seq = m_kindEngine->indexSeq();
 		MojAssert(seq);
-		gint64 id = 0;
+		MojInt64 id = 0;
 		MojErr err = seq->get(id);
 		MojErrCheck(err);
 		// update copy of id map and write it out

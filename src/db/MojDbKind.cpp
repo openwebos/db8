@@ -81,7 +81,7 @@ bool MojDbKind::extends(const MojString& id) const
 	return false;
 }
 
-MojErr MojDbKind::stats(MojObject& objOut, gsize& usageOut, MojDbReq& req, bool verify)
+MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, bool verify)
 {
 	MojLogTrace(s_log);
 
@@ -109,11 +109,11 @@ MojErr MojDbKind::stats(MojObject& objOut, gsize& usageOut, MojDbReq& req, bool 
 				m_id.data(), m_indexes.size(), cursor.m_dbIndex->name().data());
 
 	MojErrCheck(err);
-	gsize count = 0;
-	gsize size = 0;
-	gsize delCount = 0;
-	gsize delSize = 0;
-	gsize warnings = 0;
+	MojSize count = 0;
+	MojSize size = 0;
+	MojSize delCount = 0;
+	MojSize delSize = 0;
+	MojSize warnings = 0;
 	for (;;) {
 		MojDbStorageItem* item = NULL;
 		bool found = false;
@@ -145,18 +145,18 @@ MojErr MojDbKind::stats(MojObject& objOut, gsize& usageOut, MojDbReq& req, bool 
 
 	usageOut += size + delSize;
 	MojObject info;
-	err = info.put(SizeKey, (gint64) size);
+	err = info.put(SizeKey, (MojInt64) size);
 	MojErrCheck(err);
-	err = info.put(CountKey, (gint64) count);
+	err = info.put(CountKey, (MojInt64) count);
 	MojErrCheck(err);
 	if (delCount > 0) {
-		err = info.put(DelSizeKey, (gint64) delSize);
+		err = info.put(DelSizeKey, (MojInt64) delSize);
 		MojErrCheck(err);
-		err = info.put(DelCountKey, (gint64) delCount);
+		err = info.put(DelCountKey, (MojInt64) delCount);
 		MojErrCheck(err);
 	}
 	if (warnings > 0) {
-		err = info.put(WarnKey, (gint64) warnings);
+		err = info.put(WarnKey, (MojInt64) warnings);
 		MojErrCheck(err);
 	}
 	err = objOut.put(ObjectsKey, info);
@@ -204,9 +204,9 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 	MojLogInfo(s_log, _T("Kind_verifyIndex: Kind: %s; Index: %s; idIndex: %zX; size: %zu; CursorIndex: %s \n"), m_name.data(),
 					pIndex->name().data(), pIndex->idIndex(), pIndex->size(), cursor.m_dbIndex->name().data());
 	MojErrCheck(err);
-	gsize count = 0;
-	gsize delCount = 0;
-	gsize warnCount = 0;
+	MojSize count = 0;
+	MojSize delCount = 0;
+	MojSize warnCount = 0;
 	char s[1024];
 	for (;;) {
 		MojDbStorageItem* item = NULL;
@@ -215,7 +215,7 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 		if (err == MojErrInternalIndexOnFind) {
 			warnCount++;
 			MojDbIsamQuery *iquery = (MojDbIsamQuery *)cursor.m_storageQuery.get();
-			MojErr err2 =  MojUInt8ArrayToHex(iquery->m_keyData, iquery->m_keySize, s);
+			MojErr err2 =  MojByteArrayToHex(iquery->m_keyData, iquery->m_keySize, s);
 			MojErrCheck(err2);
 			MojChar *ids = (iquery->m_keySize > 18) ? (MojChar *)(iquery->m_keyData + iquery->m_keySize - 17) : NULL;
 			MojLogInfo(s_log, _T("VerifyIndex Warning: %s; KeySize: %zu; %s ;id: %s \n"),
@@ -239,11 +239,11 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 	MojLogInfo(s_log, _T("Kind_verifyIndex Counts: Kind: %s; Index: %s; count: %zu; delcount: %zu; warnings: %zu \n"), m_name.data(),
 					pIndex->name().data(), count, delCount, warnCount);
 
-	err = iinfo.put(VerifyCountKey, (gint64)count);
+	err = iinfo.put(VerifyCountKey, (MojInt64)count);
 	MojErrCheck(err);
-	err = iinfo.put(VerifyWarnCountKey, (gint64) warnCount);
+	err = iinfo.put(VerifyWarnCountKey, (MojInt64) warnCount);
 	MojErrCheck(err);
-	err = iinfo.put(VerifyDelCountKey, (gint64) delCount);
+	err = iinfo.put(VerifyDelCountKey, (MojInt64) delCount);
 	MojErrCheck(err);
 
 	return MojErrNone;
@@ -256,7 +256,7 @@ MojErr MojDbKind::init(const MojString& id)
 	// parse name and version out of id
 	if (id.length() > KindIdLenMax)
 		MojErrThrowMsg(MojErrDbMalformedId, _T("db: kind id too long"));
-	gsize sepIdx = id.rfind(VersionSeparator);
+	MojSize sepIdx = id.rfind(VersionSeparator);
 	if (sepIdx == MojInvalidIndex)
 		MojErrThrow(MojErrDbMalformedId);
 	MojErr err = id.substring(0, sepIdx, m_name);
@@ -265,10 +265,10 @@ MojErr MojDbKind::init(const MojString& id)
 	err = id.substring(sepIdx + 1, id.length() - sepIdx - 1, str);
 	MojErrCheck(err);
 	const MojChar* end = NULL;
-	gint64 ver = MojStrToInt64(str.data(), &end, 0);
-	if (*end != '\0' || ver < 0 || ver > G_MAXUINT32)
+	MojInt64 ver = MojStrToInt64(str.data(), &end, 0);
+	if (*end != '\0' || ver < 0 || ver > MojUInt32Max)
 		MojErrThrow(MojErrDbMalformedId);
-	m_version = (guint32) ver;
+	m_version = (MojUInt32) ver;
 	m_id = id;
 
 	return MojErrNone;
@@ -463,7 +463,7 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 	MojErrCheck(err);
 	// update indexes
 	MojVector<MojDbKind*> kindVec;
-	gint32 idxcount = 0;
+	MojInt32 idxcount = 0;
 	err = updateIndexes(newObj, oldObj, req, op, kindVec, idxcount);
 	MojLogInfo(s_log, _T("Kind_UpdateIndexes_End: %s; supers = %zu; indexcount = %zu; updated = %d \n"), this->id().data(),
 				m_supers.size(), m_indexes.size(), idxcount);
@@ -596,7 +596,7 @@ MojErr MojDbKind::deny(MojDbReq& req)
 	return MojErrNone;
 }
 
-MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojDbOp op, MojVector<MojDbKind*>& kindVec, gint32& idxcount)
+MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojDbOp op, MojVector<MojDbKind*>& kindVec, MojInt32& idxcount)
 {
 	MojErr err = kindVec.push(this);
 	MojErrCheck(err);
@@ -617,10 +617,10 @@ MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj
 	return MojErrNone;
 }
 
-MojErr MojDbKind::updateOwnIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, gint32& idxcount)
+MojErr MojDbKind::updateOwnIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojInt32& idxcount)
 {
 
-	gint32 count = 0;
+	MojInt32 count = 0;
 
 	for (IndexVec::ConstIterator i = m_indexes.begin();
 		 i != m_indexes.end(); ++i) {
@@ -796,7 +796,7 @@ MojDbIndex* MojDbKind::indexForQuery(const MojDbQuery& query) const
 MojErr MojDbKind::updateSupers(const KindMap& map, const StringVec& superIds, bool updating, MojDbReq& req)
 {
 	MojLogTrace(s_log);
-	gint32 indexes = 0;
+	MojInt32 indexes = 0;
 	if (updating) {
 		KindVec addedSupers;
 		MojErr err = diffSupers(map, superIds, m_superIds, addedSupers);
@@ -943,7 +943,7 @@ MojErr MojDbKind::removeKind(KindVec& vec, MojDbKind* kind)
 	MojAssert(kind);
 	MojLogTrace(s_log);
 
-	gsize idx = vec.find(kind);
+	MojSize idx = vec.find(kind);
 	MojAssert(idx != MojInvalidIndex);
 	MojErr err = vec.erase(idx, 1);
 	MojErrCheck(err);

@@ -36,7 +36,7 @@ MojErr MojDbServiceHandlerBase::invoke(Callback method, MojServiceMessage* msg, 
 	MojAssert(method && msg);
 	MojLogTrace(s_log);
 
-	guint32 retries = 0;
+	MojUInt32 retries = 0;
 	for (;;) {
 		MojErr err = invokeImpl(method, msg, payload);
 		MojErrCatch(err, MojErrDbFatal) {
@@ -97,7 +97,7 @@ MojErr MojDbServiceHandlerBase::invokeImpl(Callback method, MojServiceMessage* m
 	return MojErrNone;
 }
 
-MojErr MojDbServiceHandlerBase::formatCount(MojServiceMessage* msg, guint32 count)
+MojErr MojDbServiceHandlerBase::formatCount(MojServiceMessage* msg, MojUInt32 count)
 {
 	MojAssert(msg);
 

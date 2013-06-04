@@ -46,7 +46,7 @@ private:
 	static const MojChar* const TempDir;
 	static const MojChar* const TempStateDir;
 	static const MojChar* const TempInitStateFile;
-	static const gint32 NumThreads = 3;
+	static const MojInt32 NumThreads = 3;
 
 	typedef MojReactorApp<MojGmainReactor> Base;
 

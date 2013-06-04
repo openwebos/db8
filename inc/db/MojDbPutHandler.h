@@ -38,17 +38,17 @@ protected:
 		// sort longest strings first so we can do longest match for wildcards
 		int operator()(const MojChar* val1, const MojChar* val2) const
 		{
-			gsize len1 = MojStrLen(val1);
-			gsize len2 = MojStrLen(val2);
+			MojSize len1 = MojStrLen(val1);
+			MojSize len2 = MojStrLen(val2);
 			if (len1 == len2)
 				return MojStrCmp(val1, val2);
-			return MojComp<gsize>()(len2, len1);
+			return MojComp<MojSize>()(len2, len1);
 		}
 	};
 
 	virtual MojErr configure(const MojObject& conf, MojDbReq& req);
 	static MojErr validateWildcard(const MojString& val, MojErr errToThrow);
-	static bool matchWildcard(const MojString& expr, const MojChar* val, gsize len);
+	static bool matchWildcard(const MojString& expr, const MojChar* val, MojSize len);
 
 	const MojChar* m_kindId;
 	const MojChar* m_confProp;

@@ -62,12 +62,12 @@ MojErr MojDbSearchCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 	return MojErrNone;
 }
 
-MojErr MojDbSearchCursor::count(guint32& countOut)
+MojErr MojDbSearchCursor::count(MojUInt32& countOut)
 {
 	countOut = 0;
 	MojErr err = begin();
 	MojErrCheck(err);
-	countOut = (guint32) m_items.size();
+	countOut = (MojUInt32) m_items.size();
 
 	return MojErrNone;
 }
@@ -145,7 +145,7 @@ MojErr MojDbSearchCursor::load()
 
 MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 {
-	guint32 groupNum = 0;
+	MojUInt32 groupNum = 0;
 	bool found = false;
 	MojSharedPtr<ObjectSet> group;
 	GroupMap groupMap;
@@ -153,7 +153,7 @@ MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 	for(;;) {
 		// get current id
 		MojObject id;
-		guint32 idGroupNum = 0;
+		MojUInt32 idGroupNum = 0;
 		MojErr err = m_storageQuery->getId(id, idGroupNum, found);
 		MojErrCheck(err);
 		if (!found)
@@ -181,8 +181,8 @@ MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 	}
 
 	// no matches unless all groups are accounted for
-	guint32 groupCount = m_storageQuery->groupCount();
-	for (guint32 i = 0; i < groupCount; ++i) {
+	MojUInt32 groupCount = m_storageQuery->groupCount();
+	for (MojUInt32 i = 0; i < groupCount; ++i) {
 		if (!groupMap.contains(i))
 			return MojErrNone;
 	}
@@ -203,7 +203,7 @@ MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 
 MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 {
-	gint32 warns = 0;
+	MojInt32 warns = 0;
 	for (ObjectSet::ConstIterator i = ids.begin(); i != ids.end(); ++i) {
 		// get item by id
 		MojObject obj;

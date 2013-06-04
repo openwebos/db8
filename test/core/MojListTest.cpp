@@ -60,7 +60,7 @@ MojErr MojListTest::run()
 	MojErr err = vec.begin(vecIter);
 	MojTestErrCheck(err);
 	for (; vecIter != vec.end(); ++vecIter) {
-		MojTestAssert(list1.size() == (gsize) (*vecIter)->m_val);
+		MojTestAssert(list1.size() == (MojSize) (*vecIter)->m_val);
 		list1.pushBack(vecIter->get());
 		MojTestAssert(!list1.empty());
 		MojTestAssert(list1.contains(vecIter->get()));

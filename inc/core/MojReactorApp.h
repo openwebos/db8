@@ -34,7 +34,7 @@ public:
 protected:
 	typedef REACTOR Reactor;
 
-	MojReactorApp(guint32 majorVersion = MajorVersion, guint32 minorVersion = MinorVersion, const MojChar* versionString = NULL)
+	MojReactorApp(MojUInt32 majorVersion = MajorVersion, MojUInt32 minorVersion = MinorVersion, const MojChar* versionString = NULL)
 	: MojServiceApp(majorVersion, minorVersion, versionString) {}
 
 	Reactor m_reactor;

@@ -45,7 +45,7 @@ public:
     virtual MojErr kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine) = 0;
     virtual MojErr visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected = true) const = 0;
     virtual const MojObject& id() const = 0;
-    virtual gsize size() const = 0;
+    virtual MojSize size() const = 0;
 
     MojErr toObject(MojObject& objOut, MojDbKindEngine& kindEngine, bool headerExpected = true) const;
     MojErr toJson(MojString& strOut, MojDbKindEngine& kindEngine) const;
@@ -57,19 +57,19 @@ protected:
 class MojDbStorageQuery : public MojRefCounted
 {
 public:
-    typedef MojVector<guint8> ByteVec;
+    typedef MojVector<MojByte> ByteVec;
     typedef MojSet<MojString> StringSet;
 
     MojDbStorageQuery() {}
     virtual ~MojDbStorageQuery() {}
     virtual MojErr close() = 0;
     virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut) = 0;
-    virtual MojErr getId(MojObject& idOut, guint32& groupOut, bool& foundOut) = 0;
+    virtual MojErr getId(MojObject& idOut, MojUInt32& groupOut, bool& foundOut) = 0;
     virtual MojErr getById(const MojObject& id, MojDbStorageItem*& itemOut, bool& foundOut) = 0;
-    virtual MojErr count(guint32& countOut) = 0;
+    virtual MojErr count(MojUInt32& countOut) = 0;
     virtual MojErr nextPage(MojDbQuery::Page& pageOut) = 0;
     virtual void excludeKinds(const StringSet& toExclude) { m_excludeKinds = toExclude; }
-    virtual guint32 groupCount() const = 0;
+    virtual MojUInt32 groupCount() const = 0;
     const MojDbKey& endKey() const { return m_endKey; }
     StringSet& excludeKinds() { return m_excludeKinds; }
     bool verify() { return m_verify; }
@@ -87,13 +87,13 @@ class MojDbStorageSeq : public MojRefCounted
 public:
     virtual ~MojDbStorageSeq() {}
     virtual MojErr close() = 0;
-    virtual MojErr get(gint64& valOut) = 0;
+    virtual MojErr get(MojInt64& valOut) = 0;
 };
 
 class MojDbStorageTxn : public MojSignalHandler
 {
 public:
-    typedef MojVector<guint8> ByteVec;
+    typedef MojVector<MojByte> ByteVec;
     typedef MojSignal<MojDbStorageTxn*> CommitSignal;
 
     virtual ~MojDbStorageTxn() {}
@@ -102,7 +102,7 @@ public:
     MojErr commit();
 
     MojErr addWatcher(MojDbWatcher* watcher, const MojDbKey& key);
-    MojErr offsetQuota(gint64 amount);
+    MojErr offsetQuota(MojInt64 amount);
     void quotaEnabled(bool val) { m_quotaEnabled = val; }
     void refreshQuotas() { m_refreshQuotas = true; }
 
@@ -142,7 +142,7 @@ public:
     virtual ~MojDbStorageCollection() {}
     virtual MojErr close() = 0;
     virtual MojErr drop(MojDbStorageTxn* txn) = 0;
-    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut) = 0;
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut) = 0;
     virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut) = 0;
     virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut) = 0;
 };
@@ -150,7 +150,7 @@ public:
 class MojDbStorageIndex : public MojDbStorageCollection
 {
 public:
-    typedef MojVector<guint8> ByteVec;
+    typedef MojVector<MojByte> ByteVec;
 
     virtual ~MojDbStorageIndex() {}
     virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn) = 0;

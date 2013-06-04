@@ -31,10 +31,10 @@ public:
 	virtual ~MojDbIsamQuery();
 	virtual MojErr close();
 	virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
-	virtual MojErr getId(MojObject& idOut, guint32& groupOut, bool& foundOut);
-	virtual MojErr count(guint32& countOut);
+	virtual MojErr getId(MojObject& idOut, MojUInt32& groupOut, bool& foundOut);
+	virtual MojErr count(MojUInt32& countOut);
 	virtual MojErr nextPage(MojDbQuery::Page& pageOut);
-	virtual guint32 groupCount() const;
+	virtual MojUInt32 groupCount() const;
 	
 
 protected:
@@ -46,7 +46,7 @@ protected:
 		StateNext
 	};
 
-	typedef MojVector<guint8> ByteVec;
+	typedef MojVector<MojByte> ByteVec;
 	typedef MojVector<MojDbKeyRange> RangeVec;
 
 	virtual MojErr seekImpl(const ByteVec& key, bool desc, bool& foundOut) = 0;
@@ -62,18 +62,18 @@ protected:
 	int compareKey(const ByteVec& key);
 	MojErr incrementCount();
 	MojErr seek(bool& foundOut);
-	MojErr getKey(guint32& groupOut, bool& foundOut);
+	MojErr getKey(MojUInt32& groupOut, bool& foundOut);
 	MojErr saveEndKey();
 	MojErr parseId(MojObject& idOut);
 	MojErr checkExclude(MojDbStorageItem* item, bool& excludeOut);
 
 	bool m_isOpen;
-	guint32 m_count;
+	MojUInt32 m_count;
 	State m_state;
 	RangeVec::ConstIterator m_iter;
 	MojDbStorageTxn* m_txn;
-	gsize m_keySize;
-	const guint8* m_keyData;
+	MojSize m_keySize;
+	const MojByte* m_keyData;
 	MojAutoPtr<MojDbQueryPlan> m_plan;
 };
 

@@ -34,7 +34,7 @@ MojErr MojDecimalTest::run()
 
 	MojTestAssert(d1.magnitude() == 0 && d1.fraction() == 0);
 	MojTestAssert(d2.magnitude() == 100 && d2.fraction() == 65432);
-	gdouble d = d2.floatValue();
+	MojDouble d = d2.floatValue();
 	MojTestAssert(d == 100.065432);
 	MojTestAssert(d3.magnitude() == 3 && d3.fraction() == 141500);
 	d = d3.floatValue();
@@ -59,8 +59,8 @@ MojErr MojDecimalTest::run()
 	d1.assign(-5.28);
 	d = d1.floatValue();
 	MojTestAssert(d == -5.28);
-	gint64 m = d1.magnitude();
-	gint64 f = d1.fraction();
+	MojInt64 m = d1.magnitude();
+	MojInt64 f = d1.fraction();
 	MojTestAssert(m == -5 && f == 280000);
 	d1.assign(-987, 654);
 	MojTestAssert(d1.magnitude() == -987 && d1.fraction() == 654);

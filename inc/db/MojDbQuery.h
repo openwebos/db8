@@ -31,7 +31,7 @@
 class MojDbQuery
 {
 public:
-	static const guint32 LimitDefault = G_MAXUINT32;
+	static const MojUInt32 LimitDefault = MojUInt32Max;
 
 	typedef enum {
 		OpNone,
@@ -104,7 +104,7 @@ public:
 	static const MojChar* const ValKey;
 	static const MojChar* const CollateKey;
 	static const MojChar* const DelKey;
-	static const guint32 MaxQueryLimit = 500;
+	static const MojUInt32 MaxQueryLimit = 500;
 
 	MojDbQuery();
 	~MojDbQuery();
@@ -122,7 +122,7 @@ public:
 	MojErr distinct(const MojChar* distinct);
 	MojErr includeDeleted(bool val = true);
 	void desc(bool val) { m_desc = val; }
-	void limit(guint32 numResults) { m_limit = numResults; }
+	void limit(MojUInt32 numResults) { m_limit = numResults; }
 	void page(const Page& page) { m_page = page; }
 
 	MojErr validate() const;
@@ -135,7 +135,7 @@ public:
 	const MojString& distinct() const { return m_distinct; }
 	const Page& page() const { return m_page; }
 	bool desc() const { return m_desc; }
-	guint32 limit() const { return m_limit; }
+	MojUInt32 limit() const { return m_limit; }
 	bool operator==(const MojDbQuery& rhs) const;
 
 	static MojErr stringToOp(const MojChar* str, CompOp& opOut);
@@ -169,7 +169,7 @@ private:
 	Page m_page;
 	MojString m_orderProp;
 	MojString m_distinct;
-	guint32 m_limit;
+	MojUInt32 m_limit;
 	bool m_desc;
 
 	static MojLogger s_log;

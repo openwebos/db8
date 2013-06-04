@@ -61,7 +61,7 @@ protected:
 	virtual ~MojRbTreeBase() {}
 	void release();
 
-	gsize size() const { return m_impl ? m_impl->m_size : 0; }
+	MojSize size() const { return m_impl ? m_impl->m_size : 0; }
 	bool empty() const { return size() == 0; }
 	Node* begin() const;
 	MojErr begin(Node*& node);
@@ -92,7 +92,7 @@ private:
 		Impl(Node* root) : m_root(root), m_size(1), m_refcount(1) {}
 
 		Node* m_root;
-		gsize m_size;
+		MojSize m_size;
 		MojAtomicInt m_refcount;
 	};
 
@@ -111,7 +111,7 @@ private:
 	void init(Impl* impl);
 	void release(Node* node);
 	void validate() const;
-	void validate(Node* n, gsize& blackHeight, gsize& size) const;
+	void validate(Node* n, MojSize& blackHeight, MojSize& size) const;
 
 	Impl* m_impl;
 };

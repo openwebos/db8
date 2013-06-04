@@ -103,7 +103,7 @@ MojErr MojHashMapTest::run()
 		MojTestAssert(!map1.contains(i));
 		err = map1.put(i, i);
 		MojTestErrCheck(err);
-		MojTestAssert(map1.size() == (gsize) i + 1);
+		MojTestAssert(map1.size() == (MojSize) i + 1);
 		err = check(map1, i + 1, count);
 		MojTestErrCheck(err);
 		MojTestAssert(count == i + 1);

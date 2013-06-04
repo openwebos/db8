@@ -23,9 +23,9 @@
 #include "core/MojCoreDefs.h"
 
 template<class T>
-void MojConstruct(T* p, gsize numElems);
+void MojConstruct(T* p, MojSize numElems);
 template<class T>
-void MojDestroy(T* p, gsize numElems);
+void MojDestroy(T* p, MojSize numElems);
 template<class T>
 void MojDeleteRange(T iter, T iterEnd);
 
@@ -51,38 +51,38 @@ template<class T>
 void MojSwap(T& t1, T& t2);
 
 template<class T, class COMP>
-gsize MojBinarySearch(T key, const T* array, gsize numElems);
+MojSize MojBinarySearch(T key, const T* array, MojSize numElems);
 template<class T>
-gsize MojBinarySearch(T key, const T* array, gsize numElems);
+MojSize MojBinarySearch(T key, const T* array, MojSize numElems);
 
 template<class T, class COMP>
-void MojQuickSort(T* array, gsize numElems, const COMP& comp = COMP());
+void MojQuickSort(T* array, MojSize numElems, const COMP& comp = COMP());
 template<class T>
-void MojQuickSort(T* array, gsize numElems);
+void MojQuickSort(T* array, MojSize numElems);
 
-bool MojFlagGet(guint32 flags, guint32 mask);
-void MojFlagSet(guint32& flags, guint32 mask, bool val);
+bool MojFlagGet(MojUInt32 flags, MojUInt32 mask);
+void MojFlagSet(MojUInt32& flags, MojUInt32 mask, bool val);
 
-gsize MojHash(const void* p, gsize size);
-gsize MojHash(const MojChar* str);
+MojSize MojHash(const void* p, MojSize size);
+MojSize MojHash(const MojChar* str);
 
-inline gsize MojBase64EncodedLenMax(gsize srcSize) { return ((srcSize + 2) / 3) * 4; }
-inline gsize MojBase64DecodedSizeMax(gsize encodedLen) { return ((encodedLen + 3) / 4) * 3; }
-MojErr MojBase64Encode(const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad = true);
-MojErr MojBase64EncodeMIME(const guint8* src, gsize srcSize, MojChar* bufOut, gsize bufLen, gsize& lenOut, bool pad = true);
-MojErr MojBase64Decode(const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut);
-MojErr MojBase64DecodeMIME(const MojChar* src, gsize srcLen, guint8* bufOut, gsize bufSize, gsize& sizeOut);
+inline MojSize MojBase64EncodedLenMax(MojSize srcSize) { return ((srcSize + 2) / 3) * 4; }
+inline MojSize MojBase64DecodedSizeMax(MojSize encodedLen) { return ((encodedLen + 3) / 4) * 3; }
+MojErr MojBase64Encode(const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad = true);
+MojErr MojBase64EncodeMIME(const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad = true);
+MojErr MojBase64Decode(const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut);
+MojErr MojBase64DecodeMIME(const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut);
 
 
-int MojLexicalCompare(const guint8* data1, gsize size1, const guint8* data2, gsize size2);
-gsize MojPrefixSize(const guint8* data1, gsize size1, const guint8* data2, gsize size2);
+int MojLexicalCompare(const MojByte* data1, MojSize size1, const MojByte* data2, MojSize size2);
+MojSize MojPrefixSize(const MojByte* data1, MojSize size1, const MojByte* data2, MojSize size2);
 
 MojErr MojCreateDirIfNotPresent(const MojChar* path);
 MojErr MojRmDirRecursive(const MojChar* path);
 MojErr MojFileToString(const MojChar* path, MojString& strOut);
 MojErr MojFileFromString(const MojChar* path, const MojChar* data);
 const MojChar* MojFileNameFromPath(const MojChar* path);
-MojErr MojUInt8ArrayToHex(const guint8 *bytes, gsize len, MojChar *s);
+MojErr MojByteArrayToHex(const MojByte *bytes, MojSize len, MojChar *s);
 
 #include "core/internal/MojUtilInternal.h"
 

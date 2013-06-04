@@ -21,8 +21,6 @@
 #ifndef MOJDEFS_H_
 #define MOJDEFS_H_
 
-#include <glib.h>
-
 #include "core/internal/MojConfig.h"
 #include "core/internal/MojNew.h"
 
@@ -51,11 +49,57 @@
 	typedef char MojChar;
 #endif
 
+#ifdef MOJ_USE_LONG_LONG
+	typedef long long MojInt64;
+	typedef unsigned long long MojUInt64;
+#endif
+
+#ifdef MOJ_USE_SIZE_T
+	typedef size_t MojSize;
+#endif
+
+#ifdef MOJ_USE_INTPTR_T
+	typedef intptr_t MojIntPtr;
+#endif
+
 // MACROS
 #define MojUnused(VAR) ((void) (VAR))
 
-const gsize MojInvalidSize = G_MAXSIZE;
-const gsize MojInvalidIndex = G_MAXSIZE;
+// STANDARD TYPE DECLARATIONS
+typedef unsigned char MojByte;
+typedef signed char MojInt8;
+typedef unsigned char MojUInt8;
+typedef short MojInt16;
+typedef unsigned short MojUInt16;
+typedef int MojInt32;
+typedef unsigned int MojUInt32;
+typedef double MojDouble;
+
+// LIMITS
+const MojByte MojByteMax = 0xFF;
+const MojInt8 MojInt8Max = 0x7F;
+const MojInt8 MojInt8Min = (MojInt8) 0x80;
+const MojUInt8 MojUInt8Max = 0xFF;
+const MojInt16 MojInt16Max = 0x7FFF;
+const MojInt16 MojInt16Min = (MojInt16) 0x8000;
+const MojUInt16 MojUInt16Max = 0xFFFF;
+const MojInt32 MojInt32Max = 0x7FFFFFFF;
+const MojInt32 MojInt32Min = 0x80000000;
+const MojUInt32 MojUInt32Max = 0xFFFFFFFF;
+const MojInt64 MojInt64Max = 0x7FFFFFFFFFFFFFFFLL;
+const MojInt64 MojInt64Min = 0x8000000000000000LL;
+const MojUInt64 MojUInt64Max = 0xFFFFFFFFFFFFFFFFULL;
+const MojSize MojSizeMax = (MojSize) MojUInt64Max;
+const MojSize MojInvalidSize = MojSizeMax;
+const MojSize MojInvalidIndex = MojSizeMax;
+
+#ifdef MOJ_USE_NAME_MAX
+	const MojSize MojNameMax = NAME_MAX;
+#endif
+
+#ifdef MOJ_USE_PATH_MAX
+	const MojSize MojPathMax = PATH_MAX;
+#endif
 
 // ATTRIBUTES
 #ifdef MOJ_USE_FORMAT_ATTR

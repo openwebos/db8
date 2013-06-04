@@ -123,7 +123,7 @@ MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 	return MojErrNone;
 }
 
-MojErr MojDbCursor::count(guint32& countOut)
+MojErr MojDbCursor::count(MojUInt32& countOut)
 {
 	countOut = 0;
 	if (!m_storageQuery.get())

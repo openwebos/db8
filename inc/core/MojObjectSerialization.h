@@ -52,8 +52,8 @@ public:
 		MarkerHeaderEnd = 16
 	};
 
-	static const guint8 Version = 1;
-	static const guint8 TokenStartMarker = 32;
+	static const MojUInt8 Version = 1;
+	static const MojUInt8 TokenStartMarker = 32;
 
 	MojObjectWriter() : m_writer(m_buf), m_tokenSet(NULL) {}
 	MojObjectWriter(MojBuffer& buf, MojTokenSet* tokenSet) : m_writer(buf), m_tokenSet(tokenSet) {}
@@ -64,23 +64,23 @@ public:
 	virtual MojErr endObject();
 	virtual MojErr beginArray();
 	virtual MojErr endArray();
-	virtual MojErr propName(const MojChar* name, gsize len);
+	virtual MojErr propName(const MojChar* name, MojSize len);
 	virtual MojErr nullValue();
 	virtual MojErr boolValue(bool val);
-	virtual MojErr intValue(gint64 val);
+	virtual MojErr intValue(MojInt64 val);
 	virtual MojErr decimalValue(const MojDecimal& val);
-	virtual MojErr stringValue(const MojChar* val, gsize len);
+	virtual MojErr stringValue(const MojChar* val, MojSize len);
 
-	static gsize nullSize();
-	static gsize boolSize();
-	static gsize intSize(gint64 val);
-	static gsize decimalSize(const MojDecimal& val);
-	static gsize stringSize(const MojChar* val, gsize len);
+	static MojSize nullSize();
+	static MojSize boolSize();
+	static MojSize intSize(MojInt64 val);
+	static MojSize decimalSize(const MojDecimal& val);
+	static MojSize stringSize(const MojChar* val, MojSize len);
 
 	MojBuffer& buf() { return m_writer.buf(); }
 
 private:
-	MojErr writeString(const MojChar* name, gsize len, bool addToken);
+	MojErr writeString(const MojChar* name, MojSize len, bool addToken);
 
 	MojBuffer m_buf;
 	MojDataWriter m_writer;
@@ -91,11 +91,11 @@ class MojObjectReader : private MojNoCopy
 {
 public:
 	MojObjectReader();
-	MojObjectReader(const guint8* data, gsize size);
+	MojObjectReader(const MojByte* data, MojSize size);
 
-	const guint8* begin() const { return m_reader.begin(); }
-	const guint8* end() const { return m_reader.end(); }
-	const guint8* pos() const { return m_reader.pos(); }
+	const MojByte* begin() const { return m_reader.begin(); }
+	const MojByte* end() const { return m_reader.end(); }
+	const MojByte* pos() const { return m_reader.pos(); }
 
 	MojDataReader& dataReader() { return m_reader; }
 	bool hasNext() const { return m_reader.pos() < m_reader.end(); }
@@ -103,13 +103,13 @@ public:
 	MojErr next(MojObjectVisitor& visitor);
 	MojErr nextObject(MojObjectVisitor& visitor);
 
-	void data(const guint8* data, gsize size);
+	void data(const MojByte* data, MojSize size);
 	void skipBeginObj() { m_skipBeginObj = true; }
 	void tokenSet(MojTokenSet* tokenSet) { m_tokenSet = tokenSet; }
 
-	static MojErr read(MojObjectVisitor& visitor, const guint8* data, gsize size);
-	static MojErr readInt(MojDataReader& dataReader, guint8 marker, gint64& valOut);
-	static MojErr readString(MojDataReader& reader, MojChar const*& str, gsize& strLen);
+	static MojErr read(MojObjectVisitor& visitor, const MojByte* data, MojSize size);
+	static MojErr readInt(MojDataReader& dataReader, MojByte marker, MojInt64& valOut);
+	static MojErr readString(MojDataReader& reader, MojChar const*& str, MojSize& strLen);
 
 	MojErr read(MojObjectVisitor& visitor);
 
@@ -122,7 +122,7 @@ private:
 	} State;
 
 	MojDataReader m_reader;
-	MojVector<guint8> m_stack;
+	MojVector<MojByte> m_stack;
 	bool m_skipBeginObj;
 	MojTokenSet* m_tokenSet;
 };

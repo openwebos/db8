@@ -32,7 +32,7 @@ public:
 	~MojMessageDispatcher();
 
 	MojErr schedule(MojMessage* msg);
-	MojErr start(gint32 numThreads);
+	MojErr start(MojInt32 numThreads);
 	MojErr stop();
 	MojErr wait();
 

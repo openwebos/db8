@@ -64,7 +64,7 @@ MojErr MojDbBulkTest::run()
 	MojObject update;
 	err = update.put(_T("foo"), -1);
 	MojTestErrCheck(err);
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	err = db.merge(query, update, count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 50);
@@ -83,10 +83,10 @@ MojErr MojDbBulkTest::run()
 		MojTestErrCheck(err);
 		if (!found)
 			break;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		if (bar < 50) {
@@ -119,10 +119,10 @@ MojErr MojDbBulkTest::run()
 		MojTestErrCheck(err);
 		if (!found)
 			break;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		MojTestAssert(foo == bar);

@@ -45,7 +45,7 @@ private:
 		FlagReadable = 1,
 		FlagWriteable = 1 << 1
 	};
-	typedef gint32 Flags;
+	typedef MojInt32 Flags;
 
 	class SockInfo : public MojSignalHandler
 	{

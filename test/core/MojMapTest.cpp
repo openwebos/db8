@@ -121,7 +121,7 @@ MojErr MojMapTest::run()
 		err = intMap1.put(i, str);
 		MojTestErrCheck(err);
 		MojTestAssert(intMap1.contains(i));
-		MojTestAssert(intMap1.size() == (gsize) i + 1);
+		MojTestAssert(intMap1.size() == (MojSize) i + 1);
 		MojTestAssert(intMap1 != intMap2);
 		err = intMap1.del(i, found);
 		MojTestErrCheck(err);
@@ -138,7 +138,7 @@ MojErr MojMapTest::run()
 
 		err = strMap1.put(str, i);
 		MojTestErrCheck(err);
-		MojTestAssert(strMap1.size() == (gsize) i + 1);
+		MojTestAssert(strMap1.size() == (MojSize) i + 1);
 		MojTestAssert(strMap1.contains(str));
 		err = strMap1.del(str, found);
 		MojTestErrCheck(err);
@@ -284,9 +284,9 @@ MojErr MojMapTest::run()
 	return MojErrNone;
 }
 
-gsize MojMapTest::count(MojMap<int, MojString>& map)
+MojSize MojMapTest::count(MojMap<int, MojString>& map)
 {
-	gsize size = 0;
+	MojSize size = 0;
 	for (MojMap<int, MojString>::ConstIterator i = map.begin(); i != map.end(); ++i) {
 		++size;
 	}

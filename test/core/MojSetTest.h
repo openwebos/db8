@@ -31,7 +31,7 @@ public:
 	virtual MojErr run();
 
 private:
-	gsize count(MojSet<int>& set);
+	MojSize count(MojSet<int>& set);
 };
 
 #endif /* MOJSETTEST_H_ */

@@ -100,7 +100,7 @@ MojErr MojObjectFilter::endArray()
 	return end(&MojObjectVisitor::endArray);
 }
 
-MojErr MojObjectFilter::propName(const MojChar* name, gsize len)
+MojErr MojObjectFilter::propName(const MojChar* name, MojSize len)
 {
 	MojAssert(m_visitor);
 	MojAssert(name);
@@ -173,7 +173,7 @@ MojErr MojObjectFilter::boolValue(bool val)
 	return MojErrNone;
 }
 
-MojErr MojObjectFilter::intValue(gint64 val)
+MojErr MojObjectFilter::intValue(MojInt64 val)
 {
 	MojAssert(m_visitor);
 
@@ -197,7 +197,7 @@ MojErr MojObjectFilter::decimalValue(const MojDecimal& val)
 	return MojErrNone;
 }
 
-MojErr MojObjectFilter::stringValue(const MojChar* val, gsize len)
+MojErr MojObjectFilter::stringValue(const MojChar* val, MojSize len)
 {
 	MojAssert(m_visitor);
 
@@ -230,7 +230,7 @@ MojErr MojObjectFilter::begin(bool array, VisitorMethod method)
 	}
 	// bump include count if we are including entire subtree
 	if (m_state.m_includeCount >= 1) {
-		m_state.m_includeCount = G_MAXSIZE;
+		m_state.m_includeCount = MojSizeMax;
 	}
 	// visit
 	if (m_state.m_included) {

@@ -39,7 +39,7 @@ const MojChar* ServiceName = _T("/tmp/mojsock");
 const MojChar* ServiceName = _T("com.palm.mojlstest");
 #endif // USE_SOCKET_SERVICE
 
-static const guint32 multiResponseCount = 10;
+static const MojUInt32 multiResponseCount = 10;
 
 class MojLunaTestService : public MojService::CategoryHandler
 {
@@ -80,7 +80,7 @@ public:
 
 	MojErr multiEcho(MojServiceMessage* msg, const MojObject& payload)
 	{
-		for (guint32 i = 0; i < multiResponseCount; i++) {
+		for (MojUInt32 i = 0; i < multiResponseCount; i++) {
 			MojErr err = echo(msg, payload);
 			MojTestErrCheck(err);
 		}
@@ -91,7 +91,7 @@ public:
 	class EchoCancelHdlr : public MojSignalHandler
 	{
 	public:
-		EchoCancelHdlr(guint32& cCancellableEchos)
+		EchoCancelHdlr(MojUInt32& cCancellableEchos)
 		: m_cCancellableEchos(cCancellableEchos), m_slot(this, &EchoCancelHdlr::handleCancel) {}
 
 		MojErr handleCancel(MojServiceMessage* msg)
@@ -102,7 +102,7 @@ public:
 			return MojErrNone;
 		}
 
-		guint32& m_cCancellableEchos;
+		MojUInt32& m_cCancellableEchos;
 		MojServiceMessage::CancelSignal::Slot<EchoCancelHdlr> m_slot;
 	};
 
@@ -155,7 +155,7 @@ public:
 	}
 
 	bool& m_stop;
-	guint32 m_cCancellableEchos;
+	MojUInt32 m_cCancellableEchos;
 	MojService& m_service;
 };
 
@@ -332,7 +332,7 @@ private:
 	class EchoResponseHdlr : public MojSignalHandler
 	{
 	public:
-		EchoResponseHdlr(const MojObject& expected, guint32& pendingCount)
+		EchoResponseHdlr(const MojObject& expected, MojUInt32& pendingCount)
 		: m_expected(expected),
 		  m_pendingCount(pendingCount),
 		  m_slot(this, &EchoResponseHdlr::handleResponse)
@@ -348,14 +348,14 @@ private:
 		}
 
 		MojObject m_expected;
-		guint32& m_pendingCount;
+		MojUInt32& m_pendingCount;
 		MojServiceRequest::ReplySignal::Slot<EchoResponseHdlr> m_slot;
 	};
 
 	class EchoMultiResponseHdlr : public MojSignalHandler
 	{
 	public:
-		EchoMultiResponseHdlr(const MojObject& expected, guint32& pendingCount, guint32 callbackCount)
+		EchoMultiResponseHdlr(const MojObject& expected, MojUInt32& pendingCount, MojUInt32 callbackCount)
 		: m_expected(expected),
 		  m_pendingCount(pendingCount),
 		  m_callbacksRemaining(callbackCount),
@@ -376,11 +376,11 @@ private:
 			return MojErrNone;
 		}
 
-		guint32 callbacksRemaining() const { return m_callbacksRemaining; }
+		MojUInt32 callbacksRemaining() const { return m_callbacksRemaining; }
 
 		MojObject m_expected;
-		guint32& m_pendingCount;
-		guint32 m_callbacksRemaining;
+		MojUInt32& m_pendingCount;
+		MojUInt32 m_callbacksRemaining;
 		MojServiceRequest::ReplySignal::Slot<EchoMultiResponseHdlr> m_slot;
 	};
 
@@ -411,7 +411,7 @@ private:
 		// format expected error return
 		err = objOut.putBool(MojServiceMessage::ReturnValueKey, false);
 		MojErrCheck(err);
-		err = objOut.putInt(MojServiceMessage::ErrorCodeKey, (gint64)errExpected);
+		err = objOut.putInt(MojServiceMessage::ErrorCodeKey, (MojInt64)errExpected);
 		MojErrCheck(err);
 		err = objOut.putString(MojServiceMessage::ErrorTextKey, errTxt);
 		MojErrCheck(err);
@@ -429,7 +429,7 @@ private:
 	}
 
 	MojService& m_service;
-	guint32 m_pendingResponseCount;
+	MojUInt32 m_pendingResponseCount;
 };
 
 MojErr serviceThread(void*)

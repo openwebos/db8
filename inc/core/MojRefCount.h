@@ -25,15 +25,15 @@
 #include "core/MojAutoPtr.h"
 
 // allocation utils
-void* MojRefCountAlloc(gsize numBytes);
+void* MojRefCountAlloc(MojSize numBytes);
 template<class T>
-T* MojRefCountNew(gsize numElems);
-void* MojRefCountRealloc(void* p, gsize n);
-gint32 MojRefCountGet(void* p);
+T* MojRefCountNew(MojSize numElems);
+void* MojRefCountRealloc(void* p, MojSize n);
+MojInt32 MojRefCountGet(void* p);
 void MojRefCountRetain(void* p);
 void MojRefCountRelease(void* p);
 template<class T>
-void MojRefCountRelease(T* p, gsize numElems);
+void MojRefCountRelease(T* p, MojSize numElems);
 
 // ref-counted object
 class MojRefCounted : private MojNoCopy
@@ -41,7 +41,7 @@ class MojRefCounted : private MojNoCopy
 public:
 	void retain() { ++m_refCount; }
 	void release() { if (--m_refCount == 0) delete this; }
-	gint32 refCount() const { return m_refCount.value(); }
+	MojInt32 refCount() const { return m_refCount.value(); }
 
 protected:
 	virtual ~MojRefCounted() {}

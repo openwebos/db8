@@ -254,8 +254,8 @@ MojErr MojDbLevelEngine::removeDatabase(MojDbLevelDatabase* db)
     MojLogTrace(MojDbLevelEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
-    gsize idx;
-    gsize size = m_dbs.size();
+    MojSize idx;
+    MojSize size = m_dbs.size();
     for (idx = 0; idx < size; ++idx) {
         if (m_dbs.at(idx).get() == db) {
             MojErr err = m_dbs.erase(idx);
@@ -281,8 +281,8 @@ MojErr MojDbLevelEngine::removeSeq(MojDbLevelSeq* seq)
     MojLogTrace(MojDbLevelEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
-    gsize idx;
-    gsize size = m_seqs.size();
+    MojSize idx;
+    MojSize size = m_seqs.size();
     for (idx = 0; idx < size; ++idx) {
         if (m_seqs.at(idx).get() == seq) {
             MojErr err = m_seqs.erase(idx);

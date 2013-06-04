@@ -25,15 +25,15 @@ MojErr MojDbTextUtils::strToUnicode(const MojString& src, UnicodeVec& destOut)
 {
 	MojErr err = destOut.resize(src.length() * 2);
 	MojErrCheck(err);
-	gint32 destCapacity = 0;
-	gint32 destLength = 0;
+	MojInt32 destCapacity = 0;
+	MojInt32 destLength = 0;
 	do {
 		UChar* dest = NULL;
 		err = destOut.begin(dest);
 		MojErrCheck(err);
-		destCapacity = (gint32) destOut.size();
+		destCapacity = (MojInt32) destOut.size();
 		UErrorCode status = U_ZERO_ERROR;
-		u_strFromUTF8(dest, destCapacity, &destLength, src.data(), (gint32) src.length(), &status);
+		u_strFromUTF8(dest, destCapacity, &destLength, src.data(), (MojInt32) src.length(), &status);
 		if (status != U_BUFFER_OVERFLOW_ERROR)
 			MojUnicodeErrCheck(status);
 		err = destOut.resize(destLength);
@@ -43,21 +43,21 @@ MojErr MojDbTextUtils::strToUnicode(const MojString& src, UnicodeVec& destOut)
 	return MojErrNone;
 }
 
-MojErr MojDbTextUtils::unicodeToStr(const UChar* src, gsize len, MojString& destOut)
+MojErr MojDbTextUtils::unicodeToStr(const UChar* src, MojSize len, MojString& destOut)
 {
 	MojAssert(src || len == 0);
 
 	MojErr err = destOut.resize(len * 2);
 	MojErrCheck(err);
-	gint32 destCapacity = 0;
-	gint32 destLength = 0;
+	MojInt32 destCapacity = 0;
+	MojInt32 destLength = 0;
 	do {
 		MojChar* dest = NULL;
 		err = destOut.begin(dest);
 		MojErrCheck(err);
-		destCapacity = (gint32) destOut.length();
+		destCapacity = (MojInt32) destOut.length();
 		UErrorCode status = U_ZERO_ERROR;
-		u_strToUTF8(dest, destCapacity, &destLength, src, (gint32) len, &status);
+		u_strToUTF8(dest, destCapacity, &destLength, src, (MojInt32) len, &status);
 		if (status != U_BUFFER_OVERFLOW_ERROR)
 			MojUnicodeErrCheck(status);
 		err = destOut.resize(destLength);

@@ -34,13 +34,13 @@ public:
 	MojErr timePutKind(MojDb& db, MojTime& putKindTime, MojObject kind);
 	MojErr delKinds(MojDb& db);
 
-	MojErr createSmallObj(MojObject& obj, guint64 i);
-	MojErr createMedObj(MojObject& obj, guint64 i);
-	MojErr createLargeObj(MojObject& obj, guint64 i);
-	MojErr createMedNestedObj(MojObject& obj, guint64 i);
-	MojErr createLargeNestedObj(MojObject& obj, guint64 i);
-	MojErr createMedArrayObj(MojObject& obj, guint64 i);
-	MojErr createLargeArrayObj(MojObject& obj, guint64 i);
+	MojErr createSmallObj(MojObject& obj, MojUInt64 i);
+	MojErr createMedObj(MojObject& obj, MojUInt64 i);
+	MojErr createLargeObj(MojObject& obj, MojUInt64 i);
+	MojErr createMedNestedObj(MojObject& obj, MojUInt64 i);
+	MojErr createLargeNestedObj(MojObject& obj, MojUInt64 i);
+	MojErr createMedArrayObj(MojObject& obj, MojUInt64 i);
+	MojErr createLargeArrayObj(MojObject& obj, MojUInt64 i);
 
 	MojErr fileWrite(MojFile& file, MojString buf);
 
@@ -82,7 +82,7 @@ public:
 	static const MojChar* const MojPerfMedArrayKindExtraIndex;
 	static const MojChar* const MojPerfLgArrayKindExtraIndex;
 
-	static const guint64 numKinds = 14;
+	static const MojUInt64 numKinds = 14;
 };
 
 

@@ -25,7 +25,7 @@ struct MojThreadTestArgs
 {
 	MojThreadTestArgs() : m_counter(0), m_wait(true) {}
 
-	gint32 m_counter;
+	MojInt32 m_counter;
 	bool m_wait;
 	MojAtomicInt m_atomicCounter;
 	MojThreadMutex m_mutex;

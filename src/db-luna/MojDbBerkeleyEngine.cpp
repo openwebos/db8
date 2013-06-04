@@ -34,34 +34,34 @@
 // GENERAL
 static const int MojDbFileMode = MOJ_S_IRUSR | MOJ_S_IWUSR;
 // DB
-static const guint32 MojDbOpenFlags = DB_THREAD /*| DB_MULTIVERSION*/; // NOTE: MULTIVERSION disabled due to leaked transactions
-static const guint32 MojDbGetFlags = DB_READ_COMMITTED;
+static const MojUInt32 MojDbOpenFlags = DB_THREAD /*| DB_MULTIVERSION*/; // NOTE: MULTIVERSION disabled due to leaked transactions
+static const MojUInt32 MojDbGetFlags = DB_READ_COMMITTED;
 // LOG
-static const guint32 MojLogFlags = 0;
-static const guint32 MojLogArchiveFlags = DB_ARCH_ABS;
+static const MojUInt32 MojLogFlags = 0;
+static const MojUInt32 MojLogArchiveFlags = DB_ARCH_ABS;
 // ENV
-static const guint32 MojEnvFlags = DB_AUTO_COMMIT | DB_NOMMAP;
-static const guint32 MojEnvOpenFlags = DB_CREATE | DB_INIT_LOCK | DB_INIT_LOG | DB_INIT_MPOOL |
+static const MojUInt32 MojEnvFlags = DB_AUTO_COMMIT | DB_NOMMAP;
+static const MojUInt32 MojEnvOpenFlags = DB_CREATE | DB_INIT_LOCK | DB_INIT_LOG | DB_INIT_MPOOL |
         DB_INIT_TXN | DB_RECOVER | DB_THREAD | DB_PRIVATE | DB_DIRECT_DB;
 static const bool MojEnvDefaultPrivate = true;
 static const bool MojEnvDefaultLogAutoRemove = true;
-static const guint32 MojEnvDefaultLogFileSize = 1024 * 1024 * 2; // 2MB
-static const guint32 MojEnvDefaultLogRegionSize = 1024 * 512; // 512 KB
-static const guint32 MojEnvDefaultCacheSize = 1024 * 1024 * 2; // 2MB
-static const guint32 MojEnvDefaultMaxLocks = 8000; // max db size / page size
-static const guint32 MojEnvDefaultMaxLockers = 1000 * 2; // twice the default
-static const guint32 MojEnvDefaultCheckpointMinKb = 512; // 1MB
-static const guint32 MojEnvDefaultCheckpointMinMinutes = 0;
-static const guint32 MojEnvDefaultCompactStepSize = 25000;
+static const MojUInt32 MojEnvDefaultLogFileSize = 1024 * 1024 * 2; // 2MB
+static const MojUInt32 MojEnvDefaultLogRegionSize = 1024 * 512; // 512 KB
+static const MojUInt32 MojEnvDefaultCacheSize = 1024 * 1024 * 2; // 2MB
+static const MojUInt32 MojEnvDefaultMaxLocks = 8000; // max db size / page size
+static const MojUInt32 MojEnvDefaultMaxLockers = 1000 * 2; // twice the default
+static const MojUInt32 MojEnvDefaultCheckpointMinKb = 512; // 1MB
+static const MojUInt32 MojEnvDefaultCheckpointMinMinutes = 0;
+static const MojUInt32 MojEnvDefaultCompactStepSize = 25000;
 static const MojChar* const MojEnvSeqDbName = _T("sequences.db");
 static const MojChar* const MojEnvIndexDbName = _T("indexes.db");
 // SEQ
-static const guint32 MojSeqOpenFlags = DB_CREATE | DB_THREAD;
-static const guint32 MojSeqGetFlags = DB_TXN_NOSYNC;
-static const guint32 MojSeqCacheSize = 25;
+static const MojUInt32 MojSeqOpenFlags = DB_CREATE | DB_THREAD;
+static const MojUInt32 MojSeqGetFlags = DB_TXN_NOSYNC;
+static const MojUInt32 MojSeqCacheSize = 25;
 // TXN
-static const guint32 MojTxnBeginFlags = DB_READ_COMMITTED;
-static const guint32 MojTxnMax = 100; // need up to one per cache page for mvcc
+static const MojUInt32 MojTxnBeginFlags = DB_READ_COMMITTED;
+static const MojUInt32 MojTxnMax = 100; // need up to one per cache page for mvcc
 
 const MojChar* const MojDbBerkeleyEnv::LockFileName = _T("_lock");
 MojLogger MojDbBerkeleyEngine::s_log(_T("db.bdb"));
@@ -82,7 +82,7 @@ MojDbBerkeleyCursor::~MojDbBerkeleyCursor()
     MojErrCatchAll(err);
 }
 
-MojErr MojDbBerkeleyCursor::open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn, guint32 flags)
+MojErr MojDbBerkeleyCursor::open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
     MojAssert(db && txn);
     MojAssert(!m_dbc);
@@ -122,7 +122,7 @@ MojErr MojDbBerkeleyCursor::del()
 
     int dbErr = m_dbc->del(m_dbc, 0);
     MojBdbErrCheck(dbErr, _T("dbc->del"));
-    MojErr err = m_txn->offsetQuota(-(gint64) m_recSize);
+    MojErr err = m_txn->offsetQuota(-(MojInt64) m_recSize);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -147,7 +147,7 @@ MojErr MojDbBerkeleyCursor::delPrefix(const MojDbKey& prefix)
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyCursor::get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, bool& foundOut, guint32 flags)
+MojErr MojDbBerkeleyCursor::get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, bool& foundOut, MojUInt32 flags)
 {
     MojAssert(m_dbc);
     MojLogTrace(MojDbBerkeleyEngine::s_log);
@@ -162,7 +162,7 @@ MojErr MojDbBerkeleyCursor::get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, 
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyCursor::stats(gsize& countOut, gsize& sizeOut)
+MojErr MojDbBerkeleyCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
@@ -172,7 +172,7 @@ MojErr MojDbBerkeleyCursor::stats(gsize& countOut, gsize& sizeOut)
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyCursor::statsPrefix(const MojDbKey& prefix, gsize& countOut, gsize& sizeOut)
+MojErr MojDbBerkeleyCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
 {
     countOut = 0;
     sizeOut = 0;
@@ -182,8 +182,8 @@ MojErr MojDbBerkeleyCursor::statsPrefix(const MojDbKey& prefix, gsize& countOut,
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
 
-    gsize count = 0;
-    gsize size = 0;
+    MojSize count = 0;
+    MojSize size = 0;
     bool found = false;
     err = get(key, val, found, DB_SET_RANGE);
     MojErrCheck(err);
@@ -241,7 +241,7 @@ MojErr MojDbBerkeleyDatabase::open(const MojChar* dbName, MojDbBerkeleyEngine* e
     m_db = db;
 
     DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
-    guint32 flags = MojDbOpenFlags;
+    MojUInt32 flags = MojDbOpenFlags;
     if (!dbTxn)
         flags |= DB_AUTO_COMMIT;
     // try once without the DB_CREATE flag
@@ -288,7 +288,7 @@ MojErr MojDbBerkeleyDatabase::drop(MojDbStorageTxn* txn)
 
     DB_ENV* env = m_engine->env()->impl();
     DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
-    guint32 flags = dbTxn ? 0 : DB_AUTO_COMMIT;
+    MojUInt32 flags = dbTxn ? 0 : DB_AUTO_COMMIT;
     int dbErr = env->dbremove(env, dbTxn, m_file, NULL, flags);
     MojBdbErrCheck(dbErr, _T("env->dbremove"));
 
@@ -324,7 +324,7 @@ MojErr MojDbBerkeleyDatabase::mutexStats(int * total_mutexes, int * mutexes_free
 }
 
 
-MojErr MojDbBerkeleyDatabase::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
+MojErr MojDbBerkeleyDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
 {
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
@@ -353,7 +353,7 @@ MojErr MojDbBerkeleyDatabase::update(const MojObject& id, MojBuffer& val, MojDbS
 {
     MojAssert(oldVal && txn);
 
-    MojErr err = txn->offsetQuota(-(gint64) oldVal->size());
+    MojErr err = txn->offsetQuota(-(MojInt64) oldVal->size());
     MojErrCheck(err);
     err = put(id, val, txn, false);
     MojErrCheck(err);
@@ -429,7 +429,7 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
     MojAssert(m_db && txn);
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
-    gint64 quotaOffset = val.size();
+    MojInt64 quotaOffset = val.size();
     if (updateIdQuota)
         quotaOffset += key.size();
     MojErr err = txn->offsetQuota(quotaOffset);
@@ -440,7 +440,7 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
     char s[1024];
     size_t size1 = key.size();
     size_t size2 = val.size();
-    MojErr err2 = MojUInt8ArrayToHex(key.data(), size1, s);
+    MojErr err2 = MojByteArrayToHex(key.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(key.data()) + (size1 - 17), 16);
@@ -505,7 +505,7 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
     foundOut = false;
-    MojErr err = txn->offsetQuota(-(gint64) key.size());
+    MojErr err = txn->offsetQuota(-(MojInt64) key.size());
     MojErrCheck(err);
     DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
     int dbErr = m_db->del(m_db, dbTxn, key.impl(), 0);
@@ -513,7 +513,7 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
 #if defined(MOJ_DEBUG)
     char s[1024];   // big enough for any key
     size_t size = key.size();
-    MojErr err2 = MojUInt8ArrayToHex(key.data(), size, s);
+    MojErr err2 = MojByteArrayToHex(key.data(), size, s);
     MojErrCheck(err2);
     if (size > 16)  // if the object-id is in key
         strncat(s, (char *)(key.data()) + (size - 17), 16);
@@ -551,7 +551,7 @@ MojErr MojDbBerkeleyDatabase::closeImpl()
     return MojErrNone;
 }
 
-void MojDbBerkeleyDatabase::postUpdate(MojDbStorageTxn* txn, gsize size)
+void MojDbBerkeleyDatabase::postUpdate(MojDbStorageTxn* txn, MojSize size)
 {
     if (txn) {
         static_cast<MojDbBerkeleyTxn*>(txn)->didUpdate(size);
@@ -598,37 +598,37 @@ MojErr MojDbBerkeleyEnv::configure(const MojObject& conf)
     MojString logDir;
     MojErr err = conf.get(_T("logDir"), logDir, found);
     MojErrCheck(err);
-    guint32 logFileSize = 0;
+    MojUInt32 logFileSize = 0;
     err = conf.get(_T("logFileSize"), logFileSize, found);
     MojErrCheck(err);
     if (!found)
         logFileSize = MojEnvDefaultLogFileSize;
-    guint32 logRegionSize = 0;
+    MojUInt32 logRegionSize = 0;
     err = conf.get(_T("logRegionSize"), logRegionSize, found);
     MojErrCheck(err);
     if (!found)
         logRegionSize = MojEnvDefaultLogRegionSize;
-    guint32 cacheSize = 0;
+    MojUInt32 cacheSize = 0;
     err = conf.get(_T("cacheSize"), cacheSize, found);
     MojErrCheck(err);
     if (!found)
         cacheSize = MojEnvDefaultCacheSize;
-    guint32 maxLocks = 0;
+    MojUInt32 maxLocks = 0;
     err = conf.get(_T("maxLocks"), maxLocks, found);
     MojErrCheck(err);
     if (!found)
         maxLocks = MojEnvDefaultMaxLocks;
-    guint32 maxLockers = 0;
+    MojUInt32 maxLockers = 0;
     err = conf.get(_T("maxLockers"), maxLockers, found);
     MojErrCheck(err);
     if (!found)
         maxLockers = MojEnvDefaultMaxLockers;
-    guint32 minKb = 0;
+    MojUInt32 minKb = 0;
     err = conf.get(_T("checkpointMinKb"), minKb, found);
     MojErrCheck(err);
     if (!found)
         minKb = MojEnvDefaultCheckpointMinKb;
-    guint32 compactStepSize = 0;
+    MojUInt32 compactStepSize = 0;
     err = conf.get(_T("compactStepSize"), compactStepSize, found);
     MojErrCheck(err);
     if (!found)
@@ -728,20 +728,20 @@ MojErr MojDbBerkeleyEnv::close()
     return err;
 }
 
-MojErr MojDbBerkeleyEnv::postCommit(gsize updateSize)
+MojErr MojDbBerkeleyEnv::postCommit(MojSize updateSize)
 {
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
     // every N updates, check to see if we have enough log data
     // to justify a checkpoint
-    if ((m_updateSize += (gint32) updateSize) >= (m_checkpointMinKb * 1024)) {
+    if ((m_updateSize += (MojInt32) updateSize) >= (m_checkpointMinKb * 1024)) {
         MojErr err = tryCheckpoint(0);
         MojErrCheck(err);
     }
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyEnv::checkpoint(guint32 minKB)
+MojErr MojDbBerkeleyEnv::checkpoint(MojUInt32 minKB)
 {
     MojAssert(m_env);
     MojLogTrace(MojDbBerkeleyEngine::s_log);
@@ -753,7 +753,7 @@ MojErr MojDbBerkeleyEnv::checkpoint(guint32 minKB)
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyEnv::tryCheckpoint(guint32 minKB)
+MojErr MojDbBerkeleyEnv::tryCheckpoint(MojUInt32 minKB)
 {
     MojAssert(m_env);
     MojLogTrace(MojDbBerkeleyEngine::s_log);
@@ -766,7 +766,7 @@ MojErr MojDbBerkeleyEnv::tryCheckpoint(guint32 minKB)
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyEnv::checkpointImpl(guint32 minKB)
+MojErr MojDbBerkeleyEnv::checkpointImpl(MojUInt32 minKB)
 {
     MojAssert(m_env);
     MojAssertMutexLocked(m_checkpointMutex);
@@ -1439,8 +1439,8 @@ MojErr MojDbBerkeleyEngine::removeDatabase(MojDbBerkeleyDatabase* db)
     MojLogTrace(MojDbBerkeleyEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
-    gsize idx;
-    gsize size = m_dbs.size();
+    MojSize idx;
+    MojSize size = m_dbs.size();
     for (idx = 0; idx < size; ++idx) {
         if (m_dbs.at(idx).get() == db) {
             MojErr err = m_dbs.erase(idx);
@@ -1466,8 +1466,8 @@ MojErr MojDbBerkeleyEngine::removeSeq(MojDbBerkeleySeq* seq)
     MojLogTrace(MojDbBerkeleyEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
-    gsize idx;
-    gsize size = m_seqs.size();
+    MojSize idx;
+    MojSize size = m_seqs.size();
     for (idx = 0; idx < size; ++idx) {
         if (m_seqs.at(idx).get() == seq) {
             MojErr err = m_seqs.erase(idx);
@@ -1532,7 +1532,7 @@ MojErr MojDbBerkeleyIndex::drop(MojDbStorageTxn* txn)
     return err;
 }
 
-MojErr MojDbBerkeleyIndex::stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
+MojErr MojDbBerkeleyIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
 {
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
@@ -1563,7 +1563,7 @@ MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     char s[1024];
     size_t size1 = keyItem.size();
     size_t size2 = valItem.size();
-    MojErr err2 = MojUInt8ArrayToHex(keyItem.data(), size1, s);
+    MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
@@ -1590,7 +1590,7 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 #ifdef MOJ_DEBUG
     char s[1024];
     size_t size1 = keyItem.size();
-    MojErr err2 = MojUInt8ArrayToHex(keyItem.data(), size1, s);
+    MojErr err2 = MojByteArrayToHex(keyItem.data(), size1, s);
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
@@ -1712,12 +1712,12 @@ MojErr MojDbBerkeleyItem::toObject(MojObject& objOut) const
     return MojErrNone;
 }
 
-void MojDbBerkeleyItem::fromBytesNoCopy(const guint8* bytes, gsize size)
+void MojDbBerkeleyItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
 {
     MojAssert(bytes || size == 0);
-    MojAssert(size <= G_MAXUINT32);
+    MojAssert(size <= MojUInt32Max);
 
-    setData(const_cast<guint8*> (bytes), size, NULL);
+    setData(const_cast<MojByte*> (bytes), size, NULL);
 }
 
 MojErr MojDbBerkeleyItem::fromBuffer(MojBuffer& buf)
@@ -1732,14 +1732,14 @@ MojErr MojDbBerkeleyItem::fromBuffer(MojBuffer& buf)
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleyItem::fromBytes(const guint8* bytes, gsize size)
+MojErr MojDbBerkeleyItem::fromBytes(const MojByte* bytes, MojSize size)
 {
     MojAssert (bytes || size == 0);
 
     if (size == 0) {
         clear();
     } else {
-        guint8* newBytes = (guint8*)MojMalloc(size);
+        MojByte* newBytes = (MojByte*)MojMalloc(size);
         MojAllocCheck(newBytes);
         MojMemCpy(newBytes, bytes, size);
         setData(newBytes, size, MojFree);
@@ -1780,12 +1780,12 @@ void MojDbBerkeleyItem::freeData()
         m_free(m_dbt.data);
 }
 
-void MojDbBerkeleyItem::setData(guint8* bytes, gsize size, void (*free)(void*))
+void MojDbBerkeleyItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
 {
     MojAssert(bytes);
     freeData();
     m_free = free;
-    m_dbt.size = (guint32) size;
+    m_dbt.size = (MojUInt32) size;
     m_dbt.data = bytes;
 
     m_header.reader().data(bytes, size);
@@ -1853,14 +1853,14 @@ MojErr MojDbBerkeleySeq::closeImpl()
     return MojErrNone;
 }
 
-MojErr MojDbBerkeleySeq::get(gint64& valOut)
+MojErr MojDbBerkeleySeq::get(MojInt64& valOut)
 {
     MojLogTrace(MojDbBerkeleyEngine::s_log);
 
     db_seq_t id = 0;
     int dbErr = m_seq->get(m_seq, NULL, 1, &id, MojSeqGetFlags);
     MojBdbErrCheck(dbErr, _T("seq->get"));
-    valOut = (gint64) id;
+    valOut = (MojInt64) id;
 
     return MojErrNone;
 }

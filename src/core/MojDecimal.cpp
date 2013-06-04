@@ -20,7 +20,7 @@
 #include "core/MojDecimal.h"
 #include "core/MojUtil.h"
 
-void MojDecimal::assign(gint64 magnitude, guint32 fraction)
+void MojDecimal::assign(MojInt64 magnitude, MojUInt32 fraction)
 {
 	// TODO: think about whether these  should be asserts or errors
 	MojAssert(magnitude <= MagnitudeMax && magnitude >= MagnitudeMin);
@@ -32,30 +32,30 @@ void MojDecimal::assign(gint64 magnitude, guint32 fraction)
 		m_rep += fraction;
 }
 
-gdouble MojDecimal::floatValue() const
+MojDouble MojDecimal::floatValue() const
 {
-	return ((gdouble) m_rep) / ((gdouble) Numerator);
+	return ((MojDouble) m_rep) / ((MojDouble) Numerator);
 }
 
-guint32 MojDecimal::fraction() const
+MojUInt32 MojDecimal::fraction() const
 {
-	return (guint32) (MojAbs(m_rep) % Numerator);
+	return (MojUInt32) (MojAbs(m_rep) % Numerator);
 }
 
-MojErr MojDecimal::stringValue(MojChar* buf, gsize size) const
+MojErr MojDecimal::stringValue(MojChar* buf, MojSize size) const
 {
 	MojAssert(buf);
 	if (size < MaxStringSize)
 		MojErrThrow(MojErrInsufficientBuf);
 
 	// write the full rep in reverse order
-	gint64 rep = MojAbs(m_rep);
+	MojInt64 rep = MojAbs(m_rep);
 	MojChar tmp[MaxStringSize];
 	MojChar* decimalPoint = tmp + Precision;
 	MojChar* pos = NULL;
 	MojChar* firstDigit = NULL;
 	for (pos = tmp; rep != 0; ++pos) {
-		gint64 next = rep / 10;
+		MojInt64 next = rep / 10;
 		MojChar digit = (MojChar) (_T('0') + rep - (next * 10));
 		if (digit != _T('0') && firstDigit == NULL)
 			firstDigit = pos;
@@ -103,9 +103,9 @@ MojErr MojDecimal::assign(const MojChar* str)
 
 	MojChar c = 0;
 	State state = StateSign;
-	gint64 rep = 0;
-	gint64 exp = 0;
-	gint64 fracMultiplier = Numerator / 10;
+	MojInt64 rep = 0;
+	MojInt64 exp = 0;
+	MojInt64 fracMultiplier = Numerator / 10;
 	bool negative = false;
 	bool negativeExp = false;
 

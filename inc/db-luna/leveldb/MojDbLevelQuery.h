@@ -39,14 +39,14 @@ public:
 	virtual MojErr close();
 
 private:
-	static const guint32 SeekFlags;
-	static const guint32 SeekEmptyFlags[2];
-	static const guint32 NextFlags[2];
+	static const MojUInt32 SeekFlags;
+	static const MojUInt32 SeekEmptyFlags[2];
+	static const MojUInt32 NextFlags[2];
 
 	virtual MojErr seekImpl(const ByteVec& key, bool desc, bool& foundOut);
 	virtual MojErr next(bool& foundOut);
 	virtual MojErr getVal(MojDbStorageItem*& itemOut, bool& foundOut);
-	MojErr getKey(bool& foundOut, guint32 flags);
+	MojErr getKey(bool& foundOut, MojUInt32 flags);
 
 	MojDbLevelCursor m_cursor;
 	MojDbLevelItem m_key;

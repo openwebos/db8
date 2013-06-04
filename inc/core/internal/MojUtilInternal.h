@@ -24,7 +24,7 @@
 
 // TEMPLATE FUNCTION IMPLEMENTATIONS
 template<class T>
-void MojConstruct(T* p, gsize numElems)
+void MojConstruct(T* p, MojSize numElems)
 {
 	MojAssert(p);
 	// TODO: template specialization that's a no-op on scalar types
@@ -34,7 +34,7 @@ void MojConstruct(T* p, gsize numElems)
 }
 
 template<class T>
-void MojDestroy(T* p, gsize numElems)
+void MojDestroy(T* p, MojSize numElems)
 {
 	MojAssert(p);
 	// TODO: template specialization that's a no-op on scalar types
@@ -105,14 +105,14 @@ void MojSwap(T& t1, T& t2)
 }
 
 template<class T, class COMP>
-gsize MojBinarySearch(T key, const T* array, gsize numElems)
+MojSize MojBinarySearch(T key, const T* array, MojSize numElems)
 {
 	MojAssert (array || numElems == 0);
 
-	gsize low = 0;
-	gsize high = numElems;
+	MojSize low = 0;
+	MojSize high = numElems;
 	while (low < high) {
-		gsize mid = low + ((high - low) / 2);
+		MojSize mid = low + ((high - low) / 2);
 		int comp = COMP()(key, array[mid]);
 		if (comp == 0)
 			return mid;
@@ -125,23 +125,23 @@ gsize MojBinarySearch(T key, const T* array, gsize numElems)
 }
 
 template<class T>
-inline gsize MojBinarySearch(T key, const T* array, gsize numElems)
+inline MojSize MojBinarySearch(T key, const T* array, MojSize numElems)
 {
 	return MojBinarySearch<T, MojComp<T> >(key, array, numElems);
 }
 
 template<class T, class COMP>
-gsize MojQuickSortPartition(T* array, gsize left, gsize right, const COMP& comp)
+MojSize MojQuickSortPartition(T* array, MojSize left, MojSize right, const COMP& comp)
 {
 	// pick random pivot
 	unsigned int seed = (unsigned int) left;
-	gsize pivot = left + (MojRand(&seed) % (right - left));
-	gsize last = right - 1;
-	gsize mid = left;
+	MojSize pivot = left + (MojRand(&seed) % (right - left));
+	MojSize last = right - 1;
+	MojSize mid = left;
 	// move pivot to end
 	MojSwap(array[pivot], array[last]);
 	// move all elements < pivot to left of mid
-	for (gsize i = left; i < last; ++i) {
+	for (MojSize i = left; i < last; ++i) {
 		if (comp(array[i], array[last]) < 0) {
 			MojSwap(array[i], array[mid]);
 			++mid;
@@ -154,34 +154,34 @@ gsize MojQuickSortPartition(T* array, gsize left, gsize right, const COMP& comp)
 }
 
 template<class T, class COMP>
-void MojQuickSortImpl(T* array, gsize left, gsize right, const COMP& comp)
+void MojQuickSortImpl(T* array, MojSize left, MojSize right, const COMP& comp)
 {
 	MojAssert (array || (right - left) == 0);
 	if ((left + 1) >= right)
 		return;
-	gsize mid = MojQuickSortPartition<T, COMP>(array, left, right, comp);
+	MojSize mid = MojQuickSortPartition<T, COMP>(array, left, right, comp);
 	MojQuickSortImpl<T, COMP>(array, left, mid, comp);
 	MojQuickSortImpl<T, COMP>(array, mid + 1, right, comp);
 }
 
 template<class T, class COMP>
-inline void MojQuickSort(T* array, gsize numElems, const COMP& comp = COMP())
+inline void MojQuickSort(T* array, MojSize numElems, const COMP& comp = COMP())
 {
 	return MojQuickSortImpl<T, COMP>(array, 0, numElems, comp);
 }
 
 template<class T>
-inline void MojQuickSort(T* array, gsize numElems)
+inline void MojQuickSort(T* array, MojSize numElems)
 {
 	return MojQuickSort<T, MojComp<T> >(array, numElems);
 }
 
-inline bool MojFlagGet(guint32 flags, guint32 mask)
+inline bool MojFlagGet(MojUInt32 flags, MojUInt32 mask)
 {
 	return (flags & mask) == mask;
 }
 
-inline void MojFlagSet(guint32& flags, guint32 mask, bool val)
+inline void MojFlagSet(MojUInt32& flags, MojUInt32 mask, bool val)
 {
 	if (val)
 		flags |= mask;

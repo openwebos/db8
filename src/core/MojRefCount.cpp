@@ -19,7 +19,7 @@
 
 #include "core/MojRefCount.h"
 
-void* MojRefCountAlloc(gsize n)
+void* MojRefCountAlloc(MojSize n)
 {
 	void* p = MojMalloc(n + sizeof(MojAtomicT));
 	if (p) {
@@ -30,7 +30,7 @@ void* MojRefCountAlloc(gsize n)
 	return p;
 }
 
-void* MojRefCountRealloc(void* p, gsize n)
+void* MojRefCountRealloc(void* p, MojSize n)
 {
 	void* pnew = NULL;
 	if (n == 0) {

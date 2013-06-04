@@ -154,7 +154,7 @@ MojDbPermissionEngine::Value MojDbPermissionEngine::check(const MojChar* type,
 
 	CallerMap::ConstIterator callerIter = objIter->find(caller);
 	if (callerIter == objIter->end()) {
-		gsize callerLen = MojStrLen(caller);
+		MojSize callerLen = MojStrLen(caller);
 		for (callerIter = objIter->begin(); callerIter != objIter->end(); ++callerIter) {
 			if (matchWildcard(callerIter.key(), caller, callerLen))
 				break;

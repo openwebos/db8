@@ -34,18 +34,18 @@ private:
 	MojErr testMerge(MojDb& db);
 	MojErr testUpdateKind(MojDb& db);
 
-	MojErr updateObjsViaPut(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64));
-	MojErr updateObjsViaMerge(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64));
+	MojErr updateObjsViaPut(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
+	MojErr updateObjsViaMerge(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
 
-	MojErr putObjs(MojDb& db, const MojChar* kindId, guint64 numInsert,
-			MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64), MojObject& objs);
+	MojErr putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,
+			MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64), MojObject& objs);
 
 	MojErr mergeObj(MojDb& db, MojObject& obj, MojTime& objTime);
 	MojErr batchMergeObj(MojDb& db, MojObject* begin, const MojObject* end, MojTime& objTime);
-	MojErr queryMergeObj(MojDb& db, MojDbQuery& query, MojObject& props, guint32& count, MojTime& objTime);
+	MojErr queryMergeObj(MojDb& db, MojDbQuery& query, MojObject& props, MojUInt32& count, MojTime& objTime);
 	MojErr putObj(MojDb& db, MojObject& obj, MojTime& objTime);
 	MojErr batchPutObj(MojDb& db, MojObject* begin, const MojObject* end, MojTime& objTime);
-	MojErr updateKind(MojDb& db, const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, guint64));
+	MojErr updateKind(MojDb& db, const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
 	MojErr timeUpdateKind(MojDb& db, const MojChar* kindJson, MojObject& kindObj, MojTime& addIndexTime, MojTime& dropIndexTime);
 };
 

@@ -43,7 +43,7 @@ public:
 	void txn(MojDbStorageTxn* txn) { m_txn = txn; }
 	void verifymode(bool vmode) { m_vmode = vmode;}
 	void fixmode(bool fmode) { m_fixmode = fmode;}
-	void batchsize(gint32 bsize) { m_batchSize = bsize;}
+	void batchsize(MojInt32 bsize) { m_batchSize = bsize;}
 	void autobatch(bool bmode) { m_autobatch = bmode;}
 
 	void beginBatch();
@@ -62,7 +62,7 @@ public:
 	MojDbStorageTxn* txn() const { return m_txn.get(); }
 	bool fixmode() const {return m_fixmode;}
 	bool verifymode() {return m_vmode;}
-	gint32 batchsize() {return m_batchSize;}
+	MojInt32 batchsize() {return m_batchSize;}
 
 	operator MojDbReqRef() { return MojDbReqRef(*this); }
 	
@@ -75,14 +75,14 @@ private:
 
 	MojString m_domain;
 	MojRefCountedPtr<MojDbStorageTxn> m_txn;
-	guint32 m_beginCount;
+	MojUInt32 m_beginCount;
 	MojDb* m_db;
 	bool m_admin;
 	bool m_batch;
 	bool m_schemaLocked;	
 	bool m_vmode;
 	bool m_fixmode;
-	gint32 m_batchSize;
+	MojInt32 m_batchSize;
 	bool m_autobatch;
 };
 

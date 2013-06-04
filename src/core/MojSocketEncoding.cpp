@@ -115,20 +115,20 @@ MojErr MojSocketMessageParser::readFromSocket(MojSockT sock, MojRefCountedPtr<Mo
 	completeOut = false;
 
 	while (m_headerBytes < sizeof(m_header)) {
-		gint32 sz = recv(sock, m_headerBuf+m_headerBytes, sizeof(m_header) - m_headerBytes, 0);
+		MojInt32 sz = recv(sock, m_headerBuf+m_headerBytes, sizeof(m_header) - m_headerBytes, 0);
 		MojParserRecvCheck(sz);
 		m_headerBytes += sz;
 		if (m_headerBytes == sizeof(m_header)) {
 			MojDataReader reader(m_headerBuf, m_headerBytes);
 			err = m_header.read(reader);
 			MojErrCheck(err);
-			m_messageData = new guint8[m_header.messageLen()];
+			m_messageData = new MojByte[m_header.messageLen()];
 			MojAllocCheck(m_messageData);
 		}
 	}
 
 	while (m_messageBytesRead < m_header.messageLen()) {
-		gint32 sz = recv(sock, m_messageData + m_messageBytesRead, m_header.messageLen() - m_messageBytesRead, 0);
+		MojInt32 sz = recv(sock, m_messageData + m_messageBytesRead, m_header.messageLen() - m_messageBytesRead, 0);
 		MojParserRecvCheck(sz);
 		m_messageBytesRead += sz;
 	}
@@ -138,7 +138,7 @@ MojErr MojSocketMessageParser::readFromSocket(MojSockT sock, MojRefCountedPtr<Mo
 		err = MojErrNoMem;
 		MojErrGoto(err, done);
 	}
-	gsize cbConsumed;
+	MojSize cbConsumed;
 	err = msgOut->extract(m_messageData, m_header.messageLen(), cbConsumed);
 	MojErrGoto(err, done);
 	if (m_header.messageLen() != cbConsumed) {
@@ -166,7 +166,7 @@ MojErr MojSocketMessageEncoder::writeToBuffer(MojDataWriter& writer)
 	}
 
 	// reserve buffer space
-	gsize reserve = header.messageLen() + sizeof(header);
+	MojSize reserve = header.messageLen() + sizeof(header);
 	MojErr err = writer.reserve(reserve);
 	MojErrCheck(err);
 

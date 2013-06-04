@@ -132,7 +132,7 @@ MojErr MojDbLocaleTest::put(MojDb& db)
 	MojDbQuery query;
 	MojErr err = query.from(_T("Test:1"));
 	MojTestErrCheck(err);
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	err = db.del(query, count);
 	MojTestErrCheck(err);
 
@@ -174,7 +174,7 @@ MojErr MojDbLocaleTest::checkOrder(MojDb& db, const MojChar* expectedJson)
 		MojTestAssert(i != expected.arrayEnd());
 		MojObject id;
 		MojTestAssert(obj.get(MojDb::IdKey, id));
-		gint64 idInt = id.intValue();
+		MojInt64 idInt = id.intValue();
 		MojUnused(idInt);
 
 		MojTestAssert(id == *i++);

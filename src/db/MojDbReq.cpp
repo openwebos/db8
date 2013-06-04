@@ -44,7 +44,7 @@ MojErr MojDbReq::domain(const MojChar* val)
 {
 	MojErr err = m_domain.assign(val);
 	MojErrCheck(err);
-	gsize pos = m_domain.find(_T(' '));
+	MojSize pos = m_domain.find(_T(' '));
 	if (pos != MojInvalidSize) {
 		err = m_domain.truncate(pos);
 		MojErrCheck(err);

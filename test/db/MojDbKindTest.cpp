@@ -439,10 +439,10 @@ MojErr MojDbKindTest::testUpdateWithObjects()
 		if (!found)
 			break;
 		++count;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		MojTestAssert(foo == count);
@@ -482,10 +482,10 @@ MojErr MojDbKindTest::testUpdateWithObjects()
 		if (!found)
 			break;
 		++count;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		MojTestAssert(foo == count);
@@ -530,8 +530,8 @@ MojErr MojDbKindTest::testPermissions()
 	err = grandParentKind.init(grandparentName, NULL, NULL);
 	MojTestErrCheck(err);
 
-	guint32 allowMask = 0;
-	guint32 denyMask = 0;
+	MojUInt32 allowMask = 0;
+	MojUInt32 denyMask = 0;
 	MojFlagSet(allowMask, OpCreate, true);
 	MojFlagSet(allowMask, OpRead, true);
 	MojFlagSet(denyMask, OpUpdate, true);
@@ -708,10 +708,10 @@ MojErr MojDbKindTest::testPutKind()
 		if (!found)
 			break;
 		++count;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		MojTestAssert(foo == count);
@@ -839,7 +839,7 @@ MojErr MojDbKindTest::testDelKind()
 	MojDbQuery query;
 	err = query.from(MojDbKindEngine::RootKindId);
 	MojTestErrCheck(err);
-	guint32 delCount = 0;
+	MojUInt32 delCount = 0;
 	err = db.del(query, delCount);
 	MojTestErrCheck(err);
 	MojTestAssert(delCount == 0);
@@ -882,10 +882,10 @@ MojErr MojDbKindTest::testDelKind()
 		if (!found)
 			break;
 		++count;
-		gint64 foo;
+		MojInt64 foo;
 		err = obj.getRequired(_T("foo"), foo);
 		MojTestErrCheck(err);
-		gint64 bar;
+		MojInt64 bar;
 		err = obj.getRequired(_T("bar"), bar);
 		MojTestErrCheck(err);
 		MojTestAssert(foo == count);
@@ -943,7 +943,7 @@ MojErr MojDbKindTest::testReparent()
 	MojDbCursor cursor;
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	err = cursor.count(count);
 	MojTestErrCheck(err);
 	err = cursor.close();
@@ -989,7 +989,7 @@ MojErr MojDbKindTest::testPutKindWithPermissions()
 	MojDbQuery query;
 	err = query.from(MojDbKindEngine::RootKindId);
 	MojTestErrCheck(err);
-	guint32 delCount;
+	MojUInt32 delCount;
 	err = db.del(query, delCount);
 	MojTestErrCheck(err);
 	MojTestAssert(delCount > 0);
@@ -1529,7 +1529,7 @@ MojErr MojDbKindTest::testObjectPermissions()
 	MojDbQuery query;
 	err = query.from(MojDbKindEngine::RootKindId);
 	MojTestErrCheck(err);
-	guint32 delCount;
+	MojUInt32 delCount;
 	err = db.del(query, delCount);
 	MojTestErrCheck(err);
 	MojTestAssert(delCount > 0);
@@ -1743,7 +1743,7 @@ MojErr MojDbKindTest::testObjectPermissions()
 	MojObject results;
 	err = results.fromJson(writer.json());
 	MojTestErrCheck(err);
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	for (MojObject::ConstArrayIterator i = results.arrayBegin(); i != results.arrayEnd(); ++i) {
 		count++;
 	}

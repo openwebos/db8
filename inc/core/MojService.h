@@ -31,7 +31,7 @@
 class MojService : private MojNoCopy
 {
 public:
-	typedef guint32 Token;
+	typedef MojUInt32 Token;
 	static const MojChar* const DefaultCategory;
 
 	class CategoryHandler : public MojSignalHandler

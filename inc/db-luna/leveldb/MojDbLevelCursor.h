@@ -31,13 +31,13 @@ public:
     MojDbLevelCursor();
     ~MojDbLevelCursor();
 
-    MojErr open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, guint32 flags);
+    MojErr open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags);
     MojErr close();
     MojErr del();
     MojErr delPrefix(const MojDbKey& prefix);
-    MojErr get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, guint32 flags);
-    MojErr stats(gsize& countOut, gsize& sizeOut);
-    MojErr statsPrefix(const MojDbKey& prefix, gsize& countOut, gsize& sizeOut);
+    MojErr get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags);
+    MojErr stats(MojSize& countOut, MojSize& sizeOut);
+    MojErr statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut);
 
     leveldb::Iterator* impl() { return m_it; }
 
@@ -50,7 +50,7 @@ private:
     leveldb::Iterator* m_it;
     leveldb::DB* m_db;
     MojDbStorageTxn* m_txn;
-    gsize m_warnCount;
+    MojSize m_warnCount;
 };
 
 #endif

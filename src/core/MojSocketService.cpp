@@ -87,7 +87,7 @@ MojErr MojSocketService::Connection::start()
 
 MojErr MojSocketService::Connection::writeOpen()
 {
-	MojErr err = writeHeader(sizeof(guint32) * 2, TypeOpen);
+	MojErr err = writeHeader(sizeof(MojUInt32) * 2, TypeOpen);
 	MojErrCheck(err);
 	err = m_writer.writeUInt32(Version);
 	MojErrCheck(err);
@@ -111,7 +111,7 @@ MojErr MojSocketService::Connection::writeClose()
 
 MojErr MojSocketService::Connection::writeRequest(Message* msg)
 {
-	gsize size = sizeof(guint32) // payload size
+	MojSize size = sizeof(MojUInt32) // payload size
 			+ app.length() + 1 // app id size
 			+ method.length() + 1; // method size
 	MojErr err = writeHeader(size, TypeRequest);
@@ -129,15 +129,15 @@ MojErr MojSocketService::Connection::writeRequest(Message* msg)
 	return MojErrNone;
 }
 
-MojErr MojSocketService::Connection::writeHeader(gsize size, Type type)
+MojErr MojSocketService::Connection::writeHeader(MojSize size, Type type)
 {
-	gsize totalSize = size
-			+ sizeof(guint16) // header size
-			+ sizeof(guint8) // msg type
-			+ sizeof(guint32); // msg id
-	MojAssert(totalSize <= G_MAXUINT16);
+	MojSize totalSize = size
+			+ sizeof(MojUInt16) // header size
+			+ sizeof(MojUInt8) // msg type
+			+ sizeof(MojUInt32); // msg id
+	MojAssert(totalSize <= MojUInt16Max);
 
-	MojErr err = m_writer.writeUInt16((guint16) totalSize);
+	MojErr err = m_writer.writeUInt16((MojUInt16) totalSize);
 	MojErrCheck(err);
 	err = m_writer.writeUInt8(type);
 	MojErrCheck(err);
@@ -153,10 +153,10 @@ MojErr MojSocketService::Connection::flush(MojSockT sock)
 
 	while (!m_writeBuf.empty()) {
 		MojIoVecT vec[IoVecSize];
-		gsize vecSize = 0;
+		MojSize vecSize = 0;
 		MojErr err = m_writeBuf.readVec(vec, IoVecSize, vecSize);
 		MojErrCheck(err);
-		gsize bytesWritten = 0;
+		MojSize bytesWritten = 0;
 		err = m_sock.writev(vec, size, bytesWritten);
 		MojErrCatch(err, MojErrWouldBlock) {
 			err = reactor().notifyWritable(sock, m_flushSlot);
@@ -173,10 +173,10 @@ MojErr MojSocketService::Connection::read(MojSockT sock)
 {
 	for (;;) {
 		MojIoVecT vec[IoVecSize];
-		gsize vecSize = 0;
+		MojSize vecSize = 0;
 		MojErr err = m_readBuf.writeVec(vec, IoVecSize, size);
 		MojErrCheck(err);
-		gsize bytesRead = 0;
+		MojSize bytesRead = 0;
 		err = m_sock.readv(vec, size, bytesRead);
 		MojErrCheck(err);
 		MojErrCatch(err, MojErrWouldBlock) {
@@ -197,7 +197,7 @@ MojErr MojSocketService::Connection::handleRead()
 	MojErr err = MojErrNone;
 	switch (m_state) {
 	case StateHeaderSize: {
-		if (m_readBuf.size() < sizeof(guint16))
+		if (m_readBuf.size() < sizeof(MojUInt16))
 			break;
 		err = readHeaderSize();
 		MojErrCheck(err);
@@ -262,7 +262,7 @@ MojErr MojSocketService::Server::open(const MojChar* path)
 	return MojErrNone;
 }
 
-MojErr MojSocketService::Server::open(const MojChar* host, gint32 port)
+MojErr MojSocketService::Server::open(const MojChar* host, MojInt32 port)
 {
 	MojAssert(host);
 
@@ -684,7 +684,7 @@ MojErr MojSocketService::parseUri(const MojChar* uri, MojString& socknameOut, Mo
 	}
 	MojErr err = methodOut.assign(method);
 	MojErrCheck(err);
-	gsize nameLen = method - uri - 1;
+	MojSize nameLen = method - uri - 1;
 	err = socknameOut.assign(uri, nameLen);
 	MojErrCheck(err);
 

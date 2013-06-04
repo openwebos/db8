@@ -59,7 +59,7 @@ public:
 
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
     virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr del(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
@@ -77,7 +77,7 @@ public:
     ~MojDbTestStorageSeq();
 
     virtual MojErr close();
-    virtual MojErr get(gint64& valOut);
+    virtual MojErr get(MojInt64& valOut);
 
 private:
     MojRefCountedPtr<MojDbStorageSeq> m_seq;
@@ -91,7 +91,7 @@ public:
     ~MojDbTestStorageDatabase();
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn) ;
-    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
     virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
     virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
     virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
@@ -131,11 +131,11 @@ public:
 
     virtual MojErr close();
     virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
-    virtual MojErr getId(MojObject& objOut, guint32& groupOut, bool& foundOut);
+    virtual MojErr getId(MojObject& objOut, MojUInt32& groupOut, bool& foundOut);
     virtual MojErr getById(const MojObject& id, MojDbStorageItem*& itemOut, bool& foundOut);
-    virtual MojErr count(guint32& countOut);
+    virtual MojErr count(MojUInt32& countOut);
     virtual MojErr nextPage(MojDbQuery::Page& pageOut);
-    virtual guint32 groupCount() const { return m_query->groupCount(); }
+    virtual MojUInt32 groupCount() const { return m_query->groupCount(); }
     virtual void excludeKinds(const StringSet& toExclude) { m_query->excludeKinds(toExclude); }
 
 private:

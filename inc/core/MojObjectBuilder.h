@@ -34,12 +34,12 @@ public:
 	virtual MojErr endObject();
 	virtual MojErr beginArray();
 	virtual MojErr endArray();
-	virtual MojErr propName(const MojChar* name, gsize len);
+	virtual MojErr propName(const MojChar* name, MojSize len);
 	virtual MojErr nullValue();
 	virtual MojErr boolValue(bool val);
-	virtual MojErr intValue(gint64 val);
+	virtual MojErr intValue(MojInt64 val);
 	virtual MojErr decimalValue(const MojDecimal& val);
-	virtual MojErr stringValue(const MojChar* val, gsize len);
+	virtual MojErr stringValue(const MojChar* val, MojSize len);
 
 	const MojObject& object() const { return m_obj; }
 	MojObject& object() { return m_obj; }

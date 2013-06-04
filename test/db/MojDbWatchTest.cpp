@@ -350,7 +350,7 @@ MojErr MojDbWatchTest::rangeTest(MojDb& db)
 	MojTestErrCheck(err);
 	MojTestAssert(watcher->m_count == 0);
 	MojObject id;
-	gint64 rev;
+	MojInt64 rev;
 	err = put(db, 5, 5, id, rev);
 	MojTestErrCheck(err);
 	MojTestAssert(watcher->m_count == 0);
@@ -380,7 +380,7 @@ MojErr MojDbWatchTest::pageTest(MojDb& db)
 	MojObject idFirst;
 	MojObject idFourth;
 	MojObject idLast;
-	gint64 rev;
+	MojInt64 rev;
 	for (int i = 100; i < 150; ++i) {
 		MojErr err = put(db, 100, i, id, rev);
 		MojTestErrCheck(err);
@@ -404,7 +404,7 @@ MojErr MojDbWatchTest::pageTest(MojDb& db)
 	err = db.find(query, cursor, watcher->m_slot);
 	MojTestErrCheck(err);
 	bool found = false;
-	guint32 count = 0;
+	MojUInt32 count = 0;
 	do {
 		MojObject obj;
 		err = cursor.get(obj, found);
@@ -506,7 +506,7 @@ MojErr MojDbWatchTest::limitTest(MojDb& db)
 	return MojErrNone;
 }
 
-MojErr MojDbWatchTest::put(MojDb& db, const MojObject& fooVal, const MojObject& barVal, MojObject& idOut, gint64& revOut)
+MojErr MojDbWatchTest::put(MojDb& db, const MojObject& fooVal, const MojObject& barVal, MojObject& idOut, MojInt64& revOut)
 {
 	MojObject obj;
 	MojErr err = obj.putString(_T("_kind"), _T("WatchTest:1"));

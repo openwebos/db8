@@ -33,7 +33,7 @@ bool MojHashMap<KEY, VAL, LKEY, HASH, KEQ, VEQ>::get(const LookupType& key, Valu
 template<class KEY, class VAL, class LKEY, class HASH, class KEQ, class VEQ>
 MojErr MojHashMap<KEY, VAL, LKEY, HASH, KEQ, VEQ>::put(const KeyType& key, const ValueType& val)
 {
-	gsize idx = 0;
+	MojSize idx = 0;
 	Node* node = NULL;
 	MojErr err = MojHashBase::find(&key, node, &idx);
 	MojErrCheck(err);
@@ -90,7 +90,7 @@ const void* MojHashMap<KEY, VAL, LKEY, HASH, KEQ, VEQ>::key(const Node* node) co
 }
 
 template<class KEY, class VAL, class LKEY, class HASH, class KEQ, class VEQ>
-gsize MojHashMap<KEY, VAL, LKEY, HASH, KEQ, VEQ>::hash(const void* key) const
+MojSize MojHashMap<KEY, VAL, LKEY, HASH, KEQ, VEQ>::hash(const void* key) const
 {
 	MojAssert(key);
 	return HASH()(*static_cast<const LookupType*>(key));

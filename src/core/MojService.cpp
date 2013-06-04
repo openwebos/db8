@@ -193,7 +193,7 @@ MojErr MojService::dispatchReply(MojServiceMessage* msg)
 	MojObjectBuilder builder;
 	MojObject payload;
 	MojErr err = MojErrNone;
-	gint64 errCode = MojErrNone;
+	MojInt64 errCode = MojErrNone;
 	errCode = err = msg->payload(builder);
 	MojErrCatchAll(err);
 	if (errCode == MojErrNone)
@@ -445,7 +445,7 @@ MojErr MojService::SubscriptionKey::init(const MojServiceMessage* msg)
 {
 	MojAssert(msg);
 
-	MojErr err = push((gint64) msg->token());
+	MojErr err = push((MojInt64) msg->token());
 	MojErrCheck(err);
 	err = pushString(msg->senderAddress());
 	MojErrCheck(err);
@@ -474,7 +474,7 @@ MojErr MojService::SubscriptionKey::sender(MojString& senderOut) const
 
 MojService::Token MojService::SubscriptionKey::token() const
 {
-	gint64 tok;
+	MojInt64 tok;
 	bool valid = at(1, tok);
 	MojAssert(valid);
 	MojUnused(valid);

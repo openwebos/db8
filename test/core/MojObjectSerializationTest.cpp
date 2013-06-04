@@ -45,8 +45,8 @@ MojErr MojObjectSerializationTest::run()
 	MojTestErrCheck(err);
 	MojObjectBuilder builder;
 
-	const guint8* data = NULL;
-	gsize size = 0;
+	const MojByte* data = NULL;
+	MojSize size = 0;
 	err = writer.buf().data(data, size);
 	MojTestErrCheck(err);
 	err = MojObjectReader::read(builder, data, size);
@@ -67,9 +67,9 @@ MojErr MojObjectSerializationTest::run()
 	MojTestErrCheck(err);
 	err = vec.push(5000000000LL);
 	MojTestErrCheck(err);
-	err = vec.push(G_MAXINT64);
+	err = vec.push(MojInt64Max);
 	MojTestErrCheck(err);
-	err = vec.push(G_MININT64);
+	err = vec.push(MojInt64Min);
 	MojTestErrCheck(err);
 	err = vec.push(-1);
 	MojTestErrCheck(err);
@@ -77,7 +77,7 @@ MojErr MojObjectSerializationTest::run()
 	MojTestErrCheck(err);
 	err = vec.push(-99999999999LL);
 	MojTestErrCheck(err);
-	err = vec.push(G_MININT64);
+	err = vec.push(MojInt64Min);
 	MojTestErrCheck(err);
 	err = vec.push(true);
 	MojTestErrCheck(err);
@@ -112,10 +112,10 @@ MojErr MojObjectSerializationTest::compTest(const MojObject& obj1, const MojObje
 	err = obj2.visit(writer2);
 	MojTestErrCheck(err);
 	int compObj = obj1.compare(obj2);
-	const guint8* data1 = NULL;
-	const guint8* data2 = NULL;
-	gsize size1 = 0;
-	gsize size2 = 0;
+	const MojByte* data1 = NULL;
+	const MojByte* data2 = NULL;
+	MojSize size1 = 0;
+	MojSize size2 = 0;
 	err = writer1.buf().data(data1, size1);
 	MojTestErrCheck(err);
 	err = writer2.buf().data(data2, size2);

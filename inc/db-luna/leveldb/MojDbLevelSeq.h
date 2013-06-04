@@ -30,19 +30,19 @@ public:
 
     MojErr open(const MojChar* name, MojDbLevelDatabase* db);
     virtual MojErr close();
-    virtual MojErr get(gint64& valOut);
+    virtual MojErr get(MojInt64& valOut);
 
 
 private:
     friend class MojDbLevelEngine;
 
-    MojErr store(gint64 next);
+    MojErr store(MojInt64 next);
     MojErr allocateMore();
 
     MojDbLevelDatabase* m_db;
     MojDbLevelItem m_key;
-    gint64 m_next;
-    gint64 m_allocated;
+    MojInt64 m_next;
+    MojInt64 m_allocated;
 };
 
 #endif

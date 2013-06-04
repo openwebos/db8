@@ -30,9 +30,9 @@ MojErr MojBufferTest::run()
 	// empty test
 	MojBuffer buf1;
 	MojTestAssert(buf1.empty());
-	guint8 b;
-	const guint8* data = &b;
-	gsize size = 20;
+	MojByte b;
+	const MojByte* data = &b;
+	MojSize size = 20;
 	MojErr err = buf1.data(data, size);
 	MojTestErrCheck(err);
 	MojAutoPtr<MojBuffer::Chunk> chunk;
@@ -62,7 +62,7 @@ MojErr MojBufferTest::run()
 
 	// write/read 1 byte at a time
 	for (int i = 0; i < 10000; ++i) {
-		b = (guint8) i;
+		b = (MojByte) i;
 		if (i % 2) {
 			err = buf1.writeByte(b);
 			MojTestErrCheck(err);
@@ -73,16 +73,16 @@ MojErr MojBufferTest::run()
 		MojTestAssert(!buf1.empty());
 		size = 53;
 		buf1.iovec(vec, 10, size);
-		MojTestAssert(size == 1 && vec[0].iov_len == 1 && *(guint8*)(vec[0].iov_base) == b);
+		MojTestAssert(size == 1 && vec[0].iov_len == 1 && *(MojByte*)(vec[0].iov_base) == b);
 		buf1.advance(1);
 		MojTestAssert(buf1.empty());
 	}
 
 	// write/read 2 bytes at a time
 	for (int i = 0; i < 10000; ++i) {
-		guint8 b2[2];
-		b2[0] = (guint8) i;
-		b2[1] = (guint8) (i >> 8);
+		MojByte b2[2];
+		b2[0] = (MojByte) i;
+		b2[1] = (MojByte) (i >> 8);
 		if (i % 2) {
 			err = buf1.writeByte(b2[0]);
 			MojTestErrCheck(err);
@@ -97,12 +97,12 @@ MojErr MojBufferTest::run()
 		buf1.iovec(vec, 10, size);
 		MojTestAssert(size == 1 || size == 2);
 		if (size == 1) {
-			guint8* base = (guint8*)(vec[0].iov_base);
+			MojByte* base = (MojByte*)(vec[0].iov_base);
 			MojTestAssert(vec[0].iov_len == 2 && base[0] == b2[0] && base[1] == b2[1]);
 		} else {
-			guint8* base = (guint8*)(vec[0].iov_base);
+			MojByte* base = (MojByte*)(vec[0].iov_base);
 			MojTestAssert(vec[0].iov_len == 1 && base[0] == b2[0]);
-			base = (guint8*)(vec[1].iov_base);
+			base = (MojByte*)(vec[1].iov_base);
 			MojTestAssert(vec[1].iov_len == 1 && base[0] == b2[1]);
 		}
 		buf1.advance(2);
@@ -110,7 +110,7 @@ MojErr MojBufferTest::run()
 	}
 
 	// write/read 10000 bytes at a time
-	MojAutoArrayPtr<guint8> bytes(new guint8[10000]);
+	MojAutoArrayPtr<MojByte> bytes(new MojByte[10000]);
 	MojAllocCheck(bytes.get());
 	MojZero(bytes.get(), 10000);
 	for (int i = 0; i < 100; ++i) {
@@ -121,15 +121,15 @@ MojErr MojBufferTest::run()
 			// read it all in one chunk
 			size = 53;
 			buf1.iovec(vec, 10, size);
-			gsize dataSize = 0;
-			for (gsize j = 0; j < size; ++j) {
+			MojSize dataSize = 0;
+			for (MojSize j = 0; j < size; ++j) {
 				dataSize += vec[j].iov_len;
 			}
 			MojTestAssert(dataSize == 10000);
 			buf1.advance(10000);
 		} else {
 			// read it one chunk at a time
-			gsize dataSize = 10000;
+			MojSize dataSize = 10000;
 			while (dataSize > 0) {
 				size = 53;
 				buf1.iovec(vec, 1, size);

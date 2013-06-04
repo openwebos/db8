@@ -100,7 +100,7 @@ MojErr MojDbLevelEnv::unlockDir()
     return err;
 }
 
-MojErr MojDbLevelEnv::postCommit(gsize updateSize)
+MojErr MojDbLevelEnv::postCommit(MojSize updateSize)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
     return MojErrNone;

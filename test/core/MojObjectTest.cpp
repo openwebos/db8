@@ -226,7 +226,7 @@ MojErr MojObjectTest::getTest(const MojObject& obj)
 	MojObject obj3;
 	MojObject array1;
 	MojString str1;
-	gsize size;
+	MojSize size;
 
 	size = obj.size();
 	MojTestAssert(size == 10);

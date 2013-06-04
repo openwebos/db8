@@ -68,7 +68,7 @@ MojErr MojDbDistinctTest::run()
 	MojTestErrCheck(err);
 
 	// put test objects
-	for (gsize i = 0; i < sizeof(MojDistinctTestObjects) / sizeof(MojChar*); ++i) {
+	for (MojSize i = 0; i < sizeof(MojDistinctTestObjects) / sizeof(MojChar*); ++i) {
 		MojObject obj;
 		err = obj.fromJson(MojDistinctTestObjects[i]);
 		MojTestErrCheck(err);

@@ -24,7 +24,7 @@
 
 class MojFile {
 public:
-	static const gsize MojFileBufSize = 2048;
+	static const MojSize MojFileBufSize = 2048;
 
 	MojFile(MojFileT file = MojInvalidFile) : m_file(file) {}
 	~MojFile() { (void) close(); }
@@ -34,9 +34,9 @@ public:
 	bool open() { return m_file != MojInvalidFile; }
 	MojErr open(const MojChar* path, int flags, MojModeT mode = 0) { MojAssert(m_file == MojInvalidFile); return MojFileOpen(m_file, path, flags, mode); }
 	MojErr readString(MojString& strOut);
-	MojErr read(void* buf, gsize bufSize, gsize& sizeOut) { return MojFileRead(m_file, buf, bufSize, sizeOut); }
-	MojErr writeString(const MojChar* data, gsize& sizeOut);
-	MojErr write(const void* data, gsize size, gsize& sizeOut) { return MojFileWrite(m_file, data, size, sizeOut); }
+	MojErr read(void* buf, MojSize bufSize, MojSize& sizeOut) { return MojFileRead(m_file, buf, bufSize, sizeOut); }
+	MojErr writeString(const MojChar* data, MojSize& sizeOut);
+	MojErr write(const void* data, MojSize size, MojSize& sizeOut) { return MojFileWrite(m_file, data, size, sizeOut); }
 
 private:
 	MojFileT m_file;

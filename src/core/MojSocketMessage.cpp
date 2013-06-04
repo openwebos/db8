@@ -82,7 +82,7 @@ MojErr MojSocketMessage::serialize(MojDataWriter& writer) const
 
 MojErr MojSocketMessage::serializeString(MojDataWriter& writer, const MojString& str) const
 {
-	guint32 len = str.length();
+	MojUInt32 len = str.length();
 	MojErr err = writer.writeUInt32(len);
 	MojErrCheck(err);
 	if (len > 0) {
@@ -93,19 +93,19 @@ MojErr MojSocketMessage::serializeString(MojDataWriter& writer, const MojString&
 	return MojErrNone;
 }
 
-gsize MojSocketMessage::serializedSize() const
+MojSize MojSocketMessage::serializedSize() const
 {
 	return sizeof(Flags) +    // flags
-	sizeof(gint64) +        // token
-	sizeof(guint32) +       // category length
+	sizeof(MojInt64) +        // token
+	sizeof(MojUInt32) +       // category length
 	m_category.length() +     // category
-	sizeof(guint32) +       // method length
+	sizeof(MojUInt32) +       // method length
 	m_method.length() +       // method
-	sizeof(guint32) +       // payload length
+	sizeof(MojUInt32) +       // payload length
 	m_payloadJson.length();   // payload
 }
 
-MojErr MojSocketMessage::extract(const guint8* data, gsize len, gsize& dataConsumed)
+MojErr MojSocketMessage::extract(const MojByte* data, MojSize len, MojSize& dataConsumed)
 {
 	MojDataReader reader(data, len);
 
@@ -114,7 +114,7 @@ MojErr MojSocketMessage::extract(const guint8* data, gsize len, gsize& dataConsu
 	MojErrCheck(err);
 
 	// token
-	gint64 tok;
+	MojInt64 tok;
 	err = reader.readInt64(tok);
 	MojErrCheck(err);
 	m_token = Token(tok);
@@ -132,7 +132,7 @@ MojErr MojSocketMessage::extract(const guint8* data, gsize len, gsize& dataConsu
 
 MojErr MojSocketMessage::extractString(MojDataReader& reader, MojString& strOut)
 {
-	guint32 len;
+	MojUInt32 len;
 	MojErr err = reader.readUInt32(len);
 	MojErrCheck(err);
 	if (len) {
@@ -196,7 +196,7 @@ MojErr MojSocketMessage::senderToken(Token& tokenOut) const
 MojErr MojSocketMessage::senderToken(MojSockT socket, Token& tokenOut)
 {
 	MojAssert(socket != -1);
-	tokenOut = Token((gint64)socket);
+	tokenOut = Token((MojInt64)socket);
 	return MojErrNone;
 }
 

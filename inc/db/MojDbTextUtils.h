@@ -30,7 +30,7 @@ public:
 	typedef MojVector<UChar> UnicodeVec;
 
 	static MojErr strToUnicode(const MojString& src, UnicodeVec& destOut);
-	static MojErr unicodeToStr(const UChar* src, gsize len, MojString& destOut);
+	static MojErr unicodeToStr(const UChar* src, MojSize len, MojString& destOut);
 };
 
 #define MojUnicodeErrCheck(STATUS) if (U_FAILURE(STATUS)) MojErrThrowMsg(MojErrDbUnicode, _T("icu: %s"), u_errorName(STATUS))

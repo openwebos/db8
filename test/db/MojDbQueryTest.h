@@ -68,27 +68,27 @@ private:
 	MojErr put4(MojDb& db, const MojObject& val1, const MojChar* val2);
 	template<class COMP>
 	MojErr check(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-			const COMP& comp, const MojObject& expectedVal2, gsize expectedCount, guint32 limit = G_MAXUINT32);
+			const COMP& comp, const MojObject& expectedVal2, MojSize expectedCount, MojUInt32 limit = MojUInt32Max);
 	template <class COMP>
 	MojErr check(MojDb& db, const MojChar* kind, const MojChar* prop1, const MojObject& expectedVal1,
 			const MojChar* prop2, MojDbQuery::CompOp op,
-			const COMP& comp, const MojObject& expectedVal2, gsize expectedCount, guint32 limit = G_MAXUINT32);
+			const COMP& comp, const MojObject& expectedVal2, MojSize expectedCount, MojUInt32 limit = MojUInt32Max);
 	template <class COMP>
 	MojErr checkVal(const MojObject& obj, const MojChar* prop, const MojObject expectedVal, const COMP& comp);
 	template<class COMP>
 	MojErr checkOrder(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-			const COMP& comp, const MojObject& expectedVal, gsize expectedCount, const MojChar* order, bool desc = false);
+			const COMP& comp, const MojObject& expectedVal, MojSize expectedCount, const MojChar* order, bool desc = false);
 	template<class COMP>
 	MojErr checkPage(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-			const COMP& comp, const MojObject& expectedVal, gsize expectedCount, const MojChar* order, bool desc = false);
+			const COMP& comp, const MojObject& expectedVal, MojSize expectedCount, const MojChar* order, bool desc = false);
 	MojErr checkRange(MojDb& db, const MojChar* prop, MojDbQuery::CompOp opLower, MojDbQuery::CompOp opUpper,
-			const MojObject& valLower, const MojObject& valUpper, gsize expectedCount);
+			const MojObject& valLower, const MojObject& valUpper, MojSize expectedCount);
 	MojErr checkRange(MojDb& db, const MojChar* prop1, const MojObject& val1,
 			const MojChar* prop2, MojDbQuery::CompOp lowerOp, MojDbQuery::CompOp upperOp,
-			const MojObject& lowerVal, const MojObject& upperVal, gsize expectedCount);
+			const MojObject& lowerVal, const MojObject& upperVal, MojSize expectedCount);
 	MojErr checkCount(MojDb& db, const MojChar* kind, const MojChar* prop, MojDbQuery::CompOp op,
-			const MojObject& expectedVal, gsize expectedCount, guint32 limit = G_MAXUINT32);
-	MojErr checkKind(MojDb& db, const MojChar* kind, gsize expectedCount, const MojChar* orderBy = NULL);
+			const MojObject& expectedVal, MojSize expectedCount, MojUInt32 limit = MojUInt32Max);
+	MojErr checkKind(MojDb& db, const MojChar* kind, MojSize expectedCount, const MojChar* orderBy = NULL);
 	MojErr checkInvalid(const MojChar* queryJson, MojErr expectedErr);
 
 	ObjectSet m_ids;

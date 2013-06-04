@@ -32,8 +32,8 @@ public:
 	virtual void cleanup();
 
 private:
-	MojErr _runPhaseTest (MojDb& db, guint32 i_phase_number);
-	MojErr _generateNewRecords (MojDb& db, guint32 i_number_records);
+	MojErr _runPhaseTest (MojDb& db, MojUInt32 i_phase_number);
+	MojErr _generateNewRecords (MojDb& db, MojUInt32 i_number_records);
 	MojErr _performThreeQueries (MojDb& db);
 	MojErr _delete10PersentsRecords (MojDb& db);
 	MojErr _change10PersentsRecords (MojDb& db);

@@ -23,13 +23,13 @@
 								MojAssert(m_end >= m_begin && m_endAlloc >= m_end); \
 								MojAssert(*m_end == _T('\0'))
 
-static const gsize MojStringInitialSize = 8;
-static const gsize MojStringFormatBufSize = 128;
+static const MojSize MojStringInitialSize = 8;
+static const MojSize MojStringFormatBufSize = 128;
 
 const MojString MojString::Empty;
 MojChar* MojString::s_emptyString = (MojChar*) _T("");
 
-gsize MojString::find(const MojChar* str, gsize startIdx) const
+MojSize MojString::find(const MojChar* str, MojSize startIdx) const
 {
 	MojStringAssertValid();
 	MojAssert(startIdx == 0 || startIdx < length());
@@ -40,7 +40,7 @@ gsize MojString::find(const MojChar* str, gsize startIdx) const
 	return MojInvalidIndex;
 }
 
-gsize MojString::find(MojChar c, gsize startIdx) const
+MojSize MojString::find(MojChar c, MojSize startIdx) const
 {
 	MojStringAssertValid();
 	MojAssert(startIdx == 0 || startIdx < length());
@@ -51,7 +51,7 @@ gsize MojString::find(MojChar c, gsize startIdx) const
 	return MojInvalidIndex;
 }
 
-gsize MojString::rfind(MojChar c, gsize startIdx) const
+MojSize MojString::rfind(MojChar c, MojSize startIdx) const
 {
 	MojStringAssertValid();
 	MojAssert(startIdx == MojInvalidIndex || startIdx < length());
@@ -69,15 +69,15 @@ MojErr MojString::split(MojChar c, MojVector<MojString>& vecOut) const
 	MojStringAssertValid();
 
 	vecOut.clear();
-	gsize idx = 0;
-	gsize idxStart = 0;
-	gsize len = length();
+	MojSize idx = 0;
+	MojSize idxStart = 0;
+	MojSize len = length();
 	MojVector<MojString> vec;
 	do {
 		idx = find(c, idx);
 		if (idx == MojInvalidIndex)
 			idx = len;
-		gsize subLen = idx - idxStart;
+		MojSize subLen = idx - idxStart;
 		if (subLen > 0) {
 			MojString str;
 			MojErr err = substring(idxStart, subLen, str);
@@ -92,7 +92,7 @@ MojErr MojString::split(MojChar c, MojVector<MojString>& vecOut) const
 	return MojErrNone;
 }
 
-MojErr MojString::substring(gsize idx, gsize len, MojString& strOut) const
+MojErr MojString::substring(MojSize idx, MojSize len, MojString& strOut) const
 {
 	MojStringAssertValid();
 	MojAssert(idx <= length() && len <= (length() - idx));
@@ -135,7 +135,7 @@ bool MojString::startsWith(const MojChar* str) const
 	return true;
 }
 
-MojErr MojString::reserve(gsize len)
+MojErr MojString::reserve(MojSize len)
 {
 	MojStringAssertValid();
 
@@ -148,7 +148,7 @@ MojErr MojString::reserve(gsize len)
 	return MojErrNone;
 }
 
-MojErr MojString::truncate(gsize len)
+MojErr MojString::truncate(MojSize len)
 {
 	MojStringAssertValid();
 
@@ -162,7 +162,7 @@ MojErr MojString::truncate(gsize len)
 	return MojErrNone;
 }
 
-MojErr MojString::resize(gsize len)
+MojErr MojString::resize(MojSize len)
 {
 	MojStringAssertValid();
 
@@ -220,7 +220,7 @@ MojErr MojString::assign(const MojChar* str)
 	return assign(str, MojStrLen(str));
 }
 
-MojErr MojString::assign(const MojChar* chars, gsize len)
+MojErr MojString::assign(const MojChar* chars, MojSize len)
 {
 	MojAssert(chars || len == 0);
 	MojStringAssertValid();
@@ -242,7 +242,7 @@ MojErr MojString::assign(const MojChar* chars, gsize len)
 	return MojErrNone;
 }
 
-MojErr MojString::setAt(gsize idx, MojChar c)
+MojErr MojString::setAt(MojSize idx, MojChar c)
 {
 	MojAssert(idx < length());
 	MojStringAssertValid();
@@ -314,7 +314,7 @@ MojErr MojString::append(const MojChar* str)
 	return append(str, MojStrLen(str));
 }
 
-MojErr MojString::append(const MojChar* chars, gsize len)
+MojErr MojString::append(const MojChar* chars, MojSize len)
 {
 	MojAssert(chars || len == 0);
 	MojStringAssertValid();
@@ -355,7 +355,7 @@ MojErr MojString::appendVFormat(const MojChar* formatStr, va_list args)
 	va_list args2;
 	va_copy(args2, args);
 	// attempt to format into a small buffer
-	gsize formattedLen = 0;
+	MojSize formattedLen = 0;
 	MojChar buf[MojStringFormatBufSize];
 	MojErr err = MojVsnPrintF(buf, MojStringFormatBufSize, formattedLen, formatStr, args);
 	MojErrGoto(err, Done);
@@ -364,7 +364,7 @@ MojErr MojString::appendVFormat(const MojChar* formatStr, va_list args)
 		err = append(buf, formattedLen);
 		MojErrGoto(err, Done);
 	} else {
-		gsize newLen = 0;
+		MojSize newLen = 0;
 		err = ensureSpace(formattedLen);
 		MojErrGoto(err, Done);
 		// format into new string
@@ -380,12 +380,12 @@ Done:
 	return MojErrNone;
 }
 
-MojErr MojString::base64Encode(const MojVector<guint8>& vec, bool pad)
+MojErr MojString::base64Encode(const MojVector<MojByte>& vec, bool pad)
 {
 	MojString str;
 	MojErr err = str.resize(MojBase64EncodedLenMax(vec.size()));
 	MojErrCheck(err);
-	gsize size;
+	MojSize size;
 	err = MojBase64Encode(vec.begin(), vec.size(), str.m_begin, str.length(), size, pad);
 	MojErrCheck(err);
 	err = str.truncate(size);
@@ -395,15 +395,15 @@ MojErr MojString::base64Encode(const MojVector<guint8>& vec, bool pad)
 	return MojErrNone;
 }
 
-MojErr MojString::base64Decode(MojVector<guint8>& vecOut) const
+MojErr MojString::base64Decode(MojVector<MojByte>& vecOut) const
 {
-	MojVector<guint8> vec;
+	MojVector<MojByte> vec;
 	MojErr err = vec.resize(MojBase64DecodedSizeMax(length()));
 	MojErrCheck(err);
-	MojVector<guint8>::Iterator i;
+	MojVector<MojByte>::Iterator i;
 	err = vec.begin(i);
 	MojErrCheck(err);
-	gsize size;
+	MojSize size;
 	err = MojBase64Decode(m_begin, length(), i, vec.size(), size);
 	MojErrCheck(err);
 	err = vec.resize(size);
@@ -444,14 +444,14 @@ void MojString::reset(MojChar* begin, MojChar* end, MojChar* endAlloc)
 	init(begin, end, endAlloc);
 }
 
-MojChar* MojString::alloc(gsize len)
+MojChar* MojString::alloc(MojSize len)
 {
 	return (MojChar*) MojRefCountAlloc(sizeof(MojChar) * (len + 1));
 }
 
-MojErr MojString::realloc(gsize allocLen)
+MojErr MojString::realloc(MojSize allocLen)
 {
-	gsize len = length();
+	MojSize len = length();
 	MojChar* newData = alloc(allocLen);
 	MojAllocCheck(newData);
 	MojMemCpy(newData, m_begin, len + 1);
@@ -470,12 +470,12 @@ MojErr MojString::ensureWritable()
 	return MojErrNone;
 }
 
-MojErr MojString::ensureSpace(gsize len)
+MojErr MojString::ensureSpace(MojSize len)
 {
 	MojAssert(len);
 
 	if (len > freeSpace() || !isWritable()) {
-		gsize allocLen = MojMax(capacity() * 2, length() + len);
+		MojSize allocLen = MojMax(capacity() * 2, length() + len);
 		allocLen = MojMax(allocLen, MojStringInitialSize);
 		MojErr err = realloc(allocLen);
 		MojErrCheck(err);
@@ -483,7 +483,7 @@ MojErr MojString::ensureSpace(gsize len)
 	return MojErrNone;
 }
 
-void MojString::setEnd(gsize len)
+void MojString::setEnd(MojSize len)
 {
 	MojAssert(len <= capacity());
 	m_end = m_begin + len;

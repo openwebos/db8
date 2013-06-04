@@ -225,7 +225,7 @@ MojErr MojDbQuery::fromObject(const MojObject& obj)
 				MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: select clause but no selected properties"));
 			}
 			MojObject prop;
-			gsize i = 0;
+			MojSize i = 0;
 			while (array.at(i++, prop)) {
 				MojErr err = prop.stringValue(str);
 				MojErrCheck(err);
@@ -263,14 +263,14 @@ MojErr MojDbQuery::fromObject(const MojObject& obj)
 		desc(descVal);
 	}
 	// limit
-	gint64 lim;
+	MojInt64 lim;
 	if (obj.get(LimitKey, lim)) {
 		if (lim < 0)
 			MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: negative query limit"));
 	} else {
 		lim = LimitDefault;
 	}
-	limit((guint32) lim);
+	limit((MojUInt32) lim);
 	// page
 	MojObject pageObj;
 	if (obj.get(PageKey, pageObj)) {
@@ -435,7 +435,7 @@ void MojDbQuery::init()
 MojErr MojDbQuery::addClauses(WhereMap& map, const MojObject& array)
 {
 	MojObject clause;
-	gsize i = 0;
+	MojSize i = 0;
 	while (array.at(i++, clause)) {
 		MojString prop;
 		MojErr err = clause.getRequired(PropKey, prop);

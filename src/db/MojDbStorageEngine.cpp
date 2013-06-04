@@ -102,7 +102,7 @@ MojErr MojDbStorageTxn::addWatcher(MojDbWatcher* watcher, const MojDbKey& key)
 	return MojErrNone;
 }
 
-MojErr MojDbStorageTxn::offsetQuota(gint64 offset)
+MojErr MojDbStorageTxn::offsetQuota(MojInt64 offset)
 {
 	if (m_curQuotaOffset.get() && m_quotaEnabled) {
 		MojErr err = m_curQuotaOffset->apply(offset);

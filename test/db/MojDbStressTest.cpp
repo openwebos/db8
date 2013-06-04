@@ -99,19 +99,19 @@ MojErr MojDbStressTest::runTests()
         m_prevTests = m_tests;
 	m_tests.clear();
 
-	for (guint32 i = 0; i < NumKindTests; ++i) {
+	for (MojUInt32 i = 0; i < NumKindTests; ++i) {
 		MojRefCountedPtr<KindTest> test(new KindTest(this, m_numIterationsRemaining * NumKindTests + i));
 		MojAllocCheck(test.get());
 		MojErr err = runTest(test.get());
 		MojTestErrCheck(err);
 	}
-	for (guint32 i = 0; i < NumFullTests; ++i) {
+	for (MojUInt32 i = 0; i < NumFullTests; ++i) {
 		MojRefCountedPtr<FullTest> test(new FullTest(this, m_numIterationsRemaining * NumFullTests + i));
 		MojAllocCheck(test.get());
 		MojErr err = runTest(test.get());
 		MojTestErrCheck(err);
 	}
-	for (guint32 i = 0; i < NumConcurrentTests; ++i) {
+	for (MojUInt32 i = 0; i < NumConcurrentTests; ++i) {
 		MojRefCountedPtr<ConcurrentTest> test(new ConcurrentTest(this, m_numIterationsRemaining * NumConcurrentTests + i));
 		MojAllocCheck(test.get());
 		MojErr err = runTest(test.get());
@@ -179,7 +179,7 @@ MojErr MojDbStressTest::init()
 	return MojErrNone;
 }
 
-MojDbStressTest::TestHandler::TestHandler(MojDbStressTest* test, const MojChar* name, guint32 kindNum)
+MojDbStressTest::TestHandler::TestHandler(MojDbStressTest* test, const MojChar* name, MojUInt32 kindNum)
 : m_test(test),
   m_name(name),
   m_kindNum(kindNum)
@@ -204,7 +204,7 @@ MojErr MojDbStressTest::TestHandler::init()
 	return MojErrNone;
 }
 
-MojDbStressTest::KindTest::KindTest(MojDbStressTest* test, guint32 kindNum)
+MojDbStressTest::KindTest::KindTest(MojDbStressTest* test, MojUInt32 kindNum)
 : TestHandler(test, _T("KindTest"), kindNum),
   m_putKindBad1Slot(this, &KindTest::handlePutKindBad1),
   m_putKindGoodSlot(this, &KindTest::handlePutKindGood),
@@ -328,7 +328,7 @@ MojErr MojDbStressTest::KindTest::handleDelKind(MojObject& result, MojErr errCod
 	return MojErrNone;
 }
 
-MojDbStressTest::FullTest::FullTest(MojDbStressTest* test, guint32 kindNum)
+MojDbStressTest::FullTest::FullTest(MojDbStressTest* test, MojUInt32 kindNum)
 : TestHandler(test, _T("FullTest"), kindNum),
   m_putKindSlot(this, &FullTest::handlePutKind),
   m_watchSlot(this, &FullTest::handleWatch),
@@ -417,11 +417,11 @@ MojErr MojDbStressTest::FullTest::put()
 	MojPrintF(_T("fulltest %d - put %d\n"), m_kindNum, NumBatches - m_numBatchesRemaining);
 	// create objects for batch put
 	MojVector<MojObject> batch;
-	for (guint32 i = 0; i < BatchSize; ++i) {
+	for (MojUInt32 i = 0; i < BatchSize; ++i) {
 		MojObject obj;
 		MojErr err = obj.putString(_T("_kind"), m_kindId);
 		MojTestErrCheck(err);
-		for (guint32 j = 0; j < 10; ++j) {
+		for (MojUInt32 j = 0; j < 10; ++j) {
 			MojString foo;
 			err = foo.format(_T("foo%d"), j);
 			MojTestErrCheck(err);
@@ -555,7 +555,7 @@ MojErr MojDbStressTest::FullTest::handleDelKind(MojObject& result, MojErr errCod
 	return MojErrNone;
 }
 
-MojDbStressTest::ConcurrentTest::ConcurrentTest(MojDbStressTest* test, guint32 kindNum)
+MojDbStressTest::ConcurrentTest::ConcurrentTest(MojDbStressTest* test, MojUInt32 kindNum)
 : TestHandler(test, _T("ConcurrentTest"), kindNum),
   m_putKindSlot(this, &ConcurrentTest::handlePutKind),
   m_numPutsRemaining(NumConcurrentTestPuts),
@@ -581,11 +581,11 @@ MojErr MojDbStressTest::ConcurrentTest::run()
 	MojTestErrCheck(err);
 
 	// put objects
-	for (guint32 i = 0; i < m_numPutsRemaining; ++i) {
+	for (MojUInt32 i = 0; i < m_numPutsRemaining; ++i) {
 		MojObject obj;
 		MojErr err = obj.putString(_T("_kind"), kindId);
 		MojTestErrCheck(err);
-		for (guint32 j = 0; j < 10; ++j) {
+		for (MojUInt32 j = 0; j < 10; ++j) {
 			MojString foo;
 			err = foo.format(_T("foo%d"), j);
 			MojTestErrCheck(err);

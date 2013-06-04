@@ -21,10 +21,10 @@
 #define MOJOSLINUXINTERNAL_H_
 
 #if defined(MOJ_X86)
-inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
+inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 {
 	MojAssert(a);
-	gint32 i = incr;
+	MojInt32 i = incr;
 	asm volatile(
 			"lock xaddl %0, %1"
 				: "+r" (i), "+m" (a->val)
@@ -32,7 +32,7 @@ inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 	return incr + i;
 }
 #elif defined(MOJ_ARM)
-inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
+inline MojInt32 MojAtomicAdd(MojAtomicT* a, MojInt32 incr)
 {
 	MojAssert(a);
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3)
@@ -40,8 +40,8 @@ inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 	return  __sync_add_and_fetch(&a->val, incr);
 #else
 	/* Keep this in case we have to build using OE Classic */
-	guint32 tmp;
-	gint32 res;
+	MojUInt32 tmp;
+	MojInt32 res;
 	asm volatile(
 			"1:	ldrex %0, [%2]\n"
 			"add %0, %0, %3\n"
@@ -56,12 +56,12 @@ inline gint32 MojAtomicAdd(MojAtomicT* a, gint32 incr)
 }
 #endif
 
-inline gint32 MojAtomicIncrement(MojAtomicT* a)
+inline MojInt32 MojAtomicIncrement(MojAtomicT* a)
 {
 	return MojAtomicAdd(a, 1);
 }
 
-inline gint32 MojAtomicDecrement(MojAtomicT* a)
+inline MojInt32 MojAtomicDecrement(MojAtomicT* a)
 {
 	return MojAtomicAdd(a, -1);
 }

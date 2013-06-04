@@ -200,7 +200,7 @@ MojErr MojDbTextCollatorTest::queryTest()
 	MojTestErrCheck(err);
 
 	// put test objects
-	for (gsize i = 0; i < sizeof(MojCollatorTestObjects) / sizeof(MojChar*); ++i) {
+	for (MojSize i = 0; i < sizeof(MojCollatorTestObjects) / sizeof(MojChar*); ++i) {
 		MojObject obj;
 		err = obj.fromJson(MojCollatorTestObjects[i]);
 		MojTestErrCheck(err);
@@ -218,14 +218,14 @@ MojErr MojDbTextCollatorTest::queryTest()
 	err = db.find(query, cursor);
 	MojTestErrCheck(err);
 	bool found = false;
-	gint64 index = 0;
+	MojInt64 index = 0;
 	for (;;) {
 		MojObject obj;
 		err = cursor.get(obj, found);
 		MojTestErrCheck(err);
 		if (!found)
 			break;
-		gint64 id = 0;
+		MojInt64 id = 0;
 		err = obj.getRequired(MojDb::IdKey, id);
 		MojTestErrCheck(err);
 		MojTestAssert(id == index++);
@@ -248,7 +248,7 @@ MojErr MojDbTextCollatorTest::queryTest()
 		MojTestErrCheck(err);
 		if (!found)
 			break;
-		gint64 id = 0;
+		MojInt64 id = 0;
 		err = obj.getRequired(MojDb::IdKey, id);
 		MojTestErrCheck(err);
 		MojTestAssert(id == index++);

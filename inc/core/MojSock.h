@@ -30,7 +30,7 @@ public:
 
 	void fromAddr(MojSockAddrT* addr, MojSockLenT size);
 	MojErr fromPath(const MojChar* path);
-	MojErr fromHostPort(const MojChar* host, guint32 port);
+	MojErr fromHostPort(const MojChar* host, MojUInt32 port);
 
 	MojSockLenT size() const { return m_size; }
 	const MojSockAddrT* impl() const { return &m_u.m_sa; }
@@ -60,8 +60,8 @@ public:
 	MojErr bind(const MojSockAddr& addr) { return MojSockBind(m_sock, addr.impl(), addr.size()); }
 	MojErr connect(const MojSockAddr& addr) { return MojSockConnect(m_sock, addr.impl(), addr.size()); }
 	MojErr listen(MojSockT sock, int backlog) { return MojSockListen(m_sock, backlog); }
-	MojErr read(void* buf, gsize bufSize, gsize& sizeOut, int flags = 0) { return MojSockRecv(m_sock, buf, bufSize, sizeOut, flags); }
-	MojErr write(const void* data, gsize size, gsize& sizeOut, int flags = 0) { return MojSockSend(m_sock, data, size, sizeOut, flags); }
+	MojErr read(void* buf, MojSize bufSize, MojSize& sizeOut, int flags = 0) { return MojSockRecv(m_sock, buf, bufSize, sizeOut, flags); }
+	MojErr write(const void* data, MojSize size, MojSize& sizeOut, int flags = 0) { return MojSockSend(m_sock, data, size, sizeOut, flags); }
 
 	MojSockT impl() const { return m_sock; }
 	MojSockT& impl() { return m_sock; }

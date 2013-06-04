@@ -29,15 +29,15 @@ public:
 	MojDataWriter(MojBuffer& buf) : m_buf(buf) {}
 
 	void clear() { m_buf.clear(); }
-	MojErr writeUInt8(guint8 val) { return m_buf.writeByte(val); }
-	MojErr writeUInt16(guint16 val);
-	MojErr writeUInt32(guint32 val);
-	MojErr writeInt64(gint64 val);
+	MojErr writeUInt8(MojByte val) { return m_buf.writeByte(val); }
+	MojErr writeUInt16(MojUInt16 val);
+	MojErr writeUInt32(MojUInt32 val);
+	MojErr writeInt64(MojInt64 val);
 	MojErr writeDecimal(const MojDecimal& val);
-	MojErr writeChars(const MojChar* chars, gsize len);
+	MojErr writeChars(const MojChar* chars, MojSize len);
 
-	static gsize sizeChars(const MojChar* chars, gsize len);
-	static gsize sizeDecimal(const MojDecimal& val);
+	static MojSize sizeChars(const MojChar* chars, MojSize len);
+	static MojSize sizeDecimal(const MojDecimal& val);
 
 	MojBuffer& buf() { return m_buf; }
 
@@ -49,27 +49,27 @@ class MojDataReader
 {
 public:
 	MojDataReader();
-	MojDataReader(const guint8* data, gsize size);
+	MojDataReader(const MojByte* data, MojSize size);
 
-	void data(const guint8* data, gsize size);
-	MojErr readUInt8(guint8& val);
-	MojErr readUInt16(guint16& val);
-	MojErr readUInt32(guint32& val);
-	MojErr readInt64(gint64& val);
+	void data(const MojByte* data, MojSize size);
+	MojErr readUInt8(MojByte& val);
+	MojErr readUInt16(MojUInt16& val);
+	MojErr readUInt32(MojUInt32& val);
+	MojErr readInt64(MojInt64& val);
 	MojErr readDecimal(MojDecimal& val);
-	MojErr skip(gsize len);
+	MojErr skip(MojSize len);
 
-	const guint8* begin() const { return m_begin; }
-	const guint8* end() const { return m_end; }
-	const guint8* pos() const { return m_pos; }
+	const MojByte* begin() const { return m_begin; }
+	const MojByte* end() const { return m_end; }
+	const MojByte* pos() const { return m_pos; }
 
-	gsize available() const { return m_end - m_pos; }
+	MojSize available() const { return m_end - m_pos; }
 
 private:
 
-	const guint8* m_begin;
-	const guint8* m_end;
-	const guint8* m_pos;
+	const MojByte* m_begin;
+	const MojByte* m_end;
+	const MojByte* m_pos;
 };
 
 #endif /* MOJDATAWRITER_H_ */

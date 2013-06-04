@@ -49,7 +49,7 @@ MojErr MojSockAddr::fromPath(const MojChar* path)
 	return MojErrNone;
 }
 
-MojErr MojSockAddr::fromHostPort(const MojChar* host, guint32 port)
+MojErr MojSockAddr::fromHostPort(const MojChar* host, MojUInt32 port)
 {
 	MojAssert(host);
 

@@ -79,7 +79,7 @@ MojErr MojDbQueryPlan::buildRanges(const MojDbIndex& index)
 		// get clause for prop
 		MojDbQuery::WhereMap::ConstIterator clause = where.find(*i);
 		if (clause == where.end()) {
-			MojAssert((gsize)(i - props.begin()) == where.size());
+			MojAssert((MojSize)(i - props.begin()) == where.size());
 			break;
 		}
 
@@ -146,7 +146,7 @@ MojErr MojDbQueryPlan::rangesFromKeySets(const KeySet& lowerKeys, const KeySet& 
 {
 	MojAssert(lowerKeys.size() == upperKeys.size() && lowerKeys.size() == prefixKeys.size());
 
-	guint32 index = 0;
+	MojUInt32 index = 0;
 	KeySet::ConstIterator lowerIter = lowerKeys.begin();
 	KeySet::ConstIterator upperIter = upperKeys.begin();
 	KeySet::ConstIterator prefixIter = prefixKeys.begin();
@@ -161,11 +161,11 @@ MojErr MojDbQueryPlan::rangesFromKeySets(const KeySet& lowerKeys, const KeySet& 
 	return MojErrNone;
 }
 
-MojErr MojDbQueryPlan::rangesFromKeys(MojDbKey lowerKey, MojDbKey upperKey, MojDbKey prefix, guint32 index,
+MojErr MojDbQueryPlan::rangesFromKeys(MojDbKey lowerKey, MojDbKey upperKey, MojDbKey prefix, MojUInt32 index,
 		const MojDbQuery::WhereClause* clause)
 {
 	MojErr err = MojErrNone;
-	guint32 group = 0;
+	MojUInt32 group = 0;
 	MojDbQuery::CompOp lowerOp = MojDbQuery::OpEq;
 	MojDbQuery::CompOp upperOp = MojDbQuery::OpNone;
 	if (clause) {
@@ -253,7 +253,7 @@ MojErr MojDbQueryPlan::rangesFromKeys(MojDbKey lowerKey, MojDbKey upperKey, MojD
 	return MojErrNone;
 }
 
-MojErr MojDbQueryPlan::addRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, guint32 group)
+MojErr MojDbQueryPlan::addRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, MojUInt32 group)
 {
 	MojDbKeyRange range(lowerKey, upperKey, group);
 	// tweak range according to page
@@ -322,7 +322,7 @@ MojErr MojDbQueryPlan::pushSearch(MojDbKeyBuilder& lowerBuilder, MojDbKeyBuilder
 	MojErrCheck(err);
 	err = upperBuilder.push(toks);
 	MojErrCheck(err);
-	m_groupCount = (guint32) toks.size();
+	m_groupCount = (MojUInt32) toks.size();
 
 	return MojErrNone;
 }

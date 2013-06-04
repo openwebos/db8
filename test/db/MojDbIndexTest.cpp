@@ -39,7 +39,7 @@ public:
         return MojErrNone;
     }
 
-    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut)
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
     {
         return MojErrNone;
     }
@@ -76,8 +76,8 @@ public:
     typedef MojSet<MojDbKey> IndexSet;
     IndexSet m_set;
     bool m_incDel;
-    gsize m_putCount;
-    gsize m_delCount;
+    MojSize m_putCount;
+    MojSize m_delCount;
 };
 
 class TestTxn : public MojDbStorageTxn
@@ -163,7 +163,7 @@ MojErr MojDbIndexTest::simpleTest()
     err = index.addProp(prop);
     MojTestErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":1}"), NULL);
@@ -215,7 +215,7 @@ MojErr MojDbIndexTest::nestedTest()
     err = index.addProp(prop);
     MojTestErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":1}"), NULL);
@@ -280,7 +280,7 @@ MojErr MojDbIndexTest::compoundTest()
     err = index.addProp(prop);
     MojTestErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":1}"), NULL);
@@ -610,7 +610,7 @@ MojErr MojDbIndexTest::deletedTest()
     MojTestErrCheck(err);
     index.incDel(true);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":1}"), NULL);
@@ -643,7 +643,7 @@ MojErr MojDbIndexTest::wildcardTest()
     err = index.addProp(prop);
     MojTestErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":{\"bar\":1}}"), NULL);
@@ -690,7 +690,7 @@ MojErr MojDbIndexTest::defaultValuesTest()
     err = index.addProp(prop);
     MojTestErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"bar\":1}"), NULL);
@@ -716,7 +716,7 @@ MojErr MojDbIndexTest::defaultValuesTest()
     MojTestErrCheck(err);
     err = index2.addProp(prop2);
     MojTestErrCheck(err);
-    err = index2.open(storageIndex2.get(), (gint64) 0, req);
+    err = index2.open(storageIndex2.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index2, 1, _T("{\"bar\":1}"), NULL);
@@ -748,7 +748,7 @@ MojErr MojDbIndexTest::defaultValuesTest()
     MojTestErrCheck(err);
     err = index3.addProp(prop3);
     MojTestErrCheck(err);
-    err = index3.open(storageIndex3.get(), (gint64) 0, req);
+    err = index3.open(storageIndex3.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index3, 1, _T("{\"bar\":1}"), NULL);
@@ -784,7 +784,7 @@ MojErr MojDbIndexTest::multiTest()
             _T("]}"));
     MojErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":1,\"bar\":2,\"baz\":3}"), NULL);
@@ -826,7 +826,7 @@ MojErr MojDbIndexTest::tokenizeTest()
             _T("]}"));
     MojErrCheck(err);
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     err = put(index, 1, _T("{\"foo\":\"four score and seven years ago\"}"), NULL);
@@ -929,7 +929,7 @@ MojErr MojDbIndexTest::assertContains(TestIndex& ti, MojObject id, const MojChar
     MojTestErrCheck(err);
     MojObjectWriter(writer);
     MojObject val;
-    gsize idx = 0;
+    MojSize idx = 0;
     while (array.at(idx++, val)) {
         err = val.visit(writer);
         MojTestErrCheck(err);
@@ -986,8 +986,8 @@ MojErr MojDbIndexTest::assertContainsText(TestIndex& ti, MojObject id, const Moj
     MojObjectWriter writer;
     err = id.visit(writer);
     MojTestErrCheck(err);
-    const guint8* idData = NULL;
-    gsize idSize = 0;
+    const MojByte* idData = NULL;
+    MojSize idSize = 0;
     err = writer.buf().data(idData, idSize);
     MojTestErrCheck(err);
     err = key.byteVec().append(idData, idData + idSize);
@@ -1010,7 +1010,7 @@ MojErr MojDbIndexTest::assertCanAnswer(const MojChar* propsJson, const MojChar* 
 
     MojDbIndex index(NULL, NULL);
     MojObject prop;
-    gsize i = 0;
+    MojSize i = 0;
     for (;;) {
         if(propsObj.at(i++, prop)) {
             err = index.addProp(prop);
@@ -1023,7 +1023,7 @@ MojErr MojDbIndexTest::assertCanAnswer(const MojChar* propsJson, const MojChar* 
     MojRefCountedPtr<MojDbStorageIndex> storageIndex(new TestIndex(false));
     MojAllocCheck(storageIndex.get());
     MojDbReq req;
-    err = index.open(storageIndex.get(), (gint64) 0, req);
+    err = index.open(storageIndex.get(), (MojInt64) 0, req);
     MojTestErrCheck(err);
 
     MojDbQuery query;

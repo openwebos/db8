@@ -32,7 +32,7 @@ public:
 	virtual ~MojDbSearchCursor();
 	virtual MojErr close();
 	virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
-	virtual MojErr count(guint32& countOut);
+	virtual MojErr count(MojUInt32& countOut);
 	virtual MojErr nextPage(MojDbQuery::Page& pageOut);
 
 private:
@@ -45,10 +45,10 @@ private:
 	};
 	typedef MojSet<MojDbKey> KeySet;
 	typedef MojSet<MojObject> ObjectSet;
-	typedef MojMap<guint32, MojSharedPtr<ObjectSet> > GroupMap;
+	typedef MojMap<MojUInt32, MojSharedPtr<ObjectSet> > GroupMap;
 	typedef MojVector<MojRefCountedPtr<MojDbObjectItem>, MojEq<MojRefCountedPtr<MojDbObjectItem> >, ItemComp > ItemVec;
 
-	static const guint32 MaxResults = 10000;
+	static const MojUInt32 MaxResults = 10000;
 
 	virtual MojErr init(const MojDbQuery& query);
 	bool loaded() const { return m_pos != NULL; }
@@ -62,7 +62,7 @@ private:
 	ItemVec m_items;
 	MojString m_orderProp;
 	MojString m_distinct;
-	guint32 m_limit;
+	MojUInt32 m_limit;
 	ItemVec::ConstIterator m_pos;
 	ItemVec::ConstIterator m_limitPos;
 	MojString m_locale;

@@ -55,7 +55,7 @@ MojErr MojObjectWriter::endArray()
     return MojErrNone;
 }
 
-MojErr MojObjectWriter::propName(const MojChar* name, gsize len)
+MojErr MojObjectWriter::propName(const MojChar* name, MojSize len)
 {
     MojErr err = writeString(name, len, true);
     MojErrCheck(err);
@@ -70,7 +70,7 @@ MojErr MojObjectWriter::nullValue()
     return MojErrNone;
 }
 
-gsize MojObjectWriter::nullSize()
+MojSize MojObjectWriter::nullSize()
 {
     return 1;
 }
@@ -82,12 +82,12 @@ MojErr MojObjectWriter::boolValue(bool val)
     return MojErrNone;
 }
 
-gsize MojObjectWriter::boolSize()
+MojSize MojObjectWriter::boolSize()
 {
     return 1;
 }
 
-MojErr MojObjectWriter::intValue(gint64 val)
+MojErr MojObjectWriter::intValue(MojInt64 val)
 {
     // TODO: simplify integer encoding
     if (val < 0) {
@@ -98,20 +98,20 @@ MojErr MojObjectWriter::intValue(gint64 val)
     } else if (val == 0) {
         MojErr err = m_writer.writeUInt8(MarkerZeroIntValue);
         MojErrCheck(err);
-    } else if (val <= G_MAXUINT8) {
+    } else if (val <= MojUInt8Max) {
         MojErr err = m_writer.writeUInt8(MarkerUInt8Value);
         MojErrCheck(err);
-        err = m_writer.writeUInt8((guint8) val);
+        err = m_writer.writeUInt8((MojUInt8) val);
         MojErrCheck(err);
-    } else if (val <= G_MAXUINT16) {
+    } else if (val <= MojUInt16Max) {
         MojErr err = m_writer.writeUInt8(MarkerUInt16Value);
         MojErrCheck(err);
-        err = m_writer.writeUInt16((guint16) val);
+        err = m_writer.writeUInt16((MojUInt16) val);
         MojErrCheck(err);
-    } else if (val <= G_MAXUINT32) {
+    } else if (val <= MojUInt32Max) {
         MojErr err = m_writer.writeUInt8(MarkerUInt32Value);
         MojErrCheck(err);
-        err = m_writer.writeUInt32((guint32) val);
+        err = m_writer.writeUInt32((MojUInt32) val);
         MojErrCheck(err);
     } else {
         MojErr err = m_writer.writeUInt8(MarkerInt64Value);
@@ -122,21 +122,21 @@ MojErr MojObjectWriter::intValue(gint64 val)
     return MojErrNone;
 }
 
-gsize MojObjectWriter::intSize(gint64 val)
+MojSize MojObjectWriter::intSize(MojInt64 val)
 {
-    gsize size = 0;
+    MojSize size = 0;
     if (val < 0) {
-        size = 1 + sizeof(gint64);
+        size = 1 + sizeof(MojInt64);
     } else if (val == 0) {
         size = 1;
-    } else if (val <= G_MAXUINT8) {
-        size = 1 + sizeof(guint8);
-    } else if (val <= G_MAXUINT16) {
-        size = 1 + sizeof(guint16);
-    } else if (val <= G_MAXUINT32) {
-        size = 1 + sizeof(guint32);
+    } else if (val <= MojUInt8Max) {
+        size = 1 + sizeof(MojUInt8);
+    } else if (val <= MojUInt16Max) {
+        size = 1 + sizeof(MojUInt16);
+    } else if (val <= MojUInt32Max) {
+        size = 1 + sizeof(MojUInt32);
     } else {
-        size = 1 + sizeof(gint64);
+        size = 1 + sizeof(MojInt64);
     }
     return size;
 }
@@ -151,12 +151,12 @@ MojErr MojObjectWriter::decimalValue(const MojDecimal& val)
     return MojErrNone;
 }
 
-gsize MojObjectWriter::decimalSize(const MojDecimal& val)
+MojSize MojObjectWriter::decimalSize(const MojDecimal& val)
 {
     return 1 + MojDataWriter::sizeDecimal(val);
 }
 
-MojErr MojObjectWriter::stringValue(const MojChar* val, gsize len)
+MojErr MojObjectWriter::stringValue(const MojChar* val, MojSize len)
 {
     MojErr err = writeString(val, len, false);
     MojErrCheck(err);
@@ -164,15 +164,15 @@ MojErr MojObjectWriter::stringValue(const MojChar* val, gsize len)
     return MojErrNone;
 }
 
-gsize MojObjectWriter::stringSize(const MojChar* val, gsize len)
+MojSize MojObjectWriter::stringSize(const MojChar* val, MojSize len)
 {
     return 2 + MojDataWriter::sizeChars(val, len);
 }
 
-MojErr MojObjectWriter::writeString(const MojChar* val, gsize len, bool addToken)
+MojErr MojObjectWriter::writeString(const MojChar* val, MojSize len, bool addToken)
 {
     if (m_tokenSet) {
-        guint8 token = MojTokenSet::InvalidToken;
+        MojUInt8 token = MojTokenSet::InvalidToken;
         MojErr err = m_tokenSet->tokenFromString(val, token, addToken);
         MojErrCheck(err);
         if (token != MojTokenSet::InvalidToken) {
@@ -198,7 +198,7 @@ MojObjectReader::MojObjectReader()
 
 }
 
-MojObjectReader::MojObjectReader(const guint8* data, gsize size)
+MojObjectReader::MojObjectReader(const MojByte* data, MojSize size)
 : m_reader(data, size),
   m_skipBeginObj(false),
   m_tokenSet(NULL)
@@ -206,7 +206,7 @@ MojObjectReader::MojObjectReader(const guint8* data, gsize size)
     MojAssert(data || size == 0);
 }
 
-void MojObjectReader::data(const guint8* data, gsize size)
+void MojObjectReader::data(const MojByte* data, MojSize size)
 {
     m_reader.data(data, size);
     m_skipBeginObj = false;
@@ -233,7 +233,7 @@ MojErr MojObjectReader::nextObject(MojObjectVisitor& visitor)
 MojErr MojObjectReader::next(MojObjectVisitor& visitor)
 {
     const MojChar* str = NULL;
-    gsize strLen = 0;
+    MojSize strLen = 0;
     MojErr err = MojErrNone;
 
     if (m_stack.empty()) {
@@ -241,7 +241,7 @@ MojErr MojObjectReader::next(MojObjectVisitor& visitor)
         MojErrCheck(err);
     }
 
-    guint8 marker;
+    MojByte marker;
     err = m_reader.readUInt8(marker);
     MojErrCheck(err);
 
@@ -307,7 +307,7 @@ Redo:
         case MojObjectWriter::MarkerUInt32Value:
         case MojObjectWriter::MarkerNegativeIntValue:
         case MojObjectWriter::MarkerInt64Value: {
-            gint64 val;
+            MojInt64 val;
             err = readInt(m_reader, marker, val);
             MojErrCheck(err);
             err = visitor.intValue(val);
@@ -315,7 +315,7 @@ Redo:
             break;
         }
         case MojObjectWriter::MarkerExtensionValue: {
-            guint32 extSize;
+            MojUInt32 extSize;
             err = m_reader.readUInt32(extSize);
             MojErrCheck(err);
             err = m_reader.skip(extSize);
@@ -389,7 +389,7 @@ Redo:
     return MojErrNone;
 }
 
-MojErr MojObjectReader::read(MojObjectVisitor& visitor, const guint8* data, gsize size)
+MojErr MojObjectReader::read(MojObjectVisitor& visitor, const MojByte* data, MojSize size)
 {
     MojObjectReader reader(data, size);
     MojErr err = reader.read(visitor);
@@ -398,7 +398,7 @@ MojErr MojObjectReader::read(MojObjectVisitor& visitor, const guint8* data, gsiz
     return MojErrNone;
 }
 
-MojErr MojObjectReader::readInt(MojDataReader& dataReader, guint8 marker, gint64& valOut)
+MojErr MojObjectReader::readInt(MojDataReader& dataReader, MojByte marker, MojInt64& valOut)
 {
     MojErr err = MojErrNone;
     switch (marker) {
@@ -406,22 +406,22 @@ MojErr MojObjectReader::readInt(MojDataReader& dataReader, guint8 marker, gint64
         valOut = 0;
         break;
     case MojObjectWriter::MarkerUInt8Value:
-        guint8 val;
+        MojByte val;
         err = dataReader.readUInt8(val);
         MojErrCheck(err);
-        valOut = (gint64) val;
+        valOut = (MojInt64) val;
         break;
     case MojObjectWriter::MarkerUInt16Value:
-        guint16 val16;
+        MojUInt16 val16;
         err = dataReader.readUInt16(val16);
         MojErrCheck(err);
-        valOut = (gint64) val16;
+        valOut = (MojInt64) val16;
         break;
     case MojObjectWriter::MarkerUInt32Value:
-        guint32 val32;
+        MojUInt32 val32;
         err = dataReader.readUInt32(val32);
         MojErrCheck(err);
-        valOut = (gint64) val32;
+        valOut = (MojInt64) val32;
         break;
     case MojObjectWriter::MarkerNegativeIntValue:
     case MojObjectWriter::MarkerInt64Value:
@@ -436,7 +436,7 @@ MojErr MojObjectReader::readInt(MojDataReader& dataReader, guint8 marker, gint64
     return MojErrNone;
 }
 
-MojErr MojObjectReader::readString(MojDataReader& reader, MojChar const*& str, gsize& strLen)
+MojErr MojObjectReader::readString(MojDataReader& reader, MojChar const*& str, MojSize& strLen)
 {
 #ifdef MOJ_ENCODING_UTF8
     const MojChar* pos = (const MojChar*) reader.pos();

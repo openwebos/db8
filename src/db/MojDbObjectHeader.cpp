@@ -85,7 +85,7 @@ MojErr MojDbObjectHeader::read(MojDbKindEngine& kindEngine)
 
 	// version
 	m_read = true;
-	guint8 version = 0;
+	MojUInt8 version = 0;
 	MojDataReader& dataReader = m_reader.dataReader();
 	MojErr err = dataReader.readUInt8(version);
 	MojErrCheck(err);
@@ -95,7 +95,7 @@ MojErr MojDbObjectHeader::read(MojDbKindEngine& kindEngine)
 	MojObjectBuilder builder;
 	err = m_reader.next(builder);
 	MojErrCheck(err);
-	gint64 kindTok = builder.object().intValue();
+	MojInt64 kindTok = builder.object().intValue();
 	err = kindEngine.idFromToken(kindTok, m_kindId);
 	MojErrCheck(err);
 	// rev
@@ -115,7 +115,7 @@ MojErr MojDbObjectHeader::read(MojDbKindEngine& kindEngine)
 		MojErrCheck(err);
 	}
 	// header end
-	guint8 end;
+	MojUInt8 end;
 	err = dataReader.readUInt8(end);
 	MojErrCheck(err);
 
@@ -130,7 +130,7 @@ MojErr MojDbObjectHeader::write(MojBuffer& buf, MojDbKindEngine& kindEngine)
 	MojErr err = dataWriter.writeUInt8(Version);
 	MojErrCheck(err);
 	// kind
-	gint64 kindTok = 0;
+	MojInt64 kindTok = 0;
 	err = kindEngine.tokenFromId(m_kindId, kindTok);
 	MojErrCheck(err);
 	err = objectWriter.intValue(kindTok);

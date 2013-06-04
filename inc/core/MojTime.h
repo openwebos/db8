@@ -26,19 +26,19 @@
 class MojTime
 {
 public:
-	static const gint64 UnitsPerSec = 1000000;
-	static const gint64 UnitsPerMilli = 1000;
-	static const gint64 UnitsPerDay = UnitsPerSec * 60 * 60 * 24;
+	static const MojInt64 UnitsPerSec = 1000000;
+	static const MojInt64 UnitsPerMilli = 1000;
+	static const MojInt64 UnitsPerDay = UnitsPerSec * 60 * 60 * 24;
 
 	MojTime() : m_val(0) {}
 	MojTime(const MojTime& time) : m_val(time.m_val) {}
-	MojTime(gint64 microsecs) : m_val(microsecs) {}
+	MojTime(MojInt64 microsecs) : m_val(microsecs) {}
 
-	gint64 secs() const { return m_val / UnitsPerSec; }
-	gint64 millisecs() const { return m_val / UnitsPerMilli; }
-	gint64 microsecs() const { return m_val; }
-	gint32 millisecsPart() const { return (gint32) (millisecs() % 1000); }
-	gint32 microsecsPart() const { return (gint32) (m_val % UnitsPerSec); }
+	MojInt64 secs() const { return m_val / UnitsPerSec; }
+	MojInt64 millisecs() const { return m_val / UnitsPerMilli; }
+	MojInt64 microsecs() const { return m_val; }
+	MojInt32 millisecsPart() const { return (MojInt32) (millisecs() % 1000); }
+	MojInt32 microsecsPart() const { return (MojInt32) (m_val % UnitsPerSec); }
 
 	void fromTimeval(const MojTimevalT* tv);
 	void toTimeval(MojTimevalT* tvOut) const;
@@ -71,13 +71,13 @@ public:
 	MojTime operator%(const MojTime& rhs) const { return MojTime(m_val % rhs.m_val); }
 
 private:
-	gint64 m_val;
+	MojInt64 m_val;
 };
 
 // Alternate constructors
-inline MojTime MojSecs(gint64 secs) { return MojTime(secs * MojTime::UnitsPerSec); }
-inline MojTime MojMillisecs(gint64 millis) { return MojTime(millis * MojTime::UnitsPerMilli); }
-inline MojTime MojMicrosecs(gint64 micros) { return MojTime(micros); }
+inline MojTime MojSecs(MojInt64 secs) { return MojTime(secs * MojTime::UnitsPerSec); }
+inline MojTime MojMillisecs(MojInt64 millis) { return MojTime(millis * MojTime::UnitsPerMilli); }
+inline MojTime MojMicrosecs(MojInt64 micros) { return MojTime(micros); }
 
 #include "core/internal/MojTimeInternal.h"
 

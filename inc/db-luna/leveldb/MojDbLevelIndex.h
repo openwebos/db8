@@ -31,7 +31,7 @@ public:
     MojErr open(const MojObject& id, MojDbLevelDatabase* db, MojDbStorageTxn* txn);
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, gsize& countOut, gsize& sizeOut);
+    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
     virtual MojErr insert(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr del(const MojDbKey& key, MojDbStorageTxn* txn);
     virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);

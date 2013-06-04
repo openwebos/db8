@@ -31,7 +31,7 @@ struct MojHasher
 template<>
 struct MojHasher<const MojChar*>
 {
-	gsize operator()(const MojChar* str)
+	MojSize operator()(const MojChar* str)
 	{
 		return MojHash(str);
 	}
@@ -43,28 +43,28 @@ struct MojHasher<MojChar*> : public MojHasher<const MojChar*> {};
 template<class T>
 struct MojIntHasher
 {
-	gsize operator()(T i)
+	MojSize operator()(T i)
 	{
 		return MojHash(&i, sizeof(i));
 	}
 };
 
 template<>
-struct MojHasher<gint8> : public MojIntHasher<gint8> {};
+struct MojHasher<MojInt8> : public MojIntHasher<MojInt8> {};
 template<>
-struct MojHasher<guint8> : public MojIntHasher<guint8> {};
+struct MojHasher<MojUInt8> : public MojIntHasher<MojUInt8> {};
 template<>
-struct MojHasher<gint16> : public MojIntHasher<gint16> {};
+struct MojHasher<MojInt16> : public MojIntHasher<MojInt16> {};
 template<>
-struct MojHasher<guint16> : public MojIntHasher<guint16> {};
+struct MojHasher<MojUInt16> : public MojIntHasher<MojUInt16> {};
 template<>
-struct MojHasher<gint32> : public MojIntHasher<gint32> {};
+struct MojHasher<MojInt32> : public MojIntHasher<MojInt32> {};
 template<>
-struct MojHasher<guint32> : public MojIntHasher<guint32> {};
+struct MojHasher<MojUInt32> : public MojIntHasher<MojUInt32> {};
 template<>
-struct MojHasher<gint64> : public MojIntHasher<gint64> {};
+struct MojHasher<MojInt64> : public MojIntHasher<MojInt64> {};
 template<>
-struct MojHasher<guint64> : public MojIntHasher<guint64> {};
+struct MojHasher<MojUInt64> : public MojIntHasher<MojUInt64> {};
 template<>
 struct MojHasher<class T*> : public MojIntHasher<T*> {};
 template<>

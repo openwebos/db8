@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2013 LG Electronics
+# Copyright (c) 2013 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ foreach(test
         MojDbTextTokenizer
         MojDbWatch
         MojDbWhere
+        MojDbTxn
         )
     add_test(NAME ${test} COMMAND test_db_core ${test})
     set(DB_TEST_SOURCES ${DB_TEST_SOURCES} ${test}Test.cpp)

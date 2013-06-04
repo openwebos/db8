@@ -41,6 +41,7 @@
 #include "MojDbTextCollatorTest.h"
 #include "MojDbTextTokenizerTest.h"
 #include "MojDbWatchTest.h"
+#include "MojDbTxnTest.h"
 
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
@@ -95,5 +96,6 @@ void MojDbTestRunner::runTests()
 	test(MojDbTextCollatorTest());
 	test(MojDbTextTokenizerTest());
 	test(MojDbWatchTest());
+	test(MojDbTxnTest());
     test(MojDbWhereTest());
 }

@@ -27,28 +27,34 @@ endforeach ()
 # ---------------------------------
 set (DB_TEST_SOURCES
      MojDbTestRunner.cpp
-     MojDbWhereTest.cpp
-     MojDbBulkTest.cpp
-     MojDbConcurrencyTest.cpp
-     MojDbCrudTest.cpp
-     MojDbDumpLoadTest.cpp
-     MojDbIndexTest.cpp
-     MojDbKindTest.cpp
-     MojDbLocaleTest.cpp
-     MojDbPermissionTest.cpp
-     MojDbPurgeTest.cpp
-     MojDbQueryTest.cpp
-     MojDbQueryFilterTest.cpp
-     MojDbQuotaTest.cpp
-     MojDbRevTest.cpp
-     MojDbRevisionSetTest.cpp
-     MojDbSearchTest.cpp
-     MojDbDistinctTest.cpp
-     MojDbTextCollatorTest.cpp
-     MojDbTextTokenizerTest.cpp
-     MojDbWatchTest.cpp
      MojDbTestStorageEngine.cpp
 )
+
+foreach(test
+        MojDbBulk
+        MojDbConcurrency
+        MojDbCrud
+        MojDbDumpLoad
+        MojDbIndex
+        MojDbKind
+        MojDbLocale
+        MojDbPermission
+        MojDbPurge
+        MojDbQuery
+        MojDbQueryFilter
+        MojDbQuota
+        MojDbRev
+        MojDbRevisionSet
+        MojDbSearch
+        MojDbDistinct
+        MojDbTextCollator
+        MojDbTextTokenizer
+        MojDbWatch
+        MojDbWhere
+        )
+    add_test(NAME ${test} COMMAND test_db_core ${test})
+    set(DB_TEST_SOURCES ${DB_TEST_SOURCES} ${test}Test.cpp)
+endforeach()
 
 add_executable(test_db_core ${DB_TEST_SOURCES} ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 target_link_libraries(test_db_core
@@ -95,3 +101,4 @@ target_link_libraries(test_db_stress
 )
 install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_stress DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
 
+#add_test(NAME MojDbStressTest COMMAND test_db_stress)

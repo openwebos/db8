@@ -21,6 +21,8 @@ cmake_minimum_required(VERSION 2.8.7)
 
 project(db8 CXX)
 
+enable_testing()
+
 include(webOS/webOS)
 webos_modules_init(1 0 0 QUALIFIER RC4)
 webos_component(2 0 0)

@@ -17,6 +17,8 @@
 *
 * LICENSE@@@ */
 
+#include <string>
+#include <unistd.h>
 
 #include "MojDbTestRunner.h"
 #include "MojDbWhereTest.h"
@@ -48,7 +50,16 @@
 #error "Database Engine doesn't set. See README.txt"
 #endif
 
-const MojChar* const MojDbTestDir = _T("mojodb-test-dir");
+std::string getTestDir()
+{
+    char buf[128];
+    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", getpid());
+    if (n < 0) return "/tmp/mojodb-test-dir"; // fallback
+    else return std::string(buf, n);
+}
+const std::string mojDbTestDirString = getTestDir();
+
+const MojChar* const MojDbTestDir = mojDbTestDirString.c_str();
 
 int main(int argc, char** argv)
 {

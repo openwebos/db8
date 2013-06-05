@@ -86,6 +86,15 @@ void MojDbLevelTableTxn::Put(const leveldb::Slice& key,
 
     m_pendingValues[keyStr] = val.ToString();
     m_pendingDeletes.erase(keyStr); // if hidden before
+
+    // notify all iterators
+    for(std::set<MojDbLevelTxnIterator*>::const_iterator i = m_iterators.begin();
+        i != m_iterators.end();
+        ++i)
+    {
+        (*i)->notifyPut(key);
+    }
+
 }
 
 leveldb::Status MojDbLevelTableTxn::Get(const leveldb::Slice& key,
@@ -113,6 +122,14 @@ leveldb::Status MojDbLevelTableTxn::Get(const leveldb::Slice& key,
 
 void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
 {
+    // notify all iterators
+    for(std::set<MojDbLevelTxnIterator*>::const_iterator i = m_iterators.begin();
+        i != m_iterators.end();
+        ++i)
+    {
+        (*i)->notifyDelete(key);
+    }
+
     // populate local view
     std::string keyStr = key.ToString();
 

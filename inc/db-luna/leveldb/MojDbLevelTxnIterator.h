@@ -49,6 +49,16 @@ public:
     const std::string getKey() const;
     bool keyStartsWith(const std::string& key) const;
 
+    /**
+     *  Notify about record inserted/updated
+     */
+    void notifyPut(const leveldb::Slice &key);
+
+    /**
+     *  Notify that must be send before record deletion
+     */
+    void notifyDelete(const leveldb::Slice &key);
+
     void first();
     void last();
     bool isValid() const;
@@ -72,7 +82,7 @@ private:
 
     leveldb::DB* leveldb;
 
-    bool m_fwd;
+    bool m_fwd, m_invalid;
 
     MojDbLevelIterator m_it;
     MojDbLevelContainerIterator m_insertsItertor;

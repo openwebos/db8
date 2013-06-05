@@ -22,6 +22,31 @@
 
 #include <iostream>
 
+namespace {
+    inline bool operator<(const leveldb::Slice &a, const leveldb::Slice &b)
+    { return a.compare(b) < 0; }
+    inline bool operator>(const leveldb::Slice &a, const leveldb::Slice &b)
+    { return a.compare(b) > 0; }
+
+    enum Order { LT = -1, EQ = 0, GT = 1 };
+
+    Order compare(const MojDbLevelIterator &x, const MojDbLevelContainerIterator &y)
+    {
+        const bool xb = x.isBegin(),
+                   xe = x.isEnd(),
+                   yb = y.isBegin(),
+                   ye = y.isEnd();
+        if ((xb && yb) || (xe && ye)) return EQ;
+        if (xb || ye) return LT;
+        if (xe || yb) return GT;
+
+        int r = x->key().ToString().compare(y->first);
+        return r < 0 ? LT :
+               r > 0 ? GT :
+                       EQ ;
+    }
+}
+
 std::string string_to_hex(const std::string& input)
 {
     static const char* const lut = "0123456789ABCDEF";
@@ -47,7 +72,6 @@ MojDbLevelTxnIterator::MojDbLevelTxnIterator(MojDbLevelTableTxn *txn) :
     m_txn(txn)
 {
     MojAssert( txn );
-    m_fwd = true;
     // set iterator to first element
     first();
 }
@@ -61,6 +85,95 @@ void MojDbLevelTxnIterator::detach()
 {
     MojAssert( m_txn );
     m_txn = 0;
+}
+
+void MojDbLevelTxnIterator::notifyPut(const leveldb::Slice &key)
+{
+    // Idea here is to re-align our transaction iterator if new key is in range
+    // of keys where database iterator and transaction iterator points to.
+    // Need to take care of next cases:
+    // 1) going forward: m_it->key() <= key < m_insertsItertor->first
+    // 2) going backward: m_insertIterator->first < key <= m_it->key()
+
+    // lets see in which relations we are with leveldb iterator
+    bool keyLtDb; // key < m_it->key()
+    bool keyEqDb; // key == m_it->key()
+    if (m_it.isBegin()) keyLtDb = false, keyEqDb = false;
+    else if (m_it.isEnd()) keyLtDb = true, keyEqDb = false;
+    else
+    {
+        keyLtDb = key < m_it->key();
+        keyEqDb = key == m_it->key();
+    }
+
+    // lets see in which relations we are with transaction iterator
+    bool keyLtTxn;
+    bool keyEqTxn;
+    if (m_insertsItertor.isBegin()) keyLtTxn = false, keyEqTxn = false;
+    else if (m_insertsItertor.isEnd()) keyLtTxn = true, keyEqTxn = false;
+    else
+    {
+        keyLtTxn = key < m_insertsItertor->first;
+        keyEqTxn = key == m_insertsItertor->first;
+    }
+
+    if (m_fwd)
+    {
+        // exclude case: key < db || txn <= key
+        if (keyLtDb || !keyLtTxn) return;
+
+        --m_insertsItertor; // set to a new key
+    }
+    else
+    {
+        // exclude case: key <= txn || db < key
+        if (keyLtTxn || keyEqTxn || (!keyLtDb && !keyEqDb)) return;
+
+        ++m_insertsItertor; // set to a new key
+    }
+}
+
+void MojDbLevelTxnIterator::notifyDelete(const leveldb::Slice &key)
+{
+    // if no harm for txn iterator - nothing to do
+    if (!m_insertsItertor.isValid()) return;
+    if (m_insertsItertor->first != key) return;
+
+    if (m_fwd)
+    {
+        MojAssert( !isBegin() );
+        switch (compare(m_it, m_insertsItertor))
+        {
+        case EQ:
+            ++m_it; skipDeleted();
+            ++m_insertsItertor;
+            break;
+
+        default: MojAssert( !"happens" );
+        case GT:
+        case LT:
+            ++m_insertsItertor;
+            break;
+        }
+    }
+    else
+    {
+        MojAssert( !isEnd() );
+        switch (compare(m_it, m_insertsItertor))
+        {
+        case EQ:
+            --m_it; skipDeleted();
+            --m_insertsItertor;
+            break;
+
+        default: MojAssert( !"happens" );
+        case GT:
+        case LT:
+            --m_insertsItertor;
+            break;
+        }
+    }
+    m_invalid = true;
 }
 
 void MojDbLevelTxnIterator::skipDeleted()
@@ -78,25 +191,16 @@ void MojDbLevelTxnIterator::skipDeleted()
 
 bool MojDbLevelTxnIterator::inTransaction() const
 {
-    if (!m_it.isValid())
-        return true;
-
-    if (!m_insertsItertor.isValid())
-        return false;
-
     // Note that in case when both iterators points to the records with same
     // key we prefer to take one from transaction
-    if (m_fwd) {
-        if (m_it->key().ToString() < m_insertsItertor->first)
-            return false;
-        else
-            return true;
-    } else {
-        if (m_it->key().ToString() > m_insertsItertor->first)
-            return false;
-        else
-            return true;
+    switch( compare(m_it, m_insertsItertor) )
+    {
+    case LT: return !m_fwd;
+    case GT: return m_fwd;
+    case EQ: return true;
+    default: MojAssert( !"happens" );
     }
+    return true;
 }
 
 std::string MojDbLevelTxnIterator::getValue()
@@ -128,6 +232,7 @@ bool MojDbLevelTxnIterator::keyStartsWith(const std::string& key) const
 void MojDbLevelTxnIterator::first()
 {
     m_fwd = true;
+    m_invalid = false;
 
     m_it.toFirst();
     m_insertsItertor.toFirst();
@@ -138,6 +243,7 @@ void MojDbLevelTxnIterator::first()
 void MojDbLevelTxnIterator::last()
 {
     m_fwd = false;
+    m_invalid = false;
 
     m_it.toLast();
     m_insertsItertor.toLast();
@@ -147,7 +253,7 @@ void MojDbLevelTxnIterator::last()
 
 bool MojDbLevelTxnIterator::isValid() const
 {
-    return  m_it.isValid() || m_insertsItertor.isValid();
+    return  !m_invalid && (m_it.isValid() || m_insertsItertor.isValid());
 }
 
 bool MojDbLevelTxnIterator::isDeleted(const std::string& key) const
@@ -164,6 +270,7 @@ void MojDbLevelTxnIterator::prev()
     if (m_fwd) {
         const std::string &currentKey = getKey();
         m_fwd = false;
+        m_invalid = false;
 
         // after switching direction we may end up with one of the iterators
         // pointing to one of the tails
@@ -174,6 +281,12 @@ void MojDbLevelTxnIterator::prev()
             if (currentKey < getKey()) prev();
         }
         MojAssert( getKey() == currentKey );
+    }
+    else if (m_invalid)
+    {
+        // we already jumped here from deleted record
+        m_invalid = false;
+        return;
     }
 
     if (m_insertsItertor.isBegin()) {
@@ -211,6 +324,7 @@ void MojDbLevelTxnIterator::next()
     if (!m_fwd) {
         const std::string &currentKey = getKey();
         m_fwd = true;
+        m_invalid = false;
 
         // after switching direction we may end up with one of the iterators
         // pointing to one of the tails
@@ -222,6 +336,14 @@ void MojDbLevelTxnIterator::next()
         }
         MojAssert( getKey() == currentKey );
     }
+    else if (m_invalid)
+    {
+        // we already jumped here from deleted record
+        m_invalid = false;
+        return;
+    }
+
+    m_invalid = false;
 
     if (m_insertsItertor.isEnd()) {
         ++m_it;
@@ -253,6 +375,7 @@ void MojDbLevelTxnIterator::next()
 void MojDbLevelTxnIterator::seek(const std::string& key)
 {
     m_fwd = true;
+    m_invalid = false;
 
     m_it.seek(key);
     skipDeleted();

@@ -406,7 +406,7 @@ TEST_F(TestTxnIterator, insertIntoNext)
 }
 
 // case: Record where txn iterator points to was deleted
-TEST_F(TestTxnIterator, DISABLED_jumpOffDeleted)
+TEST_F(TestTxnIterator, jumpOffDeleted)
 {
     initSample();
 
@@ -438,7 +438,7 @@ TEST_F(TestTxnIterator, DISABLED_jumpOffDeleted)
     EXPECT_EQ( "txn-2", it->getValue() );
 }
 
-TEST_F(TestTxnIterator, DISABLED_jumpBackOffDeleted)
+TEST_F(TestTxnIterator, jumpBackOffDeleted)
 {
     initSample();
 

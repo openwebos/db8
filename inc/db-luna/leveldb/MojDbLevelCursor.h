@@ -25,6 +25,7 @@
 class MojDbLevelDatabase;
 class MojDbLevelItem;
 
+class MojDbLevelAbstractTxn;
 class MojDbLevelTableTxn;
 
 class MojDbLevelCursor : public MojNoCopy
@@ -52,7 +53,8 @@ public:
 private:
     leveldb::Iterator* m_it;
     leveldb::DB* m_db;
-    MojDbLevelTableTxn* m_txn;
+    MojDbLevelAbstractTxn* m_txn;
+    MojDbLevelTableTxn* m_ttxn;
 
     MojSize m_warnCount;
 };

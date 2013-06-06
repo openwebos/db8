@@ -23,8 +23,10 @@
 #include "db-luna/leveldb/MojDbLevelItem.h"
 #include "db-luna/leveldb/defs.h"
 
-MojDbLevelCursor::MojDbLevelCursor()
-   : m_it(NULL), m_txn(NULL)
+MojDbLevelCursor::MojDbLevelCursor() :
+    m_it(0),
+    m_txn(0),
+    m_ttxn(0)
 {
     MojLogTrace(MojDbLevelEngine::s_log);
 }
@@ -49,9 +51,8 @@ MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojU
     m_it = m_db->NewIterator(leveldb::ReadOptions());
     MojLdbErrCheck(m_it->status(), _T("db->cursor"));
 
-    MojDbLevelAbstractTxn *casted_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
-    m_txn = & casted_txn->tableTxn(m_db);
-    MojAssert( m_txn );
+    m_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
+    m_ttxn = & m_txn->tableTxn(m_db);
     m_warnCount = 0;
 
     return MojErrNone;
@@ -65,13 +66,15 @@ MojErr MojDbLevelCursor::close()
         delete m_it;
         m_it = NULL;
     }
+    m_txn = 0;
+    m_ttxn = 0;
     return MojErrNone;
 }
 
 MojErr MojDbLevelCursor::del()
 {
     MojAssert(m_it);
-    MojAssert( !m_txn || dynamic_cast<MojDbLevelAbstractTxn *>(m_txn) );
+    MojAssert( m_txn && m_ttxn );
     MojLogTrace(MojDbLevelEngine::s_log);
 
     if(m_it->Valid())
@@ -80,17 +83,10 @@ MojErr MojDbLevelCursor::del()
         const size_t delSize = recSize();
 
         //m_it->Next(); - not clear if we need it here
-        if(m_txn)
-        {
-            m_txn->Delete(key);
+        m_ttxn->Delete(key);
 
-            MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
-            MojErrCheck(err);
-        }
-        else
-        {
-            m_db->Delete(leveldb::WriteOptions(), key);
-        }
+        MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
+        MojErrCheck(err);
     }
 
     return MojErrNone;

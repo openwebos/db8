@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 *  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-*  Copyright (c) 2013 LG Electronics
+*  Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -308,11 +308,12 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
 
 MojErr MojDbLevelDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-   MojRefCountedPtr<MojDbLevelTableTxn> txn(new MojDbLevelTableTxn());
-
+   MojRefCountedPtr<MojDbLevelEnvTxn> txn(new MojDbLevelEnvTxn());
    MojAllocCheck(txn.get());
-   MojErr err = txn->begin(impl());
-   MojErrCheck(err);
+
+   // force TableTxn for this database to start
+   txn->tableTxn(impl()).begin(impl());
+
    txnOut = txn;
    return MojErrNone;
 

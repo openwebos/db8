@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 * Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-* Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public:
 };
 
 // Note we implement kinda dirty read with shadowing by local wirtes
-class MojDbLevelTableTxn : public MojDbLevelAbstractTxn
+class MojDbLevelTableTxn
 {
 public:
     MojDbLevelTableTxn() : m_db(NULL)
@@ -76,9 +76,9 @@ public:
 
     void Delete(const leveldb::Slice& key);
 
-private:
     MojErr commitImpl();
 
+private:
     void cleanup();
 
     // where and how to write this batch
@@ -111,5 +111,13 @@ private:
     typedef std::list<MojSharedPtr<MojDbLevelTableTxn> > TableTxns;
     TableTxns m_tableTxns;
 };
+
+// Note: Current workaround uses EnvTxn not only for Env transaction but for
+//       Database as well. Correct way would be to use different classes for that.
+// TODO:
+//   - We should rename TableTxn to TableData since it no more belongs to
+//     StorageTxn
+//   - Introduce new TableTxn that will simply return single tableData for
+//     a database it was constructed with
 
 #endif

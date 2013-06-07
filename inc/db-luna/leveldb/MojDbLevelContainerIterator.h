@@ -35,8 +35,8 @@ public:
     ~MojDbLevelContainerIterator();
 
     inline bool isBegin() const { return m_start; }
-    inline bool isEnd() const { return m_end; }
-    inline bool isValid() const { return !(m_start || m_end); }
+    inline bool isEnd() const { return !isBegin() && m_it == m_container.end(); }
+    inline bool isValid() const { return !(isBegin() || isEnd()); }
 
     void toBegin();
     void toEnd();
@@ -59,7 +59,6 @@ private:
     iterator_t m_it;
 
     bool m_start;
-    bool m_end;
 };
 
 #endif

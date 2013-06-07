@@ -16,6 +16,8 @@
 *
 * LICENSE@@@ */
 
+#include <cassert>
+
 #include "db-luna/leveldb/MojDbLevelContainerIterator.h"
 
 MojDbLevelContainerIterator::MojDbLevelContainerIterator (std::map<std::string, std::string>& database)
@@ -35,13 +37,14 @@ MojDbLevelContainerIterator::~MojDbLevelContainerIterator()
 
 MojDbLevelContainerIterator& MojDbLevelContainerIterator::operator++ ()
 {
-    if (m_it != --m_container.end()) {
-        if (m_start)
-            m_start = false;
-
+    assert( !isEnd() );
+    if (m_start)
+    {
+        toFirst();
+    }
+    else
+    {
         ++m_it;
-    } else {
-        m_end = true;
     }
 
     return *this;
@@ -59,12 +62,13 @@ MojDbLevelContainerIterator MojDbLevelContainerIterator::operator++(int )
 
 MojDbLevelContainerIterator& MojDbLevelContainerIterator::operator-- ()
 {
-    if (m_it == m_container.begin()) {
-        m_start = true;
-    } else {
-        if (m_end)
-            m_end = false;
-
+    assert( !isBegin() );
+    if (m_it == m_container.begin())
+    {
+        toBegin();
+    }
+    else
+    {
         --m_it;
     }
 
@@ -86,50 +90,27 @@ MojDbLevelContainerIterator& MojDbLevelContainerIterator::operator= (iterator_t 
     m_it = iterator;
     m_start = false;
 
-    if (m_it == m_container.end()) {
-        m_end = true;
-    } else {
-        m_end = false;
-    }
-
     return *this;
 }
 
 void MojDbLevelContainerIterator::toBegin()
 {
-    m_it = m_container.begin();
     m_start = true;
-    m_end = false;
 }
 
 void MojDbLevelContainerIterator::toEnd()
 {
     m_it = m_container.end();
-    m_start = false;
-    m_end = true;
 }
 
 void MojDbLevelContainerIterator::toFirst()
 {
-    if (m_container.empty()) {
-        m_start = true;
-        m_end = true;
-        m_it = m_container.end();
-    } else {
-        m_start = false;
-        m_end = false;
-        m_it = m_container.begin();
-    }
+    m_it = m_container.begin();
+    m_start = false;
 }
+
 void MojDbLevelContainerIterator::toLast()
 {
-    if (m_container.empty()) {
-        m_start = true;
-        m_end = true;
-        m_it = m_container.end();
-    } else {
-        m_start = false;
-        m_end = false;
-        m_it = --m_container.end();
-    }
+    m_start = m_container.empty();
+    if (!m_start) m_it = --m_container.end();
 }

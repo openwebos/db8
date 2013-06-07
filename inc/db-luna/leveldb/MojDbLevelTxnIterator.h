@@ -52,6 +52,8 @@ public:
     void first();
     void last();
     bool isValid() const;
+    bool isBegin() const { return m_it.isBegin() && m_insertsItertor.isBegin(); }
+    bool isEnd() const { return m_it.isEnd() && m_insertsItertor.isEnd(); }
     bool isDeleted(const std::string& key) const;
     void prev();
     void next();

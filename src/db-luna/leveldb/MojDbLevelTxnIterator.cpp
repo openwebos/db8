@@ -158,22 +158,22 @@ bool MojDbLevelTxnIterator::isDeleted(const std::string& key) const
 
 void MojDbLevelTxnIterator::prev()
 {
-    if (m_fwd) {
-        m_fwd = false;
-        if (m_insertsItertor.isValid() && m_it.isValid()) {
-            if (m_it->key().ToString() > m_insertsItertor->first) {
-                --m_it;
-                skipDeleted();
-            } else {
-                --m_insertsItertor;
-            }
-        } else {
-            if (m_insertsItertor.isEnd())
-                --m_insertsItertor;
+    MojAssert( !isBegin() );
+    if (isEnd()) return last();
 
-            if (m_it.isEnd())
-                --m_it;
+    if (m_fwd) {
+        const std::string &currentKey = getKey();
+        m_fwd = false;
+
+        // after switching direction we may end up with one of the iterators
+        // pointing to one of the tails
+        if (m_it.isEnd()) { --m_it; skipDeleted(); }
+        else if (m_insertsItertor.isEnd()) --m_insertsItertor;
+        else
+        {
+            if (currentKey < getKey()) prev();
         }
+        MojAssert( getKey() == currentKey );
     }
 
     if (m_insertsItertor.isBegin()) {
@@ -187,10 +187,12 @@ void MojDbLevelTxnIterator::prev()
         return;
     }
 
+    MojAssert( !m_it.isEnd() );
+    MojAssert( !m_insertsItertor.isEnd() );
+
     if (m_it->key().ToString() > m_insertsItertor->first) {
         --m_it;
         skipDeleted();
-
     } else if (m_it->key().ToString() == m_insertsItertor->first) {
         // advance both iterators to the next key value
         --m_insertsItertor;
@@ -203,28 +205,27 @@ void MojDbLevelTxnIterator::prev()
 
 void MojDbLevelTxnIterator::next()
 {
-    if (!m_fwd) {
-        m_fwd = true;
-        if (m_insertsItertor.isValid() && m_it.isValid()) {
-            if (m_it->key().ToString() < m_insertsItertor->first) {
-                ++m_it;
-                skipDeleted();
-            } else {
-                ++m_insertsItertor;
-            }
-        } else {
-            if (m_insertsItertor.isBegin())
-                ++m_insertsItertor;
+    MojAssert( !isEnd() );
+    if (isBegin()) return first();
 
-            if (m_it.isBegin())
-                ++m_it;
+    if (!m_fwd) {
+        const std::string &currentKey = getKey();
+        m_fwd = true;
+
+        // after switching direction we may end up with one of the iterators
+        // pointing to one of the tails
+        if (m_it.isBegin()) { ++m_it; skipDeleted(); }
+        else if (m_insertsItertor.isBegin()) ++m_insertsItertor;
+        else
+        {
+            if (getKey() < currentKey) next();
         }
+        MojAssert( getKey() == currentKey );
     }
 
     if (m_insertsItertor.isEnd()) {
         ++m_it;
         skipDeleted();
-
         return;
     }
 
@@ -232,6 +233,9 @@ void MojDbLevelTxnIterator::next()
         ++m_insertsItertor;
         return;
     }
+
+    MojAssert( !m_it.isBegin() );
+    MojAssert( !m_insertsItertor.isBegin() );
 
     if (m_it->key().ToString() < m_insertsItertor->first) {
         ++m_it;

@@ -29,6 +29,7 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                Runner.cpp
+               TestContainerIterator.cpp
                TestIterator.cpp
                TestTxn.cpp
                TestTxnIterator.cpp

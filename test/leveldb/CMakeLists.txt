@@ -29,6 +29,7 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                Runner.cpp
+               TestIterator.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
 target_link_libraries(${PROJECT_NAME}

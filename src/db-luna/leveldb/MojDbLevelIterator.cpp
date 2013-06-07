@@ -16,6 +16,8 @@
 *
 * LICENSE@@@ */
 
+#include <cassert>
+
 #include "db-luna/leveldb/MojDbLevelIterator.h"
 #include "leveldb/db.h"
 
@@ -28,11 +30,6 @@ MojDbLevelIterator::MojDbLevelIterator (database_t* database)
     toFirst();
 }
 
-MojDbLevelIterator::MojDbLevelIterator(iterator_t* iterator, database_t* database)
-    : m_database(database), m_it(iterator)
-{
-}
-
 MojDbLevelIterator::~MojDbLevelIterator()
 {
     delete m_it;
@@ -43,6 +40,7 @@ MojDbLevelIterator::~MojDbLevelIterator()
 
 MojDbLevelIterator& MojDbLevelIterator::operator++ ()
 {
+    assert( !m_end );
     if (m_start) {
         toFirst();
         return *this;
@@ -64,6 +62,7 @@ MojDbLevelIterator& MojDbLevelIterator::operator++ ()
 
 MojDbLevelIterator& MojDbLevelIterator::operator-- ()
 {
+    assert( !m_start );
     if (m_end) {
         toLast();
         return *this;
@@ -106,51 +105,33 @@ void MojDbLevelIterator::restore()
 void MojDbLevelIterator::seek(const std::string& key)
 {
     m_it->Seek(key);
-    if (!m_it->Valid()) {
-        m_end = true;
-        m_start = true;
-    } else {
-        m_end = false;
-        m_start = false;
-    }
+    m_start = false;
+    m_end = !m_it->Valid();
 }
 
 void MojDbLevelIterator::toBegin()
 {
-    m_it->SeekToFirst();
-    if (m_it->Valid()) {
-        m_start = true;
-        m_end = false;
-    } else {
-        m_start = true;
-        m_end = true;
-    }
+    m_start = true;
+    m_end = false;
 }
 
 void MojDbLevelIterator::toEnd()
 {
-    m_it->SeekToLast();
-
-    if (m_it->Valid()) {
-        m_start = false;
-        m_end = true;
-    } else {
-        m_start = true;
-        m_end = true;
-    }
+    m_start = false;
+    m_end = true;
 }
 
 void MojDbLevelIterator::toFirst()
 {
     m_it->SeekToFirst();
-
-    m_start = !m_it->Valid();
+    m_start = false;
     m_end = !m_it->Valid();
 }
+
 void MojDbLevelIterator::toLast()
 {
     m_it->SeekToLast();
 
     m_start = !m_it->Valid();
-    m_end = !m_it->Valid();
+    m_end = false;
 }

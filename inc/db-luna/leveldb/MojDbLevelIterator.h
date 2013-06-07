@@ -39,7 +39,6 @@ class MojDbLevelIterator : public MojNoCopy
 
 public:
     MojDbLevelIterator(database_t* database);
-    MojDbLevelIterator(iterator_t* iterator, database_t* database);
     ~MojDbLevelIterator();
 
     inline bool isBegin() const { return m_start; }

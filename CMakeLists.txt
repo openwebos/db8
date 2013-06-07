@@ -228,4 +228,6 @@ if (WEBOS_CONFIG_BUILD_TESTS)
 	add_subdirectory(test/db)
 	add_subdirectory(test/dbclient)
 	add_subdirectory(test/luna-service)
+
+    add_subdirectory(bundled/gtest-1.6.0)
 endif()

@@ -230,4 +230,5 @@ if (WEBOS_CONFIG_BUILD_TESTS)
 	add_subdirectory(test/luna-service)
 
     add_subdirectory(bundled/gtest-1.6.0)
+    add_subdirectory(test/mojocore)
 endif()

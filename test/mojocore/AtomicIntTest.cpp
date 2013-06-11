@@ -63,7 +63,11 @@ TEST(AtomicInt, logic)
 
 TEST(AtomicInt, threadsafety)
 {
-#if 0  // TODO:  Fix compile problem with test
+#if __GNUC__ > 4 || \
+              (__GNUC__ == 4 && (__GNUC_MINOR__ > 6 || \
+                                 (__GNUC_MINOR__ == 6 && \
+                                  __GNUC_PATCHLEVEL__ > 2)) )
+
     const size_t nthreads = 8, nsteps = 10000;
 
     MojAtomicInt sum = 0;
@@ -88,4 +92,5 @@ TEST(AtomicInt, threadsafety)
     for(auto &thread : threads) thread.join();
     EXPECT_EQ( (MojInt32)(nthreads * nsteps), sum.value() );
 #endif
+    // GCC version is less 4.6.3. Test AtomicIntTest disabled
 }

@@ -230,7 +230,7 @@ if (WEBOS_CONFIG_BUILD_TESTS)
 	add_subdirectory(test/luna-service)
 
     add_subdirectory(bundled/gtest-1.6.0)
-    ##add_subdirectory(test/mojocore)   ## TODO: Fix broken test
+    add_subdirectory(test/mojocore)
     add_subdirectory(test/db-core)
     if (WEBOS_DB8_BACKEND STREQUAL "leveldb")
         add_subdirectory(test/leveldb)

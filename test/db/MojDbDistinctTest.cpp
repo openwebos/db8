@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 *  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-*  Copyright (c) 2013 LG Electronics
+*  Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -97,30 +97,44 @@ MojErr MojDbDistinctTest::simpleTest(MojDb& db)
 	MojDbQuery query;
 	const MojChar* queryString;
 	const MojChar* expectedIdsJson;
+    MojString str;
+    MojDbSearchCursor searchCursor(str);
+    MojDbCursor cursor;
 
 	//1st test
 	queryString = _T("bar");
 	expectedIdsJson = _T("[\"a\",\"b\",\"c\",\"d\"]");
 	err = initQuery(query, queryString);
 	MojTestErrCheck(err);
-	err = check(db, query, queryString, expectedIdsJson);
+    err = check(db, query, searchCursor, queryString, expectedIdsJson);
 	MojTestErrCheck(err);
+    searchCursor.close();
+
+	//test for find
+    err = check(db, query, cursor, queryString, expectedIdsJson);
+    MojTestErrCheck(err);
+    cursor.close();
 
 	//2nd test
 	queryString = _T("foo");
 	expectedIdsJson = _T("[\"e\",\"f\",\"g\"]");
 	err = initQuery(query, queryString);
 	MojTestErrCheck(err);
-	err = check(db, query, queryString, expectedIdsJson);
-	MojTestErrCheck(err);
+
+    err = check(db, query, searchCursor, queryString, expectedIdsJson);
+    MojTestErrCheck(err);
+    searchCursor.close();
+
+	//test for find
+    err = check(db, query, cursor, queryString, expectedIdsJson);
+    MojTestErrCheck(err);
+    cursor.close();
 
 	return MojErrNone;
 }
 
-MojErr MojDbDistinctTest::check(MojDb& db, const MojDbQuery& query, const MojChar* queryString, const MojChar* expectedIdsJson)
+MojErr MojDbDistinctTest::check(MojDb& db, const MojDbQuery& query, MojDbCursor& cursor, const MojChar* queryString, const MojChar* expectedIdsJson)
 {
-	MojString str;
-	MojDbSearchCursor cursor(str);
 	MojErr err = db.find(query, cursor);
 	MojTestErrCheck(err);
 
@@ -166,6 +180,8 @@ MojErr MojDbDistinctTest::initQuery(MojDbQuery& query, const MojChar* queryStrin
 
 	err = query.distinct(queryString);
 	MojTestErrCheck(err);
+    err = query.order(queryString);
+    MojTestErrCheck(err);
 
 	return MojErrNone;
 }

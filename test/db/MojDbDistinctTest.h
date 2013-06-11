@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 *  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-*  Copyright (c) 2013 LG Electronics
+*  Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ private:
 	MojErr filterTest(MojDb& db);
 
 	MojErr initQuery(MojDbQuery& query, const MojChar* queryString = NULL);
-	MojErr check(MojDb& db, const MojDbQuery& query, const MojChar* queryString, const MojChar* expectedIdsJson);
+    MojErr check(MojDb& db, const MojDbQuery& query, MojDbCursor& cursor, const MojChar* queryString, const MojChar* expectedIdsJson);
 };
 
 #endif /* MOJDBDISTINCTTEST_H_ */

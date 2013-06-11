@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@
 #include "db/MojDbIsamQuery.h"
 #include "db/MojDbQueryPlan.h"
 #include "db/MojDb.h"
+#include "db/MojDbCursor.h"
 #include "core/MojObjectBuilder.h"
 #include "core/MojObjectSerialization.h"
 
@@ -45,6 +47,7 @@ MojErr MojDbIsamQuery::open(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* tx
 	m_state = StateSeek;
 	m_txn = txn;
 	m_endKey.clear();
+    m_distinct = m_plan->query().distinct();
 
 	return MojErrNone;
 }
@@ -57,6 +60,8 @@ MojErr MojDbIsamQuery::close()
 		m_plan.reset();
 		init();
 	}
+	m_lastItem.reset();
+
 	return err;
 }
 
@@ -142,6 +147,36 @@ MojUInt32 MojDbIsamQuery::groupCount() const
 	return m_plan->groupCount();
 }
 
+MojErr MojDbIsamQuery::distinct(MojDbStorageItem*& itemOut, bool& distinct)
+{
+    MojObject obj, destObj;
+    MojErr err = itemOut->toObject(obj, m_plan->kindEngine());
+    MojErrCheck(err);
+    obj.getRequired(m_distinct, destObj);
+    distinct = false;
+
+    //if there is kept last element, check whether current element is duplicated with it
+    if(m_lastItem.get())
+    {
+        MojObject compObj, distinctObj;
+	    err = m_lastItem->toObject(compObj, m_plan->kindEngine());
+        MojErrCheck(err);
+        err = compObj.getRequired(m_distinct, distinctObj);
+        MojErrCheck(err);
+        if(!distinctObj.compare(destObj))
+        {
+            //In this case, current element is duplicated, so need to skip.
+            distinct = true;
+            return MojErrNone;
+	    }
+    }
+    //keep the non-duplicated element
+    m_lastItem.reset(new MojDbObjectItem(obj));
+    itemOut = m_lastItem.get();
+
+    return MojErrNone;
+}
+
 MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool getItem)
 {
 	itemOut = NULL;
@@ -167,7 +202,21 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 		MojErrCheck(err);
 	}
 	if (foundOut) {
-		incrementCount();
+        //If distinct query is, We need to check that field is duplicated or not
+        //In case of duplication, count will not incremented,
+        //and set "itemOut" to NULL for getting next DB result.
+        if(!m_distinct.empty() && itemOut)
+        {
+            bool distincted = false;
+            err = distinct(itemOut, distincted);
+            MojErrCheck(err);
+            if(!distincted)
+                incrementCount();
+            else
+                itemOut = NULL;
+        }
+        else
+            incrementCount();
 	}
 	return MojErrNone;
 }

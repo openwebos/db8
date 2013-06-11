@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -22,6 +23,7 @@
 
 #include "db/MojDbDefs.h"
 #include "db/MojDbStorageEngine.h"
+#include "db/MojDbObjectItem.h"
 
 class MojDbIsamQuery : public MojDbStorageQuery
 {
@@ -45,7 +47,6 @@ protected:
 		StateSeek,
 		StateNext
 	};
-
 	typedef MojVector<MojByte> ByteVec;
 	typedef MojVector<MojDbKeyRange> RangeVec;
 
@@ -55,6 +56,7 @@ protected:
 
 	MojDbIsamQuery();
 	MojErr open(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn);
+    MojErr distinct(MojDbStorageItem*& itemOut, bool& distinct);
 	MojErr getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool getItem);
 	void init();
 	bool match();
@@ -75,6 +77,8 @@ protected:
 	MojSize m_keySize;
 	const MojByte* m_keyData;
 	MojAutoPtr<MojDbQueryPlan> m_plan;
+    MojString m_distinct;
+    MojRefCountedPtr<MojDbObjectItem> m_lastItem;
 };
 
 #endif /* MOJDBISAMQUERY_H_ */

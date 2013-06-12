@@ -42,6 +42,7 @@
 #include "MojDbTextTokenizerTest.h"
 #include "MojDbWatchTest.h"
 #include "MojDbTxnTest.h"
+#include "MojDbCursorTxnTest.h"
 
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
@@ -97,5 +98,6 @@ void MojDbTestRunner::runTests()
 	test(MojDbTextTokenizerTest());
 	test(MojDbWatchTest());
 	test(MojDbTxnTest());
-    test(MojDbWhereTest());
+	test(MojDbWhereTest());
+	test(MojDbCursorTxnTest());
 }

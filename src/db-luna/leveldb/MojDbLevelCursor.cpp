@@ -151,9 +151,6 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
         key.from(m_txnIt->getKey());
         val.from(m_txnIt->getValue());
 
-    } else {
-        MojLogInfo(MojDbLevelEngine::s_log, _T("Transaction is not okey. Get return Not Foun"));
-        MojLdbErrCheck(m_txnIt->status(), _T("lbb->get"));
     }
 
     return MojErrNone;

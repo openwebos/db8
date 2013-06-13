@@ -158,8 +158,7 @@ You will need to use `sudo` if you did not specify `WEBOS_INSTALL_ROOT`.
 # Copyright and License Information
 
 All content, including all source code files and documentation files in this repository are:
- Copyright (c) 2009-2013 Hewlett-Packard Development Company, L.P.
- Copyright (c) 2013 LG Electronics
+ Copyright (c) 2009-2013 LG Electronics, Inc.
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

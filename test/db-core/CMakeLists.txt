@@ -20,6 +20,7 @@
 project(gtest_db_core C CXX)
 
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories(../db)
 
 add_definitions(-Wall -ansi -Wno-deprecated -pthread)
 
@@ -31,6 +32,8 @@ add_executable(${PROJECT_NAME}
                Runner.cpp
                DumpLoadTest.cpp
                ReqTest.cpp
+               QuotaTest.cpp
+               ../db/MojDbTestStorageEngine.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
 target_link_libraries(${PROJECT_NAME}

@@ -34,6 +34,7 @@ add_executable(${PROJECT_NAME}
                ReqTest.cpp
                QuotaTest.cpp
                SearchTest.cpp
+               TextCollatorTest.cpp
                ../db/MojDbTestStorageEngine.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 

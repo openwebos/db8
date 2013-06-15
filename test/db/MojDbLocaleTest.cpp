@@ -60,7 +60,7 @@ MojErr MojDbLocaleTest::run()
 	err = db.putKind(obj);
 	MojTestErrCheck(err);
 
-	err = db.updateLocale(_T("fr_FR"));
+	err = db.updateLocale(_T("fr_CA"));
 	MojTestErrCheck(err);
 	err = put(db);
 	MojErrCheck(err);
@@ -77,9 +77,14 @@ MojErr MojDbLocaleTest::run()
      *   the word "côte" sorts before "coté" because the acute accent on the final
      *   "e" is more significant than the circumflex on the "o".
      *
-     * Note that icu shipped with Ubuntu 12.04 doesn't follow this requirements.
+     * Note that icu shipped with Ubuntu 12.04 and one from Yocto 1.4 doesn't
+     * follow this requirements. But rather follows other what said in other
+     * document: http://userguide.icu-project.org/collation/concepts#TOC-Collator-naming-scheme
+     *   "Some French dictionary ordering traditions sort strings with
+     *    different accents from the back of the string. This attribute is
+     *    automatically set to On for the Canadian French locale (fr_CA)."
      */
-    err = db.updateLocale(_T("fr_FR"));
+    err = db.updateLocale(_T("fr_CA"));
     MojTestErrCheck(err);
     err = checkOrder(db, _T("[1,3,2,4]"));
     MojTestErrCheck(err);

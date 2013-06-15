@@ -197,3 +197,77 @@ TEST_F(TextCollatorTest, query)
     EXPECT_EQ( 2, index );
     MojExpectNoErr( cursor.close() );
 }
+
+/**
+ * Here we test that accents ordering is set to be backward for fr_CA.
+ * See http://userguide.icu-project.org/collation/concepts#TOC-Collator-naming-scheme
+ *  "Some French dictionary ordering traditions sort strings with different
+ *   accents from the back of the string"
+ * Note that ICU 50.1.2 in difference from ICU 3.6 doesn't apply this rule to
+ * all locales with french language.
+ */
+TEST_F(TextCollatorTest, accentsOrder)
+{
+    MojString cote1, cote2, cote3, cote4;
+    MojAssertNoErr( cote1.assign(_T("cote")) );
+    MojAssertNoErr( cote2.assign(_T("coté")) );
+    MojAssertNoErr( cote3.assign(_T("côte")) );
+    MojAssertNoErr( cote4.assign(_T("côté")) );
+
+    // for en_US order should be: cote < coté < côte < côté
+    MojDbTextCollator colUs;
+    MojAssertNoErr( colUs.init(_T("en_US"), MojDbCollationSecondary) );
+
+    MojDbKey keyUs1, keyUs2, keyUs3, keyUs4;
+    MojExpectNoErr( colUs.sortKey(cote1, keyUs1) );
+    MojExpectNoErr( colUs.sortKey(cote2, keyUs2) );
+    MojExpectNoErr( colUs.sortKey(cote3, keyUs3) );
+    MojExpectNoErr( colUs.sortKey(cote4, keyUs4) );
+
+    EXPECT_TRUE( keyUs1 < keyUs2 );
+    EXPECT_TRUE( keyUs2 < keyUs3 );
+    EXPECT_TRUE( keyUs3 < keyUs4 );
+
+    // ensure transitivity
+    EXPECT_TRUE( keyUs1 < keyUs3 );
+    EXPECT_TRUE( keyUs1 < keyUs4 );
+    EXPECT_TRUE( keyUs2 < keyUs4 );
+
+    // for fr_CA order should be: cote < côte < coté < côté
+    MojDbTextCollator colFrCa;
+    MojAssertNoErr( colFrCa.init(_T("fr_CA"), MojDbCollationSecondary) );
+
+    MojDbKey keyFrCa1, keyFrCa2, keyFrCa3, keyFrCa4;
+    MojExpectNoErr( colFrCa.sortKey(cote1, keyFrCa1) );
+    MojExpectNoErr( colFrCa.sortKey(cote2, keyFrCa2) );
+    MojExpectNoErr( colFrCa.sortKey(cote3, keyFrCa3) );
+    MojExpectNoErr( colFrCa.sortKey(cote4, keyFrCa4) );
+
+    EXPECT_TRUE( keyFrCa1 < keyFrCa3 );
+    EXPECT_TRUE( keyFrCa3 < keyFrCa2 );
+    EXPECT_TRUE( keyFrCa2 < keyFrCa4 );
+
+    // ensure transitivity
+    EXPECT_TRUE( keyFrCa1 < keyFrCa2 );
+    EXPECT_TRUE( keyFrCa1 < keyFrCa4 );
+    EXPECT_TRUE( keyFrCa3 < keyFrCa4 );
+
+    // for fr_FR order should still be be: cote < coté < côte < côté
+    MojDbTextCollator colFr;
+    MojAssertNoErr( colFr.init(_T("fr_FR"), MojDbCollationSecondary) );
+
+    MojDbKey keyFr1, keyFr2, keyFr3, keyFr4;
+    MojExpectNoErr( colFr.sortKey(cote1, keyFr1) );
+    MojExpectNoErr( colFr.sortKey(cote2, keyFr2) );
+    MojExpectNoErr( colFr.sortKey(cote3, keyFr3) );
+    MojExpectNoErr( colFr.sortKey(cote4, keyFr4) );
+
+    EXPECT_TRUE( keyFr1 < keyFr2 );
+    EXPECT_TRUE( keyFr2 < keyFr3 );
+    EXPECT_TRUE( keyFr3 < keyFr4 );
+
+    // ensure transitivity
+    EXPECT_TRUE( keyFr1 < keyFr3 );
+    EXPECT_TRUE( keyFr1 < keyFr4 );
+    EXPECT_TRUE( keyFr2 < keyFr4 );
+}

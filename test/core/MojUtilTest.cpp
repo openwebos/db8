@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,6 +19,7 @@
 
 
 #include "MojUtilTest.h"
+#include <unistd.h>
 
 static const MojChar* const TestFileName = _T("bartestfile");
 
@@ -49,6 +51,9 @@ MojErr MojUtilTest::run()
 	MojFlagSet(flags, 2, false);
 	MojTestAssert(flags == 1);
 
+        //change cwd to /tmp
+        //due to NFS behaviour - it reporting wrong folder attributes and make a problem
+        chdir("/tmp");
 	// rmdirr
 	MojErr err = MojMkDir(_T("foo"), S_IRWXU);
 	MojTestErrCheck(err);

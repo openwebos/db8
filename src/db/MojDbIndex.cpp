@@ -603,7 +603,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 	for (KeySet::ConstIterator i = keys.begin(); i != keys.end(); ++i) {
 
 		MojErr err = m_index->del(*i, txn);
-#if defined(MOJ_DEBUG_LOGGING)
+#if defined(MOJ_DEBUG)
 		char s[1024];
 		char *s2 = NULL;
 		if (m_kind)
@@ -619,7 +619,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		// This has some potential risk
 		if (err == MojErrInternalIndexOnDel) {
 			m_delMisses++;
-#if defined(MOJ_DEBUG_LOGGING)
+#if defined(MOJ_DEBUG)
 			MojLogWarning(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 			if (forcedel)
@@ -640,7 +640,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 	for (KeySet::ConstIterator i = keys.begin(); i != keys.end(); ++i) {
 
 		MojErr err = m_index->insert(*i, txn);
-#if defined(MOJ_DEBUG_LOGGING)
+#if defined(MOJ_DEBUG)
 		char s[1024];
 		size_t size = (*i).size();
 		MojErr err2 = MojByteArrayToHex((*i).data(), size, s); 

@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 * Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-* Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -56,3 +56,4 @@ private:
 };
 
 #endif /* MOJDBLEVELQUERY_H_ */
+

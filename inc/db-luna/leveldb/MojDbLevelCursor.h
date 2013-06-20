@@ -21,7 +21,7 @@
 
 #include <auto_ptr.h>
 
-#include "leveldb/db.h"
+#include <leveldb/db.h>
 #include "db/MojDbDefs.h"
 
 #include <db-luna/leveldb/MojDbLevelIterator.h>
@@ -63,3 +63,4 @@ private:
 };
 
 #endif
+

@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 *  Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-*  Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+#include <leveldb/iterator.h>
 
 #include "db-luna/leveldb/MojDbLevelEngine.h"
 #include "db-luna/leveldb/MojDbLevelFactory.h"
@@ -35,9 +39,6 @@
 
 #include <sys/statvfs.h>
 
-#include "leveldb/db.h"
-#include "leveldb/write_batch.h"
-#include "leveldb/iterator.h"
 
 //const MojChar* const MojDbLevelEnv::LockFileName = _T("_lock");
 MojLogger MojDbLevelEngine::s_log(_T("db.ldb"));

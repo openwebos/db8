@@ -18,8 +18,8 @@
 
 #include <cassert>
 
+#include <leveldb/db.h>
 #include "db-luna/leveldb/MojDbLevelIterator.h"
-#include "leveldb/db.h"
 
 #include <iostream>
 

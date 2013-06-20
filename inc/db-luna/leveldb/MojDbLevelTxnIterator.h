@@ -19,13 +19,13 @@
 #ifndef MOJDBLEVELTXNITERATOR_H
 #define MOJDBLEVELTXNITERATOR_H
 
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+
 #include "core/MojNoCopy.h"
 
 #include "db-luna/leveldb/MojDbLevelContainerIterator.h"
 #include "db-luna/leveldb/MojDbLevelIterator.h"
-
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 #include <map>
 #include <string>
@@ -91,3 +91,4 @@ private:
 };
 
 #endif
+

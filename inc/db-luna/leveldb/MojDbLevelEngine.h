@@ -1,7 +1,7 @@
 /* @@@LICENSE
 *
 * Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
-* Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #ifndef MOJDBLEVELENGINE_H_
 #define MOJDBLEVELENGINE_H_
 
-#include "leveldb/db.h"
+#include <leveldb/db.h>
 #include "db/MojDbDefs.h"
 #include "db/MojDbStorageEngine.h"
 
@@ -70,3 +70,4 @@ private:
 };
 
 #endif /* MOJDBLEVELENGINE_H_ */
+

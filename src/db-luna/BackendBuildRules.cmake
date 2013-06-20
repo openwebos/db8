@@ -25,7 +25,7 @@
 # Optional variable:
 # DB_BACKEND_WRAPPER_CFLAGS     - compiller flags
 
-set(WEBOS_DB8_BACKEND "berkeleydb" CACHE STRING "Backend to use with DB8")
+set(WEBOS_DB8_BACKEND "leveldb" CACHE STRING "Backend to use with DB8")
 
 message (STATUS "Use database frontend: ${WEBOS_DB8_BACKEND}")
 
@@ -62,7 +62,7 @@ elseif (WEBOS_DB8_BACKEND STREQUAL "leveldb")
         MESSAGE(FATAL_ERROR "Failed to find LevelDB libaries. Please install.")
     endif()
 
-    set (DB_BACKEND_INCLUDES ${WEBOS_INSTALL_ROOT}/../leveldb/leveldb-1.9.0/include)
+    set (DB_BACKEND_INCLUDES ${WEBOS_INSTALL_ROOT}/include)
     set (DB_BACKEND_LIB "${LDB}")
 
     set(DB_BACKEND_WRAPPER_SOURCES

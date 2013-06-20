@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojCoreTestRunner.h
+* Description           : Header file for MojCoreTestRunner test.
+****************************************************************************************************
+**/
 
 #ifndef MOJCORETESTRUNNER_H_
 #define MOJCORETESTRUNNER_H_

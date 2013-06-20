@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojDecimalTest.cpp
+* Description           : Source file for MojDecimal test.
+****************************************************************************************************
+**/
 
 #include "MojDecimalTest.h"
 #include "core/MojDecimal.h"
@@ -24,7 +30,24 @@ MojDecimalTest::MojDecimalTest()
 : MojTestCase(_T("MojDecimal"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run
+                 1. MojDecimal class stores decimal numbers. Internally it stores each
+                    decimal number in the form of magnitude and fraction with 6 digit
+                    precision. It is possible to read both magnitude and fraction
+                    parts using utility functions.
+                    Ex: magnitude() returns magnitude value.
+                        fraction() returns fraction value.
+                        floatValue() utility converts magnitude and fraction into double number and
+                        returns to caller.
+                 2. magnitude and fraction digits are internally stored as long long int number.
+                 3. stringValue() utility function converts decimal numbers and copies in the form
+                    of string.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojDecimalTest::run()
 {
 	MojDecimal d1;

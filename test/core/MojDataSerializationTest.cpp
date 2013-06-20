@@ -16,7 +16,12 @@
 *
 * LICENSE@@@ */
 
-
+/**
+****************************************************************************************************
+* Filename              : MojDataSerializationTest.cpp
+* Description           : Source file for MojDataSerialization test.
+****************************************************************************************************
+**/
 #include "MojDataSerializationTest.h"
 #include "core/MojDataSerialization.h"
 #include "core/MojDecimal.h"
@@ -25,7 +30,25 @@ MojDataSerializationTest::MojDataSerializationTest()
 : MojTestCase(_T("MojDataSerialization"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              1. Data serialization is way of translating the data structure into a format
+                       which can be stored and accessed in the semantically identical clone of the
+                       original object.
+                    2. Data is converted into big endian format before storing into a buffer.
+                       Conversion to big endian is handled for data of various size.
+                    3. MojDataWriter is used for storing the data and MojReader class is used for
+                       reading the data from buffer. Data is read or written in multiples of bytes.
+                       It also supports reading/writing of decimal numbers.
+                    4. In this test case, data of different size is written to buffer using Writer
+                       Utility functions and data is read from the buffer using Reader utility
+                       functions. For reading the data from Buffer, byte pointer is initialized
+                       to the start of Buffer and then Reader class functions are used to read
+                       the data of different size.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojDataSerializationTest::run()
 {
 	MojBuffer buf;
@@ -66,16 +89,20 @@ MojErr MojDataSerializationTest::run()
 	err = writer.buf().data(data, size);
 	MojTestErrCheck(err);
 	MojDataReader reader(data, size);
+
 	MojUInt8 ui8val = 98;
 	err = reader.readUInt8(ui8val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui8val == 0);
+
 	err = reader.readUInt8(ui8val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui8val == 5);
+
 	err = reader.readUInt8(ui8val);
 	MojTestErrCheck(err);
 	MojTestAssert(ui8val == 0xFF);
+
 	MojUInt16 ui16val = 9999;
 	err = reader.readUInt16(ui16val);
 	MojTestErrCheck(err);

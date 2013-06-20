@@ -16,11 +16,20 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* @Filename             : MojAutoPtrTest.cpp
+* @Description          : Source file for MojAutoPtr testcases.
+****************************************************************************************************
+**/
 
 #include "MojAutoPtrTest.h"
 #include "core/MojAutoPtr.h"
 #include "core/MojString.h"
 
+/**
+ * FooTest and BarTest are used to validate autoptr functionalities on inherited classes *
+**/
 class FooTest {
 	int i;
 };
@@ -58,6 +67,40 @@ MojAutoPtrTest::MojAutoPtrTest()
 {
 }
 
+/**
+****************************************************************************************************
+* @run           This functions checks for auto pointer functionalities.
+                 1. Pointer created using AutoPtr without any arguments is assigned
+                    to NULL
+                 2. When AutoPtr with same type is assigned from RHS to LHS, ownership
+                    is transferred and RHS is made NULL.(Stealing of ownership)
+                    Ex:
+                       LHS(Auto_Ptr) = RHS(Auto_Ptr)
+                       LHS ==> 0x0000
+                       RHS ==> 0x1000
+
+                       After assignment
+                       LHS ==> 0x1000
+                       RHS ==> 0x0000
+                 3. LHS(Shared_Ptr) = RHS(Shared_Ptr).
+                    Ex :
+                       LHS ==> 0x1000
+                       RHS ==> 0x2000
+
+                       Step 1: Decrement the reference count of 0x1000.
+                               If the reference count is equal to 0, then delete the memory block.
+                       Step 2: Assign LHS pointer to 0x2000(Sharing Ownership)
+                       Step 3: Increment the reference count of 0x2000 by 1
+
+                       After Assignment
+                       LHS ==> 0x2000
+                       RHS ==> 0x2000
+
+                 4. AutoPtr and SharedPtr holds good for inherited classes also.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojAutoPtrTest::run()
 {
 	MojErr err = MojErrNone;

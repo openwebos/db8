@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojCoreTestRunner.cpp
+* Description           : Executes testcases of core library.
+****************************************************************************************************
+**/
 
 #include "MojCoreTestRunner.h"
 #include "MojAtomicIntTest.h"
@@ -49,7 +55,13 @@ int main(int argc, char** argv)
 	MojCoreTestRunner runner;
 	return runner.main(argc, argv);
 }
-
+/**
+****************************************************************************************************
+* @runTests         Test execution starts from here.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 void MojCoreTestRunner::runTests()
 {
 	test(MojAtomicIntTest());

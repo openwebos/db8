@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojAutoPtrTest.h
+* Description           : Header file for MojAutoPtr test
+****************************************************************************************************
+**/
 
 #ifndef MOJAUTOPTRTEST_H_
 #define MOJAUTOPTRTEST_H_

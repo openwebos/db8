@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojBufferTest.cpp
+* Description           : Source file for MojBuffer test.
+****************************************************************************************************
+**/
 
 #include "MojBufferTest.h"
 #include "core/MojBuffer.h"
@@ -24,7 +30,21 @@ MojBufferTest::MojBufferTest()
 : MojTestCase(_T("MojBuffer"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              Used for temporary data storage by applications.
+                    1. Internally data is stored by allocating memory on heap which is maintained by
+                       MojBuffer class.
+                    2. Each memory block is called chunk and chunks are maintained in the chunklist.
+                    3. New chunks are allocated if there are no chunks in the list.
+                    4. MojBuffer uses double linked list to store the data and also provides facility
+                       to traverse through the list.
+                    5. Data of different chunk size can be directly read into vector for easy access.
+                    6. Data is maintained as type void.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojBufferTest::run()
 {
 	// empty test

@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojDecimalTest.h
+* Description           : Header file for MojDecimal test.
+****************************************************************************************************
+**/
 
 #ifndef MOJDECIMALTEST_H_
 #define MOJDECIMALTEST_H_

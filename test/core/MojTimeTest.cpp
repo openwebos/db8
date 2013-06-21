@@ -16,7 +16,13 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojTimeTest.cpp
 
+* Description           : Source file for MojTime test.
+****************************************************************************************************
+**/
 #include "MojTimeTest.h"
 #include "core/MojTime.h"
 
@@ -25,6 +31,41 @@ MojTimeTest::MojTimeTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @run                    This function tests the time functionality.A MojTime instance is created
+                          which initializes the m_val of MojTime class.The functions used in this
+                          test suite are the following:
+                          1.fromTimeVal:This function gets the values from  MojTimeValT and updates
+                             m_val.
+                            eg:time.fromTimeval(&tv);
+                          2.toTimeval:This function extracts the m_val and assigns to MojTimeValT.
+                            eg:time.toTimeval(&tv2);
+                          3.fromTimespec:This function gets the values from  MojTimespecT and updates
+                             m_val.
+                            eg:time.fromTimespec(&ts);
+                          4.toTimespec:This function extracts the m_val and assigns to MojTimespecT.
+                            eg:time.toTimespec(&ts2);
+                          5.secs/millisecs/microsecs/millisecsPart/microsecsPart:
+                             The secs,millisecs,microsecs,millisecsPart,microsecsPart extracts the
+                             seconds,milliseconds,microseconds,millisecsPart,microsecsPart from the
+                             m_val respectively.
+                          6.Operator overloading:
+                             This include the operator overloading functionality for ==,!=,<,<=,>,>=
+                             ,=,+=,-=,*=,/=,%=,++,--,postincrement,postdecrement,+,-,*,/% operators
+                             eg:MojTestAssert(time++ == 1);
+                                MojTestAssert(++time == 3);
+                                MojTestAssert((time *= -10) == 10);
+                                time = MojTime(8) / MojTime(4);
+                           7.MojSecs/MojMillisecs/MojMicrosecs:This function gets the seconds,
+                             milliseconds and micro seconds and assigns to respective m_val.
+                             eg:time = MojSecs(3);
+                                time = MojMillisecs(45);
+                                time = MojMicrosecs(5);
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojTimeTest::run()
 {
 	MojTimevalT tv;

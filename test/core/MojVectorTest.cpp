@@ -15,8 +15,13 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+/**
+****************************************************************************************************
+* Filename              : MojVectorTest.cpp
 
-
+* Description           : Source file for MojVector test.
+****************************************************************************************************
+**/
 #include "MojVectorTest.h"
 #include "core/MojString.h"
 #include "core/MojVector.h"
@@ -41,6 +46,26 @@ MojVectorTest::MojVectorTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @run                    This function checks working of different vector types.
+                          In this test three vector types are checked.
+
+                          1.INT
+                            All Vector operations supported for INT is tested.
+                            The operations empty,resize,insert,erase,equality,find,append,reverse
+                            sort etc are verified with this test case.
+                          2.STRING
+                            All Vector operations supported for STRING is tested.
+                            The operations empty,resize,insert,erase ,reserve ,clear all operations
+                            are checked with this test case
+                          3.OBJECT
+                           All Vector operations supported for OBJECT is tested.
+                           For object erase,insert,push and clear operations are verified.
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojVectorTest::run()
 {
 	MojErr err = intTest();
@@ -53,6 +78,39 @@ MojErr MojVectorTest::run()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @intTest                The intTest() includes the following:
+                          1.Test Without Data(Empty Test):
+                            When a MojVector Object is created it calls the default constructor
+                            of MojVector in which m_begin,m_end and m_endAlloc are initialized.
+                            MojVector functions size(),capacity(),empty(),begin(),end(),operator
+                            overloading (==,<,>,>=,<=,!=),compare,find,assign,reverse and sort()
+                            are verified for their functionality when an Object is created.
+                          2.Test After Inserting Data:
+                            The data to vector is inserted by using push() or setAt() or insert()
+                            or append() functions.
+                            The data is removed from vector by using pop() or erase() at position.
+                            erase() can also be used to remove a given range of elementsalso.clear()
+                            function clears all the elements in the vector.
+                            sort(),reverse(),find() all these functions are used in vector operations
+                            for sorting, reversing data and finding data respectivly.
+                            reserve() will reverse a fixed size of memory.resize() will resize the
+                            allocated memory.
+                            For eg: err = v1.reserve(50);
+                                      //the vector capacity be at least enough to contain 50 elements.
+                                    err = v2.resize(200);
+                                      //resizes so that it contain 200 elements
+                          3.Vector to Vector Operation
+                            equality test compares two vectors and checks whether both vectors are same.
+                            compare() comapres two vectors.
+                            assign() assigns one vector value to another one.
+                            swap() interchanges 2 vectors
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojVectorTest::intTest()
 {
 	MojVector<int> v1;
@@ -268,6 +326,39 @@ MojErr MojVectorTest::intTest()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @stringTest             The stringTest() includes the following:
+                          1.Test Without Data:
+                            When a MojVector String is created it calls the default constructor
+                            of MojVector in which m_begin,m_end and m_endAlloc is initialized.
+                            MojVector functions size(),capacity(),empty(),begin(),end(),operator
+                            overloading (==,<,>,>=,<=,!=),compare,find,assign,reverse and sort()
+                            are verified for their functionality.
+
+                           2.Test After Inserting Data:
+                             To insert the MojString data to vector done by push() or setAt()
+                             or insert() or append() functions.
+                             To remove the data from vector done by pop() or erase() at position.
+                             erase() can also be used to remove a given range of elements.clear()
+                             function clears all the elements in the vector.
+
+                             sort(),reverse(),find() all these functions are used in vector operations
+                             for sorting, reversing data and finding data respectivly.
+
+                             reserve() will reverse a fixed size of memory.resize() will resize the
+                             allocated memory.
+                             eg:err = v1.reserve(50);//the vector capacity be at least enough to contain
+                             50 elements.
+
+                           3.Vector to Vector Operation
+                             assign() assigns one vector value to another one.
+                             swap() interchanges 2 vectors
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojVectorTest::stringTest()
 {
 	MojVector<MojString> v1;
@@ -380,6 +471,23 @@ MojErr MojVectorTest::stringTest()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @objTest                In the ObjTest() it creates a Vector of type Object.When the Vector Object's
+                          instance is created then it calls the constructor where s_defaultConstructCount
+                          is set accordingly.
+                          insert() function is called to insert the 100 Vector objects .erase()
+                          erase the element in nth position.
+                          eg:v1.erase(6);//6th position data will be erased.
+                          push() will insert the Object to the Vector in the last position.
+                          copy constructor is called to copy data from one Vector to another
+                          eg:MojVector<MojVectorTestObj> v3(v2);
+                          The destructor should be called as many times as default/copy constructors
+                          are called
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojVectorTest::objTest()
 {
 	MojVector<MojVectorTestObj> v1;

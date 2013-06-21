@@ -21,7 +21,13 @@
 #define MOJTIMETEST_H_
 
 #include "MojCoreTestRunner.h"
+/**
+****************************************************************************************************
+* Filename              : MojTimeTest.h
 
+* Description           : Header file for MojTime test.
+****************************************************************************************************
+**/
 class MojTimeTest : public MojTestCase
 {
 public:

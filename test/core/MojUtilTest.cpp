@@ -16,7 +16,13 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojUtilTest.cpp
 
+* Description           : Source file for MojUtil test.
+****************************************************************************************************
+**/
 #include "MojUtilTest.h"
 #include <unistd.h>
 
@@ -27,6 +33,57 @@ MojUtilTest::MojUtilTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @run                    This function tests the utility functions provided in DB8.These include
+                          the following:
+                          1.MojMin()/MojMax:
+                            a)MojMin():This returns the minimum of two given numbers.
+                              eg:MojMin(1,8) //returns one.
+                            b)MojMax():This returns the maximum of two given numbers.
+                              eg:MojMax(14,2) //returns 14
+                           2.MojFlagGet/MojFlagSet
+                             a)MojFlagGet():This function returns the flag set value or it returns
+                               ((flags & mask) == mask);
+                               eg:MojFlagGet(flags, 1))//returns true as flag is set to 1
+                              b)MojFlagSet(): This sets the flag value or returns (flags |= mask;)
+                                eg:MojFlagSet(flags, 1, true);//this sets the flag value as 1
+                                   MojFlagSet(flags, 2, false);//this sets the flag value to 1 when the
+                                   old flag value is 3.
+                          3.MojMkDir/MojRmDirRecursive
+                               a)MojMkDir():It creates a new Directory with the given mode.
+                                 eg:err = MojMkDir(_T("foo/bar"), S_IRWXU);
+                               b)MojRmDirRecursive());It removes the directory ,sub-directories and the
+                                 contents inside the directory.
+                                 err = MojRmDirRecursive(_T("foo"));
+                          4.MojFileOpen/MojFileClose:
+                               a)MojFileOpen():It opens the file in the mode and the flag specified
+                                 eg:err = MojFileOpen(file, _T("foo/file2"), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+                               b)MojFileClose():It closes the opened file.
+                                 eg:err = MojFileClose(file);
+                          5.testBase64/testBase64Mime:
+                               a)testBase64:It checks the encoding and decoding functionality of Base 64.
+                                 Base64 is a group of similar binary-to-text encoding schemes that represent
+                                 binary data in an ASCII string format by translating it into a radix-64 representation.
+                             eg:MojByte input1[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
+                                err = testBase64(input1, sizeof(input1), _T("4EiR+x_y"));
+                               b)testBase64Mime: MIME's Base64 encoding is based on that of the RFC 1421 version.
+                                 eg:MojByte input4[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9, 0x7e};
+                                 err = testBase64Mime(input4, sizeof(input4), _T("FPucA9l+"));
+                          6.MojBinarySearch/MojQuickSort:
+                               a)MojBinarySearch:Binary search operation is done in this function.
+                                 Invalid data also given and tested here.
+                                 eg:int array3[] = {2,24,87};
+                                 MojTestAssert(MojBinarySearch(0, array3, 3) == MojInvalidIndex);
+                               b)MojQuickSort:Quick Sort functionality is done in this function
+                          7.MojFileToString
+                               The file contents will be stored in the given string
+                               eg:err = MojFileToString(TestFileName, str);
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::run()
 {
 	MojUInt32 flags = 0;
@@ -192,6 +249,15 @@ MojErr MojUtilTest::run()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @testBase64             The testBase64() tests the MojBase64Encode encoding and the
+                          MojBase64Decode decoding functionality.
+
+* @param                : MojByte*,MojSize and the MojChar*
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::testBase64(const MojByte* src, MojSize size, const MojChar* expected)
 {
 	// encode
@@ -220,6 +286,15 @@ MojErr MojUtilTest::testBase64(const MojByte* src, MojSize size, const MojChar* 
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @testBase64Mime         The testBase64Mime() tests the MojBase64EncodeMIME encoding and the
+                          MojBase64DecodeMIME decoding functionality.
+
+* @param                : MojByte*,MojSize and the MojChar*
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::testBase64Mime(const MojByte* src, MojSize size, const MojChar* expected)
 {
 	// encode
@@ -248,6 +323,15 @@ MojErr MojUtilTest::testBase64Mime(const MojByte* src, MojSize size, const MojCh
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @testBase64Err          The testBase64Err() tests the MojBase64Decode Decoding by giving
+                          invalid data
+
+* @param                : MojChar*
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::testBase64Err(const MojChar* str)
 {
 	MojVector<MojByte> vec;
@@ -264,6 +348,15 @@ MojErr MojUtilTest::testBase64Err(const MojChar* str)
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @testBase64MimeErr      The testBase64MimeErr() tests the MojBase64DecodeMime Decoding by giving
+                          invalid data
+
+* @param                : MojChar*
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::testBase64MimeErr(const MojChar* str)
 {
 	MojVector<MojByte> vec;
@@ -280,6 +373,14 @@ MojErr MojUtilTest::testBase64MimeErr(const MojChar* str)
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @writeFile              The writeFile function opens the file and writes the data to the given file path.
+
+* @param                : MojChar* and MojChar*
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojUtilTest::writeFile(const MojChar* path, const MojChar* data)
 {
 	(void) MojUnlink(path);
@@ -301,6 +402,14 @@ Done:
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @cleanup                The functionality of cleanup is to unlink the filename and to remove the
+                          created directory which was created for testing.
+* @param                : None
+* @retval               : None
+***************************************************************************************************
+**/
 void MojUtilTest::cleanup()
 {
 	(void) MojRmDirRecursive(_T("foo"));

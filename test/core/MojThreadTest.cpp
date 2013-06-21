@@ -15,7 +15,13 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+/**
+****************************************************************************************************
+* Filename              : MojThreadTest.cpp
 
+* Description           : Source file for MojThread test.
+****************************************************************************************************
+**/
 
 #include "MojThreadTest.h"
 #include "core/MojThread.h"
@@ -108,6 +114,17 @@ MojThreadTest::MojThreadTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @run                    Test cases for thread operations.
+                          It includes two tests.
+                           1.Basic test
+                           2.err Test
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojThreadTest::run()
 {
 	MojErr err = basicTest();
@@ -118,6 +135,28 @@ MojErr MojThreadTest::run()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @basicTest              1.New threads Creation:
+                            This function starts 10 new threads in the calling process using
+                            MojThreadCreate and all created threads are pushed to MojVector after
+                            validating the thread creation.If not valid thread MojInvalidThread
+                            exception is thrown.
+                            eg:MojErr err = MojThreadCreate(thread, MojThreadTestFn, &args);
+                          2.Mutex functionality:
+                            The mutex object referenced by mutex is locked by calling pthread_mutex_lock().
+                            The pthread_mutex_unlock() function releases the mutex object referenced by mutex
+                            eg:guard.lock();
+                               guard.unlock();
+                          3.Thread Join:
+                            The threads are terminated by using pthread_join.It ensures the main thread
+                            to wait until all the other threads are finished.
+                            eg:MojErr err = MojThreadJoin(*i, threadErr);
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojThreadTest::basicTest()
 {
 	MojVector<MojThreadT> threads;
@@ -162,6 +201,17 @@ MojErr MojThreadTest::basicTest()
 	return MojErrNone;
 }
 
+/**
+***************************************************************************************************
+* @errTest                This function generates an error condition "not found" and tests
+                          whether expected error is displayed.It basically checks whether the
+                          error handling is done as expected.
+                          eg:MojTestErrExpected(threadErr, MojErrNotFound);
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 MojErr MojThreadTest::errTest()
 {
 	MojThreadT thread = MojInvalidThread;

@@ -199,6 +199,7 @@ MojErr MojDbCursor::visitObject(MojObjectVisitor& visitor, bool& foundOut)
 			MojErrCheck(err);
 		}
 	}
+
 	MojLogInfo(MojDb::s_log, _T("dbcursor_visitObject: found: %d\n"), (int)foundOut);
 	return MojErrNone;
 }

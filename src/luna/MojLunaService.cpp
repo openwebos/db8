@@ -316,7 +316,7 @@ MojErr MojLunaService::dispatchReplyImpl(MojServiceRequest* req, MojServiceMessa
 	MojAssertMutexUnlocked(m_mutex);
 	MojLogTrace(s_log);
 
-	// don't automatically cancel a subscription if the payload has "subscribed":true 
+	// don't automatically cancel a subscription if the payload has "subscribed":true
 	bool subscribed = false;
 	payload.get(_T("subscribed"), subscribed);
 

@@ -68,8 +68,9 @@ webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion
                          -Wno-unused-but-set-variable -Wno-unused-variable
                          -fno-exceptions -frename-registers -DMOJ_LINUX -fno-strict-aliasing
                          -DMOJ_INTERNAL -D_REENTRANT)
-###webos_add_compiler_flags(DEBUG -DMOJ_DEBUG -DMOJ_DEBUG_LOGGING)
-webos_add_compiler_flags(DEBUG -DMOJ_DEBUG_LOGGING)
+
+# to turn on extra debug information (like output to log dirty buffers data) add debug compile flag -DMOJ_DEBUG_LOGGING
+webos_add_compiler_flags(DEBUG -DMOJ_DEBUG)
 webos_add_linker_options(ALL --no-undefined)
 
 # -- add local include paths

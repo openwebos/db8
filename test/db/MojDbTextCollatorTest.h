@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -32,8 +33,10 @@ public:
 	virtual void cleanup();
 
 private:
-	MojErr simpleTest();
-	MojErr queryTest();
+    MojErr simpleTest1();
+    MojErr queryTest1();
+    MojErr simpleTest2();
+    MojErr queryTest2();
 };
 
 #endif /* MOJDBTEXTCOLLATORTEST_H_ */

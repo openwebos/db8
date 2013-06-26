@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -71,6 +72,7 @@ public:
 	const StringVec& sortKey() const { return m_sortKey; }
 	const MojString& locale() const { return m_locale; }
 	const MojString& name() const { return m_name; }
+    MojDbCollationStrength collation(MojSize idx) const { return (m_props.at(idx)->collation()); }
 
 private:
 	static const MojSize WatchWarningThreshold = 20;

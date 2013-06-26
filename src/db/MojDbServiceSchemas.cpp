@@ -31,7 +31,7 @@
 				 _T("\"prop\":{\"type\":\"string\"},") \
 				 _T("\"op\":{\"type\":\"string\",\"enum\":[\"<\",\"<=\",\"=\",\">=\",\">\",\"!=\",\"%\",\"?\"]},") \
 				 _T("\"val\":{}},") \
-				 _T("\"collate\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"default\",\"primary\",\"secondary\",\"tertiary\"]}}},") \
+                 _T("\"collate\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"default\",\"primary\",\"secondary\",\"tertiary\",\"quaternary\",\"identical\"]}}},") \
 		 _T("\"filter\":{\"type\":\"array\",\"optional\":true,\"items\":{") \
 			_T("\"type\":\"object\",") \
 			 _T("\"properties\":{") \
@@ -164,7 +164,7 @@ const MojChar* const MojDbServiceHandler::PutKindSchema =
 					 _T("\"properties\":{")
 						 _T("\"name\":{\"type\":\"string\",\"minimum\":1},")
  						 _T("\"type\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"single\",\"multi\"]},")
-						 _T("\"collate\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"default\",\"primary\",\"secondary\",\"tertiary\"]},")
+                         _T("\"collate\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"default\",\"primary\",\"secondary\",\"tertiary\",\"quaternary\",\"identical\"]},")
 						 _T("\"tokenize\":{\"type\":\"string\",\"optional\":true,\"enum\":[\"none\",\"default\",\"all\"]},")
 						 _T("\"default\":{\"optional\":true},")
 						 _T("\"include\":{\"type\":\"array\",\"optional\":true,\"items\":{")

@@ -21,6 +21,7 @@
 #include "db/MojDbSearchCursor.h"
 #include "db/MojDbExtractor.h"
 #include "db/MojDbIndex.h"
+#include "db/MojDbKind.h"
 #include "db/MojDb.h"
 
 MojDbSearchCursor::MojDbSearchCursor(MojString localeStr)
@@ -83,6 +84,9 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 	MojErr err = initImpl(query);
 	MojErrCheck(err);
 
+    err = retrieveCollation(query);
+    MojErrCheck(err);
+
 	// override limit and sort since we need to retrieve everything
 	// and sort before re-imposing limit
 	m_limit = query.limit();
@@ -97,6 +101,32 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 	MojErrCheck(err);
 
 	return MojErrNone;
+}
+
+MojErr MojDbSearchCursor::retrieveCollation(const MojDbQuery& query)
+{
+    m_collation = MojDbCollationInvalid;
+
+    const MojChar* orderName = query.order().data();
+    if (m_kindEngine && !query.order().empty()) {
+        // Get index that is set by orderBy
+        MojDbKind* kind = NULL;
+        MojErr err = m_kindEngine->getKind(query.from().data(), kind);
+        MojErrCheck(err);
+        MojDbIndex* index = kind->indexForCollation(query);
+        if(index != NULL) {
+            // Find property name that is equal to orderBy name form index to retrieve collation strenth.
+            MojDbIndex::StringVec propNames = index->props();
+            for (MojSize idx = 0; idx < propNames.size(); idx++) {
+                if(!(propNames.at(idx)).compare(orderName)) {
+                    m_collation = index->collation(idx);
+                    break;
+                }
+            }
+        }
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbSearchCursor::begin()
@@ -248,10 +278,18 @@ MojErr MojDbSearchCursor::sort()
 	//MojErr err = collator->init(_T(""), MojDbCollationPrimary);
     MojErr err = MojErrNone;
 
-    if(m_dbIndex)
-       err = collator->init(m_dbIndex->locale(), MojDbCollationPrimary);
-    else
-       err = collator->init(m_locale, MojDbCollationPrimary);
+    // set locale
+    MojString locale = m_locale;
+    if(m_dbIndex) {
+        locale = m_dbIndex->locale();
+    }
+    // set collate
+    MojDbCollationStrength coll = m_collation;
+    if (coll == MojDbCollationInvalid) {
+        // default setting is primary
+        coll = MojDbCollationPrimary;
+    }
+    err = collator->init(locale, coll);
     MojErrCheck(err);
 
 	MojDbPropExtractor extractor;

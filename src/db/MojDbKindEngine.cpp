@@ -226,6 +226,8 @@ MojErr MojDbKindEngine::find(const MojDbQuery& query, MojDbCursor& cursor, MojDb
 
 	MojErr err = query.validate();
 	MojErrCheck(err);
+    // In order to find collate index, cursor needs kindEngine
+    cursor.kindEngine(this);
 	err = cursor.init(query);
 	MojErrCheck(err);
 

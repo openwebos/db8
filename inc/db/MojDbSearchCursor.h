@@ -34,6 +34,7 @@ public:
 	virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
 	virtual MojErr count(MojUInt32& countOut);
 	virtual MojErr nextPage(MojDbQuery::Page& pageOut);
+    MojDbCollationStrength collation() const { return m_collation; }
 
 private:
 	struct ItemComp
@@ -51,6 +52,7 @@ private:
 	static const MojUInt32 MaxResults = 10000;
 
 	virtual MojErr init(const MojDbQuery& query);
+    MojErr retrieveCollation(const MojDbQuery& query);
 	bool loaded() const { return m_pos != NULL; }
 	MojErr begin();
 	MojErr load();
@@ -66,6 +68,7 @@ private:
 	ItemVec::ConstIterator m_pos;
 	ItemVec::ConstIterator m_limitPos;
 	MojString m_locale;
+    MojDbCollationStrength m_collation;
 };
 
 #endif /* MOJDBSEARCHCURSOR_H_ */

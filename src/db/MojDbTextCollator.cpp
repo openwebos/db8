@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -50,6 +51,9 @@ MojErr MojDbTextCollator::init(const MojChar* locale, MojDbCollationStrength lev
 	case MojDbCollationTertiary:
 		strength = UCOL_TERTIARY;
 		break;
+    case MojDbCollationQuaternary:
+        strength = UCOL_QUATERNARY;
+        break;
 	case MojDbCollationIdentical:
 		strength = UCOL_IDENTICAL;
 		break;
@@ -62,6 +66,11 @@ MojErr MojDbTextCollator::init(const MojChar* locale, MojDbCollationStrength lev
 	MojUnicodeErrCheck(status);
 	MojAssert(m_ucol);
 	ucol_setAttribute(m_ucol, UCOL_NORMALIZATION_MODE, UCOL_ON, &status);
+    if (level == MojDbCollationIdentical) {
+        // Combination of IDENTICAL and NUMERIC option cover full-width comparison and ["001","01","1"] ordering.
+        // NUMERIC option converts number charcter to numeric "a021" -> ["a",21]
+        ucol_setAttribute(m_ucol, UCOL_NUMERIC_COLLATION, UCOL_ON, &status);
+    }
 	MojUnicodeErrCheck(status);
 	ucol_setStrength(m_ucol, strength);
 

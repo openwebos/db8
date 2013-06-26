@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2009-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -92,6 +93,7 @@ public:
 	MojErr tokenSet(MojTokenSet& tokenSetOut);
 	MojErr checkPermission(MojDbOp op, MojDbReq& req);
 	MojErr checkOwnerPermission(MojDbReq& req);
+    MojDbIndex* indexForCollation(const MojDbQuery& query) { return indexForQuery(query); }
 	
 private:
 	struct IndexComp

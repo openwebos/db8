@@ -49,25 +49,7 @@ static const MojChar* const TestKind1Str =
 	{\"name\":\"LastZipLimit\",\"props\":[{\"name\":\"LastUpdate\"},{\"name\":\"ZipCode\"},{\"name\":\"Limit\"}]}, \
 	{\"name\":\"LimitAddress\",\"props\":[{\"name\":\"Limit\"},{\"name\":\"StreetAddress\"},{\"name\":\"City\"},{\"name\":\"State\"},{\"name\":\"ZipCode\"}]}, \
 	]}");
-/*
-static const MojChar* const TestKind2Str =
-	_T("{\"id\":\"Test2:1\",")
-	_T("\"owner\":\"mojodb.admin\",")
-	_T("\"extends\":[\"Test1:1\"],")
-	_T("\"indexes\":[{\"name\":\"FullAddress\",\"props\":[{\"name\":\"StreetAddress\"},{\"name\":\"City\"},{\"name\":\"State\"},{\"name\":\"ZipCode\"}]}]}");
 
-static const MojChar* const TestKind3Str =
-	_T("{\"id\":\"Test3:1\",")
-	_T("\"owner\":\"mojodb.admin\",")
-	_T("\"extends\":[\"Test1:1\"],")
-	_T("\"indexes\":[{\"name\":\"LimitAddress\",\"props\":[{\"name\":\"Limit\"},{\"name\":\"StreetAddress\"},{\"name\":\"City\"},{\"name\":\"State\"},{\"name\":\"ZipCode\"}]}]}");
-
-static const MojChar* const TestKind4Str =
-	_T("{\"id\":\"Test4:1\",")
-	_T("\"owner\":\"mojodb.admin\",")
-	_T("\"extends\":[\"Test1:1\"],")
-	_T("\"indexes\":[{\"name\":\"StateUpdate\",\"props\":[{\"name\":\"State\"},{\"name\":\"LastUpdate\"}]}]}");
-*/
 #define PHASE_1_RECORDS_NUMBER 100
 #define PHASE_2_RECORDS_NUMBER 400
 #define PHASE_3_RECORDS_NUMBER 1600
@@ -106,7 +88,9 @@ MojErr MojDbPerfIndexTest::run()
 
 	MojDb db;
 
-	_displayMessage("\n<<< Please, cleanup folder %s before this test! >>>\n", MojDbTestDir);
+	//_displayMessage("\n<<< Please, cleanup folder %s before this test! >>>\n", MojDbTestDir);
+	cleanup();
+
 	// open
 	MojErr err = db.open(MojDbTestDir);
 	MojTestErrCheck(err);
@@ -146,16 +130,16 @@ MojErr MojDbPerfIndexTest::_runPhaseTest (MojDb& db, MojUInt32 i_phase_number)
 	int time_result = clock_gettime(CLOCK_REALTIME, &ts1);
 	number_records = arr_number_records[i_phase_number];
 
-	_displayMessage("\tPhase [%d] running..\t", i_phase_number + 1);
+	_displayMessage("\tPhase [%d] running..\n\t\t", i_phase_number + 1);
 
-	// add a new records
+	// add new records
 	err = _generateNewRecords(db, number_records);
 	MojTestErrCheck(err);
 
 	err = _performThreeQueries(db);
 	MojTestErrCheck(err);
 
-	// delete 10% records
+	// delete ~10% records
 	err = _delete10PersentsRecords(db);
 	MojTestErrCheck(err);
 
@@ -174,7 +158,7 @@ MojErr MojDbPerfIndexTest::_runPhaseTest (MojDb& db, MojUInt32 i_phase_number)
 	if (time_result == 0)
 	{
 		time_t diff = (ts2.tv_sec - ts1.tv_sec) * 1000 + abs(1000000000 + ts2.tv_nsec - ts1.tv_nsec - 1000000000) / 1000000;
-		_displayMessage("completed with time: %ums\n", diff);
+		_displayMessage("\n\tcompleted with time: %ums\n", diff);
 	}
 
 	return err;
@@ -186,6 +170,7 @@ MojErr MojDbPerfIndexTest::_generateNewRecords (MojDb& db, MojUInt32 i_number_re
 	MojString str_value;
 	MojObject obj;
 	MojObject obj_description;
+	MojUInt32 count = 0;
 	time_t time_stamp;
 
 	obj_description.pushString(Description);
@@ -253,8 +238,11 @@ MojErr MojDbPerfIndexTest::_generateNewRecords (MojDb& db, MojUInt32 i_number_re
 
 		err = db.put(obj);
 		MojTestErrCheck(err);
+		count++;
 		obj.clear();
 	}
+
+	_displayMessage("created: %d, ", count);
 
 	return err;
 }
@@ -339,14 +327,25 @@ MojErr MojDbPerfIndexTest::_delete10PersentsRecords (MojDb& db)
 	MojObject nullable(str_value);
 	MojDbQuery query;
 	MojUInt32 count = 0;
+	MojUInt32 count2 = 0;
 
 	err = query.from(_T("Test1:1"));
 	MojTestErrCheck(err);
 	err = query.where(_T("ZipCode"), MojDbQuery::OpEq, nullable);
 	MojTestErrCheck(err);
 
-	err = db.del(query, count);
+	query.limit(3000);
+
+	MojDbReq request;
+	err = db.del(query, count, MojDb::FlagNone, request);
 	MojTestErrCheck(err);
+
+	MojDbReq request2;
+	err = db.del(query, count2, MojDb::FlagNone, request2);
+	MojTestErrCheck(err);
+
+	_displayMessage("deleted: %d (2-->%d), ", count, count2);
+	MojTestAssert(count2 == 0);
 
 	return err;
 }
@@ -355,52 +354,80 @@ MojErr MojDbPerfIndexTest::_change10PersentsRecords (MojDb& db)
 {
 	MojErr err = MojErrNone;
 	MojDbQuery query;
-	MojUInt32 count = 0;
+	MojUInt32 rec_count = 0;
+	MojDbCursor cursor;
 
 	err = query.from(_T("Test1:1"));
 	MojTestErrCheck(err);
 	err = query.where(_T("Limit"), MojDbQuery::OpGreaterThan, 89999999);
 	MojTestErrCheck(err);
 
-	MojDbCursor cursor;
 	err = db.find(query, cursor);
 
 	if (err == MojErrNone)
 	{
-		for (;;)
+		err = _cursorChange10PersentsRecords(db, cursor, rec_count);
+		MojTestErrCheck(err);
+		cursor.close();
+	}
+
+	MojUInt32 rec_count2 = 0;
+	MojDbCursor cursor2;
+
+	err = db.find(query, cursor2);
+
+	if (err == MojErrNone)
+	{
+		err = _cursorChange10PersentsRecords(db, cursor2, rec_count2);
+		MojTestErrCheck(err);
+		cursor2.close();
+	}
+
+	_displayMessage("changed: %d (2-->%d)", rec_count, rec_count2);
+	MojTestAssert(rec_count == rec_count2);
+
+	return err;
+}
+
+MojErr MojDbPerfIndexTest::_cursorChange10PersentsRecords (MojDb& db, MojDbCursor& cursor, MojUInt32& count_affected)
+{
+	MojErr err = MojErrNone;
+
+	for (;;)
+	{
+		MojUInt32 count = 0;
+		MojObject dbObj;
+		bool found;
+		err = cursor.get(dbObj, found);
+		MojTestErrCheck(err);
+		if (!found)
+			break;
+
+		// update
+		MojInt32 value;
+		MojObject update;
+		err = dbObj.get(_T("Limit"), value, found);
+
+		if( found )
 		{
-			MojObject dbObj;
-			bool found;
-			err = cursor.get(dbObj, found);
+			MojDbQuery subquery;
+			err = subquery.from(_T("Test1:1"));
 			MojTestErrCheck(err);
-			if (!found)
-				break;
+			err = subquery.where(_T("Limit"), MojDbQuery::OpEq, value);
 
-			// update
-			MojInt32 value;
-			MojObject update;
-			err = dbObj.get(_T("Limit"), value, found);
+			MojTestErrCheck(err);
 
-			if( found )
-			{
-				MojDbQuery subquery;
-				err = subquery.from(_T("Test1:1"));
-				MojTestErrCheck(err);
-				err = subquery.where(_T("Limit"), MojDbQuery::OpEq, value);
+			value = value + 67;
+			err = update.put(_T("Limit"), value);
+			MojTestErrCheck(err);
 
-				MojTestErrCheck(err);
+			err = db.merge(subquery, update, count);
+			MojTestErrCheck(err);
 
-				value = value + 67;
-				err = update.put(_T("Limit"), value);
-				MojTestErrCheck(err);
-
-				err = db.merge(subquery, update, count);
-				MojTestErrCheck(err);
-			}
+			count_affected++;
 		}
 	}
 
-	cursor.close();
 	return err;
 }
 

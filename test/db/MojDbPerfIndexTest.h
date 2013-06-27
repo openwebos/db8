@@ -37,6 +37,7 @@ private:
 	MojErr _performThreeQueries (MojDb& db);
 	MojErr _delete10PersentsRecords (MojDb& db);
 	MojErr _change10PersentsRecords (MojDb& db);
+	MojErr _cursorChange10PersentsRecords (MojDb& db, MojDbCursor& cursor, MojUInt32& count_affected);
 
 	inline MojErr _generateStreetAddress (MojString& o_string);
 	inline MojErr _generateCityName (MojString& o_string);

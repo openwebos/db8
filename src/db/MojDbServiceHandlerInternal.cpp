@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) 2009-2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+
+#include <unicode/uloc.h>
 
 #include "db/MojDbServiceHandler.h"
 #include "db/MojDbServiceDefs.h"
@@ -612,6 +614,9 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
         
 		err = m_db.updateLocale(str);
 		MojErrCheck(err);
+
+        UErrorCode errorU;
+        uloc_setDefault(str.data(), &errorU);
 	}
 	return MojErrNone;
 }

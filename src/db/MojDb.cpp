@@ -18,6 +18,8 @@
 * LICENSE@@@ */
 
 
+#include <unicode/uloc.h>
+
 #include "db/MojDb.h"
 #include "db/MojDbQuery.h"
 #include "db/MojDbKind.h"
@@ -53,12 +55,16 @@ const MojUInt32 MojDb::AutoCompactSize = 5000;
 
 MojLogger MojDb::s_log(_T("db.mojodb"));
 
+
 MojDb::MojDb()
 : m_purgeWindow(PurgeNumDaysDefault),
   m_loadStepSize(LoadStepSizeDefault),
   m_isOpen(false)
 {
 	MojLogTrace(s_log);
+
+    UErrorCode error;
+    uloc_setDefault("en_US", &error);
 }
 
 MojDb::~MojDb()

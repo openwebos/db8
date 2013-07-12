@@ -34,18 +34,88 @@ MojErr MojDbQueryFilter::init(const MojDbQuery& query)
 	return MojErrNone;
 }
 
+/***********************************************************************
+ * test
+ *
+ * Test whether values of filter conditions exist in range or not
+ * through the following sequence;
+ *   1. If name of filter condition is object format as "file.name",
+ *   Split with '.' delimiter and contain the result into string vector.
+ *   2. Find values of delivered object through findValue function
+ *   and contain the results into object array.
+ *   3. Check whether retrieved value from delivered object exists in range.
+ * overflows and to report any truncations.
+ ***********************************************************************/
 bool MojDbQueryFilter::test(const MojObject& obj) const
 {
-	for (MojDbQuery::WhereMap::ConstIterator i = m_clauses.begin(); i != m_clauses.end(); ++i) {
-		MojObject val;
-		if (!obj.get(i.key(), val))
-			return false;
+    for (MojDbQuery::WhereMap::ConstIterator filterIter = m_clauses.begin(); filterIter != m_clauses.end(); ++filterIter) {
+        // if name of filter condition is object format as "file.name", split with '.' delimiter.
+        MojString keyStr;
+        keyStr.assign(filterIter.key());
+        MojVector<MojString> keyVec;
+        MojErr err = keyStr.split(_T('.'), keyVec);
+        MojErrCheck(err);
 
-		if (!(testLower(*i, val) && testUpper(*i, val))) {
-			return false;
-		}
-	}
-	return true;
+        // find values by using key name and contain results into object array.
+        MojObject objVals;
+        if (!findValue(obj, keyVec.begin(), keyVec.end(), objVals))
+            return false;
+
+        // check whether the value exists in range.
+        bool testResult = false;
+        for (MojObject::ConstArrayIterator valIter = objVals.arrayBegin(); valIter != objVals.arrayEnd(); ++valIter) {
+            if (testLower(*filterIter, *valIter) && testUpper(*filterIter, *valIter)) {
+                testResult = true;
+                break;
+            }
+        }
+        if(!testResult) return false;
+    }
+    return true;
+}
+
+/***********************************************************************
+ * findValue
+ *
+ * Find values recursively from delivered data object
+ * by using name vector from filter condition.
+ * and contain the result into object array.
+ ***********************************************************************/
+bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const
+{
+    MojObject childObj = obj;
+    for (const MojString* key = begin; key != end; ++key) {
+        if(childObj.type() == MojObject::TypeArray) {
+            // if array, find values recursively
+            for (MojObject::ConstArrayIterator childObjIter = childObj.arrayBegin(); childObjIter != childObj.arrayEnd(); ++childObjIter) {
+                findValue(*childObjIter, key, end, valOut);
+            }
+            return (!valOut.empty());
+        } else {
+            if(!childObj.get(key->data(), childObj)) {
+                return false;
+            }
+        }
+    }
+
+    // if found, push result value into object array.
+    bool foundOut;
+    MojErr err;
+    if(childObj.type() == MojObject::TypeArray) {
+        MojObject::ArrayIterator iter;
+        err = childObj.arrayBegin(iter);
+        MojErrCheck(err);
+        for (; iter != childObj.arrayEnd(); ++iter) {
+            // if result set is array, we should remove "_id" for comparison.
+            err = iter->del(_T("_id"), foundOut);
+            MojErrCheck(err);
+            valOut.push(*iter);
+        }
+    } else {
+        valOut.push(childObj);
+    }
+
+    return true;
 }
 
 bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const MojObject& val)
@@ -56,16 +126,18 @@ bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const Mo
 		return true;
 
 	case MojDbQuery::OpEq:
-		if (val.type() == MojObject::TypeArray) {
-			MojObject::ConstArrayIterator end = lowerVal.arrayEnd();
-			for (MojObject::ConstArrayIterator i = lowerVal.arrayBegin(); i != end; ++i) {
-				if (val == *i)
-					return true;
-			}
-			return false;
-		} else {
-			return val == lowerVal;
-		}
+        // if lower value type is array, lower operation can use equal operator only.
+        if (lowerVal.type() == MojObject::TypeArray) {
+            MojObject::ConstArrayIterator end = lowerVal.arrayEnd();
+            for (MojObject::ConstArrayIterator i = lowerVal.arrayBegin(); i != end; ++i) {
+                if (val == *i) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return val == lowerVal;
+        }
 
 	case MojDbQuery::OpNotEq:
 		return val != lowerVal;

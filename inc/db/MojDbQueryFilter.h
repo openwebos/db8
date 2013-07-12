@@ -31,6 +31,7 @@ public:
 
 	MojErr init(const MojDbQuery& query);
 	bool test(const MojObject& obj) const;
+    bool findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const;
 
 private:
 	static bool testLower(const MojDbQuery::WhereClause& clause, const MojObject& val);

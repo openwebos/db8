@@ -41,6 +41,30 @@ MojErr MojDbQueryFilterTest::run()
 				_T("[{\"prop\":\"foo\",\"op\":\"=\",\"val\":1}]"),
 				false);
 	MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[2, 3]}}"),
+                _T("[{\"prop\":\"file.ext\",\"op\":\"=\",\"val\":[2]}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[2, 3]}}"),
+                _T("[{\"prop\":\"file.ext\",\"op\":\"=\",\"val\":2}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[{\"name\":\"jpg\"},{\"name\":\"png\"}]}}"),
+                _T("[{\"prop\":\"file.ext.name\",\"op\":\"=\",\"val\":\"jpg\"}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[{\"name\":\"jpg\"},{\"name\":\"png\"}]}}"),
+                _T("[{\"prop\":\"file.ext.name\",\"op\":\"=\",\"val\":[\"jpg\"]}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[{\"name\":\"jpg\"},{\"name\":\"png\"}]}}"),
+                _T("[{\"prop\":\"file.ext\",\"op\":\"=\",\"val\":{\"name\":\"jpg\"}}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"filename\":\"test2\",\"ext\":[{\"name\":\"jpg\"},{\"name\":\"png\"}]}}"),
+                _T("[{\"prop\":\"file.ext\",\"op\":\"=\",\"val\":[{\"name\":\"jpg\"}]}]"),
+                true);
+    MojTestErrCheck(err);
 	// !=
 	err = check(_T("{\"foo\":1}"),
 				_T("[{\"prop\":\"foo\",\"op\":\"!=\",\"val\":1}]"),

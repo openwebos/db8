@@ -22,6 +22,9 @@ project(db8 CXX)
 
 enable_testing()
 
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "")
+
 include(webOS/webOS)
 webos_modules_init(1 0 0 QUALIFIER RC4)
 webos_component(2 0 0)

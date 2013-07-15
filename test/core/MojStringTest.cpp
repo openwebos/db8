@@ -16,7 +16,13 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojStringTest.cpp
 
+* Description           : Source file for MojString test.
+****************************************************************************************************
+**/
 #include "MojStringTest.h"
 #include "core/MojString.h"
 
@@ -24,6 +30,103 @@ MojStringTest::MojStringTest()
 : MojTestCase("MojString")
 {
 }
+
+/**
+***************************************************************************************************
+* @run                   Test cases for ensuring the String operations.
+
+                          1.Test Without Data(Empty Test):
+                            When a MojString Object is created it calls the default constructor
+                            of MojString in which m_begin,m_end and m_endAlloc are initialized.
+                            MojString functions compare(),compareCaseless(),startsWith(),swap()
+                            assign(),setAt(),format(),vformat(),truncate(),resize(),append(),
+                            split() are verified for their functionality when an Object is created
+                            and it is empty.
+
+                          2.Test After Inserting Data:
+                            a)Insert Data:
+                              The data to string is inserted by using assign() or setAt() or
+                              insert() or append() functions.These functionality is tested here.
+                              eg:err = str4.assign(_T("hEllo World!"), 5);
+                            b)Comparison functions:
+                              Comparing two strings are done using the functions compare(),
+                              compareless and operator overloading functions like ==,!=,<=,>=.
+                              eg:MojTestAssert(str1.compare(str3) == 0);
+                                 MojTestAssert(str1.compareCaseless(chars1, 3) == 0);
+                                 MojTestAssert(str1 >= chars1);
+                                 MojTestAssert(str1 != chars2);
+                            c)Self assignment:
+                              Test case written to test the assignment of string to itself.
+                              eg:err = str1.substring(0, 2, str1);
+                                 str1.assign(str1);
+                            d)find() test:
+                              The find function checks whether a character or string is found in
+                              the given string.
+                              eg:idx = str1.find(_T('?'), idx);
+                                 //for str1 if '?' character is found the first index of the
+                                 character is returned
+                                 idx = str1.rfind(_T(' '));
+                                 //for str1 starting from end of string first found ' ' character
+                                 index is returned.
+                                 MojTestAssert(idx == 10);
+                                 idx = str1.find(_T("hi"));//It returns the index where the given
+                                 string starts.
+                            e)split() test:
+                              Split function is to break the string to two or more parts.
+                              eg:err = str1.assign(_T(" hi   there   !  "));
+                              err = str1.split(_T(' '), vec);
+                              MojTestAssert(vec.size() == 3);
+                              MojTestAssert(vec[0] == _T("hi"));
+                              MojTestAssert(vec[1] == _T("there"));
+                              MojTestAssert(vec[2] == _T("!"));
+                            f)format() test:
+                              It tests the string formatting functionality for the string.
+                              err = str1.format(_T("hello %s %d"), _T("world"), 14);
+                              MojTestErrCheck(err);
+                              MojTestAssert(str1 == _T("hello world 14"));
+                            g)append() test:
+                              It tests the appending functionality of the string.
+                              eg:MojTestAssert(str1 == _T("hello"));
+                              err = str1.append(_T('!'));
+                            h)truncate() test:
+                              The truncate function truncates a string to specified length.
+                              The test is written to test the truncate().
+                              eg:MojTestAssert(str1 == _T("hello! world!"));
+                              err = str1.truncate(5);
+                            i)reserve() test:
+                              This tests the vector capacity to conatin at least the given no
+                              of elements or not.
+                              eg:err = str5.reserve(5);//vector capacity to contain 5 elements
+                            j)resize() test:
+                              This test checks the resizing functionality of the string to given
+                              length.
+                              err = str1.resize(0);//Empty string
+                            k)ref-count() test:
+                              This test checks the number of references and deferences for a
+                              string is done as expected.
+                              eg:MojTestAssert(str1 == _T("52"));
+                              MojTestAssert(str2 == _T("Hello"));
+                              str2 = str1;
+                              err = str1.append(_T('0'));
+                            l)base64 Encoding and Decoding test:
+                              This tests the encoding/decoding scheme that represent binary data
+                              in an ASCII string format by translating it into a radix-64
+                              representation and vice versa.
+                              eg: MojByte input[] = {0x14, 0xfb, 0x9c, 0x03, 0xd9};
+                              err = bv.assign(input, input + sizeof(input));
+                              err = str1.base64Encode(bv);
+                              MojVector<MojByte> bv2;
+                              err = str1.base64Decode(bv2);
+                              MojTestAssert(bv == bv2);
+                            m)tolower() test:
+                              The test case checks the tolower() functionality to change the
+                              string to lower case.
+                              eg:err = str1.assign(_T("HeLlO"));//returns hello
+
+* @param                : None
+* @retval               : MojErr
+***************************************************************************************************
+**/
 
 MojErr MojStringTest::run()
 {

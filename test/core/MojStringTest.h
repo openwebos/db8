@@ -16,7 +16,13 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojStringTest.h
 
+* Description           : Header file for MojString test.
+****************************************************************************************************
+**/
 #ifndef MOJSTRINGTEST_H_
 #define MOJSTRINGTEST_H_
 

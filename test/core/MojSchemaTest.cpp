@@ -15,6 +15,13 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+/**
+****************************************************************************************************
+* Filename              : MojSchemaTest.cpp
+
+* Description           : Source file for MojSchema test.
+****************************************************************************************************
+**/
 
 
 #include "MojSchemaTest.h"
@@ -25,6 +32,25 @@ MojSchemaTest::MojSchemaTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @run                The MojSchema provides a mechanism to validate the JSON data objects.
+                      Schema Test include the following:
+
+                      1.typeTest
+                      2.disallowTest
+                      3.propertiesTest
+                      4.ItemsTest
+                      5.requiresTest
+                      6.minmaxTest
+                      7.arrayTest
+                      8.stringTest
+                      9.enumTest
+                      10.divisibleTest
+* @param            : None
+* @retval           : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::run()
 {
 	MojErr err = typeTest();
@@ -50,7 +76,15 @@ MojErr MojSchemaTest::run()
 
 	return MojErrNone;
 }
-
+/**
+***************************************************************************************************
+* @typeTest           Different data types like array,int,string,Object,number and null are added
+                      in this test case to check the functionality of type parameter.
+                      eg:err = checkValid(_T("{\"type\":\"object\"}"),_T("{}"), true);
+* @param            : None
+* @retval           : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::typeTest()
 {
 	// null
@@ -215,7 +249,17 @@ MojErr MojSchemaTest::typeTest()
 
 	return MojErrNone;
 }
-
+/**
+***************************************************************************************************
+* @disallowTest                 The disallow test checks the functionality of diallow attribute
+                                which is similar to type except that it won't allow the specified
+                                type in the schema.
+                                eg:err = checkValid(_T("{\"disallow\":\"null\"}"),_T("5"),true);
+                                  //null type is not allowed in the schema.
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::disallowTest()
 {
 	// null
@@ -376,7 +420,17 @@ MojErr MojSchemaTest::disallowTest()
 
 	return MojErrNone;
 }
-
+/**
+***************************************************************************************************
+* @propertiesTest              The properties parameter functionality is verified in this test.
+                               This properties is related with Object.For the Object type
+                               definition defining some object properties using the properties key.
+                               eg:err = checkValid(_T("{\"properties\":{}}"), _T("{\"foo\":
+                                        \"bar\"}"),true);
+* @param                      :  None
+* @retval                     :  MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::propertiesTest()
 {
 	MojErr err = MojErrNone;
@@ -413,7 +467,18 @@ MojErr MojSchemaTest::propertiesTest()
 
 	return MojErrNone;
 }
-
+/**
+***************************************************************************************************
+* @itemsTest                    The items parameter functionality is verified in this test.This
+                                property related to schema or array of schemas.When this is an
+                                object or schema and the instance value is an array ,all the items
+                                in the array should confirm to this schema.
+                                eg:err = checkValid(_T("{\"items\":{\"type\":\"integer\"}}"),
+                                 _T("[]"), true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::itemsTest()
 {
 	MojErr err = MojErrNone;
@@ -482,7 +547,17 @@ MojErr MojSchemaTest::itemsTest()
 
 	return MojErrNone;
 }
-
+/**
+***************************************************************************************************
+* @requiresTest                The requires keyword functionality is verified in this test.The
+                               requires property tells that the property given by requires
+                               attribute must be present in the containing instance object.
+                               eg:err = checkValid(_T("{\"properties\":{\"foo\":{\"optional\":
+                                         true,\"requires\":\"bar\"}}}"), _T("{}"),true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::requiresTest()
 {
 	MojErr err = MojErrNone;
@@ -501,7 +576,32 @@ MojErr MojSchemaTest::requiresTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @minmaxTest                   The minimum and maximum keyword functionality is verified in this
+                                test.
 
+                                The minimum indicates the minimum value for the instance property
+                                when the type of the instance value is a number.
+                                eg:err = checkValid(_T("{\"minimum\":2}"),_T("2.0"),true);
+
+                                The maximum indicates the maximum value for the instance property
+                                when the type of the instance value is a number.
+                                eg: err = checkValid(_T("{\"maximum\":2}"),_T("2"),true);
+
+                                If the minimum is defined, the minimumCanEqual indicates whether
+                                or not the instance  property value can equal the minimum.
+                                eg:err = checkValid(_T("{\"minimum\":2,\"minimumCanEqual\":false}")
+                                         ,_T("2.1"),true);
+
+                                If the maximum is defined, the maximumCanEqual indicates whether
+                                or not the instance property value can equal the maximum.
+                                eg:err = checkValid(_T("{\"maximum\":2,\"maximumCanEqual\":true}")
+                                         ,_T("2"),true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::minmaxTest()
 {
 	MojErr err = MojErrNone;
@@ -582,7 +682,27 @@ MojErr MojSchemaTest::minmaxTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @arrayTest                    This test case holds good when the type is array.
 
+                                The minItems indicates the minimum number of values in an array
+                                when an array is the instance value.
+                                eg:err = checkValid(_T("{\"minItems\":0}"),_T("[]"),true);
+
+                                The maxItems indicates the maximum number of values in an array
+                                when an array is the instance value.
+                                eg:err = checkValid(_T("{\"maxItems\":2}"), _T("[1,2]"), true);
+
+                                The unique indicates that all the items in an array must be unique
+                                (no two identical values) within that array when an array is the
+                                instance value
+                                eg:err = checkValid(_T("{\"uniqueItems\":true}"),_T("[1,2,3,4]"),
+                                          true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 MojErr MojSchemaTest::arrayTest()
 {
 	MojErr err = MojErrNone;
@@ -672,6 +792,21 @@ MojErr MojSchemaTest::arrayTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @stringTest                   The minLength and maxLength functionality  is tested in this test.
+
+                                When the instance value is a string, the maxlenth indicates maximum
+                                length of the string.
+                                eg:err = checkValid(_T("{\"maxLength\":6}"),_T("\"hello\""),true);
+
+                                When the instance value is a string, the minlength indicates
+                                minimum length of the string.
+                                eg:err = checkValid(_T("{\"minLength\":0}"),_T("\"hello\""),true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 
 MojErr MojSchemaTest::stringTest()
 {
@@ -733,6 +868,22 @@ MojErr MojSchemaTest::stringTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @enumTest                      The enum functionality is for array type and its functionality is
+                                 verified in this test.
+                                 The enum  provides an enumeration of possible values that are
+                                 valid for the instance property. This should be an array, and each
+                                 item in the array represents a possible value for the instance
+                                 value.If "enum" is included,the instance value must be one of the
+                                 values in enum array in order for the schema to be valid
+                                 eg:err = checkValid(_T("{\"enum\":[1]}"),_T("1"),true);
+                                    err = checkValid(_T("{\"enum\":[1,false,\"hello\"]}"),_T("1"),
+                                          true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 
 MojErr MojSchemaTest::enumTest()
 {
@@ -764,6 +915,18 @@ MojErr MojSchemaTest::enumTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @divisibleTest                The divisibleBy functionality is verified in this test.
+                                This divisibleBy indicates that the instance property value must be
+                                divisible by the given schema value when the instance property
+                                value is a number.
+                                eg:(void) checkValid(_T("{\"divisibleBy\":0}"), _T("18"),false);
+                                   (void) checkValid(_T("{\"divisibleBy\":1}"), _T("18"),true);
+* @param                      : None
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 
 MojErr MojSchemaTest::divisibleTest()
 {
@@ -788,6 +951,18 @@ MojErr MojSchemaTest::divisibleTest()
 
 	return MojErrNone;
 }
+/**
+***************************************************************************************************
+* @checkValid                   The CheckValid function takes two parameters as input and validates
+                                SchemaJson and instanceJson according to the expected value.
+                                If expected is true then validation will return true else if
+                                expected is false then the validation should return false.
+                                eg:(void) checkValid(_T("{\"divisibleBy\":3}"),_T("18.0"),true);
+                                   (void) checkValid(_T("{\"divisibleBy\":3}"),_T("18.1"),false);
+* @param                      : MojChar*,MojChar*,bool
+* @retval                     : MojErr
+***************************************************************************************************
+**/
 
 MojErr MojSchemaTest::checkValid(const MojChar* schemaJson, const MojChar* instanceJson, bool expected)
 {

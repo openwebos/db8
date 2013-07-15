@@ -16,7 +16,13 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojSchemaTest.h
 
+* Description           : Header file for MojSchema test.
+****************************************************************************************************
+**/
 #ifndef MOJSCHEMATEST_H_
 #define MOJSCHEMATEST_H_
 

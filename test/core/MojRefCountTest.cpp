@@ -15,7 +15,13 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
+/**
+****************************************************************************************************
+* Filename              : MojRefCountTest.cpp
 
+* Description           : Source file for MojRefCount test.
+****************************************************************************************************
+**/
 
 #include "MojRefCountTest.h"
 #include "core/MojAutoPtr.h"
@@ -42,6 +48,32 @@ MojRefCountTest::MojRefCountTest()
 {
 }
 
+/**
+***************************************************************************************************
+* @MojRefCountTest  :Test case for checking the reference counter functionality.This function
+                     checks whether the counter sets and resets as expected.
+                     1.MojReCountAlloc():
+                       It allocates memory and incements the Atomic counter and returns the
+                       pointer to allocated memory.
+                       p2 = (int*) MojRefCountAlloc(sizeof(int));
+                     2.MojRefCountGet:
+                       It returns the Atomic counter value.
+                       eg:MojTestAssert(MojRefCountGet(p1) == 1);
+                     3.MojRefCountRetain:
+                       It increments the Atomic counter value.
+                       eg:MojRefCountRetain(p1);
+                     4.MojRefCountRelease:
+                       It decrements the Atomic counter value.If no more references found,then it
+                       frees the atomic counter allocated memory.
+                       eg:MojRefCountRelease(p1);
+                     5.MojRefCountRealloc:
+                       It reallocates the memory to the given size and increments the atomic
+                       counter.
+                       eg:p1 = (int*) MojRefCountRealloc(p1, 100);
+* @param            :  None
+* @retval           :  MojErr
+***************************************************************************************************
+**/
 MojErr MojRefCountTest::run()
 {
 	int* p1 = NULL;

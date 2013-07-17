@@ -16,6 +16,71 @@
 *
 * LICENSE@@@ */
 
+/*
+DB8 Index Performance Test
+==========================
+Overview
+--------
+Create a Kind with 8 fields and ten indexes, We will populate the records using randomization
+techniques (see below).
+Add 100 records, then perform 3 queries, delete 10 %, change 10%, perform the 3 queries again.
+Then repeat adding 400 more records, then 1600 more, then 6400 more, then 25600 more records
+Record the elapsed time after each phase.
+
+Layout
+------
+Field name          Type        Contents
+Street Address      String      Construct a street address by randomly creating a number between 1 and
+                                9999, and then adding a street name randomly selected from 10 street
+                                names: [“Elm St.”, “Lake View Drive”, “Main St.”, “Frontage Road”,
+                                “Route 120”, “Madison Avenue”, “Heritage Circle”, “Bay Ave.”, “15
+                                St.”, “Ave. B”]
+                                Ex: “5111 Heritage Circle” or “25 Elm St.”
+City                String      Randomly select a city name from ten city names:[“Lincoln City”,
+                                “Clinton”, “Mammoth Falls”, “Eureka”, “Elk Village”, “Dartmouth”,
+                                “Rome”, “Athens”, “Sunnyvale”, “Kiev”]
+State               String      Randomly select a State name from ten state names: [“California”,
+                                “Georgia”, “New York”, “New Jersey”, “Iowa”, “Indiana”, “New
+                                Mexico”, “North Carolina”, North Dakota”]
+Zipcode             String      Randomly create a 5 digit number, with the leading zeroes, in the range
+                                “00001” to “99999”. However, leave 1 in 10 blank (for the Delete test)
+Limit               Number      Randomly create a number in the range 1 to 99999999
+LastUpdate          Date        Randomly create a valid date in the range Jan 1, 2012 to Dec 31, 2012
+Next Update         Date        Add 3 months to the LastUpdate value
+Description         String      Every second record add a description field, as follows:
+                                “Description”:“Mary had a little lamb, its fleece was white as snow”
+Indexes
+-------
+Index name          Fields      Contents
+ZipAddress          2           “Street Address”, “ZipCode”
+FullAddress         4           “Street Address”, “City”, “State”, “ZipCode”
+Limit               1           “Limit”
+ZipLimit            2           “Zipcode”, “Limit”
+Update              1           “Last Update”
+StateUpdate         2           “State”, “Last Update”
+Next                1           “Next Update”
+StateNext           2           “State”, “Next Update”
+LastZipLimit        3           “Last Update”, “Zipcode”, “Limit”
+LimitAddress        5           “Limit”, “Street Address”, “City”, “State”, “ZipCode”
+
+Queries
+-------
+Query Name          Index           Contents
+MissingZip          FullAddress     Only return records where Zipcode field is empty
+Whales              LimitAddress    Only return records where Limit > 89999999
+StateNew            StateUpdate     Only return records where State begins with “New”
+
+Deletion
+--------
+Delete records using the “MissingZip” index. This will delete 10% of the records just added.
+
+Update
+------
+Select records using the “Whales” query and change the limit field by adding 67 to the current
+value. This will modify about 10% of the records
+each time.
+*/
+
 #include <stdlib.h>
 #include <time.h>
 #include "db/MojDbStorageEngine.h"

@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojHashMapTest.cpp
+* Description           : Source file for MojHashMap test.
+****************************************************************************************************
+**/
 
 #include "MojHashMapTest.h"
 #include "core/MojVector.h"
@@ -24,7 +30,28 @@ MojHashMapTest::MojHashMapTest()
 : MojTestCase(_T("MojHashMap"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              1. MojHashMap stores data in key-value pair. HashMap internally use Hashing
+                       algorithm to store the data.
+                    2. Hashing Algorithm:
+                        * Key is given to the Hashing algorithm to generate the Hash_Key
+                        * Hash_Key % No_Of_Buckets gives id of the bucket.
+                        * Node having the information of key and value is inserted into the
+                          corresponding bucket.
+                       For all Insertion,Retrieval and Deletion, same algorithm is used to determine the
+                       bucket id and to perform the required operation. Key and value can be of any
+                       datatype.
+                    3. Every key is mapped to only one value. Inserting a different value on the
+                       existing key means modifying the previous value.
+                       Ex: put(1,100) ==> key = 1 and value = 100
+                           put(1,200) ==> key = 1 and value = 200 (100 is overwritten with 200)
+                    4. MojHash provides utility functions like put/get/del/find for performing
+                       various operations on HashMap.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojHashMapTest::run()
 {
 	MojHashMap<int, int> map1, map2;

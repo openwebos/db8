@@ -16,7 +16,12 @@
 *
 * LICENSE@@@ */
 
-
+/**
+****************************************************************************************************
+* Filename              : MojHashMapTest.h
+* Description           : Header file for MojHashMap test.
+****************************************************************************************************
+**/
 #ifndef MOJHASHMAPTEST_H_
 #define MOJHASHMAPTEST_H_
 

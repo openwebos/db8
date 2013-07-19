@@ -16,7 +16,12 @@
 *
 * LICENSE@@@ */
 
-
+/**
+****************************************************************************************************
+* Filename              : MojAtomicTest.h
+* Description           : Header file for MojAtomic test.
+****************************************************************************************************
+**/
 #ifndef MOJATOMICINTTEST_H_
 #define MOJATOMICINTTEST_H_
 

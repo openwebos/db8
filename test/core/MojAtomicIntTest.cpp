@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojAtomicTest.cpp
+* Description           : Source file for MojAtomic test.
+****************************************************************************************************
+**/
 
 #include "MojAtomicIntTest.h"
 
@@ -23,7 +29,20 @@ MojAtomicIntTest::MojAtomicIntTest()
 : MojTestCase(_T("MojAtomicInt"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              MojAtomicInt is a wrapper class over int datatype.
+                    1. For storing integer number, instance of MojAtomic class is created and
+                       the value to be assigned is given as a parameter to the constructor.
+                       By default 0 is assigned.
+                    2. It provides utility functions to perform arithemetic operations atomically.
+                       Ex: increments() adds 1 to number
+                           decrement() subtracts 1 from number etc..
+                    3. Provides overloaded function for all relational operators.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojAtomicIntTest::run ()
 {
 	MojAtomicInt i1;

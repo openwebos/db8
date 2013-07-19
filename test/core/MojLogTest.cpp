@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojLogTest.cpp
+* Description           : Source file for MojLog test.
+****************************************************************************************************
+**/
 
 #include "MojLogTest.h"
 #include "core/MojLogEngine.h"
@@ -51,7 +57,22 @@ MojLogTest::MojLogTest()
 : MojTestCase(_T("MojLog"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              Tests logging functionality. By default LogEngine supports default logger and
+                    error logger.
+                    New loggers can be added to the log engine using addLogger functionality.
+                    Similarly existing loggers can be removed using removeLogger functionality.
+                    Appender decides where log text need to be written. It can be a file or stdout or
+                    stderr. Syslog and PmLogger can also be used for logging.
+                    Each logger is to be set with log level which tells the priority of the logs.
+                    Default level of the logger is "LevelDefault".
+                    If there are many registered loggers, then each one can be configured using
+                    single configuration file with the required log level.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojLogTest::run()
 {
 	MojLogEngine engine;

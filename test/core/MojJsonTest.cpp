@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojJsonTest.cpp
+* Description           : Source file for MojJson test.
+****************************************************************************************************
+**/
 
 #include "MojJsonTest.h"
 #include "core/MojJson.h"
@@ -24,7 +30,20 @@ MojJsonTest::MojJsonTest()
 : MojTestCase("MojJson")
 {
 }
-
+/**
+****************************************************************************************************
+* @run              JSON is a light weight data-interchange format. It is a list of name/value
+                    pairs stored as an object or array.
+                    Tests functionalities of classes like MojJsonWriter and MojJsonReader.
+                    These classes are used to parse the JSON data from object or to write
+                    JSON data to object.
+                    In WebOS, communication among all components happens through JSON
+                    object which internally uses Parser and Writer class for data conversion.
+                    This test case is tested for different possible JSON strings.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojJsonTest::run()
 {
 	const MojChar* empty = _T("{}");

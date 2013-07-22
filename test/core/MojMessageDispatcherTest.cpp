@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojMessageDispatcherTest.cpp
+* Description           : Source file for MojMessageDispatcher test.
+****************************************************************************************************
+**/
 
 #include "MojMessageDispatcherTest.h"
 #include "core/MojMessage.h"
@@ -54,7 +60,20 @@ MojMessageDispatcherTest::MojMessageDispatcherTest()
 : MojTestCase(_T("MojMessageQueue"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              For all incoming messages,queue name is extracted from message and checked in
+                    both pending and scheduled lists.If queue is not present in both the lists,new
+                    queue is created and added to the schedule list with the message.
+                    Thread is awakened to read the queued message from schedule list for further
+                    processing. When message is getting processed, corresponding queue is kept in
+                    pending list. After completing the processing,queue is removed from pending list
+                    and added to scheduled list if more messages to be processed, otherwise queue is
+                    deleted.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojMessageDispatcherTest::run()
 {
 	MojMessageDispatcher queue;

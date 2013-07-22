@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojObjectTest.cpp
+* Description           : Source file for MojObject test.
+****************************************************************************************************
+**/
 
 #include "MojObjectTest.h"
 #include "core/MojHashMap.h"
@@ -27,7 +33,19 @@ MojObjectTest::MojObjectTest()
 : MojTestCase("MojObject")
 {
 }
-
+/**
+****************************************************************************************************
+* @run              MojObject stores key-value pairs.Internally it provides separate implmentation
+                    for all data types. Provides facility to push single entry or entire array
+                    of data into MojObject.
+                    Supports put/get/delete operation.
+                    Data having key and value is converted to Node type and then node is inserted
+                    into TreeBase. All operation happens on TreeBase are based on key.
+                    Provides interface to convert JSON string to JSON object and viceversa.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojObjectTest::run()
 {
 	MojObject obj0;

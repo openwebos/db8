@@ -15,7 +15,12 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
-
+/**
+****************************************************************************************************
+* Filename              : MojMessageDispatcherTest.h
+* Description           : Header file for MojMessageDispatcher test.
+****************************************************************************************************
+**/
 
 #ifndef MOJMESSAGEDISPATCHERTEST_H_
 #define MOJMESSAGEDISPATCHERTEST_H_

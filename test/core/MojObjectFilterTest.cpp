@@ -15,8 +15,12 @@
 * limitations under the License.
 *
 * LICENSE@@@ */
-
-
+/**
+****************************************************************************************************
+* Filename              : MojObjectFilter.cpp
+* Description           : Source file for MojObjectFilter test.
+****************************************************************************************************
+**/
 #include "MojObjectFilterTest.h"
 #include "db/MojDb.h"
 #include "core/MojJson.h"
@@ -188,7 +192,17 @@ MojObjectFilterTest::MojObjectFilterTest()
 : MojTestCase(_T("MojObjectFilter"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              Json object stores data in the form of name/value pairs. It is parsed for
+                    nested key-value pairs i.e slices. Multiple slices of data are stored in a set.
+                    Set is filtered and parsed by MojFilter and MojParser classes respectively.
+                    Parsed data is given to MojWriter and converted into MojObject.Finally filtered,
+                    parsed object is compared with the expected object.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojObjectFilterTest::run()
 {
 	//parse a full object, ask for slices that exist - all the leaf node slices
@@ -1612,7 +1626,13 @@ MojErr MojObjectFilterTest::testNestedArray4() {
 
 	return MojErrNone;
 }
-
+/**
+****************************************************************************************************
+* @testFilteredParse  Parses data slices from set and converts into single object using writer
+                      class functions. Converted object is compared with the expected object.
+* @retval        :    MojErr
+****************************************************************************************************
+**/
 MojErr MojObjectFilterTest::testFilteredParse(const MojChar* toParse, MojObject& expected, MojDbQuery::StringSet& set)
 {
 	MojJsonWriter writer;

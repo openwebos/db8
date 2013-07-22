@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojObjectTest.h
+* Description           : Header file for MojObject test.
+****************************************************************************************************
+**/
 
 #ifndef MOJOBJECTTEST_H_
 #define MOJOBJECTTEST_H_

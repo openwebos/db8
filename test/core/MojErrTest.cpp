@@ -20,6 +20,13 @@
 #include "MojErrTest.h"
 #include "core/MojLogEngine.h"
 
+/**
+****************************************************************************************************
+* Filename              : MojErrTest.cpp
+* Description           : Source file for MojErr test.
+****************************************************************************************************
+**/
+
 static MojErr throwAnErr(bool cond, MojErr errToThrow)
 {
 	if (cond)
@@ -47,7 +54,34 @@ MojErrTest::MojErrTest()
 : MojTestCase(_T("MojErr"))
 {
 }
+/**
+****************************************************************************************************
+* @run              Testcase to check runtime error handling and logging of errors in DB8.
+                    1. Throw and Catch utility are used to handle run time errors.
+                       Ex:
+                          throwAnErr(true, MojErrNoMem) -> API to throw an error
+                          MojErrCatch(err, MojErrNoMem) -> API to catch an error.
+                          MojErrCatchAll(err)           -> API to catch an error.
+                          In catch block err should not be equal to MojErrNone.
 
+                    2. MojErrAccumulate(..): This function writes error messages with information
+                       like file name, function name, line number to logger.
+
+                    *  throwAnErr(false,MojErrNoMem) - Error is caught by MojErrCatch(..) function
+                                                       on setting the condition to 'true'.
+                                                       MojErrNoMem cannot be caught as condition =
+                                                       'false'.
+
+                    *  throwAnErr(true,MojErrNoMem)  - This error is caught as it is thrown with
+                                                       condition = 'true'.
+
+                    *  throwAnErrMsg(true, MojErrInvalidArg)  - Writes error message to the logger
+                                                                on setting the condition to 'true'
+
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojErrTest::run()
 {
 	MojErr err = throwAnErr(false, MojErrNoMem);

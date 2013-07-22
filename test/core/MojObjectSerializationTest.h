@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojObjectSerializationTest.h
+* Description           : Header file for MojObjectSerialization test.
+****************************************************************************************************
+**/
 
 #ifndef MOJOBJECTSERIALIZATIONTEST_H_
 #define MOJOBJECTSERIALIZATIONTEST_H_

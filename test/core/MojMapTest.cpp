@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojMapTest.cpp
+* Description           : Source file for MojMap test.
+****************************************************************************************************
+**/
 
 #include "MojMapTest.h"
 #include "core/MojString.h"
@@ -24,7 +30,31 @@ MojMapTest::MojMapTest()
 : MojTestCase(_T("MojMap"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              MojMap stores data in the form of key-value pair. Key and Value can be of any
+                    datatype.
+                    Every key is mapped to single value. If 2 put operations are performed on the same
+                    key then last updated value is written to MojMap.
+                    Ex:
+                         put(1,100)
+                         put(1,200) Here key 1 points to 200 by overwriting the value 100.
+                    MojMap maintains reference count of instance accessing it. If reference count
+                    becomes 0 then map is deallocated.
+                    Diff() utility compares 2 maps and gives non matching entries in the
+                    resultant MojMap.
+                    Like C++ library map, MojMap provides put/delete API facility and iterators
+                    to traverse through the Map.
+                    MojMap provides utility functions like lowerBound(..) and upperBound(..)
+                    which takes key as a parameter.lowerBound(..) returns the current key if key
+                    present in the map, otherwise returns the key by adding 1 to it.
+                    Similarly upperBound(..) returns the next key if key is present in the map
+                    otherwise returns the key by adding 1 to it.
+                    Provides comparison function to compare 2 maps node by node.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojMapTest::run()
 {
 	MojMap<int, MojString> intMap1;

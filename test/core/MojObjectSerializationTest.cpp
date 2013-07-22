@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojObjectSerializationTest.cpp
+* Description           : Source file for MojObjectSerialization test.
+****************************************************************************************************
+**/
 
 #include "MojObjectSerializationTest.h"
 #include "core/MojObject.h"
@@ -26,7 +32,20 @@ MojObjectSerializationTest::MojObjectSerializationTest()
 : MojTestCase(_T("MojObjectSerialization"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              Object Serialization is a way of tanslating the data into a format which can be
+                    accessed consistantly so that it remains same while reading and writing
+                    by identical clone of objects.
+                    Data is converted to BigEndian format before storing to a buffer.
+                    MojReader and MojWriter classes are used for reading and writing of data from
+                    buffer. Data is read or written from buffer in multiples of bytes.
+                    Json string is used for testing,which is parsed and converted into Json object.
+                    Json Objects are compared to check the correctness and data consistancy.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojObjectSerializationTest::run()
 {
 	const MojChar* json =

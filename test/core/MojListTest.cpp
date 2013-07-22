@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojListTest.cpp
+* Description           : Source file for MojList test.
+****************************************************************************************************
+**/
 
 #include "MojListTest.h"
 #include "core/MojList.h"
@@ -34,7 +40,26 @@ MojListTest::MojListTest()
 : MojTestCase("MojList")
 {
 }
+/**
+****************************************************************************************************
+* @run              MojList is similar to standard C++ template library list.
+                    MojList uses double linked list to store the data.
+                    MojList provides facilities to access data from both front and back of the list.
+                    MojList provides additional functionalities like contains() which checks for the
+                    object in the list. This testcase verifies all list operations for inserting,
+                    retrieving of data using const, non const iterators.
 
+                    List functionalities tested:
+                    * Populating list using 'push' utility and checking for empty test.
+                    * Adding data to the list using pushBack() utility.
+                    * Using const and non-const iterators to ensure integrity of data.
+                    * Erasing data using erase().
+                    * popBack() and popFront() to retrieve data from front and back of the list.
+                    * Deleting the entire list using clear() utility.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojListTest::run()
 {
 	// create a bunch of TestItems

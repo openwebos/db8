@@ -19,12 +19,16 @@
 #ifndef MOJDBLEVELCURSOR_H
 #define MOJDBLEVELCURSOR_H
 
-#include <auto_ptr.h>
-
 #include <leveldb/db.h>
 #include "db/MojDbDefs.h"
 
 #include <db-luna/leveldb/MojDbLevelIterator.h>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    #include <boost/smart_ptr/scoped_ptr.hpp>
+#else
+    #include <auto_ptr.h>
+#endif
 
 class MojDbLevelDatabase;
 class MojDbLevelItem;
@@ -57,8 +61,11 @@ private:
     leveldb::DB* m_db;
     MojDbLevelAbstractTxn* m_txn;
     MojDbLevelTableTxn* m_ttxn;
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    boost::scoped_ptr<MojDbLevelTxnIterator> m_txnIt;
+#else
     std::auto_ptr<MojDbLevelTxnIterator> m_txnIt;
-
+#endif
     MojSize m_warnCount;
 };
 

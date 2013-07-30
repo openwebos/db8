@@ -67,15 +67,68 @@ MojErr MojDbSearchCursor::count(MojUInt32& countOut)
 	countOut = 0;
 	MojErr err = begin();
 	MojErrCheck(err);
-	countOut = (MojUInt32) m_items.size();
+    countOut = m_count;
 
 	return MojErrNone;
 }
 
+/***********************************************************************
+ * setPagePosition
+ *
+ * Move cursor position to page id provided in query.
+ *   1. Find item "_id" which is equal to page id iteratively.
+ *   2. If found, set begin/last position and next page.
+ ***********************************************************************/
+MojErr MojDbSearchCursor::setPagePosition()
+{
+    MojErr err;
+    MojDbStorageItem* item;
+    m_pos = m_items.begin();
+    ItemVec::ConstIterator last = m_items.end();
+    m_limitPos = last;
+    // retrieve page id from query
+    MojObject pageKey;
+    err = m_page.toObject(pageKey);
+    MojErrCheck(err);
+    while (m_pos != last) {
+        // retrieve id from query
+        item = m_pos->get();
+        const MojObject id = item->id();
+        // If match, set begin/last position and next page
+        if(pageKey.compare(id) == 0) {
+            if (m_limit >= (last-m_pos)) {
+                m_limitPos = m_items.end();
+                m_page.clear();
+            } else {
+                m_limitPos = m_pos + m_limit;
+                // set next page
+                MojDbStorageItem* nextItem = m_limitPos->get();
+                const MojObject nextId = nextItem->id();
+                m_page.fromObject(nextId);
+                // print log for nextId
+                MojString strOut;
+                err = nextId.toJson(strOut);
+                MojErrCheck(err);
+                MojLogInfo(MojDb::s_log, _T("nextId : %s \n"), strOut.data());
+            }
+            break;
+        }
+        ++m_pos;
+    }
+
+    return MojErrNone;
+}
+
+/***********************************************************************
+ * nextPage
+ *
+ * Set next page if m_page is not null
+ ***********************************************************************/
 MojErr MojDbSearchCursor::nextPage(MojDbQuery::Page& pageOut)
 {
-	// TODO: support paging by writing index
-	return MojErrNone;
+    pageOut = m_page;
+
+    return MojErrNone;
 }
 
 MojErr MojDbSearchCursor::init(const MojDbQuery& query)
@@ -95,9 +148,21 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 	} else {
 		m_orderProp = query.order();
 	}
+    // retrieve page info from query.
+    MojDbQuery::Page page;
+    page = m_query.page();
+    if(!page.empty()) {
+        MojObject objOut;
+        err = page.toObject(objOut);
+        MojErrCheck(err);
+        m_page.fromObject(objOut);
+    }
 	m_query.limit(MaxResults);
 	err = m_query.order(_T(""));
 	MojErrCheck(err);
+    // delete page info from query for query plan
+    page.clear();
+    m_query.page(page);
 
 	return MojErrNone;
 }
@@ -161,13 +226,25 @@ MojErr MojDbSearchCursor::load()
 		err = m_items.reverse();
 		MojErrCheck(err);
 	}
-	// set limit and pos
-	if (m_limit >= m_items.size()) {
-		m_limitPos = m_items.end();
-	} else {
-		m_limitPos = m_items.begin() + m_limit;
-	}
-	m_pos = m_items.begin();
+    // next page
+    if (!m_page.empty()) {
+        err = setPagePosition();
+        MojErrCheck(err);
+    } else {
+        // set begin/last position.
+        m_pos = m_items.begin();
+        if (m_limit >= m_items.size()) {
+            m_limitPos = m_items.end();
+        } else {
+            // if item size is bigger than limit, set next page.
+            m_limitPos = m_items.begin() + m_limit;
+            MojDbStorageItem* nextItem = m_limitPos->get();
+            const MojObject nextId = nextItem->id();
+            m_page.fromObject(nextId);
+        }
+    }
+    // set remainder count
+    m_count = m_items.end() - m_pos;
 
 	return MojErrNone;
 }

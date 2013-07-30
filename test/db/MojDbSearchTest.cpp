@@ -48,6 +48,26 @@ static const MojChar* const MojSearchTestObjects[] = {
 	_T("{\"_id\":15,\"_kind\":\"SearchTest:1\",\"world\":\"this is not a test\"}")
 };
 
+static const MojChar* const MojSearchKindStr2 =
+    _T("{\"id\":\"SearchTest:2\",")
+    _T("\"owner\":\"mojodb.admin\",")
+    _T("\"indexes\":[")
+        _T("{\"name\":\"foo\",\"props\":[{\"name\":\"foo\"}]},")
+    _T("]}");
+static const MojChar* const MojSearchTestObjects2[] = {
+    _T("{\"_id\":\"++IWp1fmlvwsxy8D\",\"_kind\":\"SearchTest:2\",\"foo\":4}"),
+    _T("{\"_id\":\"++IWp1fmlxkTooxj\",\"_kind\":\"SearchTest:2\",\"foo\":3}"),
+    _T("{\"_id\":\"++IWp1fmlyZW0hGw\",\"_kind\":\"SearchTest:2\",\"foo\":2}"),
+    _T("{\"_id\":\"++IWp1fmlzCsYb34\",\"_kind\":\"SearchTest:2\",\"foo\":1}"),
+    _T("{\"_id\":\"++IWp1fmlzpdwxKP\",\"_kind\":\"SearchTest:2\",\"foo\":\"cote\"}"),
+    _T("{\"_id\":\"++IWp1fmm+O4QrDA\",\"_kind\":\"SearchTest:2\",\"foo\":\"CotE\"}"),
+    _T("{\"_id\":\"++IWp1fmm0+i9flc\",\"_kind\":\"SearchTest:2\",\"foo\":\"coté\"}"),
+    _T("{\"_id\":\"++IWp1fmm0_D1WX0\",\"_kind\":\"SearchTest:2\",\"foo\":\"côte\"}"),
+    _T("{\"_id\":\"++IWp1fmm171XToa\",\"_kind\":\"SearchTest:2\",\"foo\":\"côTe\"}"),
+    _T("{\"_id\":\"++IWp1fmm1ggMvpb\",\"_kind\":\"SearchTest:2\",\"foo\":\"carap\"}")
+};
+
+
 MojDbSearchTest::MojDbSearchTest()
 : MojTestCase(_T("MojDbSearch"))
 {
@@ -78,7 +98,24 @@ MojErr MojDbSearchTest::run()
 	err = simpleTest(db);
 	MojTestErrCheck(err);
 	err = filterTest(db);
-	MojTestErrCheck(err);
+    MojTestErrCheck(err);
+
+    // add kind for page test
+    err = kindObj.fromJson(MojSearchKindStr2);
+    MojTestErrCheck(err);
+    err = db.putKind(kindObj);
+    MojTestErrCheck(err);
+
+    // put test objects for page test
+    for (MojSize i = 0; i < sizeof(MojSearchTestObjects2) / sizeof(MojChar*); ++i) {
+        MojObject obj;
+        err = obj.fromJson(MojSearchTestObjects2[i]);
+        MojTestErrCheck(err);
+        err = db.put(obj);
+        MojTestErrCheck(err);
+    }
+    err = pageTest(db);
+    MojTestErrCheck(err);
 
 	err = db.close();
 	MojTestErrCheck(err);
@@ -192,6 +229,27 @@ MojErr MojDbSearchTest::filterTest(MojDb& db)
 
 	return MojErrNone;
 }
+
+MojErr MojDbSearchTest::pageTest(MojDb& db)
+{
+    MojDbQuery query;
+    MojErr err = query.from(_T("SearchTest:2"));
+    MojTestErrCheck(err);
+    query.limit(3);
+    // set page id
+    MojString idStr;
+    idStr.assign(_T("++IWp1fmlzpdwxKP"));
+    MojObject obj(idStr);
+    MojDbQuery::Page page;
+    err = page.fromObject(obj);
+    MojTestErrCheck(err);
+    query.page(page);
+    err = check(db, query, _T("[\"++IWp1fmlzpdwxKP\",\"++IWp1fmm+O4QrDA\",\"++IWp1fmm0+i9flc\"]"));
+    MojTestErrCheck(err);
+
+    return MojErrNone;
+}
+
 
 MojErr MojDbSearchTest::initQuery(MojDbQuery& query, const MojChar* queryStr, const MojChar* orderBy, const MojObject& barVal, bool desc)
 {

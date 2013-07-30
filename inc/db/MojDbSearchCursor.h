@@ -32,7 +32,8 @@ public:
 	virtual MojErr close();
 	virtual MojErr get(MojDbStorageItem*& itemOut, bool& foundOut);
 	virtual MojErr count(MojUInt32& countOut);
-	virtual MojErr nextPage(MojDbQuery::Page& pageOut);
+    virtual MojErr setPagePosition();
+    virtual MojErr nextPage(MojDbQuery::Page& pageOut);
     MojDbCollationStrength collation() const { return m_collation; }
 
 private:
@@ -59,6 +60,7 @@ private:
 	MojErr loadObjects(const ObjectSet& ids);
 	MojErr sort();
 	MojErr distinct();
+    const MojDbQuery::Page& page() const { return m_page; }
 
 	ItemVec m_items;
 	MojString m_orderProp;
@@ -68,6 +70,8 @@ private:
 	ItemVec::ConstIterator m_limitPos;
 	MojString m_locale;
     MojDbCollationStrength m_collation;
+    MojDbQuery::Page m_page;
+    MojUInt32 m_count;
 };
 
 #endif /* MOJDBSEARCHCURSOR_H_ */

@@ -33,6 +33,7 @@ public:
 private:
 	MojErr simpleTest(MojDb& db);
 	MojErr filterTest(MojDb& db);
+    MojErr pageTest(MojDb& db);
 
 	MojErr initQuery(MojDbQuery& query, const MojChar* queryStr,
 			const MojChar* orderBy = NULL, const MojObject& barVal = MojObject::Undefined, bool desc = false);

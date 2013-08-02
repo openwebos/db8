@@ -222,6 +222,7 @@ public:
 		// send a high-latency request and build up a service-side queue
 		const MojChar* echoStr = _T("{\"hello\":\"world\"}");
 		MojObject expectedResponse;
+
 		MojErr err = formatEchoResponse(echoStr, expectedResponse);
 		MojTestErrCheck(err);
 

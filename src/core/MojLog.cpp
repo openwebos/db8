@@ -16,8 +16,13 @@
 *
 * LICENSE@@@ */
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <glib.h>
 
 #include "core/MojLogEngine.h"
+#include "core/MojLog.h"
 
 const MojChar* const MojLogger::s_levelNames[] = {
 	_T("trace"),
@@ -40,6 +45,9 @@ MojLogger::MojLogger(const MojChar* name, MojLogEngine* engine)
 	if (m_engine == NULL)
 		m_engine = MojLogEngine::instance();
 	m_engine->addLogger(this);
+#if defined(USE_PMLOG)
+    PmLogGetContext(m_name, &m_context);
+#endif  // USE_PMLOG
 }
 
 MojLogger::~MojLogger()
@@ -92,6 +100,21 @@ MojErr MojLogger::levelFromString(const MojChar* str, Level& levelOut)
 	MojErrThrowMsg(MojErrLogLevelNotFound, _T("log: level not found: '%s'"), str);
 }
 
+#if defined(USE_PMLOG)
+char * MojLogger::fmtUnique(char *dest, const char *pFile, int32_t lineNbr)
+{
+    char nameBase[120];
+    char *pEnd;
+    const char *pStart = strrchr (pFile, '/');
+    g_strlcpy (nameBase, (pStart ? pStart + 1 : pFile), sizeof(nameBase)-20);
+    if (!(pEnd = strchr (nameBase, '.'))) pEnd = nameBase + strlen(nameBase);
+    snprintf (pEnd, 19, ":%d", lineNbr);
+    size_t len = strlen (nameBase);
+    g_strlcpy (dest, nameBase + (len < MOJLOG_UNIQUE_MAX ? 0 : (len - MOJLOG_UNIQUE_MAX - 1)), MOJLOG_UNIQUE_MAX);
+    return dest;
+}
+#endif
+
 MojLogTracer::MojLogTracer(MojLogger& logger, const MojChar* function, const MojChar* file, int line)
 : m_logger(logger),
   m_function(function),
@@ -121,3 +144,4 @@ int MojLogTracer::indentLevel(int inc)
 	*level += inc;
 	return curVal;
 }
+

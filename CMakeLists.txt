@@ -46,6 +46,12 @@ pkg_check_modules(LS2 REQUIRED luna-service2)
 include_directories(${LS2_INCLUDE_DIRS})
 webos_add_compiler_flags(ALL ${LS2_CFLAGS_OTHER})
 
+# -- check for pmLogLib
+pkg_check_modules(PMLOG REQUIRED PmLogLib)
+include_directories(${PMLOG_INCLUDE_DIRS})
+webos_add_compiler_flags(ALL ${PMLOG_CFLAGS_OTHER})
+
+
 # -- check for ICU
 find_library(ICU NAMES icuuc)
 if(ICU STREQUAL "ICU-NOTFOUND")
@@ -69,7 +75,7 @@ webos_build_pkgconfig(files/pkgconfig/db8)
 webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion
                          -Wno-unused-but-set-variable -Wno-unused-variable
                          -fno-exceptions -frename-registers -DMOJ_LINUX -fno-strict-aliasing
-                         -DMOJ_INTERNAL -D_REENTRANT)
+                         -DMOJ_INTERNAL -D_REENTRANT -DUSE_PMLOG)
 
 # to turn on extra debug information (like output to log dirty buffers data) add debug compile flag -DMOJ_DEBUG_LOGGING
 webos_add_compiler_flags(DEBUG -DMOJ_DEBUG)
@@ -121,6 +127,7 @@ target_link_libraries(mojocore
                       ${GLIB2_LDFLAGS}
                       ${GTHREAD2_LDFLAGS}
                       ${LS2_LDFLAGS}
+                      ${PMLOG_LDFLAGS}
                       )
 webos_build_library(TARGET mojocore NOHEADERS)
 

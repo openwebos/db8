@@ -20,7 +20,6 @@
 #include "db/MojDbIdGenerator.h"
 #include "core/MojObjectSerialization.h"
 #include "core/MojTime.h"
-#include "core/MojString.h"
 
 MojDbIdGenerator::MojDbIdGenerator()
 {
@@ -40,7 +39,7 @@ MojErr MojDbIdGenerator::init()
 	return MojErrNone;
 }
 
-MojErr MojDbIdGenerator::id(MojObject& idOut)
+MojErr MojDbIdGenerator::id(MojObject& idOut, MojString shardId)
 {
 	// an id consists of  a timestamp (in microsecs) concatenated with a 32-bit random number.
 	// The goal is to have a very low likelihood of id collision among multiple devices owned
@@ -59,9 +58,29 @@ MojErr MojDbIdGenerator::id(MojObject& idOut)
 
 	MojBuffer buf;
 	MojDataWriter writer(buf);
-	err = writer.writeInt64(time.microsecs());
-	MojErrCheck(err);
-	err = writer.writeUInt32(randNum);
+
+    // if shard ID exists, add shard ID in front of _id
+    if (!shardId.empty()) {
+        // extract UInt32 shard info from shard Id
+        MojVector<MojByte> shardIdVector;
+        err = shardId.base64Decode(shardIdVector);
+        MojErrCheck(err);
+        MojUInt32 shard = 0;
+        for (MojVector<MojByte>::ConstIterator byte = shardIdVector.begin(); byte != shardIdVector.end(); ++byte) {
+            shard = (shard << 8) | (*byte);
+        }
+        // Revise "_id" field to include optional shard prefix ([32bit shard][50bit time][14bit random])
+        err = writer.writeUInt32(shard);
+        MojErrCheck(err);
+    }
+
+    // Generating a 50-bit timestamp based in microseconds,
+    // but with a 2 bit downshift so the timestamp interval is in units of 4 microseconds,
+    // which will normally produce a unique timestamp. Then concatenate a 14 bit random number to ensure uniqueness.
+	MojUInt64 baseId = ((MojUInt64) (time.microsecs() & 0xFFFFFFFFFFFFC)) << 12;
+    // Take the bottom 14 bits random number from 32 bits
+    baseId +=  (randNum & 0x3FFF);
+    err = writer.writeInt64(baseId);
 	MojErrCheck(err);
 
 	MojVector<MojByte> byteVec;

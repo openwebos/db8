@@ -54,6 +54,9 @@ public:
 	static const MojChar* const KindKey;
 	static const MojChar* const RevKey;
 	static const MojChar* const SyncKey;
+    static const MojChar* const KindIdPrefix;
+    static const MojChar* const QuotaIdPrefix;
+    static const MojChar* const PermissionIdPrefix;
 	static const MojUInt32 AutoBatchSize;
 	static const MojUInt32 AutoCompactSize;
 	static MojLogger s_log;
@@ -104,6 +107,7 @@ public:
 	MojInt64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
     MojInt64 purgeWindow() {return m_purgeWindow;}
+    void shardId(const MojString& shardId) {m_shardId = shardId;}
 
 private:
 	friend class MojDbKindEngine;
@@ -154,6 +158,7 @@ private:
 	MojErr loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req);
 	MojErr purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req);
 
+    MojErr attachShardId(MojObject& id);
 	MojErr nextId(MojInt64& idOut);
 	MojErr getState(const MojChar* key, MojObject& valOut, MojDbReq& req);
 	MojErr updateState(const MojChar* key, const MojObject& val, MojDbReq& req);
@@ -178,7 +183,7 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
-
+    MojString m_shardId;
 	
 };
 

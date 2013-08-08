@@ -68,6 +68,7 @@ const MojChar* const MojDbServiceDefs::ReadKey = _T("read");
 const MojChar* const MojDbServiceDefs::ResponsesKey = _T("responses");
 const MojChar* const MojDbServiceDefs::ResultsKey = _T("results");
 const MojChar* const MojDbServiceDefs::RevKey = _T("rev");
+const MojChar* const MojDbServiceDefs::ShardIdKey = _T("shardId");
 const MojChar* const MojDbServiceDefs::SizeKey = _T("size");
 const MojChar* const MojDbServiceDefs::ServiceKey = _T("service");
 const MojChar* const MojDbServiceDefs::SubscribeKey = _T("subscribe");

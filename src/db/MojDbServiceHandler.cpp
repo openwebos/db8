@@ -401,6 +401,14 @@ MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload
 	MojObject obj;
 	MojErr err = payload.getRequired(MojDbServiceDefs::ObjectsKey, obj);
 	MojErrCheck(err);
+
+    // get shard ID
+    MojString shardId;
+    bool foundOut;
+    err = payload.get(MojDbServiceDefs::ShardIdKey, shardId, foundOut);
+    MojErrCheck(err);
+    m_db.shardId(shardId);
+
 	MojObject::ArrayIterator begin;
 	err = obj.arrayBegin(begin);
 	MojErrCheck(err);

@@ -85,6 +85,7 @@
 #define MOJ_PUT_SCHEMA \
 	_T("{\"type\":\"object\",") \
 	  _T("\"properties\":{") \
+         _T("\"shardId\":{\"type\":\"string\",\"optional\":true},") \
 		 _T("\"objects\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}}},") \
 	  _T("\"additionalProperties\":false}")
 

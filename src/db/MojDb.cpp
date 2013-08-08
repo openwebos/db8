@@ -49,6 +49,9 @@ const MojChar* const MojDb::LastPurgedRevKey = _T("lastPurgedRev");
 const MojChar* const MojDb::LocaleKey = _T("locale");
 const MojChar* const MojDb::DbStateObjId = _T("_internal/dbstate");
 const MojChar* const MojDb::VersionFileName = _T("_version");
+const MojChar* const MojDb::KindIdPrefix = _T("_kinds/");
+const MojChar* const MojDb::QuotaIdPrefix = _T("_quotas/");
+const MojChar* const MojDb::PermissionIdPrefix = _T("_permissions/");
 const MojUInt32 MojDb::AutoBatchSize = 1000;
 const MojUInt32 MojDb::AutoCompactSize = 5000;
 
@@ -470,6 +473,11 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
 	MojAssert(end >= begin);
 	MojLogTrace(s_log);
 
+    // Max shard ID(0xFFFFFFFF) converted base-64 is "zzzzzk"
+    if(m_shardId.length() > 6 || m_shardId.compare(_T("zzzzzk")) > 0) {
+        MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID length"));
+    }
+
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
 
@@ -718,10 +726,11 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
 	// assign id
 	MojObject putId = id;
 	if (putId.undefined()) {
-		err = m_idGenerator.id(putId);
+        err = m_idGenerator.id(putId, m_shardId);
 		MojErrCheck(err);
 		err = obj.put(IdKey, putId);
 		MojErrCheck(err);
+        m_shardId.clear();
 	}
 
 	// assign ids to subobjects in arrays - only for regular objects
@@ -939,6 +948,11 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
 	MojRefCountedPtr<MojDbStorageItem> prevItem;
 	MojObject id;
 	if (obj.get(IdKey, id)) {
+        // Attach shard ID only put query but putKind and merge when shard ID exists
+        if (MojFlagGet(flags, FlagNone)) {
+            MojErr err = attachShardId(id);
+            MojErrCheck(err);
+        }
 		// get previous revision if we have an id
 		MojErr err = m_objDb->get(id, req.txn(), true, prevItem);
 		MojErrCheck(err);
@@ -997,6 +1011,50 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
 		err = prevItem->close();
 		MojErrCheck(err);
 	}
+	return MojErrNone;
+}
+
+/***********************************************************************
+ * attachShardId
+ *
+ * Attach shard ID in front of _id
+ * 1. decode _id and get byte vector
+ * 2. decode shard ID and get byte vector
+ * 3. merge shard ID byte vector and _id byte vector
+ * 4. replace old _id with new one
+ ***********************************************************************/
+MojErr MojDb::attachShardId(MojObject& id)
+{
+    MojString idStr;
+    MojErr err = id.stringValue(idStr);
+    MojErrCheck(err);
+    if (!(idStr.startsWith(MojDb::KindIdPrefix) || idStr.startsWith(MojDb::DbStateObjId)
+        || idStr.startsWith(MojDb::QuotaIdPrefix) || idStr.startsWith(MojDb::PermissionIdPrefix))) {
+        // Max 96bit _id(0xFFFFFFFFFFFFFFFFFFFFFFFF) converted base-64 is "zzzzzzzzzzzzzzzz"
+        if (idStr.length() > 16 || idStr.compare(_T("zzzzzzzzzzzzzzzz")) > 0) {
+            MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid _id length"));
+        }
+        if (!m_shardId.empty()) {
+            // Max 64bit _id(0xFFFFFFFFFFFFFFFF) converted base-64 is "zzzzzzzzzzw"
+            if(idStr.length() <= 11 && idStr.compare(_T("zzzzzzzzzzw")) <= 0) {
+                // decode _id
+                MojVector<MojByte> idByteVec;
+                err = idStr.base64Decode(idByteVec);
+                MojErrCheck(err);
+                // decode shard ID
+                MojVector<MojByte> byteVec;
+                err = m_shardId.base64Decode(byteVec);
+                MojErrCheck(err);
+                // attach shard ID in front of _id
+                byteVec.append(idByteVec.begin(), idByteVec.end());
+                err = idStr.base64Encode(byteVec, false);
+                MojErrCheck(err);
+                // replace old _id with new one attached shard ID
+                id = MojObject(idStr);
+            }
+        }
+    }
+
 	return MojErrNone;
 }
 

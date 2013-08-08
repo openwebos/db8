@@ -42,6 +42,8 @@
 #include "MojDbWatchTest.h"
 #include "MojDbTxnTest.h"
 #include "MojDbCursorTxnTest.h"
+#include "MojDbNewIdTest.h"
+
 
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
@@ -99,4 +101,5 @@ void MojDbTestRunner::runTests()
 	test(MojDbTxnTest());
 	test(MojDbWhereTest());
 	test(MojDbCursorTxnTest());
+    test(MojDbNewIdTest());
 }

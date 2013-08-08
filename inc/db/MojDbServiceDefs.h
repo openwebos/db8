@@ -73,6 +73,7 @@ public:
 	static const MojChar* const ResponsesKey;
 	static const MojChar* const ResultsKey;
 	static const MojChar* const RevKey;
+    static const MojChar* const ShardIdKey;
 	static const MojChar* const SizeKey;
 	static const MojChar* const ServiceKey;
 	static const MojChar* const SubscribeKey;

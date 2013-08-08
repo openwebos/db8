@@ -17,25 +17,24 @@
 * LICENSE@@@ */
 
 
-#ifndef MOJDBIDGENERATOR_H_
-#define MOJDBIDGENERATOR_H_
+#ifndef MOJDBNEWIDTEST_H_
+#define MOJDBNEWIDTEST_H_
 
-#include "db/MojDbDefs.h"
-#include "core/MojThread.h"
-#include "core/MojString.h"
+#include "MojDbTestRunner.h"
 
-class MojDbIdGenerator
+class MojDbNewIdTest : public MojTestCase
 {
 public:
-	MojDbIdGenerator();
+    MojDbNewIdTest();
 
-	MojErr init();
-    MojErr id(MojObject& idOut, MojString shard = MojString());
+    virtual MojErr run();
+    virtual void cleanup();
 
 private:
-	char m_randStateBuf[8];
-	MojRandomDataT m_randBuf;
-	MojThreadMutex m_mutex;
+    MojErr putTestKind(MojDb& db);
+    MojErr putTest(MojDb& db);
+    MojErr duplicateTest(MojDb& db);
+    MojUInt32 getKindCount (const MojChar* MojQueryStr, MojDb& db);
 };
 
-#endif /* MOJDBIDGENERATOR_H_ */
+#endif /* MOJDBNEWIDTEST_H_ */

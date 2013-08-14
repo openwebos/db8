@@ -438,7 +438,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	MojLogInfo(s_log, _T("Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
 						path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 	
-	MojLogWarning(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
+    MojLogNotice(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
 		path, total, elapsedTimeMS, total_transaction_time, transactions, mutexes_used - orig_mutexes_used, mutexes_free, total_mutexes);
 	
 	return MojErrNone;
@@ -533,8 +533,11 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 	err = cursor.close();
 	MojErrCheck(err);
 
-	//MojLogInfo(s_log, _T("Finished Backup with %d warnings \n"), warns);
-	MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), (int)warns);
+    if (warns > 0) {
+        MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), (int)warns);
+    } else {
+        MojLogNotice(s_log, _T("Finished Backup with no warnings \n"));
+    }
 	
 	// construct the next incremental key
 	if (response && !curRev.undefined()) {

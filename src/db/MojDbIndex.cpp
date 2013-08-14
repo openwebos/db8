@@ -267,7 +267,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(newKeys, txn);
 		MojErrCheck(err);
-		MojLogInfo(s_log, _T("IndexAdd: %s; Keys= %zu \n"), this->m_name.data(), newKeys.size());
+        MojLogDebug(s_log, _T("IndexAdd: %s; Keys= %zu \n"), this->m_name.data(), newKeys.size());
 	} else if (includeOld && !includeNew) {
 		// we include the old but not the new objects, so del all the old keys
 		MojAssert(oldObj);
@@ -278,7 +278,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(oldKeys, txn);
 		MojErrCheck(err);
-		MojLogInfo(s_log, _T("IndexDel: %s; Keys= %zu \n"), this->name().data(), oldKeys.size());
+        MojLogDebug(s_log, _T("IndexDel: %s; Keys= %zu \n"), this->name().data(), oldKeys.size());
 	} else if (includeNew && includeOld) {
 		// we include old and new objects
 		MojAssert(newObj && oldObj);
@@ -300,7 +300,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = delKeys(keysToDel, txn, forcedel);
 		
-		MojLogInfo(s_log, _T("IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n"), 
+        MojLogDebug(s_log, _T("IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n"),
 			this->name().data(), oldKeys.size(), newKeys.size(), keysToDel.size(), keysToPut.size(), (int)err);
 
 		MojErrCheck(err);
@@ -613,14 +613,14 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		MojErrCheck(err2); 
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
-		MojLogInfo(s_log, _T("delKey %d for: %s - %s; key= %s ; err= %d\n"), count+1, s2, this->m_name.data(), s, err);
+        MojLogDebug(s_log, _T("delKey %d for: %s - %s; key= %s ; err= %d\n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 
 		// This has some potential risk
 		if (err == MojErrInternalIndexOnDel) {
 			m_delMisses++;
 #if defined(MOJ_DEBUG_LOGGING)
-			MojLogWarning(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
+            MojLogNotice(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 			if (forcedel)
 				err = MojErrNone;
@@ -647,7 +647,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 		MojErrCheck(err2);
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
-		MojLogInfo(s_log, _T("insertKey %d for: %s; key= %s ; err= %d\n"), count+1, this->m_name.data(), s, err);
+        MojLogDebug(s_log, _T("insertKey %d for: %s; key= %s ; err= %d\n"), count+1, this->m_name.data(), s, err);
 #endif
 		MojErrCheck(err);
 		count ++;

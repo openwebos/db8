@@ -301,8 +301,7 @@ MojErr MojDbKindEngine::putKind(const MojObject& obj, MojDbReq& req, bool builti
 		MojErrCheck(err);
 	} else {
 		// existing kind
-		MojLogInfo(s_log, _T("UpdatingKind: %s \n"), id.data());
-		MojLogWarning(s_log, _T("UpdatingKind: %s \n"), id.data());
+        MojLogNotice(s_log, _T("UpdatingKind: %s \n"), id.data());
 		err = (*i)->configure(obj, m_kinds, m_locale, req);
 		MojErrCheck(err);
 	}

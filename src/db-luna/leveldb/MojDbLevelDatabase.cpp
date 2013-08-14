@@ -261,7 +261,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldb put: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
+    MojLogDebug(MojDbLevelEngine::s_log, _T("ldb put: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     this->m_name.data(), size1, str_buf, size2, err);
 #endif
 
@@ -361,7 +361,7 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
     MojErrCheck(err2);
     if (size > 16)  // if the object-id is in key
         strncat(str_buf, (char *)(key.data()) + (size - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbdel: %s; keylen: %zu, key= %s; err = %d \n"), this->m_name.data(), size, str_buf, !st.ok());
+    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbdel: %s; keylen: %zu, key= %s; err = %d \n"), this->m_name.data(), size, str_buf, !st.ok());
 #endif
 
     if (st.IsNotFound() == false) {

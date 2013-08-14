@@ -85,7 +85,7 @@ MojErr MojDbCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 	else
 		MojErrAccumulate(m_lastErr, err);
 	MojErrCheck(err);
-	MojLogInfo(MojDb::s_log, _T("dbcursor_get_item: found: %d\n"), (int)foundOut);
+    MojLogDebug(MojDb::s_log, _T("dbcursor_get_item: found: %d\n"), (int)foundOut);
 	return MojErrNone;
 }
 
@@ -99,7 +99,7 @@ MojErr MojDbCursor::get(MojObject& objOut, bool& foundOut)
 	MojErr err = visitObject(builder, foundOut);
 	MojErrCheck(err);
 	objOut = builder.object();
-	MojLogInfo(MojDb::s_log, _T("dbcursor_get_obj: found: %d\n"), (int)foundOut);
+    MojLogDebug(MojDb::s_log, _T("dbcursor_get_obj: found: %d\n"), (int)foundOut);
 	return MojErrNone;
 }
 
@@ -121,7 +121,7 @@ MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 		MojErrCheck(err);
 		i++;
 	} while (found);
-	MojLogInfo(MojDb::s_log, _T("dbcursor_visit: count: %d\n"), (int)i);
+    MojLogDebug(MojDb::s_log, _T("dbcursor_visit: count: %d\n"), (int)i);
 	return MojErrNone;
 }
 
@@ -199,7 +199,7 @@ MojErr MojDbCursor::visitObject(MojObjectVisitor& visitor, bool& foundOut)
 		}
 	}
 
-	MojLogInfo(MojDb::s_log, _T("dbcursor_visitObject: found: %d\n"), (int)foundOut);
+    MojLogDebug(MojDb::s_log, _T("dbcursor_visitObject: found: %d\n"), (int)foundOut);
 	return MojErrNone;
 }
 

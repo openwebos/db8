@@ -428,13 +428,13 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 
 
 	if ((AlertLevel)alertLevel > NoSpaceAlert) {
-		MojLogWarning(s_log, _T("Database volume %.1f full, generating "
+        MojLogWarning(s_log, _T("Database volume usage %.1f, generating "
 								"warning, severity \"%s\""), percentUsed,
 					  SpaceAlertNames[alertLevel - NoSpaceAlert]);
 	} else {
 		if ((AlertLevel)alertLevel != m_spaceAlertLevel) {
 			// Generate 'ok' message only if there has been a transition.
-			MojLogWarning(s_log, _T("Database volume %1.f full, space ok, no warning needed.\n"), percentUsed);
+            MojLogInfo(s_log, _T("Database volume usage %1.f, space ok, no warning needed.\n"), percentUsed);
 		}
 	}
 

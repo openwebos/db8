@@ -131,7 +131,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErr err = requireNotOpen();
 	MojErrCheck(err);
 
-	MojLogInfo(s_log, _T("opening: '%s'..."), path);
+    MojLogNotice(s_log, _T("opening: '%s'..."), path);
 
 	MojAutoCloser<MojDb> closer(this);
 	m_isOpen = true;
@@ -190,7 +190,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErrCheck(err);
 
 	closer.release();
-	MojLogInfo(s_log, _T("open completed"));
+    MojLogNotice(s_log, _T("open completed"));
 
 	return MojErrNone;
 }
@@ -204,7 +204,7 @@ MojErr MojDb::close()
 	MojErr errClose = MojErrNone;
 
 	if (m_isOpen) {
-		MojLogInfo(s_log, _T("closing..."));
+        MojLogNotice(s_log, _T("closing..."));
 
 		errClose = m_quotaEngine.close();
 		MojErrAccumulate(err, errClose);
@@ -228,7 +228,7 @@ MojErr MojDb::close()
 			m_storageEngine.reset();
 		}
 		m_isOpen = false;
-		MojLogInfo(s_log, _T("close completed"));
+        MojLogNotice(s_log, _T("close completed"));
 	}
 	return err;
 }
@@ -318,9 +318,8 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 		MojLogWarning(s_log, _T("delKind_error: %s has %d subkinds \n"), idStr.data(), pk->nsubkinds());
 		MojErrThrow(MojErrDbKindHasSubKinds);
 	}
-
-	//MojLogInfo(s_log, _T("delKind: %s \n"), idStr.data());
-	MojLogWarning(s_log, _T("delKind: %s \n"), idStr.data());
+    else
+        MojLogNotice(s_log, _T("delKind: %s \n"), idStr.data());
 
 	err = m_kindEngine.checkOwnerPermission(idStr, req);
 	MojErrCheck(err);
@@ -475,6 +474,7 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
 
     // Max shard ID(0xFFFFFFFF) converted base-64 is "zzzzzk"
     if(m_shardId.length() > 6 || m_shardId.compare(_T("zzzzzk")) > 0) {
+        MojLogWarning(s_log, _T("Invalid shard ID length\n"));
         MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID length"));
     }
 
@@ -502,7 +502,6 @@ MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
     MojErrCheck(err);
 
 	MojLogInfo(s_log, _T("putKind: %s \n"), id.data());
-	MojLogWarning(s_log, _T("putKind: %s \n"), id.data());
 
 	// set _kind and _id
 	err = obj.putString(KindKey, MojDbKindEngine::KindKindId);
@@ -882,7 +881,7 @@ MojErr MojDb::delImpl(const MojDbQuery& quer, MojUInt32& countOut, MojDbReq& req
         }
 
         if (warns > 0)
-            MojLogInfo(s_log, _T("delquery index_warnings: %s, count: %d\n"), newQuery.from().data(), warns);
+            MojLogNotice(s_log, _T("delquery index_warnings: %s, count: %d\n"), newQuery.from().data(), warns);
         countOut += count;
 
         err = cursor.close();
@@ -1175,19 +1174,19 @@ MojErr MojDb::commitBatch(MojDbReq& req)
 
 	err = req.end();
 	if (err != MojErrNone)
-		MojLogInfo(s_log, _T("CommitBatch req.end: err= %d\n"), (int)err);
+        MojLogNotice(s_log, _T("CommitBatch req.end: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	err = req.endBatch();
 	if (err != MojErrNone)
-		MojLogInfo(s_log, _T("CommitBatch req.endbatch: err= %d\n"), (int)err);
+        MojLogNotice(s_log, _T("CommitBatch req.endbatch: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	req.beginBatch();
 
 	err = beginReq(req, false);
 	if (err != MojErrNone)
-		MojLogInfo(s_log, _T("CommitBatch ended: err= %d\n"), (int)err);
+        MojLogNotice(s_log, _T("CommitBatch ended: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	return MojErrNone;

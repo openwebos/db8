@@ -140,7 +140,7 @@ MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, boo
 		}
 	}
 
-	MojLogInfo(s_log, _T("KindStats Summary: %s : Count: %zu; delCount: %zu; warnings: %zu \n"), m_id.data(), count, delCount, warnings);
+    MojLogNotice(s_log, _T("KindStats Summary: %s : Count: %zu; delCount: %zu; warnings: %zu \n"), m_id.data(), count, delCount, warnings);
 
 	usageOut += size + delSize;
 	MojObject info;
@@ -217,7 +217,7 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 			MojErr err2 =  MojByteArrayToHex(iquery->m_keyData, iquery->m_keySize, s);
 			MojErrCheck(err2);
 			MojChar *ids = (iquery->m_keySize > 18) ? (MojChar *)(iquery->m_keyData + iquery->m_keySize - 17) : NULL;
-			MojLogInfo(s_log, _T("VerifyIndex Warning: %s; KeySize: %zu; %s ;id: %s \n"),
+            MojLogNotice(s_log, _T("VerifyIndex Warning: %s; KeySize: %zu; %s ;id: %s \n"),
 					cursor.m_dbIndex->name().data(), iquery->m_keySize, s, ids);
 			continue;
 		}
@@ -235,7 +235,7 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 		}
 	}
 
-	MojLogInfo(s_log, _T("Kind_verifyIndex Counts: Kind: %s; Index: %s; count: %zu; delcount: %zu; warnings: %zu \n"), m_name.data(),
+    MojLogInfo(s_log, _T("Kind_verifyIndex Counts: Kind: %s; Index: %s; count: %zu; delcount: %zu; warnings: %zu \n"), m_name.data(),
 					pIndex->name().data(), count, delCount, warnCount);
 
 	err = iinfo.put(VerifyCountKey, (MojInt64)count);
@@ -450,6 +450,7 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 		   MojErrCheck(err);
 		   if (!res.valid())
 		   {
+              MojLogWarning(s_log, _T("schema validation failed for kind '%s': %s \n"), m_id.data(), res.msg().data());
 		      MojErrThrowMsg(MojErrSchemaValidation, _T("schema validation failed for kind '%s': %s"),
 		                     m_id.data(), res.msg().data());
 		   }
@@ -464,7 +465,7 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 	MojVector<MojDbKind*> kindVec;
 	MojInt32 idxcount = 0;
 	err = updateIndexes(newObj, oldObj, req, op, kindVec, idxcount);
-	MojLogInfo(s_log, _T("Kind_UpdateIndexes_End: %s; supers = %zu; indexcount = %zu; updated = %d \n"), this->id().data(),
+    MojLogDebug(s_log, _T("Kind_UpdateIndexes_End: %s; supers = %zu; indexcount = %zu; updated = %d \n"), this->id().data(),
 				m_supers.size(), m_indexes.size(), idxcount);
 
 	MojErrCheck(err);
@@ -484,7 +485,7 @@ MojErr MojDbKind::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req
 		MojErrThrow(MojErrDbNoIndexForQuery);
 
 	cursor.m_dbIndex = index;
-	MojLogInfo(s_log, _T("Dbkind_find: Kind: %s, UsingIndex: %s, order: %s, limit: %d \n"), m_id.data(), index->name().data(),
+    MojLogDebug(s_log, _T("Dbkind_find: Kind: %s, UsingIndex: %s, order: %s, limit: %d \n"), m_id.data(), index->name().data(),
 				query.order().data(), (int)query.limit());
 	err = index->find(cursor, watcher, req);
 	MojErrCheck(err);

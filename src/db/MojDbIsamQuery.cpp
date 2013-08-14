@@ -83,7 +83,7 @@ MojErr MojDbIsamQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
 		}
 		MojErrCheck(err);
 	} while (itemOut == NULL && foundOut);
-	MojLogInfo(MojDb::s_log, _T("isamquery_get: found: %d; count1= %d; count2= %d\n"), (int)foundOut, i1, i2);
+    MojLogDebug(MojDb::s_log, _T("isamquery_get: found: %d; count1= %d; count2= %d\n"), (int)foundOut, i1, i2);
 	return MojErrNone;
 }
 
@@ -125,7 +125,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-		MojLogInfo(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
+        MojLogNotice(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
 								 from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;

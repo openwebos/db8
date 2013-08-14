@@ -1004,7 +1004,7 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int pre_compact_reclaimed_blocks = (int)(statAfterCompact.f_bfree - statAtBeginning.f_bfree);
 
-	MojLogWarning(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
+    MojLogNotice(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		pre_compact_reclaimed_blocks * blockSize,
 		DatabaseRoot, statAfterCompact.f_bfree * blockSize,
 		 statAfterCompact.f_blocks * blockSize,
@@ -1269,7 +1269,7 @@ MojErr MojDbBerkeleyEngine::compact()
 		}
 
 		if ((stepSize <= 1) || (dbErr != 0)) {
-			MojLogInfo(s_log, "Compacting %s\n", (*i)->m_name.data());
+            MojLogNotice(s_log, "Compacting %s\n", (*i)->m_name.data());
 
 		        struct statvfs statBeforeCompact, statAfterCompact, statAfterCheckpoint;
 
@@ -1329,7 +1329,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			if (reclaimed_blocks > max_reclaimed_blocks)
 				max_reclaimed_blocks = reclaimed_blocks;
 
-			MojLogInfo(s_log, "Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
+            MojLogNotice(s_log, "Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
 				(*i)->m_name.data(),
 				log_generation_blocks * blockSize,
 				reclaimed_blocks * blockSize);
@@ -1350,7 +1350,7 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int compact_freed_blocks = (int)(statAtEnd.f_bfree - statAtBeginning.f_bfree);
 
-	MojLogWarning(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
+    MojLogNotice(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
 			     "%d db pages truncated (max burst %d), "
 	                     "%d log bytes created by compacts (max burst %d), "
 	                     "%d bytes reclaimed by checkpoints (max burst %d), "
@@ -1368,7 +1368,7 @@ MojErr MojDbBerkeleyEngine::compact()
 	                     total_compact_time, max_step_time
 	                     );
 
-	MojLogWarning(s_log, _T("Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
+    MojLogNotice(s_log, _T("Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		elapsedTotalMS,
 		compact_freed_blocks * blockSize,
 		pre_compact_reclaimed_blocks * blockSize,
@@ -1566,7 +1566,7 @@ MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     m_db->m_name.data(), size1, s, size2, err);
 #endif
 	MojErrCheck(err);
@@ -1593,7 +1593,7 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
 	if (!found)
 		MojLogWarning(MojDbBerkeleyEngine::s_log, _T("bdbindexdel_warn: not found: %s \n"), s);
 #endif

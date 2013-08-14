@@ -259,7 +259,7 @@ MojErr MojLunaService::sendImpl(MojServiceRequest* req, const MojChar* service, 
 
 	MojLunaRequest* lunaReq = static_cast<MojLunaRequest*>(req);
 	const MojChar* json = lunaReq->payload();
-	MojLogInfo(s_log, _T("request sent: %s"), json);
+    MojLogDebug(s_log, _T("request sent: %s"), json);
 
 	MojString uri;
 	MojErr err = uri.format(_T("%s://%s/%s"), UriScheme, service, method);
@@ -411,7 +411,7 @@ bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, category));
 	MojAllocCheck(request.get());
-	MojLogInfo(s_log, _T("request received: %s"), request->payload());
+    MojLogDebug(s_log, _T("request received: %s"), request->payload());
 
 	MojErr reqErr;
 	MojErr err = reqErr = request->processSubscriptions();
@@ -434,7 +434,7 @@ bool MojLunaService::handleResponse(LSHandle* sh, LSMessage* msg, void* ctx)
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, NULL, true));
 	MojAllocCheck(request.get());
-	MojLogInfo(s_log, _T("response received: %s"), request->payload());
+    MojLogDebug(s_log, _T("response received: %s"), request->payload());
 	MojErr err = service->handleReply(request.get());
 	MojErrCatchAll(err);
 

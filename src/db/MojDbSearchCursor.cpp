@@ -338,7 +338,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 		}
 	}
 	if (warns > 0)
-		MojLogWarning(MojDb::s_log, _T("Search warnings: %d \n"), warns);
+        MojLogNotice(MojDb::s_log, _T("Search warnings: %d \n"), warns);
 	return MojErrNone;
 }
 

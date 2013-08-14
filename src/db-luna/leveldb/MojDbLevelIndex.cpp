@@ -117,7 +117,7 @@ MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
+    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     m_db->m_name.data(), size1, s, size2, err);
 #endif
     MojErrCheck(err);
@@ -144,7 +144,7 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
+    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
     if (!found)
         MojLogWarning(MojDbLevelEngine::s_log, _T("ldbindexdel_warn: not found: %s \n"), s);
 #endif

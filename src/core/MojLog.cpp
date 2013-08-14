@@ -103,14 +103,12 @@ MojErr MojLogger::levelFromString(const MojChar* str, Level& levelOut)
 #if defined(USE_PMLOG)
 char * MojLogger::fmtUnique(char *dest, const char *pFile, int32_t lineNbr)
 {
-    char nameBase[120];
-    char *pEnd;
     const char *pStart = strrchr (pFile, '/');
-    g_strlcpy (nameBase, (pStart ? pStart + 1 : pFile), sizeof(nameBase)-20);
-    if (!(pEnd = strchr (nameBase, '.'))) pEnd = nameBase + strlen(nameBase);
-    snprintf (pEnd, 19, ":%d", lineNbr);
-    size_t len = strlen (nameBase);
-    g_strlcpy (dest, nameBase + (len < MOJLOG_UNIQUE_MAX ? 0 : (len - MOJLOG_UNIQUE_MAX - 1)), MOJLOG_UNIQUE_MAX);
+    gchar *str = g_ascii_strup((pStart ? pStart + 1 : pFile), MOJLOG_UNIQUE_MAX - 6);
+    char *ptr = strchr(str, '.');
+    if (ptr) *ptr = '\0'; // trim off file extensions
+    snprintf (dest, MOJLOG_UNIQUE_MAX, "%s#%d", str, lineNbr);
+    g_free (str);
     return dest;
 }
 #endif

@@ -21,6 +21,7 @@
 #define MOJLOG_H_
 
 #include <stdio.h>
+#include <glib.h>
 #include "core/MojListEntry.h"
 
 #ifdef MOJ_HAVE_STDARG_H
@@ -57,7 +58,7 @@
   }
 
   #if defined(MOJ_DEBUG) || defined(MOJ_DEBUG_LOGGING)
-    #define MojLogDebug(LOGGER, ...)        { if ((LOGGER).level() <= (LOGGER).LevelDebug) { \
+    #define MojLogDebug(LOGGER, ...)        { if (G_UNLIKELY((LOGGER).level() <= (LOGGER).LevelDebug)) { \
         char logMsg[MOJLOG_MESSAGE_MAX+1]; \
         mojLogFmtMsg(logMsg, __VA_ARGS__); \
         PmLogdebug((LOGGER).getContext(), "%s", logMsg);}}
@@ -68,7 +69,7 @@
     #define MojLogTrace(LOGGER)
   #endif
 
-  #define MojLogInfo(LOGGER, ...)    { if ((LOGGER).level() <= (LOGGER).LevelInfo) {\
+  #define MojLogInfo(LOGGER, ...)    { if (G_UNLIKELY((LOGGER).level() <= (LOGGER).LevelInfo)) {\
         char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
         mojLogFmtMsg(logMsg, __VA_ARGS__); \
         PmLogInfo((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \

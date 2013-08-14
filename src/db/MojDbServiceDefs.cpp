@@ -80,6 +80,12 @@ const MojChar* const MojDbServiceDefs::VerifyKey = _T("verify");
 const MojChar* const MojDbServiceDefs::WarningsKey = _T("warnings");
 const MojChar* const MojDbServiceDefs::WatchKey = _T("watch");
 const MojChar* const MojDbServiceDefs::WindowKey = _T("window");
+const MojChar* const MojDbServiceDefs::ListActiveMediaKey = _T("listActiveMedia");
+const MojChar* const MojDbServiceDefs::ShardInfoKey = _T("shardInfo");
+const MojChar* const MojDbServiceDefs::ShardKindKey = _T("shardKind");
+const MojChar* const MojDbServiceDefs::SetShardModeKey = _T("setShardMode");
+const MojChar* const MojDbServiceDefs::MediaKey = _T("media");
+const MojChar* const MojDbServiceDefs::TransientKey = _T("transient");
 // property values
 const MojChar* const MojDbServiceDefs::AllowValue = _T("allow");
 const MojChar* const MojDbServiceDefs::DenyValue = _T("deny");
@@ -112,6 +118,10 @@ const MojChar* const MojDbServiceDefs::SpaceCheckMethod = _T("spaceCheck");
 const MojChar* const MojDbServiceDefs::ScheduledSpaceCheckMethod = _T("scheduledSpaceCheck");
 const MojChar* const MojDbServiceDefs::StatsMethod = _T("stats");
 const MojChar* const MojDbServiceDefs::WatchMethod = _T("watch");
+const MojChar* const MojDbServiceDefs::ListActiveMediaMethod = _T("listActiveMedia");
+const MojChar* const MojDbServiceDefs::ShardInfoMethod = _T("shardInfo");
+const MojChar* const MojDbServiceDefs::ShardKindMethod = _T("shardKind");
+const MojChar* const MojDbServiceDefs::SetShardModeMethod = _T("setShardMode");
 // service name
 const MojChar* const MojDbServiceDefs::Category = MojService::DefaultCategory;
 const MojChar* const MojDbServiceDefs::InternalCategory = _T("/internal");

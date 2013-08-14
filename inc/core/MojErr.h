@@ -144,6 +144,7 @@ typedef enum {
 	MojErrDbWatchUnsupported,
 	MojErrDbWarnings,
 	MojErrDbKindHasSubKinds,
+    MojErrDbInvalidShardId,
 	
 
 	// LS ERRORS

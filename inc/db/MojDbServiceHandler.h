@@ -54,6 +54,10 @@ private:
 	static const MojChar* const SearchSchema;
 	static const MojChar* const StatsSchema;
 	static const MojChar* const WatchSchema;
+	static const MojChar* const ListActiveMediaSchema;
+	static const MojChar* const ShardInfoSchema;
+	static const MojChar* const ShardKindSchema;
+	static const MojChar* const SetShardModeSchema;
 
 	typedef MojMap<MojString, DbCallback, const MojChar*, MojComp<const MojChar*>, MojCompAddr<DbCallback> > BatchMap;
 
@@ -90,6 +94,10 @@ private:
 	MojErr handleSearch(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleStats(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleWatch(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleListActiveMedia(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleShardInfo(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleShardKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleSetShardMode(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 
 	MojErr findImpl(MojServiceMessage* msg, MojObject& payload, MojDbReq& req, MojDbCursor& cursor, bool doCount);
 

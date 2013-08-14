@@ -39,6 +39,10 @@ const MojDbServiceHandler::SchemaMethod MojDbServiceHandler::s_pubMethods[] = {
 	{MojDbServiceDefs::ReserveIdsMethod, (Callback) &MojDbServiceHandler::handleReserveIds, MojDbServiceHandler::ReserveIdsSchema},
 	{MojDbServiceDefs::SearchMethod, (Callback) &MojDbServiceHandler::handleSearch, MojDbServiceHandler::SearchSchema},
 	{MojDbServiceDefs::WatchMethod, (Callback) &MojDbServiceHandler::handleWatch, MojDbServiceHandler::WatchSchema},
+    {MojDbServiceDefs::ListActiveMediaMethod, (Callback) &MojDbServiceHandler::handleListActiveMedia, MojDbServiceHandler::ListActiveMediaSchema},
+    {MojDbServiceDefs::ShardInfoMethod, (Callback) &MojDbServiceHandler::handleShardInfo, MojDbServiceHandler::ShardInfoSchema},
+    {MojDbServiceDefs::ShardKindMethod, (Callback) &MojDbServiceHandler::handleShardKind, MojDbServiceHandler::ShardKindSchema},
+    {MojDbServiceDefs::SetShardModeMethod, (Callback) &MojDbServiceHandler::handleSetShardMode, MojDbServiceHandler::SetShardModeSchema},
 	{NULL, NULL, NULL} };
 
 const MojDbServiceHandler::SchemaMethod MojDbServiceHandler::s_privMethods[] = {
@@ -635,6 +639,184 @@ MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& paylo
 	MojErrCheck(err);
 
 	return MojErrNone;
+}
+
+/***********************************************************************
+ * handleListActiveMedia
+ *
+ * Request list of active media and receive a JSON object
+ *   @return:
+ *     - returnValue:true
+ *     - count:0
+ *     - media:[]
+ ***********************************************************************/
+MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    MojAssert(msg);
+    MojLogTrace(s_log);
+    MojErr err;
+
+    MojUInt32 count = 0;
+    //
+    // TODO : Request list of active media and receive a JSON object
+    //
+    MojObjectVisitor& writer = msg->writer();
+    err = writer.beginObject();
+    MojErrCheck(err);
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+    MojErrCheck(err);
+    err = writer.propName(MojDbServiceDefs::MediaKey);
+    MojErrCheck(err);
+    err = writer.beginArray();
+    MojErrCheck(err);
+    //
+    // TODO : Add result of active media list
+    //
+    err = writer.endArray();
+    MojErrCheck(err);
+    err = writer.intProp(MojDbServiceDefs::CountKey, (MojInt64) count);
+    MojErrCheck(err);
+    err = writer.endObject();
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+/***********************************************************************
+ * handleShardInfo
+ *
+ * Request information on a DB8 by providing the shard ID
+ *   @parameter:
+ *     - shardId    (as base-64 string)    (Required)
+ *   @return:
+ *     - returnValue:false
+ *     - errorText: "Invalid Shard ID"
+ ***********************************************************************/
+MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    MojAssert(msg);
+    MojLogTrace(s_log);
+    MojErr err;
+
+    // get shard ID
+    MojString shardId;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojErrCheck(err);
+    // if shard ID is not zero, return invalid shard ID error
+    if(shardId.compare(_T("0")) != 0) {
+        MojErrThrow(MojErrDbInvalidShardId);
+    }
+    m_db.shardId(shardId);
+    //
+    // TODO : Request shard information and receive a JSON object
+    //
+    MojObjectVisitor& writer = msg->writer();
+    err = writer.beginObject();
+    MojErrCheck(err);
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+    MojErrCheck(err);
+    //
+    // TODO : Add result of shard information
+    //
+    err = writer.endObject();
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+/***********************************************************************
+ * handleShardKind
+ *
+ * Request whether an external media supports a specific kind,
+ * by providing the DB8 short ID and the Kind
+ *   @parameter:
+ *     - shardId    (as base-64 string)    (Required)
+ *     - kind        (string)            (Required)
+ *   @return:
+ *     - returnValue:false
+ *     - errorText: "Invalid Shard ID"
+ ***********************************************************************/
+MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    MojAssert(msg);
+    MojLogTrace(s_log);
+    MojErr err;
+
+    // get shard ID
+    MojString shardId;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojErrCheck(err);
+    // if shard ID is not zero, return invalid shard ID error
+    if(shardId.compare(_T("0")) != 0) {
+        MojErrThrow(MojErrDbInvalidShardId);
+    }
+    m_db.shardId(shardId);
+    // get kind
+    MojString kindStr;
+    err = payload.getRequired(MojDbServiceDefs::KindKey, kindStr);
+    MojErrCheck(err);
+    //
+    // TODO : Request whether an external media supports a specific kind and receive a JSON object
+    //
+    MojObjectVisitor& writer = msg->writer();
+    err = writer.beginObject();
+    MojErrCheck(err);
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+    MojErrCheck(err);
+    //
+    // TODO : Add result
+    //
+    err = writer.endObject();
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+/***********************************************************************
+ * handleSetShardMode
+ *
+ * Mark external media as 'transient' by providing the DB8 short ID
+ *   @parameter:
+ *     - shardId    (as base-64 string)    (Required)
+ *     - transient    (boolean)            (Required)
+ *   @return:
+ *     - returnValue:false
+ *     - errorText: "Invalid Shard ID"
+ ***********************************************************************/
+MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    MojAssert(msg);
+    MojLogTrace(s_log);
+    MojErr err;
+
+    // get shard ID
+    MojString shardId;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojErrCheck(err);
+    // if shard ID is not zero, return invalid shard ID error
+    if(shardId.compare(_T("0")) != 0) {
+        MojErrThrow(MojErrDbInvalidShardId);
+    }
+    m_db.shardId(shardId);
+    // get kind
+    bool transient;
+    err = payload.getRequired(MojDbServiceDefs::TransientKey, transient);
+    MojErrCheck(err);
+    //
+    // TODO : Set external media as "transient"
+    //
+    MojObjectVisitor& writer = msg->writer();
+    err = writer.beginObject();
+    MojErrCheck(err);
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+    MojErrCheck(err);
+    //
+    // TODO : Add result
+    //
+    err = writer.endObject();
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
 MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload, MojDbReq& req, MojDbCursor& cursor, bool doCount)

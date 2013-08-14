@@ -133,6 +133,7 @@ static const MojErrStr s_errStrings[] = {
 	{MojErrDbWatchUnsupported, _T("db: watch not supported for query")},
 	{MojErrDbWarnings, _T("db: warnings - run stats")},
 	{MojErrDbKindHasSubKinds, _T("db: can not delete kind that has sub-kinds")},
+    {MojErrDbInvalidShardId, _T("db: invalid shard id")},
 	// LS ERRORS
 	{MojErrLuna, _T("luna: generic fault")},
 	{MojErrCategoryNotFound, _T("luna: category not found")},

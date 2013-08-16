@@ -27,6 +27,8 @@
 #include "db/MojDbPermissionEngine.h"
 #include "db/MojDbQuotaEngine.h"
 #include "db/MojDbStorageEngine.h"
+#include "db/MojDbShardIdCache.h"
+#include "db/MojDbShardEngine.h"
 #include "db/MojDbWatcher.h"
 #include "db/MojDbReq.h"
 #include "core/MojHashMap.h"
@@ -104,6 +106,8 @@ public:
 	MojDbQuotaEngine* quotaEngine() { return &m_quotaEngine; }
 	MojDbStorageEngine* storageEngine() { return m_storageEngine.get(); }
 	MojDbStorageDatabase* storageDatabase() { return m_objDb.get(); }
+    MojDbShardIdCache* shardIdCache () { return &m_shardIdCache; }
+    MojDbShardEngine* shardEngine () { return &m_shardEngine; }
 	MojInt64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
     MojInt64 purgeWindow() {return m_purgeWindow;}
@@ -176,7 +180,9 @@ private:
 	MojDbIdGenerator m_idGenerator;
 	MojDbKindEngine m_kindEngine;
 	MojDbPermissionEngine m_permissionEngine;
-	MojDbQuotaEngine m_quotaEngine;
+    MojDbQuotaEngine m_quotaEngine;
+    MojDbShardIdCache m_shardIdCache;
+	MojDbShardEngine m_shardEngine;
 	MojThreadRwLock m_schemaLock;
 	MojString m_engineName;
 	MojObject m_conf;

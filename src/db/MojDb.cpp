@@ -185,6 +185,16 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	err = req.end();
 	MojErrCheck(err);
 
+    // shard id
+    MojLogInfo(s_log, _T("Init shard id cache"));
+    err = m_shardIdCache.init();
+    MojErrCheck(err);
+
+    // shard's
+    MojLogInfo(s_log, _T("Init shard engine"));
+    err = m_shardEngine.init(this);
+    MojErrCheck(err);
+
 	// idgen
 	err = m_idGenerator.init();
 	MojErrCheck(err);

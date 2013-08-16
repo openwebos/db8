@@ -44,7 +44,7 @@
 #include "MojDbCursorTxnTest.h"
 #include "MojDbNewIdTest.h"
 
-
+#include "MojDbShardManagerTest.h"
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
 #elif MOJ_USE_LDB
@@ -79,6 +79,7 @@ int main(int argc, char** argv)
 
 void MojDbTestRunner::runTests()
 {
+	test(MojDbShardManagerTest());
 	test(MojDbBulkTest());
 	test(MojDbConcurrencyTest());
 	test(MojDbCrudTest());

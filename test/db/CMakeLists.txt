@@ -54,6 +54,7 @@ foreach(test
         MojDbTxn
         MojDbCursorTxn
         MojDbNewId
+        MojDbShardManager
         )
     add_test(NAME ${test} COMMAND test_db_core ${test})
     set(DB_TEST_SOURCES ${DB_TEST_SOURCES} ${test}Test.cpp)

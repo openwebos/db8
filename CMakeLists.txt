@@ -144,6 +144,8 @@ set(DB_LIB_SOURCES
     src/db/MojDbKey.cpp
     src/db/MojDbKind.cpp
     src/db/MojDbKindEngine.cpp
+    src/db/MojDbShardIdCache.cpp
+    src/db/MojDbShardEngine.cpp
     src/db/MojDbKindState.cpp
     src/db/MojDbObjectHeader.cpp
     src/db/MojDbObjectItem.cpp

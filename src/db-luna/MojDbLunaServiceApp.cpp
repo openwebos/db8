@@ -17,7 +17,7 @@
 * LICENSE@@@ */
 
 
-#include "MojDbLunaServiceApp.h"
+#include "db-luna/MojDbLunaServiceApp.h"
 #include "db/MojDbServiceDefs.h"
 #include "db/MojDbServiceHandler.h"
 

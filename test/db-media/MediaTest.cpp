@@ -44,7 +44,7 @@
 using namespace std;
 
 
-const MojChar* ServiceName = _T("com.webos.service.attachedstoragemanager");    // PDM service name
+const MojChar* ServiceName = _T("com.webos.service.attachedstoragemanager");    // PDM servicename
 
 struct MediaSuite : public ::testing::Test
 {
@@ -71,20 +71,35 @@ public:
     MojPdmClientHandler(MojService* mojService)
     : m_dbErr(MojErrNone),
     m_callbackInvoked (false),
-    m_slot(this, &MojPdmClientHandler::handleResult)
+    m_slot(this, &MojPdmClientHandler::handleResult),
+    m_service(mojService)
     {
+        std::cout << "MojPdmClientHandler::MojPdmClientHandler" << std::endl;
     }
 
     virtual MojErr handleResult(MojObject& result, MojErr errCode)
     {
+        std::cout << "MojPdmClientHandler::handleResult" << std::endl;
+
         m_callbackInvoked = true;
         m_result = result;
         m_dbErr = errCode;
         if (errCode != MojErrNone) {
+
+            std::cout << "ERROR" << std::endl;
+
             bool found = false;
             MojErr err = result.get(MojServiceMessage::ErrorTextKey, m_errTxt, found);
+
+            std::cout << m_errTxt << std::endl;
+
             //MojTestErrCheck(err);
             //MojTestAssert(found);
+        } else {
+            std::cout << "found" << std::endl;
+            MojString resStr;
+            result.toJson(resStr);
+            std::cout << resStr << std::endl;
         }
         return MojErrNone;
     }
@@ -99,6 +114,8 @@ public:
 
     MojErr wait(MojService* service)
     {
+        std::cout << "MojPdmClientHandler::wait" << std::endl;
+
         while (!m_callbackInvoked) {
             MojErr err = service->dispatch();
             MojErrCheck(err);
@@ -166,8 +183,9 @@ TEST_F(MediaSuite, mediaSubscribe)
     std::cerr << "Send request" << std::endl;
     MojObject payload;
     err = payload.fromJson("{\"subscribe\":true}");
+
     MojAssertNoErr(err);
-    err = req->send(m_mediaClient->m_slot, ServiceName, "list", payload);
+    err = req->send(m_mediaClient->m_slot, ServiceName, _T("listDevices"), payload);
     MojAssertNoErr(err);
 
     std::cerr << "Wait" << std::endl;

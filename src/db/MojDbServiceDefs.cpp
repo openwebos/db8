@@ -127,3 +127,5 @@ const MojChar* const MojDbServiceDefs::Category = MojService::DefaultCategory;
 const MojChar* const MojDbServiceDefs::InternalCategory = _T("/internal");
 const MojChar* const MojDbServiceDefs::ServiceName = _T("com.palm.db");
 const MojChar* const MojDbServiceDefs::TempServiceName = _T("com.palm.tempdb");
+const MojChar* const MojDbServiceDefs::PDMServiceName = _T("com.webos.service.attachedstoragemanager");
+const MojChar* const MojDbServiceDefs::PDMClientName = _T("com.palm.mojodbclient");

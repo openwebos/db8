@@ -209,6 +209,8 @@ webos_build_library(TARGET mojoluna NOHEADERS)
 set(LUNA_BIN_SOURCES
     src/db-luna/MojDbLunaServiceApp.cpp
     src/db-luna/MojDbLunaServiceDb.cpp
+    src/db-luna/MojDbLunaServicePdm.cpp
+    src/db-luna/MojDbLunaServicePdmHandler.cpp
 )
 
 include_directories (${DB_BACKEND_INCLUDES})

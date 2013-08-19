@@ -132,6 +132,8 @@ public:
 	static const MojChar* const InternalCategory;
 	static const MojChar* const ServiceName;
 	static const MojChar* const TempServiceName;
+    static const MojChar* const PDMServiceName;
+    static const MojChar* const PDMClientName;
 };
 
 #endif /* MOJDBSERVICEDEFS_H_ */

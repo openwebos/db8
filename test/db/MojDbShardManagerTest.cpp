@@ -32,6 +32,31 @@
 #error "Doesn't specified database type. See macro MOJ_USE_BDB and MOJ_USE_LDB"
 #endif
 
+#define SHARDID_CACHE_SIZE  100
+#define SHARD_ITEMS_NUMBER 10
+
+/**
+ * Test description
+ *
+ * This test is cover functionality of two classes: MojDbShardIdCache and MojDbShardEngine.
+ *
+ * test scenario for MojDbShardIdCache:
+ * ------------------------------------
+ * - generate a new id's (=SHARDID_CASH_SIZE);
+ * - put all new generated id's to cache;
+ * - read id's from the cache and compaire them with local copies;
+ * - check for existance of never been stored id.
+ *
+ * test scenario for MojDbShardEngine:
+ * -----------------------------------
+ * - compute a number of new id's (=SHARD_ITEMS_NUMBER);
+ * - verify id for root path;
+ * - store sample shard info;
+ * - try to get previously stored info;
+ * - get id for path, verify;
+ * - set activity, read and verify;
+ * - check existance of id, even for wrong id
+ */
 
 MojDbShardManagerTest::MojDbShardManagerTest()
     : MojTestCase(_T("MojDbShardManagerTest"))
@@ -55,64 +80,134 @@ MojErr MojDbShardManagerTest::run()
     cleanup();
 
     // open
-    //err = db.open(MojDbTestDir);
-    //MojTestErrCheck(err);
+    err = db.open(MojDbTestDir);
+    MojTestErrCheck(err);
 
     MojDbShardIdCache* p_cache = db.shardIdCache();
     MojDbShardEngine* p_eng = db.shardEngine();
 
-    (void)_testShardIdCache(p_cache);
+    p_eng->init(&db);
 
-    (void)_testShardManager(p_eng);
+    err = _testShardIdCache(p_cache);
+    MojTestErrCheck(err);
+    err = _testShardManager(p_eng);
+    MojTestErrCheck(err);
+    err = db.close();
+    MojTestErrCheck(err);
 
-    //err = db.close();
-    //MojTestErrCheck(err);
-
-    return MojErrNone;
+    return err;
 }
 
 MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
 {
-    MojUInt32 arr[] = { 0x01, 0x000000FF, 0x0000FFFF, 0x00FFFFFF, 0xFFFFFFFF, 100 };
+    MojErr err = MojErrNone;
+    MojUInt32 arr[SHARDID_CACHE_SIZE + 1];
 
     ip_cache->init();
+    arr[SHARDID_CACHE_SIZE] = 0xFFFFFFFF;
 
-    displayMessage("ShardIdCache: Put 5 id's.. ");
-    for (MojInt16 i = 0; i < 5; i++)
+    //ShardIdCache: Put id's..
+    for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
     {
+        arr[i] = i * 100L; //generate id and keep it
         ip_cache->put(arr[i]);
     }
 
-    displayMessage("compare.. ");
-    for (MojInt16 i = 0; i < 5; i++)
+    //compare..
+    for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
     {
         if (!ip_cache->isExist(arr[i]))
         {
-            displayMessage("[id %d is wrong] ", i);
+            err = MojErrDbVerificationFailed; //id %d is wrong ", i
         }
     }
 
-    if (ip_cache->isExist(arr[5]))
-        displayMessage("compare id6 is wrong ");
+    if (ip_cache->isExist(arr[SHARDID_CACHE_SIZE]))
+        err = MojErrDbVerificationFailed; //compare id6 is wrong
 
-    displayMessage("done\n");
+    //remove all id's
+    for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
+    {
+        ip_cache->del(arr[i]);
+    }
 
-    return MojErrNone;
+    //done
+
+    return err;
 }
 
 MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
 {
+    MojErr err = MojErrNone;
     MojUInt32 id;
     MojString str;
 
-    //generate id
-    str.assign("SunDisk1");
-    //MojDbShardEngine::computeShardId(str, id);
+    //compute a new shard id
+    for(MojInt32 i = 0; i < SHARD_ITEMS_NUMBER; ++i)
+    {
+        //generate id
+        str.format("MassStorageMedia%d",i);
+        ip_eng->computeShardId(str, id);
+    }
 
-    //
-    //ip_eng->getIdForPath(str, id);
+    //verify id for root
+    str.assign("/");
+    ip_eng->getIdForPath(str, id);
+    if (id != 0)
+        err = MojErrDbVerificationFailed;
 
-    return MojErrNone;
+    //store sample shard info
+    MojDbShardEngine::ShardInfo put_info;
+    put_info.id = 0xFF;
+    put_info.media.assign("{media}");
+    put_info.path.assign("/media/media01");
+    err = ip_eng->put(put_info);
+    MojTestErrCheck(err);
+
+    //get info
+    MojDbShardEngine::ShardInfo get_info;
+    err = ip_eng->get(0xFF, get_info);
+    MojTestErrCheck(err);
+
+    if (get_info.path.compare(put_info.path.data()) != 0)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //get id for path, verify
+    id = 0;
+    err = ip_eng->getIdForPath(put_info.path, id);
+    MojTestErrCheck(err);
+
+    if (id != put_info.id)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //set activity, read and verify
+    err = ip_eng->setActivity(put_info.id, true);
+    MojTestErrCheck(err);
+
+    err = ip_eng->get(0xFF, get_info);
+    MojTestErrCheck(err);
+
+    if (!get_info.active)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //check existance of id, even for wrong id
+    if (ip_eng->isIdExist(0xFF) == MojErrNotFound)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    if (ip_eng->isIdExist(0xFFFFFFFF) == MojErrExists)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    return err;
 }
 
 MojErr MojDbShardManagerTest::displayMessage(const MojChar* format, ...)

@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojBulkTest.cpp
+* Description           : Source file for MojBulk test.
+****************************************************************************************************
+**/
 
 #include "MojDbBulkTest.h"
 #include "db/MojDb.h"
@@ -30,6 +36,22 @@ MojDbBulkTest::MojDbBulkTest()
 {
 }
 
+/**
+****************************************************************************************************
+* @run              Inserts bulk data into the database using 'put' utility command.
+                    Data is inserted by running through the loop for a registered kind.
+                    Data is queried and updated using 'merge' utility function.
+
+                    Control Flow :
+                    1. Database Open
+                    2. Kind registration
+                    3. Inserting bulk data.
+                    4. Querying and Updating the data.
+                    5. Verify by checking the count of records.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojDbBulkTest::run()
 {
 	MojDb db;

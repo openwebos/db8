@@ -30,6 +30,13 @@ static const MojChar* const TestJson =
 	_T("{\"_kind\":\"Test:1\",\"foo\":100,\"bar\":5000}");
 static const MojUInt32 TestNumObjects = 10000;
 
+/**
+****************************************************************************************************
+* @delThread        Callback function to delete the contents of database.
+* @param         :  arg
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 static MojErr delThread(void* arg)
 {
 	MojDb* db = (MojDb*) arg;
@@ -43,7 +50,13 @@ static MojErr delThread(void* arg)
 
 	return MojErrNone;
 }
-
+/**
+****************************************************************************************************
+* @queryThread      Callback function to query the contents of database.
+* @param         :  arg
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 static MojErr queryThread(void* arg)
 {
 	MojDb* db = (MojDb*) arg;
@@ -75,7 +88,16 @@ MojDbConcurrencyTest::MojDbConcurrencyTest()
 : MojTestCase(_T("MojDbConcurrency"))
 {
 }
-
+/**
+****************************************************************************************************
+* @run              Tests concurrency handling in DB. Separate threads are created to
+                    simultaneously query and delete the data.
+                    Threads are joined after execution and checked for database deadlock error to
+                    ensure no concurrency issues.
+* @param         :  None
+* @retval        :  MojErr
+****************************************************************************************************
+**/
 MojErr MojDbConcurrencyTest::run()
 {
 	MojDb db;

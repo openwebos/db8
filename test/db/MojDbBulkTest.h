@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+****************************************************************************************************
+* Filename              : MojDbBulkTest.h
+* Description           : Header file for MojDbBulk test.
+****************************************************************************************************
+**/
 
 #ifndef MOJDBBULKTEST_H_
 #define MOJDBBULKTEST_H_

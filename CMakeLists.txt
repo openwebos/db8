@@ -206,7 +206,10 @@ target_link_libraries(mojoluna
 webos_build_library(TARGET mojoluna NOHEADERS)
 
 # -- source for generating mojodb-luna
-set(LUNA_BIN_SOURCES src/db-luna/MojDbLunaServiceApp.cpp)
+set(LUNA_BIN_SOURCES
+    src/db-luna/MojDbLunaServiceApp.cpp
+    src/db-luna/MojDbLunaServiceDb.cpp
+)
 
 include_directories (${DB_BACKEND_INCLUDES})
 add_executable(mojodb-luna ${LUNA_BIN_SOURCES} ${DB_BACKEND_WRAPPER_SOURCES})

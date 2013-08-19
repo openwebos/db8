@@ -27,6 +27,7 @@
 #include "core/MojGmainReactor.h"
 #include "core/MojMessageDispatcher.h"
 #include "luna/MojLunaService.h"
+#include "db-luna/MojDbLunaServiceDb.h"
 
 class MojDbEnv;
 
@@ -50,32 +51,13 @@ private:
 
     typedef MojReactorApp<MojGmainReactor> Base;
 
-    class DbService
-    {
-    public:
-        DbService(MojMessageDispatcher& dispatcher);
-        MojErr init(MojReactor& reactor);
-        MojErr open(MojGmainReactor& reactor, MojDbEnv* env,
-                    const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir);
-        MojErr openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir);
-        MojErr close();
-
-        MojDb& db() { return m_db; }
-        MojLunaService& service() { return m_service; }
-
-    private:
-        MojDb m_db;
-        MojLunaService m_service;
-        MojRefCountedPtr<MojDbServiceHandler> m_handler;
-    };
-
     MojErr dropTemp();
     virtual MojErr handleArgs(const StringVec& args);
     virtual MojErr displayUsage();
 
     MojString m_dbDir;
-    DbService m_mainService;
-    DbService m_tempService;
+    MojDbLunaServiceDb m_mainService;
+    MojDbLunaServiceDb m_tempService;
     MojMessageDispatcher m_dispatcher;
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;

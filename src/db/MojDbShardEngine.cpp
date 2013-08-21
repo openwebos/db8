@@ -24,10 +24,11 @@
 
 using namespace std;
 
-static const MojChar* const TestKind1Str =
-    _T("{\"id\":\"ShardInfo:1\",")
+static const MojChar* const ShardInfoKind1Str =
+    _T("{\"id\":\"ShardInfo1:1\",")
     _T("\"owner\":\"mojodb.admin\",")
-    _T("\"indexes\":[{\"name\":\"Info\",\"props\":[{\"name\":\"ShardId\"},{\"name\":\"Path\"},{\"name\":\"Active\"},{\"name\":\"Transient\"},{\"name\":\"Media\"},{\"name\":\"IdBase64\"}]}, \
+    _T("\"indexes\":[ {\"name\":\"Info1\", \"props\":[ {\"name\":\"ShardId\"},{\"name\":\"Path\"},{\"name\":\"Active\"},{\"name\":\"Transient\"},{\"name\":\"Media\"},{\"name\":\"IdBase64\"} ]}, \
+    {\"name\":\"Info2\", \"props\":[ {\"name\":\"Path\"},{\"name\":\"ShardId\"} ]}, \
     ]}");
 
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
@@ -52,7 +53,17 @@ MojDbShardEngine::~MojDbShardEngine(void)
  */
 MojErr MojDbShardEngine::init (MojDb* ip_db)
 {
+    MojErr err;
+    MojObject obj;
+
     mp_db = ip_db;
+
+    // add type
+    err = obj.fromJson(ShardInfoKind1Str);
+    MojErrCheck(err);
+    err = mp_db->putKind(obj);
+    MojErrCheck(err);
+
     return (MojErrNone);
 }
 
@@ -72,7 +83,7 @@ MojErr MojDbShardEngine::put (MojUInt32 i_id, bool i_active, bool i_transient, M
     MojObject obj;
     MojString tmp_string;
 
-    MojErr err = obj.putString(_T("_kind"), _T("ShardInfo:1"));
+    MojErr err = obj.putString(_T("_kind"), _T("ShardInfo1:1"));
     MojErrCheck(err);
 
     MojInt32 val = static_cast<MojInt32>(i_id);
@@ -128,7 +139,7 @@ MojErr MojDbShardEngine::get (MojUInt32 i_id, ShardInfo& o_info)
     MojObject obj(id);
     MojObject dbObj;
 
-    err = query.from(_T("ShardInfo:1"));
+    err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
     err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
@@ -241,7 +252,7 @@ MojErr MojDbShardEngine::getIdForPath (MojString& i_path, MojUInt32& o_id)
     MojObject obj(path);
     MojObject dbObj;
 
-    err = query.from(_T("ShardInfo:1"));
+    err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
     err = query.where(_T("Path"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
@@ -293,7 +304,7 @@ MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
     MojObject dbObj;
     MojUInt32 count = 0;
 
-    err = query.from(_T("ShardInfo:1"));
+    err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
     err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
@@ -405,7 +416,7 @@ MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id)
     MojObject obj(val);
     MojObject dbObj;
 
-    err = query.from(_T("ShardInfo:1"));
+    err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
     err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
@@ -441,7 +452,7 @@ MojErr MojDbShardEngine::isIdExist (MojString i_id_base64)
     MojObject obj(i_id_base64);
     MojObject dbObj;
 
-    err = query.from(_T("ShardInfo:1"));
+    err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
     err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);

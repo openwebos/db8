@@ -60,7 +60,6 @@ private:
     MojDbLunaServiceDb m_mainService;
     MojDbLunaServiceDb m_tempService;
     MojDbLunaServicePdm m_pdmService;
-    bool m_pdmEnabled;
     MojMessageDispatcher m_dispatcher;
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;

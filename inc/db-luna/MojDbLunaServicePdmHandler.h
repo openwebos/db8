@@ -47,9 +47,8 @@ private:
     MojObject m_result;
     bool m_callbackInvoked;
 
-    MojServiceRequest::ReplySignal::Slot<MojDbLunaServicePdmHandler> m_slot;
-
     MojReactor& m_reactor;
+    MojServiceRequest::ReplySignal::Slot<MojDbLunaServicePdmHandler> m_slot;
 
     static MojLogger s_log;
 };

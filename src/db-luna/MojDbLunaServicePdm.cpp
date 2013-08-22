@@ -23,11 +23,31 @@
 #include "core/MojApp.h"
 
 MojLogger MojDbLunaServicePdm::s_log(_T("db-luna.shard"));
+const MojChar* const MojDbLunaServicePdm::ConfKey = _T("pdm");
 
 MojDbLunaServicePdm::MojDbLunaServicePdm(MojMessageDispatcher& dispatcher)
 : m_service(true, &dispatcher)
 {
     MojLogTrace(s_log);
+}
+
+MojErr MojDbLunaServicePdm::configure(const MojObject& conf)
+{
+    MojLogTrace(s_log);
+
+    MojErr err;
+    MojObject pdmConf;
+
+    if (conf.get(ConfKey, pdmConf)) {
+        bool found = pdmConf.get(_T("enabled"), m_isEnabled);
+        if (!found) {
+            m_isEnabled = true;
+        }
+    } else {
+        m_isEnabled = true;
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbLunaServicePdm::init(MojReactor& reactor)

@@ -52,7 +52,6 @@ MojDbLunaServiceApp::MojDbLunaServiceApp()
   m_tempService(m_dispatcher),
   m_pdmService(m_dispatcher)
 {
-    m_pdmEnabled = false;       // TODO: move to config file
    // set up db first
 #ifdef MOJ_USE_BDB
    MojDbStorageEngine::setEngineFactory(new MojDbBerkeleyFactory());
@@ -86,11 +85,8 @@ MojErr MojDbLunaServiceApp::init()
     MojErrCheck(err);
     err = m_tempService.init(m_reactor);
     MojErrCheck(err);
-
-    if (m_pdmEnabled) {
-        err = m_pdmService.init(m_reactor);
-        MojErrCheck(err);
-    }
+    err = m_pdmService.init(m_reactor);
+    MojErrCheck(err);
 
     return MojErrNone;
 }
@@ -110,6 +106,8 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     err = m_mainService.db().configure(conf);
     MojErrCheck(err);
     err = m_tempService.db().configure(conf);
+    MojErrCheck(err);
+    err = m_pdmService.configure(conf);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -148,7 +146,7 @@ MojErr MojDbLunaServiceApp::open()
 		MojErrCheck(err);
 	}
 
-	if (m_pdmEnabled) {
+	if (m_pdmService.isEnabled()) {
         // open pdm service conection
         err = m_pdmService.open(m_reactor, MojDbServiceDefs::PDMClientName, MojDbServiceDefs::PDMServiceName);
         MojErrCheck(err);
@@ -184,10 +182,8 @@ MojErr MojDbLunaServiceApp::close()
 	errClose = m_tempService.close();
 	MojErrAccumulate(err, errClose);
 
-    if (m_pdmEnabled) {
-        errClose = m_pdmService.close();
-        MojErrAccumulate(err, errClose);
-    }
+    errClose = m_pdmService.close();
+    MojErrAccumulate(err, errClose);
 
 	m_internalHandler->close();
 	m_internalHandler.reset();

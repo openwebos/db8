@@ -32,17 +32,21 @@ class MojDbLunaServicePdm
 {
 public:
     MojDbLunaServicePdm(MojMessageDispatcher& dispatcher);
+    MojErr configure(const MojObject& conf);
     MojErr init(MojReactor& reactor);
     MojErr open(MojGmainReactor& reactor, const MojChar* MojdbPDMClientName, const MojChar* pdmServiceName);
     MojErr close();
 
     MojLunaService& service() { return m_service; }
+    bool isEnabled() const { return m_isEnabled; }
 
 private:
     MojLunaService m_service;
     MojRefCountedPtr<MojDbLunaServicePdmHandler> m_handler;
 
+    bool m_isEnabled;
     static MojLogger s_log;
+    static const MojChar* const ConfKey;
 };
 
 #endif

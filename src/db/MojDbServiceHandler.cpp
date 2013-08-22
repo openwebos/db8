@@ -24,6 +24,7 @@
 #include "db/MojDbReq.h"
 #include "db/MojDbIndex.h"
 #include "core/MojJson.h"
+#include <list>
 
 const MojDbServiceHandler::SchemaMethod MojDbServiceHandler::s_pubMethods[] = {
 	{MojDbServiceDefs::BatchMethod, (Callback) &MojDbServiceHandler::handleBatch, MojDbServiceHandler::BatchSchema},
@@ -656,25 +657,57 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
     MojLogTrace(s_log);
     MojErr err;
 
+    bool retval = true;
     MojUInt32 count = 0;
-    //
-    // TODO : Request list of active media and receive a JSON object
-    //
+    MojString shards_info;
+    MojString value;
+
+    // Request list of active media and receive a JSON object
+    std::list<MojDbShardEngine::ShardInfo> list;
+    m_db.shardEngine()->getAllActive(list, count);
+
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
-    err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, retval);
+    MojErrCheck(err);
+    err = writer.intProp(MojDbServiceDefs::CountKey, (MojInt64) count);
     MojErrCheck(err);
     err = writer.propName(MojDbServiceDefs::MediaKey);
     MojErrCheck(err);
     err = writer.beginArray();
     MojErrCheck(err);
-    //
-    // TODO : Add result of active media list
-    //
+
+    // Add result of active media list
+    std::list<MojDbShardEngine::ShardInfo>::iterator it;
+
+    for (it = list.begin(); it != list.end(); ++it)
+    {
+//todo: verify here for comma delimiter for objects {},{}
+//        if(it != list.begin())
+//        {
+            //", "
+//        }
+
+        //"{"
+        err = writer.beginObject();
+        MojErrCheck(err);
+        err = writer.stringProp("deviceId", "");
+        MojErrCheck(err);
+        err = writer.stringProp("deviceUri", "");
+        MojErrCheck(err);
+        err = writer.stringProp("mountPath", "");
+        MojErrCheck(err);
+        value.format("%d", (*it).id);
+        err = writer.stringProp("shardId", value.data());
+        MojErrCheck(err);
+
+        //"}"
+        err = writer.endObject();
+        MojErrCheck(err);
+    }
+
     err = writer.endArray();
-    MojErrCheck(err);
-    err = writer.intProp(MojDbServiceDefs::CountKey, (MojInt64) count);
     MojErrCheck(err);
     err = writer.endObject();
     MojErrCheck(err);

@@ -283,6 +283,119 @@ MojErr MojDbShardEngine::getIdForPath (MojString& i_path, MojUInt32& o_id)
 }
 
 /**
+ * get list of all active shards
+ */
+MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& o_count)
+{
+    MojErr err = MojErrNone;
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    if(mp_db == nullptr)
+        return MojErrNotInitialized;
+#else
+    if(mp_db == NULL)
+        return MojErrNotInitialized;
+#endif
+
+    MojDbQuery query;
+    MojDbCursor cursor;
+    MojObject obj(true);
+    MojObject dbObj;
+    ShardInfo shard_info;
+    bool flag;
+    MojInt32 value_id;
+    MojUInt32 count = 0;
+    MojString value;
+
+    err = query.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query.where(_T("Active"), MojDbQuery::OpEq, obj);
+    MojErrCheck(err);
+
+    err = mp_db->find(query, cursor);
+
+    if (err == MojErrNone)
+    {
+        bool found = true;
+        while (found)
+        {
+            err = cursor.get(dbObj, found);
+            MojErrCheck(err);
+
+            if (!found)
+                break;
+
+            //Shard id
+            err = dbObj.get(_T("ShardId"), value_id, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.id = static_cast<MojUInt32>(value_id);
+            else
+            {
+                break;
+            }
+
+            //Path
+            err = dbObj.get(_T("Path"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.path = value;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Path' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //Transient
+            found = dbObj.get(_T("Transient"), flag);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.active = flag;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Transient' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //Media
+            err = dbObj.get(_T("Media"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.media = value;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Media' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //IdBase64
+            err = dbObj.get(_T("IdBase64"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.id_base64 = value;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'IdBase64' for record with id [%x]\n"), shard_info.id);
+            }
+
+            o_list.push_back(shard_info);
+           ++count;
+        }
+
+        cursor.close();
+    }
+    else
+    {
+        err = MojErrDbObjectNotFound;
+    }
+
+    o_count = count;
+    return err;
+}
+
+/**
  * set shard activity
  */
 MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
@@ -380,24 +493,6 @@ MojErr MojDbShardEngine::computeShardId (MojString& i_media, MojUInt32& o_id)
     return err;
 }
 
-bool MojDbShardEngine::_computeId (MojString& i_media, MojUInt32& o_id)
-{
-    if(i_media.length() == 0)
-        return false;
-
-    std::string str = i_media.data();
-
-    //Create a 24 bit hash of the string
-    static boost::crc_32_type result;
-    result.process_bytes(str.data(), str.length());
-    MojInt32 code = result.checksum();
-
-    //Prefix the 24 bit hash with 0x01 to create a 32 bit unique shard ID
-    o_id = code & 0xFFFFFF;
-
-    return true;
-}
-
 MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id)
 {
     MojErr err = MojErrNone;
@@ -470,3 +565,22 @@ MojErr MojDbShardEngine::isIdExist (MojString i_id_base64)
 
     return err;
 }
+
+bool MojDbShardEngine::_computeId (MojString& i_media, MojUInt32& o_id)
+{
+    if(i_media.length() == 0)
+        return false;
+
+    std::string str = i_media.data();
+
+    //Create a 24 bit hash of the string
+    static boost::crc_32_type result;
+    result.process_bytes(str.data(), str.length());
+    MojInt32 code = result.checksum();
+
+    //Prefix the 24 bit hash with 0x01 to create a 32 bit unique shard ID
+    o_id = code & 0xFFFFFF;
+
+    return true;
+}
+

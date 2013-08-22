@@ -23,6 +23,7 @@
 #include "core/MojCoreDefs.h"
 #include "core/MojErr.h"
 #include "core/MojString.h"
+#include <list>
 
 class MojDb;
 
@@ -44,6 +45,17 @@ public:
             active = false;
             transient = false;
         }
+
+        ShardInfo& operator=(const ShardInfo& i_src)
+        {
+            this->active = i_src.active;
+            this->transient = i_src.transient;
+            this->id = i_src.id;
+            this->path = i_src.path;
+            this->media = i_src.media;
+            this->id_base64 = i_src.id_base64;
+            return (*this);
+        }
     };
 
     MojDbShardEngine(void);
@@ -61,6 +73,9 @@ public:
 
     //get correspond shard id using path to device
     MojErr getIdForPath (MojString& i_path, MojUInt32& o_id);
+
+    //get list of all active shards
+    MojErr getAllActive (std::list<ShardInfo>& o_list, MojUInt32& o_count);
 
     //set shard activity
     MojErr setActivity (MojUInt32 i_id, bool i_isActive);

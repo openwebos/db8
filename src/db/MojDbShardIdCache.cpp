@@ -24,7 +24,7 @@
 
 using namespace std;
 
-static const MojChar* const dbPathName = _T("shard_id_cache");
+static const MojChar* const dbPathName = _T("/var/db/shard_id_cache");
 MojLogger MojDbShardIdCache::s_log(_T("db.shardIdCache"));
 
 MojDbShardIdCache::MojDbShardIdCache()

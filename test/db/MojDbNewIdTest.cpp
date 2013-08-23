@@ -34,7 +34,8 @@ static const MojChar* const MojNewIdTestKindStr1 =
     _T("\"owner\":\"mojodb.admin\"")
     _T("}");
 
-static const MojChar* const MojNewIdTestObjects[] = {
+static const MojChar* const MojNewIdTestObjects1[] = {
+    _T("{\"_kind\":\"NewIdTest:1\"}"),
     _T("{\"_kind\":\"NewIdTest:1\"}"),
     _T("{\"_kind\":\"NewIdTest:1\"}"),
     _T("{\"_kind\":\"NewIdTest:1\",\"_id\":\"a123456789\"}"),
@@ -44,18 +45,20 @@ static const MojChar* const MojNewIdTestObjects[] = {
     _T("{\"_kind\":\"NewIdTest:1\",\"_id\":\"e1234567890123456\"}"),
 };
 
-static const MojChar* const MojNewIdTestShardIds[] = {
-    _T("s12345"),
+static const MojChar* const MojNewIdTestShardIds1[] = {
+    _T("zzzzzk"),
+    _T("aaaaak"),
     _T("s123456"),
-    _T("s12345"),
-    _T("s12345"),
+    _T("zzzzzk"),
+    _T("zzzzzk"),
     _T("s123456"),
     _T(""),
     _T(""),
 };
 
-static const bool MojNewIdTestExpectResult[] = {
+static const bool MojNewIdTestExpectResult1[] = {
     true,
+    false, //"errorCode":-3968,"errorText":"db: Invalid shard ID","returnValue":false
     false, //"errorCode":-3968,"errorText":"db: Invalid shard ID","returnValue":false
     true,
     false, //"errorCode":-3968,"errorText":"db: Invalid _id","returnValue":false
@@ -71,12 +74,33 @@ static const MojChar* const MojNewIdTestKindStr2 =
     _T("\"owner\":\"mojodb.admin\"")
     _T("}");
 
-static const MojChar* const MojTestObjStr =
+static const MojChar* const MojTestObjStr2 =
     _T("{\"_kind\":\"NewIdTest:2\",\"foo\":1,\"bar\":2}");
 
-static const MojChar* const MojQueryStr =
+static const MojChar* const MojQueryStr2 =
     _T("NewIdTest:2");
 
+// for adding shard id test
+static const MojChar* const MojNewIdTestKindStr3 =
+    _T("{\"id\":\"NewIdTest:3\",")
+    _T("\"owner\":\"mojodb.admin\"")
+    _T("}");
+
+static const MojChar* const MojNewIdTestObjects3[] = {
+    _T("{\"_kind\":\"NewIdTest:3\"}"),
+    _T("{\"_kind\":\"NewIdTest:3\"}"),
+    _T("{\"_kind\":\"NewIdTest:3\"}"),
+    _T("{\"_kind\":\"NewIdTest:3\"}"),
+    _T("{\"_kind\":\"NewIdTest:3\"}"),
+};
+
+static const MojChar* const MojNewIdTestShardIds3[] = {
+    _T("zzzzzh"),
+    _T("zzzzzi"),
+    _T("zzzzzj"),
+    _T("zzzzzj"),
+    _T("zzzzzh"),
+};
 
 MojDbNewIdTest::MojDbNewIdTest()
 : MojTestCase(_T("MojDbNewId"))
@@ -84,24 +108,28 @@ MojDbNewIdTest::MojDbNewIdTest()
 }
 /**
 ****************************************************************************************************
-* @run       It runs 2 tests for testing id.
+* @run       It runs 3 tests for testing id.
              1. check-invalid ids of inputed objects.
-                (1) shardId:{"s12345"},  object : {"_kind":"NewIdTest:1"}
+                (1) shardId:{"zzzzzk"}, object : {"_kind":"NewIdTest:1"}
                     : normal
-                (2) shardId:{"s123456"}, object : {"_kind":"NewIdTest:1"}
+                (2) shardId:{"aaaaak"}, object : {"_kind":"NewIdTest:1"}
+                    : Invalid shard ID, shard ID does not exist in shardIdCache.
+                (3) shardId:{"s123456"}, object : {"_kind":"NewIdTest:1"}
                     : Invalid shard ID, shard ID is too long.
-                (3) shardId:{"s12345"},  object : {"_kind":"NewIdTest:1","_id":"a123456789"}
+                (4) shardId:{"zzzzzk"},  object : {"_kind":"NewIdTest:1","_id":"a123456789"}
                     : normal
-                (4) shardId:{"s12345"},  object : {"_kind":"NewIdTest:1","_id":"b1234567890123456"}
+                (5) shardId:{"zzzzzk"},  object : {"_kind":"NewIdTest:1","_id":"b1234567890123456"}
                     : Invalid _id, _id is too long.
-                (5) shardId:{"s123456"}, object : {"_kind":"NewIdTest:1","_id":"c123456789"}
+                (6) shardId:{"s123456"}, object : {"_kind":"NewIdTest:1","_id":"c123456789"}
                     : Invalid shard ID, shard ID is too long.
-                (6) shardId:{""},        object : {"_kind":"NewIdTest:1","_id":"d123456789"}
+                (7) shardId:{""},        object : {"_kind":"NewIdTest:1","_id":"d123456789"}
                     : normal
-                (7) shardId:{""},        object : {"_kind":"NewIdTest:1","_id":"e1234567890123456"}
+                (8) shardId:{""},        object : {"_kind":"NewIdTest:1","_id":"e1234567890123456"}
                     : Invalid _id, _id is too long.
 
-                    2. check for duplicate id through looping. (1000 times)
+             2. check for duplicate id through looping. (1000 times)
+             3. add shard Id into Kind:1
+                and check if there are shard ids in Kind:1 without duplication of shard Id
 * @param         :  None
 * @retval        :  MojErr
 ****************************************************************************************************
@@ -113,6 +141,11 @@ MojErr MojDbNewIdTest::run()
 
     // db Open
     err = db.open(MojDbTestDir);
+    MojTestErrCheck(err);
+
+    // put shardIds into shardIdCache
+    MojDbShardIdCache* p_cache = db.shardIdCache();
+    err = initShardIdCache(p_cache);
     MojTestErrCheck(err);
 
     // put kinds
@@ -127,6 +160,10 @@ MojErr MojDbNewIdTest::run()
     err = duplicateTest(db);
     MojTestErrCheck(err);
 
+    // 3rd Test : Check adding shardId into Kind:1
+    err = addShardIdTest(db);
+    MojTestErrCheck(err);
+
     err = db.close();
     MojTestErrCheck(err);
 
@@ -136,6 +173,18 @@ MojErr MojDbNewIdTest::run()
 void MojDbNewIdTest::cleanup()
 {
     (void) MojRmDirRecursive(MojDbTestDir);
+}
+
+MojErr MojDbNewIdTest::initShardIdCache (MojDbShardIdCache* ip_cache)
+{
+    MojUInt32 arr[] = { 0xFFFFFFFA, 0xFFFFFFFB, 0xFFFFFFFC, 0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF };
+
+    for (MojSize i = 0; i < 6; i++)
+    {
+        ip_cache->put(arr[i]);
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbNewIdTest::putTestKind(MojDb& db)
@@ -154,6 +203,11 @@ MojErr MojDbNewIdTest::putTestKind(MojDb& db)
     err = db.putKind(kindObj);
     MojTestErrCheck(err);
 
+    err = kindObj.fromJson(MojNewIdTestKindStr3);
+    MojTestErrCheck(err);
+    err = db.putKind(kindObj);
+    MojTestErrCheck(err);
+
     return MojErrNone;
 }
 
@@ -162,19 +216,19 @@ MojErr MojDbNewIdTest::putTest(MojDb& db)
 {
     MojErr err;
 
-    for (MojSize i = 0; i < sizeof(MojNewIdTestObjects) / sizeof(MojChar*); ++i) {
+    for (MojSize i = 0; i < sizeof(MojNewIdTestObjects1) / sizeof(MojChar*); ++i) {
         MojObject obj;
-        err = obj.fromJson(MojNewIdTestObjects[i]);
+        err = obj.fromJson(MojNewIdTestObjects1[i]);
         MojTestErrCheck(err);
 
         MojString shardId;
-        shardId.assign(MojNewIdTestShardIds[i]);
+        shardId.assign(MojNewIdTestShardIds1[i]);
         db.shardId(shardId);
 
         err = db.put(obj);
         bool result = (err == 0);
 
-        MojTestAssert(MojNewIdTestExpectResult[i] == result);
+        MojTestAssert(MojNewIdTestExpectResult1[i] == result);
     }
 
     return MojErrNone;
@@ -187,14 +241,14 @@ MojErr MojDbNewIdTest::duplicateTest(MojDb& db)
 
     for (MojUInt32 i = 0; i < numObjects; ++i) {
         MojObject objOrig;
-        err = objOrig.fromJson(MojTestObjStr);
+        err = objOrig.fromJson(MojTestObjStr2);
         MojTestErrCheck(err);
         MojObject obj1 = objOrig;
         err = db.put(obj1);
         MojTestErrCheck(err);
     }
 
-    MojUInt32 count = getKindCount(MojQueryStr, db);
+    MojUInt32 count = getKindCount(MojQueryStr2, db);
     MojTestAssert(numObjects == count);
 
     return MojErrNone;
@@ -220,3 +274,37 @@ MojUInt32 MojDbNewIdTest::getKindCount (const MojChar* MojQueryStr, MojDb& db)
 
     return count;
 }
+
+MojErr MojDbNewIdTest::addShardIdTest(MojDb& db)
+{
+    MojErr err;
+
+    for (MojSize i = 0; i < sizeof(MojNewIdTestObjects3) / sizeof(MojChar*); ++i) {
+        MojObject obj;
+        err = obj.fromJson(MojNewIdTestObjects3[i]);
+        MojTestErrCheck(err);
+
+        MojString shardId;
+        shardId.assign(MojNewIdTestShardIds3[i]);
+        db.shardId(shardId);
+
+        err = db.put(obj);
+    }
+
+    // get object with _id from db
+    MojObject resultObj;
+    bool foundOut;
+    MojString idStr;
+    idStr.assign(_T("_kinds/NewIdTest:3"));
+    MojObject id(idStr);
+    err = db.get(id, resultObj, foundOut);
+    MojErrCheck(err);
+    // extract shardIds from result object
+    MojObject shardIdsObj;
+    resultObj.get(_T("shardId"), shardIdsObj);
+    // check if size of shardIds is 3
+    MojTestAssert(shardIdsObj.size() == 3);
+
+    return MojErrNone;
+}
+

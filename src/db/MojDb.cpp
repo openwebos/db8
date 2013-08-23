@@ -31,6 +31,7 @@
 #include "core/MojObjectSerialization.h"
 #include "core/MojTime.h"
 #include "core/MojFile.h"
+#include "db-luna/leveldb/MojDbLevelItem.h"
 
 const MojChar* const MojDb::AdminRole = _T("admin");
 const MojChar* const MojDb::ObjDbName = _T("objects.db");
@@ -480,16 +481,29 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
 	MojAssert(end >= begin);
 	MojLogTrace(s_log);
 
-    // Max shard ID(0xFFFFFFFF) converted base-64 is "zzzzzk"
-    if(m_shardId.length() > 6 || m_shardId.compare(_T("zzzzzk")) > 0) {
-        MojLogWarning(s_log, _T("Invalid shard ID length\n"));
-        MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID length"));
+    if (!m_shardId.empty()) {
+        // extract UInt32 shard info from shard Id
+        MojVector<MojByte> shardIdVector;
+        MojErr err = m_shardId.base64Decode(shardIdVector);
+        MojErrCheck(err);
+        MojUInt32 id = 0;
+        for (MojVector<MojByte>::ConstIterator byte = shardIdVector.begin(); byte != shardIdVector.end(); ++byte) {
+            id = (id << 8) | (*byte);
+        }
+        // Max shard ID(0xFFFFFFFF) converted base-64 is "zzzzzk"
+        // Shard ID should exist in shard_id_cache
+        if(m_shardId.length() > 6 || m_shardId.compare(_T("zzzzzk")) > 0 || !m_shardIdCache.isExist(id)) {
+            MojLogWarning(s_log, _T("Invalid shard ID\n"));
+            MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID"));
+        }
     }
 
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
 
 	for (MojObject* i = begin; i != end; ++i) {
+        err = addShardIdToMasterKind(*i, req);
+        MojErrCheck(err);
 		err = putImpl(*i, flags, req);
 		MojErrCheck(err);
 	}
@@ -946,6 +960,78 @@ MojErr MojDb::getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op
 		MojErrCheck(err);
 	}
 	return MojErrNone;
+}
+
+/***********************************************************************
+ * addShardIdToMasterKind
+ *
+ * Add shard ID into Kind:1
+ * 1. Find a tuple that matches _kind from Kind:1
+ * 2. If _kind does not exist in Kind:1, return "Kind not Registered"
+ * 3. Extract shardIds array from the tuple
+ * 4. Push shardId if shardId does not exist in extracted shardIds array
+ ***********************************************************************/
+MojErr MojDb::addShardIdToMasterKind(MojObject& obj, MojDbReqRef req)
+{
+    bool foundOut;
+    MojString kindId;
+    MojErr err = obj.get(KindKey, kindId, foundOut);
+    MojErrCheck(err);
+    if(foundOut && !m_shardId.empty() && !kindId.startsWith(MojDbKindEngine::KindKindId)) {
+        // get _id from _kind
+        MojString id;
+        err = formatKindId(kindId.data(), id);
+        MojErrCheck(err);
+        // make query
+        MojDbQuery query;
+        err = query.from(MojDbKindEngine::KindKindId);
+        MojErrCheck(err);
+        MojObject idObj(id);
+        err = query.where(IdKey, MojDbQuery::OpEq, idObj);
+        MojErrCheck(err);
+        // find cursor using query
+        MojDbCursor cursor;
+        err = find(query, cursor);
+        MojErrCheck(err);
+        // get item from cursor
+        MojDbStorageItem* prevItem = NULL;
+        err = cursor.get(prevItem, foundOut);
+        MojErrCheck(err);
+        if(foundOut) {
+            // convert extracted item to object type
+            MojObject oldObj;
+            err = prevItem->toObject(oldObj, m_kindEngine);
+            MojErrCheck(err);
+            MojObject mergedObj(oldObj);
+            // extract shardIds from result object
+            MojObject shardIdsObj;
+            oldObj.get(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+            // check if shardId exists in extracted shardIds
+            bool isExist = false;
+            MojString shardIdStr;
+            for(MojSize i=0; i<shardIdsObj.size(); i++) {
+                shardIdsObj.at(i, shardIdStr, foundOut);
+                if(shardIdStr.compare(m_shardId.data()) == 0) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if(!isExist) {
+                // push shardId
+                err = shardIdsObj.pushString(m_shardId.data());
+                MojErrCheck(err);
+                err = mergedObj.put(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+                MojErrCheck(err);
+                // update Kind:1
+                err = putObj(id, mergedObj, &oldObj, prevItem, req, OpUpdate);
+                MojErrCheck(err);
+            }
+        } else {
+            MojErrThrow(MojErrDbKindNotRegistered);
+        }
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema)

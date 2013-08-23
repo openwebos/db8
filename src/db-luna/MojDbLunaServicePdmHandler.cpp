@@ -22,11 +22,13 @@
 #include "luna/MojLunaService.h"
 #include "core/MojServiceMessage.h"
 #include "core/MojService.h"
+#include "db-luna/MojDbLunaServicePdm.h"
 
 MojLogger MojDbLunaServicePdmHandler::s_log(_T("db-luna.shard"));
 
-MojDbLunaServicePdmHandler::MojDbLunaServicePdmHandler(MojReactor& reactor)
-: m_dbErr(MojErrNone),
+MojDbLunaServicePdmHandler::MojDbLunaServicePdmHandler(MojDbLunaServicePdm* parent, MojReactor& reactor)
+: m_mojDbLunaServicePdm(parent),
+m_dbErr(MojErrNone),
 m_callbackInvoked (false),
 m_slot(this, &MojDbLunaServicePdmHandler::handleResult),
 m_reactor(reactor)
@@ -76,10 +78,13 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         MojLogError(s_log, _T("Luna error response: %s"), m_errTxt.data());
         MojAssert(found);
     } else {
+#ifdef MOJ_DEBUG
         MojString resStr;
         result.toJson(resStr);
 
         MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
+#endif
+
     }
     return MojErrNone;
 }

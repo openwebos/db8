@@ -21,6 +21,7 @@
 
 #include "db/MojDbServiceDefs.h"
 #include "core/MojApp.h"
+#include <algorithm>
 
 MojLogger MojDbLunaServicePdm::s_log(_T("db-luna.shard"));
 const MojChar* const MojDbLunaServicePdm::ConfKey = _T("pdm");
@@ -52,7 +53,7 @@ MojErr MojDbLunaServicePdm::configure(const MojObject& conf)
 
 MojErr MojDbLunaServicePdm::init(MojReactor& reactor)
 {
-    m_handler.reset(new MojDbLunaServicePdmHandler(reactor));
+    m_handler.reset(new MojDbLunaServicePdmHandler(this, reactor));
     MojAllocCheck(m_handler.get());
 
     return MojErrNone;
@@ -91,4 +92,21 @@ MojErr MojDbLunaServicePdm::close()
     MojErrAccumulate(err, errClose);
 
     return err;
+}
+
+MojErr MojDbLunaServicePdm::addDatabase(MojDb* database)
+{
+    MojLogTrace(s_log);
+    MojAllocCheck(m_handler.get());
+
+#ifdef MOJ_DEBUG
+    database_list_t::iterator i = std::find(m_databases.begin(), m_databases.end(), database);
+    if (i != m_databases.end()) { // not well to compare adress
+        MojLogError(s_log, _T("mojodb already added to PDM"));
+    }
+#endif
+
+    m_databases.push_back(database);
+
+    return MojErrNone;
 }

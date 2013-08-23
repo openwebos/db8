@@ -150,6 +150,14 @@ MojErr MojDbLunaServiceApp::open()
         // open pdm service conection
         err = m_pdmService.open(m_reactor, MojDbServiceDefs::PDMClientName, MojDbServiceDefs::PDMServiceName);
         MojErrCheck(err);
+
+        if (!dbOpenFailed) {
+            err = m_pdmService.addDatabase(&m_mainService.db());
+            MojErrCheck(err);
+            err = m_pdmService.addDatabase(&m_tempService.db());
+            MojErrCheck(err);
+        }
+
     }
 
 	// open internal handler

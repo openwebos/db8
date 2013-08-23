@@ -27,10 +27,15 @@
 #include "core/MojMessageDispatcher.h"
 #include "luna/MojLunaService.h"
 #include "db-luna/MojDbLunaServicePdmHandler.h"
+#include <list>
+
+class MojDb;
 
 class MojDbLunaServicePdm
 {
 public:
+    typedef std::list<MojDb*> database_list_t;
+
     MojDbLunaServicePdm(MojMessageDispatcher& dispatcher);
     MojErr configure(const MojObject& conf);
     MojErr init(MojReactor& reactor);
@@ -40,6 +45,9 @@ public:
     MojLunaService& service() { return m_service; }
     bool isEnabled() const { return m_isEnabled; }
 
+    MojErr addDatabase(MojDb* database);
+    database_list_t* getActiveDatabases() { return &m_databases; }
+
 private:
     MojLunaService m_service;
     MojRefCountedPtr<MojDbLunaServicePdmHandler> m_handler;
@@ -47,6 +55,7 @@ private:
     bool m_isEnabled;
     static MojLogger s_log;
     static const MojChar* const ConfKey;
+    database_list_t m_databases;
 };
 
 #endif

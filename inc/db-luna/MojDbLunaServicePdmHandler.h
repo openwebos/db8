@@ -27,11 +27,12 @@
 #include "core/MojReactor.h"
 
 class MojLunaService;
+class MojDbLunaServicePdm;
 
 class MojDbLunaServicePdmHandler : public MojSignalHandler
 {
 public:
-    MojDbLunaServicePdmHandler(MojReactor& mojService);
+    MojDbLunaServicePdmHandler(MojDbLunaServicePdm* parent, MojReactor& mojService);
     MojErr open(MojLunaService* service, const MojChar* pdmServiceName);
 
     virtual MojErr handleResult(MojObject& result, MojErr errCode);
@@ -42,6 +43,7 @@ public:
     MojService* service();
 
 private:
+    MojDbLunaServicePdm* m_mojDbLunaServicePdm;
     MojErr m_dbErr;
     MojString m_errTxt;
     MojObject m_result;

@@ -31,6 +31,7 @@
 #include "db-luna/MojDbLunaServicePdm.h"
 
 class MojDbEnv;
+class MojDb;
 
 class MojDbLunaServiceApp : public MojReactorApp<MojGmainReactor>
 {
@@ -41,7 +42,6 @@ public:
     virtual MojErr init();
     virtual MojErr open();
     virtual MojErr close();
-
 private:
     static const MojChar* const VersionString;
     static const MojChar* const MainDir;

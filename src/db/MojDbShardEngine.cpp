@@ -27,9 +27,10 @@ using namespace std;
 static const MojChar* const ShardInfoKind1Str =
     _T("{\"id\":\"ShardInfo1:1\",")
     _T("\"owner\":\"mojodb.admin\",")
-    _T("\"indexes\":[ {\"name\":\"Info1\", \"props\":[ {\"name\":\"ShardId\"},{\"name\":\"Path\"},{\"name\":\"Active\"},{\"name\":\"Transient\"},{\"name\":\"Media\"},{\"name\":\"IdBase64\"} ]}, \
-    {\"name\":\"Info2\", \"props\":[ {\"name\":\"Path\"},{\"name\":\"ShardId\"} ]}, \
-    ]}");
+    _T("\"indexes\":[ {\"name\":\"Info1\", \"props\":[ {\"name\":\"ShardId\"},{\"name\":\"Active\"},{\"name\":\"Transient\"},{\"name\":\"IdBase64\"}, \
+                                                       {\"name\":\"deviceId\"},{\"name\":\"deviceUri\"},{\"name\":\"mountPath\"},{\"name\":\"deviceName\"} ]}, \
+                      {\"name\":\"Info2\", \"props\":[ {\"name\":\"mountPath\"},{\"name\":\"ShardId\"} ]}, \
+                    ]}");
 
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
 
@@ -70,7 +71,7 @@ MojErr MojDbShardEngine::init (MojDb* ip_db)
 /**
  * put a new shard description to db
  */
-MojErr MojDbShardEngine::put (MojUInt32 i_id, bool i_active, bool i_transient, MojString& i_path, MojString& i_media, MojString& i_id_base64)
+MojErr MojDbShardEngine::put (ShardInfo& i_info)
 {
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     if(mp_db == nullptr)
@@ -86,29 +87,37 @@ MojErr MojDbShardEngine::put (MojUInt32 i_id, bool i_active, bool i_transient, M
     MojErr err = obj.putString(_T("_kind"), _T("ShardInfo1:1"));
     MojErrCheck(err);
 
-    MojInt32 val = static_cast<MojInt32>(i_id);
+    MojInt32 val = static_cast<MojInt32>(i_info.id);
     MojObject obj1(val); //keep numeric
     err = obj.put(_T("ShardId"), obj1);
     MojErrCheck(err);
 
-    MojObject obj2(i_path);
-    err = obj.put(_T("Path"), obj2);
+    MojObject obj2(i_info.active);
+    err = obj.put(_T("Active"), obj2);
     MojErrCheck(err);
 
-    MojObject obj3(i_active);
-    err = obj.put(_T("Active"), obj3);
+    MojObject obj3(i_info.transient);
+    err = obj.put(_T("Transient"), obj3);
     MojErrCheck(err);
 
-    MojObject obj4(i_transient);
-    err = obj.put(_T("Transient"), obj4);
+    MojObject obj4(i_info.id_base64);
+    err = obj.put(_T("IdBase64"), obj4);
     MojErrCheck(err);
 
-    MojObject obj5(i_media);
-    err = obj.put(_T("Media"), obj5);
+    MojObject obj5(i_info.deviceId);
+    err = obj.put(_T("deviceId"), obj5);
     MojErrCheck(err);
 
-    MojObject obj6(i_id_base64);
-    err = obj.put(_T("IdBase64"), obj6);
+    MojObject obj6(i_info.deviceUri);
+    err = obj.put(_T("deviceUri"), obj6);
+    MojErrCheck(err);
+
+    MojObject obj7(i_info.mountPath);
+    err = obj.put(_T("mountPath"), obj7);
+    MojErrCheck(err);
+
+    MojObject obj8(i_info.deviceName);
+    err = obj.put(_T("deviceName"), obj8);
     MojErrCheck(err);
 
     err = mp_db->put(obj);
@@ -123,99 +132,17 @@ MojErr MojDbShardEngine::put (MojUInt32 i_id, bool i_active, bool i_transient, M
  */
 MojErr MojDbShardEngine::get (MojUInt32 i_id, ShardInfo& o_info)
 {
-    MojErr err = MojErrNone;
+    MojString str;
+    str.assign("");
+    return(_get(i_id, str, o_info));
+}
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
-
-    MojDbQuery query;
-    MojDbCursor cursor;
-    MojInt32 id = static_cast<MojInt32>(i_id);
-    MojObject obj(id);
-    MojObject dbObj;
-
-    err = query.from(_T("ShardInfo1:1"));
-    MojErrCheck(err);
-    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
-    MojErrCheck(err);
-
-    err = mp_db->find(query, cursor);
-
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        if (found)
-        {
-            bool flag;
-            MojString value;
-            //Path
-            err = dbObj.get(_T("Path"), value, found);
-            MojErrCheck(err);
-
-            if (found)
-                o_info.path = value;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Path' for record with id [%x]\n"), i_id);
-            }
-
-            //Active
-            found = dbObj.get(_T("Active"), flag);
-            MojErrCheck(err);
-
-            if (found)
-                o_info.active = flag;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Active' for record with id [%x]\n"), i_id);
-            }
-
-            //Transient
-            found = dbObj.get(_T("Transient"), flag);
-            MojErrCheck(err);
-
-            if (found)
-                o_info.active = flag;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Transient' for record with id [%x]\n"), i_id);
-            }
-
-            //Media
-            err = dbObj.get(_T("Media"), value, found);
-            MojErrCheck(err);
-
-            if (found)
-                o_info.media = value;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Media' for record with id [%x]\n"), i_id);
-            }
-
-            //IdBase64
-            err = dbObj.get(_T("IdBase64"), value, found);
-            MojErrCheck(err);
-
-            if (found)
-                o_info.id_base64 = value;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'IdBase64' for record with id [%x]\n"), i_id);
-            }
-        }
-
-        cursor.close();
-        o_info.id = i_id;
-    }
-
-    return err;
+/**
+ * get shard description by id
+ */
+MojErr MojDbShardEngine::get (MojString& i_id_base64, ShardInfo& o_info)
+{
+    return(_get(0, i_id_base64, o_info));
 }
 
 /**
@@ -254,7 +181,7 @@ MojErr MojDbShardEngine::getIdForPath (MojString& i_path, MojUInt32& o_id)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("Path"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("mountPath"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     err = mp_db->find(query, cursor);
@@ -336,37 +263,15 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
                 break;
             }
 
-            //Path
-            err = dbObj.get(_T("Path"), value, found);
-            MojErrCheck(err);
-
-            if (found)
-                shard_info.path = value;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Path' for record with id [%x]\n"), shard_info.id);
-            }
-
             //Transient
             found = dbObj.get(_T("Transient"), flag);
             MojErrCheck(err);
 
             if (found)
-                shard_info.active = flag;
+                shard_info.transient = flag;
             else
             {
                 MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Transient' for record with id [%x]\n"), shard_info.id);
-            }
-
-            //Media
-            err = dbObj.get(_T("Media"), value, found);
-            MojErrCheck(err);
-
-            if (found)
-                shard_info.media = value;
-            else
-            {
-                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Media' for record with id [%x]\n"), shard_info.id);
             }
 
             //IdBase64
@@ -374,10 +279,54 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
             MojErrCheck(err);
 
             if (found)
-                shard_info.id_base64 = value;
+                shard_info.id_base64.assign(value);
             else
             {
                 MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'IdBase64' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //deviceId
+            err = dbObj.get(_T("deviceId"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.deviceId.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceId' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //deviceUri
+            err = dbObj.get(_T("deviceUri"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.deviceUri.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceUri' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //mountPath
+            err = dbObj.get(_T("mountPath"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.mountPath.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'mountPath' for record with id [%x]\n"), shard_info.id);
+            }
+
+            //deviceName
+            err = dbObj.get(_T("deviceName"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                shard_info.deviceName.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceName' for record with id [%x]\n"), shard_info.id);
             }
 
             o_list.push_back(shard_info);
@@ -530,7 +479,7 @@ MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id)
     return err;
 }
 
-MojErr MojDbShardEngine::isIdExist (MojString i_id_base64)
+MojErr MojDbShardEngine::isIdExist (MojString& i_id_base64)
 {
     MojErr err = MojErrNone;
 
@@ -584,3 +533,148 @@ bool MojDbShardEngine::_computeId (MojString& i_media, MojUInt32& o_id)
     return true;
 }
 
+MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info)
+{
+    MojErr err = MojErrNone;
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    if(mp_db == nullptr)
+        return MojErrNotInitialized;
+#else
+    if(mp_db == NULL)
+        return MojErrNotInitialized;
+#endif
+
+    MojDbQuery query;
+    MojDbCursor cursor;
+    MojInt32 id = static_cast<MojInt32>(i_id);
+    MojObject dbObj;
+
+    err = query.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+
+    if (i_id_base64.length() > 0) //switch
+    {
+        MojObject obj(i_id_base64);
+        o_info.id_base64.assign(i_id_base64);
+        err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+    }
+    else
+    {
+        MojObject obj(id);
+        o_info.id = i_id;
+        err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+    }
+
+    MojErrCheck(err);
+    err = mp_db->find(query, cursor);
+
+    if (err == MojErrNone)
+    {
+        bool found;
+        err = cursor.get(dbObj, found);
+        MojErrCheck(err);
+        if (found)
+        {
+            bool flag;
+            MojString value;
+
+            if (i_id_base64.length() > 0) //switch
+            {
+                //Shard id
+                err = dbObj.get(_T("ShardId"), id, found);
+                MojErrCheck(err);
+
+                if (found)
+                    o_info.id = static_cast<MojUInt32>(id);
+                else
+                {
+                    MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'ShardId' for record with id [%s]\n"), i_id_base64.data());
+                }
+            }
+            else
+            {
+                //IdBase64
+                err = dbObj.get(_T("IdBase64"), value, found);
+                MojErrCheck(err);
+
+                if (found)
+                    o_info.id_base64.assign(value);
+                else
+                {
+                    MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'IdBase64' for record with id [%x]\n"), o_info.id);
+                }
+            }
+
+            //Active
+            found = dbObj.get(_T("Active"), flag);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.active = flag;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Active' for record with id [%x]\n"), o_info.id);
+            }
+
+            //Transient
+            found = dbObj.get(_T("Transient"), flag);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.transient = flag;
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'Transient' for record with id [%x]\n"), o_info.id);
+            }
+
+            //deviceId
+            err = dbObj.get(_T("deviceId"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.deviceId.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceId' for record with id [%x]\n"), o_info.id);
+            }
+
+            //deviceUri
+            err = dbObj.get(_T("deviceUri"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.deviceUri.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceUri' for record with id [%x]\n"), o_info.id);
+            }
+
+            //mountPath
+            err = dbObj.get(_T("mountPath"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.mountPath.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'mountPath' for record with id [%x]\n"), o_info.id);
+            }
+
+            //deviceName
+            err = dbObj.get(_T("deviceName"), value, found);
+            MojErrCheck(err);
+
+            if (found)
+                o_info.deviceName.assign(value);
+            else
+            {
+                MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceName' for record with id [%x]\n"), o_info.id);
+            }
+        }
+
+        cursor.close();
+    }
+
+    return err;
+}

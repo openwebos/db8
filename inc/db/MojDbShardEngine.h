@@ -35,9 +35,11 @@ public:
         bool active;
         bool transient;
         MojUInt32 id;
-        MojString path;
-        MojString media;
         MojString id_base64;
+        MojString deviceId;
+        MojString deviceUri;
+        MojString mountPath;
+        MojString deviceName;
 
         ShardInfo()
         {
@@ -51,9 +53,11 @@ public:
             this->active = i_src.active;
             this->transient = i_src.transient;
             this->id = i_src.id;
-            this->path = i_src.path;
-            this->media = i_src.media;
             this->id_base64 = i_src.id_base64;
+            this->deviceId = i_src.deviceId;
+            this->deviceUri = i_src.deviceUri;
+            this->mountPath = i_src.mountPath;
+            this->deviceName = i_src.deviceName;
             return (*this);
         }
     };
@@ -66,10 +70,10 @@ public:
 
     //put a new shard description to db
     MojErr put (ShardInfo& i_info);
-    MojErr put (MojUInt32 i_id, bool i_active, bool i_transient, MojString& i_path, MojString& i_media, MojString& i_id_base64);
 
     //get shard description by id
     MojErr get (MojUInt32 i_id, ShardInfo& o_info);
+    MojErr get (MojString& i_id_base64, ShardInfo& o_info);
 
     //get correspond shard id using path to device
     MojErr getIdForPath (MojString& i_path, MojUInt32& o_id);
@@ -91,18 +95,14 @@ public:
     //return: MojErrExists         --> exist
     //        MojErrNotFound       --> not found
     //        MojErrNotInitialized --> db was not initialized
-    MojErr isIdExist (MojString i_id_base64);
+    MojErr isIdExist (MojString& i_id_base64);
 
 private:
     MojDb* mp_db;
     static MojLogger s_log;
 
     bool _computeId (MojString& i_media, MojUInt32& o_id);
+    MojErr _get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info);
 };
-
-inline MojErr MojDbShardEngine::put (ShardInfo& i_info)
-{
-    return put(i_info.id, i_info.active, i_info.transient, i_info.path, i_info.media, i_info.id_base64);
-}
 
 #endif /* MOJDBSHARDENGINE_H_ */

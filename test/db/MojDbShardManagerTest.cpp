@@ -159,8 +159,7 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     //store sample shard info
     MojDbShardEngine::ShardInfo put_info;
     put_info.id = 0xFF;
-    put_info.media.assign("{media}");
-    put_info.path.assign("/media/media01");
+    put_info.mountPath.assign("/media/media01");
     err = ip_eng->put(put_info);
     MojTestErrCheck(err);
 
@@ -169,14 +168,14 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     err = ip_eng->get(0xFF, get_info);
     MojTestErrCheck(err);
 
-    if (get_info.path.compare(put_info.path.data()) != 0)
+    if (get_info.mountPath.compare(put_info.mountPath.data()) != 0)
         err = MojErrDbVerificationFailed;
 
     MojTestErrCheck(err);
 
     //get id for path, verify
     id = 0;
-    err = ip_eng->getIdForPath(put_info.path, id);
+    err = ip_eng->getIdForPath(put_info.mountPath, id);
     MojTestErrCheck(err);
 
     if (id != put_info.id)

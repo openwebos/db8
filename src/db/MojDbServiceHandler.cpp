@@ -692,11 +692,11 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
         //"{"
         err = writer.beginObject();
         MojErrCheck(err);
-        err = writer.stringProp("deviceId", "");
+        err = writer.stringProp("deviceId", (*it).deviceId.data());
         MojErrCheck(err);
-        err = writer.stringProp("deviceUri", "");
+        err = writer.stringProp("deviceUri", (*it).deviceUri.data());
         MojErrCheck(err);
-        err = writer.stringProp("mountPath", "");
+        err = writer.stringProp("mountPath", (*it).mountPath.data());
         MojErrCheck(err);
         value.format("%d", (*it).id);
         err = writer.stringProp("shardId", value.data());
@@ -735,22 +735,63 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
     MojString shardId;
     err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
     MojErrCheck(err);
-    // if shard ID is not zero, return invalid shard ID error
-    if(shardId.compare(_T("0")) != 0) {
-        MojErrThrow(MojErrDbInvalidShardId);
-    }
-    m_db.shardId(shardId);
-    //
-    // TODO : Request shard information and receive a JSON object
-    //
+
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
-    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
-    MojErrCheck(err);
-    //
-    // TODO : Add result of shard information
-    //
+
+    if (shardId.length() == 0) // parameter is absent
+    {
+        err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+        MojErrCheck(err);
+        err = writer.stringProp("errorText", "Invalid Parameters");
+        MojErrCheck(err);
+        err = writer.stringProp("errorCode", "1");
+        MojErrCheck(err);
+    }
+    else
+    {
+        //validate id
+        if ( (shardId.compare("0") != 0) && (m_db.shardEngine()->isIdExist(shardId) == MojErrExists) )
+        {
+            MojDbShardEngine::ShardInfo info;
+            err = m_db.shardEngine()->get(shardId, info);
+            MojErrCheck(err);
+
+            err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+            MojErrCheck(err);
+            err = writer.stringProp("isActive", info.active ? "true" : "false");
+            MojErrCheck(err);
+            err = writer.stringProp("shardId", shardId.data());
+            MojErrCheck(err);
+
+            //exist
+            if (info.active)
+            {
+                err = writer.stringProp("deviceId", info.deviceId.data());
+                MojErrCheck(err);
+                err = writer.stringProp("deviceName", info.deviceName.data());
+                MojErrCheck(err);
+                err = writer.stringProp("deviceUri", info.deviceUri.data());
+                MojErrCheck(err);
+                err = writer.stringProp("mountPath", info.mountPath.data());
+                MojErrCheck(err);
+            }
+
+            m_db.shardId(shardId);
+       }
+       else
+       {
+            //wrong id
+            err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+            MojErrCheck(err);
+            err = writer.stringProp("errorText", "Invalid Shard ID");
+            MojErrCheck(err);
+            err = writer.stringProp("errorCode", "100");
+            MojErrCheck(err);
+        }
+    }
+
     err = writer.endObject();
     MojErrCheck(err);
 

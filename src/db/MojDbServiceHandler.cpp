@@ -820,6 +820,7 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     MojString shardId;
     err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
     MojErrCheck(err);
+
     // if shard ID is not zero, return invalid shard ID error
     if(shardId.compare(_T("0")) != 0) {
         MojErrThrow(MojErrDbInvalidShardId);
@@ -867,26 +868,49 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
     MojString shardId;
     err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
     MojErrCheck(err);
-    // if shard ID is not zero, return invalid shard ID error
-    if(shardId.compare(_T("0")) != 0) {
-        MojErrThrow(MojErrDbInvalidShardId);
-    }
-    m_db.shardId(shardId);
-    // get kind
-    bool transient;
-    err = payload.getRequired(MojDbServiceDefs::TransientKey, transient);
-    MojErrCheck(err);
-    //
-    // TODO : Set external media as "transient"
-    //
+
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
-    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
-    MojErrCheck(err);
-    //
-    // TODO : Add result
-    //
+
+    if (shardId.length() == 0) // parameter is absent
+    {
+        err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+        MojErrCheck(err);
+        err = writer.stringProp("errorText", "Invalid Parameters");
+        MojErrCheck(err);
+        err = writer.stringProp("errorCode", "1");
+        MojErrCheck(err);
+    }
+    else
+    {
+        bool transient;
+        err = payload.getRequired(MojDbServiceDefs::TransientKey, transient);
+        MojErrCheck(err);
+
+        //validate id
+        if ( (shardId.compare("0") != 0) && (m_db.shardEngine()->isIdExist(shardId) == MojErrExists) )
+        {
+            MojDbShardEngine::ShardInfo info;
+            err = m_db.shardEngine()->setTransient(shardId, transient);
+            MojErrCheck(err);
+
+            err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+            MojErrCheck(err);
+            m_db.shardId(shardId);
+       }
+       else
+       {
+            //wrong id
+            err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+            MojErrCheck(err);
+            err = writer.stringProp("errorText", "Invalid Shard ID");
+            MojErrCheck(err);
+            err = writer.stringProp("errorCode", "100");
+            MojErrCheck(err);
+        }
+    }
+
     err = writer.endObject();
     MojErrCheck(err);
 

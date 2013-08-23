@@ -84,6 +84,10 @@ public:
     //set shard activity
     MojErr setActivity (MojUInt32 i_id, bool i_isActive);
 
+    //set transient
+    MojErr setTransient (MojUInt32 i_id, bool i_isTransient);
+    MojErr setTransient (MojString& i_id_base64, bool i_isTransient);
+
     //compute a new shard id
     MojErr computeShardId (MojString& i_media, MojUInt32& o_id);
 

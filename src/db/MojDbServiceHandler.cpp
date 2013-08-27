@@ -821,26 +821,65 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
     MojErrCheck(err);
 
-    // if shard ID is not zero, return invalid shard ID error
-    if(shardId.compare(_T("0")) != 0) {
-        MojErrThrow(MojErrDbInvalidShardId);
-    }
-    m_db.shardId(shardId);
     // get kind
     MojString kindStr;
     err = payload.getRequired(MojDbServiceDefs::KindKey, kindStr);
     MojErrCheck(err);
-    //
-    // TODO : Request whether an external media supports a specific kind and receive a JSON object
-    //
+
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
-    err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
-    MojErrCheck(err);
-    //
-    // TODO : Add result
-    //
+
+    if ( G_UNLIKELY((shardId.length() == 0) || (kindStr.length() == 0) )) // parameters are absent
+    {
+        err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+        MojErrCheck(err);
+        err = writer.stringProp("errorText", "Invalid Parameters");
+        MojErrCheck(err);
+        err = writer.stringProp("errorCode", "1");
+        MojErrCheck(err);
+    }
+    else
+    {
+       if (G_LIKELY(m_db.shardEngine()->isIdExist(shardId) == MojErrExists))
+       {
+            if (G_LIKELY(m_db.isValidKind(kindStr)))
+            {
+                //ok
+                err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+                MojErrCheck(err);
+                err = writer.stringProp("isSupported", m_db.isSupported(shardId, kindStr) ? "true" : "false");
+                MojErrCheck(err);
+                err = writer.stringProp("shardId", shardId.data());
+                MojErrCheck(err);
+                err = writer.stringProp("_kind", kindStr.data());
+                MojErrCheck(err);
+
+                m_db.shardId(shardId);
+            }
+            else
+            {
+                //wrong kind
+                err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+                MojErrCheck(err);
+                err = writer.stringProp("errorText", "Invalid _kind");
+                MojErrCheck(err);
+                err = writer.stringProp("errorCode", "200");
+                MojErrCheck(err);
+           }
+       }
+       else
+       {
+            //wrong id
+            err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
+            MojErrCheck(err);
+            err = writer.stringProp("errorText", "Invalid Shard ID");
+            MojErrCheck(err);
+            err = writer.stringProp("errorCode", "100");
+            MojErrCheck(err);
+        }
+    }
+
     err = writer.endObject();
     MojErrCheck(err);
 

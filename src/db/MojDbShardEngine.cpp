@@ -71,7 +71,7 @@ MojErr MojDbShardEngine::init (MojDb* ip_db)
 /**
  * put a new shard description to db
  */
-MojErr MojDbShardEngine::put (ShardInfo& i_info)
+MojErr MojDbShardEngine::put (const ShardInfo& i_info)
 {
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     if(mp_db == nullptr)
@@ -349,7 +349,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
 }
 
 /**
- * set shard activity
+ * set activity flag
  */
 MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
 {
@@ -402,7 +402,59 @@ MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
 }
 
 /**
- * set transient
+ * set activity flag
+ */
+MojErr MojDbShardEngine::setActivity (MojString& i_id_base64, bool i_isActive)
+{
+    MojErr err = MojErrNone;
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    if(mp_db == nullptr)
+        return MojErrNotInitialized;
+#else
+    if(mp_db == NULL)
+        return MojErrNotInitialized;
+#endif
+
+    MojDbQuery query;
+    MojDbCursor cursor;
+    MojObject obj(i_id_base64);
+    MojObject dbObj;
+    MojUInt32 count = 0;
+
+    err = query.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+    MojErrCheck(err);
+
+    err = mp_db->find(query, cursor);
+
+    if (err == MojErrNone)
+    {
+        bool found;
+        err = cursor.get(dbObj, found);
+        MojErrCheck(err);
+        cursor.close();
+
+        if (found)
+        {
+            MojObject update;
+            err = update.put(_T("Active"), i_isActive);
+            MojErrCheck(err);
+            err = mp_db->merge(query, update, count);
+            MojErrCheck(err);
+        }
+    }
+    else
+    {
+        err = MojErrDbObjectNotFound;
+    }
+
+    return err;
+}
+
+/**
+ * set transient flag
  */
 MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
 {
@@ -455,7 +507,7 @@ MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
 }
 
 /**
- * set transient
+ * set transient flag
  */
 MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransient)
 {

@@ -69,7 +69,7 @@ public:
     MojErr init (MojDb* ip_db);
 
     //put a new shard description to db
-    MojErr put (ShardInfo& i_info);
+    MojErr put (const ShardInfo& i_info);
 
     //get shard description by id
     MojErr get (MojUInt32 i_id, ShardInfo& o_info);
@@ -81,10 +81,11 @@ public:
     //get list of all active shards
     MojErr getAllActive (std::list<ShardInfo>& o_list, MojUInt32& o_count);
 
-    //set shard activity
+    //set activity flag
     MojErr setActivity (MojUInt32 i_id, bool i_isActive);
+    MojErr setActivity (MojString& i_id_base64, bool i_isActive);
 
-    //set transient
+    //set transient flag
     MojErr setTransient (MojUInt32 i_id, bool i_isTransient);
     MojErr setTransient (MojString& i_id_base64, bool i_isTransient);
 

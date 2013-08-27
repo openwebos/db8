@@ -1376,6 +1376,83 @@ MojErr MojDb::assignIds(MojObject& obj)
 	return MojErrNone;
 }
 
+/**
+ * verify _kind
+ */
+bool MojDb::isValidKind (MojString& i_kindStr)
+{
+    bool foundOut = false;
+    MojErr err;
+    // make query
+    MojDbQuery query;
+    err = query.from(MojDbKindEngine::KindKindId);
+    MojErrCheck(err);
+    MojObject idObj(i_kindStr);
+    err = query.where(IdKey, MojDbQuery::OpEq, idObj);
+    MojErrCheck(err);
+    // find cursor using query
+    MojDbCursor cursor;
+    err = find(query, cursor);
+    MojErrCheck(err);
+    // get item from cursor
+    MojDbStorageItem* p_item = NULL;
+    err = cursor.get(p_item, foundOut);
+    MojErrCheck(err);
+    cursor.close();
+
+    return foundOut;
+}
+
+/**
+ * successful, if records for the _kind have been written to this shard
+ */
+bool MojDb::isSupported (MojString& i_shardId, MojString& i_kindStr)
+{
+    bool foundOut = false;
+    bool isExist = false;
+    MojErr err;
+    // make query
+    MojDbQuery query;
+    err = query.from(MojDbKindEngine::KindKindId);
+    MojErrCheck(err);
+    MojObject idObj(i_kindStr);
+    err = query.where(IdKey, MojDbQuery::OpEq, idObj);
+    MojErrCheck(err);
+    // find cursor using query
+    MojDbCursor cursor;
+    err = find(query, cursor);
+    MojErrCheck(err);
+    // get item from cursor
+    MojDbStorageItem* p_item = NULL;
+    err = cursor.get(p_item, foundOut);
+    MojErrCheck(err);
+    cursor.close();
+
+    if(foundOut)
+    {
+        // convert extracted item to object type
+        MojObject oldObj;
+        err = p_item->toObject(oldObj, m_kindEngine);
+        MojErrCheck(err);
+        // extract shardIds from result object
+        MojObject shardIdsObj;
+        oldObj.get(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+        // check if shardId exists in extracted shardIds
+        MojString shardIdStr;
+        for(MojSize i=0; i<shardIdsObj.size(); i++)
+        {
+            shardIdsObj.at(i, shardIdStr, foundOut);
+            if(shardIdStr.compare(i_shardId.data()) == 0)
+            {
+                isExist = true;
+                break;
+            }
+        }
+    }
+
+    return isExist;
+}
+
 MojErr MojDb::formatKindId(const MojChar* id, MojString& dbIdOut)
 {
 	MojErr err = dbIdOut.format(_T("_kinds/%s"), id);

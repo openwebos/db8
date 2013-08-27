@@ -113,6 +113,11 @@ public:
     MojInt64 purgeWindow() {return m_purgeWindow;}
     void shardId(const MojString& shardId) {m_shardId = shardId;}
 
+    //verify _kind
+    bool isValidKind (MojString& i_kindStr);
+    //successful, if records for the _kind have been written to this shard
+    bool isSupported (MojString& i_shardId, MojString& i_kindStr);
+
 private:
 	friend class MojDbKindEngine;
 	friend class MojDbReq;
@@ -191,7 +196,7 @@ private:
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
     MojString m_shardId;
-	
+
 };
 
 #endif /* MOJDB_H_ */

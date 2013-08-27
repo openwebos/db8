@@ -61,7 +61,7 @@
     #define MojLogDebug(LOGGER, ...)        { if (G_UNLIKELY((LOGGER).level() <= (LOGGER).LevelDebug)) { \
         char logMsg[MOJLOG_MESSAGE_MAX+1]; \
         mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogdebug((LOGGER).getContext(), "%s", logMsg);}}
+        PmLogDebug((LOGGER).getContext(), "%s", logMsg);}}
 
     #define MojLogTrace(LOGGER)            MojLogTracer __MOJTRACER(LOGGER, _T(__PRETTY_FUNCTION__), _T(__FILE__), __LINE__)
   #else

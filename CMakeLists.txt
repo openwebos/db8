@@ -47,7 +47,7 @@ include_directories(${LS2_INCLUDE_DIRS})
 webos_add_compiler_flags(ALL ${LS2_CFLAGS_OTHER})
 
 # -- check for pmLogLib
-pkg_check_modules(PMLOG REQUIRED PmLogLib)
+pkg_check_modules(PMLOG REQUIRED PmLogLib>=3)
 include_directories(${PMLOG_INCLUDE_DIRS})
 webos_add_compiler_flags(ALL ${PMLOG_CFLAGS_OTHER})
 

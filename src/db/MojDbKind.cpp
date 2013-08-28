@@ -607,8 +607,6 @@ MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj
 		if (kindVec.find((*i), 0) == MojInvalidIndex) {
 			err = (*i)->updateIndexes(newObj, oldObj, req, op, kindVec, idxcount);
 			MojErrCheck(err);
-		} else {
-			return MojErrNone;
 		}
 	}
 	err = updateOwnIndexes(newObj, oldObj, req, idxcount);
@@ -814,6 +812,8 @@ MojErr MojDbKind::updateSupers(const KindMap& map, const StringVec& superIds, bo
 			MojErrCheck(err);
 			MojDbCursor cursor;
 			cursor.kindEngine(m_kindEngine);
+            err = cursor.init(query);
+            MojErrCheck(err);
 			err = find(cursor, NULL, req, OpKindUpdate);
 			MojErrCheck(err);
 			for (;;) {
@@ -821,15 +821,16 @@ MojErr MojDbKind::updateSupers(const KindMap& map, const StringVec& superIds, bo
 				bool found = false;
 				err = cursor.get(obj, found);
 				MojErrCheck(err);
-				if (!found)
+                if (!found) {
 					break;
-
+                }
+                MojVector<MojDbKind*> kindVec;
 				for (KindVec::ConstIterator i = addedSupers.begin(); i != addedSupers.end(); ++i) {
-					err = (*i)->updateOwnIndexes(&obj, NULL, req, indexes);
+                    err = (*i)->updateIndexes(&obj, NULL, req, OpNone, kindVec, indexes);
 					MojErrCheck(err);
 				}
 				for (KindVec::ConstIterator i = removedSupers.begin(); i != removedSupers.end(); ++i) {
-					err = (*i)->updateOwnIndexes(NULL, &obj, req, indexes);
+                    err = (*i)->updateIndexes(NULL, &obj, req, OpNone, kindVec, indexes);
 					MojErrCheck(err);
 				}
 			}

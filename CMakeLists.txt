@@ -46,11 +46,12 @@ pkg_check_modules(LS2 REQUIRED luna-service2)
 include_directories(${LS2_INCLUDE_DIRS})
 webos_add_compiler_flags(ALL ${LS2_CFLAGS_OTHER})
 
-# -- check for pmLogLib
-pkg_check_modules(PMLOG REQUIRED PmLogLib>=3)
-include_directories(${PMLOG_INCLUDE_DIRS})
-webos_add_compiler_flags(ALL ${PMLOG_CFLAGS_OTHER})
-
+if (NOT DEFINED USE_PMLOG OR USE_PMLOG)
+    # -- check for pmLogLib
+    pkg_check_modules(PMLOG REQUIRED PmLogLib>=3)
+    include_directories(${PMLOG_INCLUDE_DIRS})
+    webos_add_compiler_flags(ALL ${PMLOG_CFLAGS_OTHER} -DUSE_PMLOG)
+endif()
 
 # -- check for ICU
 find_library(ICU NAMES icuuc)
@@ -76,7 +77,7 @@ webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion
                          -Wno-unused-but-set-variable -Wno-unused-variable
                          -fno-exceptions -frename-registers -DMOJ_LINUX -fno-strict-aliasing
                          -Wno-psabi
-                         -DMOJ_INTERNAL -D_REENTRANT -DUSE_PMLOG)
+                         -DMOJ_INTERNAL -D_REENTRANT)
 
 # Note: no-psabi will disable notice for gcc: the mangling of 'va_list' has changed in GCC 4.4
 

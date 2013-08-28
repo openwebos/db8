@@ -37,6 +37,7 @@ add_executable(${PROJECT_NAME}
                SearchTest.cpp
                TextCollatorTest.cpp
                IdGeneratorTest.cpp
+               ShardsTest.cpp
                ../db/MojDbTestStorageEngine.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 

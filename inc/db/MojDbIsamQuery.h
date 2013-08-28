@@ -67,6 +67,7 @@ protected:
 	MojErr saveEndKey();
 	MojErr parseId(MojObject& idOut);
 	MojErr checkExclude(MojDbStorageItem* item, bool& excludeOut);
+    MojErr checkShard(bool &excludeOut);
 
 	bool m_isOpen;
 	MojUInt32 m_count;

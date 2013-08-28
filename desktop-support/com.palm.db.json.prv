@@ -2,7 +2,7 @@
     "role": {
         "exeName":"/usr/lib/luna/mojodb-luna",
         "type": "regular",
-        "allowedNames": ["com.palm.db","com.palm.tempdb"]
+        "allowedNames": ["com.palm.db","com.palm.tempdb","com.webos.mediadb"]
     },
     "permissions": [
         {
@@ -12,6 +12,11 @@
         },
         {
             "service":"com.palm.tempdb",
+            "inbound":["*"],
+            "outbound":[]
+        },
+        {
+            "service":"com.webos.mediadb",
             "inbound":["*"],
             "outbound":[]
         }

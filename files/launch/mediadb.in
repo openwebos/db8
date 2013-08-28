@@ -1,0 +1,10 @@
+# -*- mode: conf; -*-
+
+start on stopped finish
+
+
+script
+
+end script
+
+

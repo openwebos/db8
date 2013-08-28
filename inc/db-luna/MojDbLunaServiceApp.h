@@ -45,6 +45,8 @@ public:
 private:
     static const MojChar* const VersionString;
     static const MojChar* const MainDir;
+    static const MojChar* const MediaDir;
+    static const MojChar* const MediaBaseDir;
     static const MojChar* const TempDir;
     static const MojChar* const TempStateDir;
     static const MojChar* const TempInitStateFile;
@@ -58,6 +60,7 @@ private:
 
     MojString m_dbDir;
     MojDbLunaServiceDb m_mainService;
+    MojDbLunaServiceDb m_mediaService;
     MojDbLunaServiceDb m_tempService;
     MojDbLunaServicePdm m_pdmService;
     MojMessageDispatcher m_dispatcher;

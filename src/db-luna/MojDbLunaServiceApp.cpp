@@ -35,6 +35,8 @@
 
 const MojChar* const MojDbLunaServiceApp::VersionString = MOJ_VERSION_STRING;
 const MojChar* const MojDbLunaServiceApp::MainDir = _T("main");
+const MojChar* const MojDbLunaServiceApp::MediaDir = _T("data/.db8");
+const MojChar* const MojDbLunaServiceApp::MediaBaseDir = _T("/media/cryptofs");
 const MojChar* const MojDbLunaServiceApp::TempDir = _T("temp");
 const MojChar* const MojDbLunaServiceApp::TempStateDir = _T("/tmp/mojodb");
 const MojChar* const MojDbLunaServiceApp::TempInitStateFile = _T("/tmp/mojodb/tempdb_init");
@@ -47,10 +49,11 @@ int main(int argc, char** argv)
 }
 
 MojDbLunaServiceApp::MojDbLunaServiceApp()
-: MojReactorApp<MojGmainReactor>(MajorVersion, MinorVersion, VersionString),
-  m_mainService(m_dispatcher),
-  m_tempService(m_dispatcher),
-  m_pdmService(m_dispatcher)
+: MojReactorApp<MojGmainReactor>(MajorVersion, MinorVersion, VersionString)
+, m_mainService(m_dispatcher)
+, m_mediaService(m_dispatcher)
+, m_tempService(m_dispatcher)
+, m_pdmService(m_dispatcher)
 {
    // set up db first
 #ifdef MOJ_USE_BDB
@@ -83,6 +86,8 @@ MojErr MojDbLunaServiceApp::init()
 
     err = m_mainService.init(m_reactor);
     MojErrCheck(err);
+    err = m_mediaService.init(m_reactor);
+    MojErrCheck(err);
     err = m_tempService.init(m_reactor);
     MojErrCheck(err);
     err = m_pdmService.init(m_reactor);
@@ -104,6 +109,8 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     err = m_env->configure(dbConf);
     MojErrCheck(err);
     err = m_mainService.db().configure(conf);
+    MojErrCheck(err);
+    err = m_mediaService.db().configure(conf);
     MojErrCheck(err);
     err = m_tempService.db().configure(conf);
     MojErrCheck(err);
@@ -137,6 +144,10 @@ MojErr MojDbLunaServiceApp::open()
 	MojErrCatchAll(err) {
 		dbOpenFailed = true;
 	}
+    err = m_mediaService.open(m_reactor, m_env.get(), MojDbServiceDefs::MediaServiceName, MediaBaseDir, MediaDir);
+    MojErrCatchAll(err) {
+        dbOpenFailed = true;
+    }
 	err = m_tempService.open(m_reactor, m_env.get(), MojDbServiceDefs::TempServiceName, m_dbDir, TempDir);
 	MojErrCatchAll(err) {
 		dbOpenFailed = true;
@@ -153,6 +164,8 @@ MojErr MojDbLunaServiceApp::open()
 
         if (!dbOpenFailed) {
             err = m_pdmService.addDatabase(&m_mainService.db());
+            MojErrCheck(err);
+            err = m_pdmService.addDatabase(&m_mediaService.db());
             MojErrCheck(err);
             err = m_pdmService.addDatabase(&m_tempService.db());
             MojErrCheck(err);
@@ -189,6 +202,8 @@ MojErr MojDbLunaServiceApp::close()
 	MojErrAccumulate(err, errClose);
 	errClose = m_tempService.close();
 	MojErrAccumulate(err, errClose);
+    errClose = m_mediaService.close();
+    MojErrAccumulate(err, errClose);
 
     errClose = m_pdmService.close();
     MojErrAccumulate(err, errClose);

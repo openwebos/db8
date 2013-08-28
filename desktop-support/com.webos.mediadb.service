@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=com.webos.mediadb
+Exec=/usr/lib/luna/mojodb-luna /var/db
+Type=static

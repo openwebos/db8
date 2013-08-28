@@ -131,6 +131,7 @@ public:
 	static const MojChar* const Category;
 	static const MojChar* const InternalCategory;
 	static const MojChar* const ServiceName;
+    static const MojChar* const MediaServiceName;
 	static const MojChar* const TempServiceName;
     static const MojChar* const PDMServiceName;
     static const MojChar* const PDMClientName;

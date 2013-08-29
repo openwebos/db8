@@ -27,7 +27,8 @@ MojLogger MojDbLunaServicePdm::s_log(_T("db-luna.shard"));
 const MojChar* const MojDbLunaServicePdm::ConfKey = _T("pdm");
 
 MojDbLunaServicePdm::MojDbLunaServicePdm(MojMessageDispatcher& dispatcher)
-: m_service(true, &dispatcher)
+: m_service(true, &dispatcher),
+ m_shardInfoSignal(this)
 {
     MojLogTrace(s_log);
 }
@@ -94,19 +95,19 @@ MojErr MojDbLunaServicePdm::close()
     return err;
 }
 
-MojErr MojDbLunaServicePdm::addDatabase(MojDb* database)
+MojErr MojDbLunaServicePdm::notifyShardEngine(const MojDbShardEngine::ShardInfo& shardInfo)
 {
     MojLogTrace(s_log);
-    MojAllocCheck(m_handler.get());
+    MojLogDebug(s_log, "Notify Shard Engine about new shard");
 
-#ifdef MOJ_DEBUG
-    database_list_t::iterator i = std::find(m_databases.begin(), m_databases.end(), database);
-    if (i != m_databases.end()) { // not well to compare adress
-        MojLogError(s_log, _T("mojodb already added to PDM"));
-    }
-#endif
+    return m_shardInfoSignal.call(shardInfo);
+}
 
-    m_databases.push_back(database);
+MojErr MojDbLunaServicePdm::addShardEngine(MojDbShardEngine* shardEngine)
+{
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, "Add shard engine to luna service pdm");
 
+    m_shardInfoSignal.connect(shardEngine->m_pdmWatcher.m_pdmSlot);
     return MojErrNone;
 }

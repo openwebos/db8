@@ -163,14 +163,15 @@ MojErr MojDbLunaServiceApp::open()
         MojErrCheck(err);
 
         if (!dbOpenFailed) {
-            err = m_pdmService.addDatabase(&m_mainService.db());
+            err = m_pdmService.addShardEngine(m_mainService.db().shardEngine());
             MojErrCheck(err);
-            err = m_pdmService.addDatabase(&m_mediaService.db());
+
+            err = m_pdmService.addShardEngine(m_tempService.db().shardEngine());
             MojErrCheck(err);
-            err = m_pdmService.addDatabase(&m_tempService.db());
+
+            err = m_pdmService.addShardEngine(m_mediaService.db().shardEngine());
             MojErrCheck(err);
         }
-
     }
 
 	// open internal handler

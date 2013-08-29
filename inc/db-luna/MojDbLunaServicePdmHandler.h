@@ -25,12 +25,16 @@
 #include "core/MojSignal.h"
 #include "core/MojServiceRequest.h"
 #include "core/MojReactor.h"
+#include "db/MojDbShardEngine.h"
+#include <map>
+#include <set>
 
 class MojLunaService;
 class MojDbLunaServicePdm;
 
 class MojDbLunaServicePdmHandler : public MojSignalHandler
 {
+    typedef std::map<MojString, MojDbShardEngine::ShardInfo> ShardInfoListType;
 public:
     MojDbLunaServicePdmHandler(MojDbLunaServicePdm* parent, MojReactor& mojService);
     MojErr open(MojLunaService* service, const MojChar* pdmServiceName);
@@ -43,6 +47,10 @@ public:
     MojService* service();
 
 private:
+    bool existInCache(const MojString& id);
+    void copyShardCache(std::set<MojString>*);
+    MojErr processLunaResponse(const MojObject* response, MojDbShardEngine::ShardInfo* result);
+
     MojDbLunaServicePdm* m_mojDbLunaServicePdm;
     MojErr m_dbErr;
     MojString m_errTxt;
@@ -51,6 +59,7 @@ private:
 
     MojReactor& m_reactor;
     MojServiceRequest::ReplySignal::Slot<MojDbLunaServicePdmHandler> m_slot;
+    ShardInfoListType m_shardCache;
 
     static MojLogger s_log;
 };

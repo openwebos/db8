@@ -23,6 +23,7 @@
 #include "core/MojCoreDefs.h"
 #include "core/MojErr.h"
 #include "core/MojString.h"
+#include "core/MojSignal.h"
 #include <list>
 
 class MojDb;
@@ -41,11 +42,11 @@ public:
         MojString mountPath;
         MojString deviceName;
 
-        ShardInfo()
+        ShardInfo(MojUInt32 _id = 0, bool _active = false, bool _transient = false)
         {
-            id = 0;
-            active = false;
-            transient = false;
+            id = _id;
+            active = _active;
+            transient = _transient;
         }
 
         ShardInfo& operator=(const ShardInfo& i_src)
@@ -61,6 +62,19 @@ public:
             return (*this);
         }
     };
+
+    typedef MojSignal<ShardInfo> ShardInfoSignal;
+
+    class Watcher : public MojSignalHandler
+    {
+    public:
+        Watcher(MojDbShardEngine* shardEngine);
+        MojErr handleShardInfoSlot(ShardInfo shardInfo);
+
+        MojDbShardEngine* m_shardEngine;
+        ShardInfoSignal::Slot<Watcher> m_pdmSlot;
+    };
+
 
     MojDbShardEngine(void);
     ~MojDbShardEngine(void);
@@ -103,11 +117,14 @@ public:
     MojErr isIdExist (MojString& i_id_base64);
 
 private:
+    bool _computeId (MojString& i_media, MojUInt32& o_id);
+    MojErr _get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info);
+
     MojDb* mp_db;
     static MojLogger s_log;
 
-    bool _computeId (MojString& i_media, MojUInt32& o_id);
-    MojErr _get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info);
+public:
+    Watcher m_pdmWatcher;
 };
 
 #endif /* MOJDBSHARDENGINE_H_ */

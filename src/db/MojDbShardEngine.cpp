@@ -35,6 +35,7 @@ static const MojChar* const ShardInfoKind1Str =
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
 
 MojDbShardEngine::MojDbShardEngine(void)
+: m_pdmWatcher(this)
 {
     MojLogTrace(s_log);
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
@@ -850,4 +851,17 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
     }
 
     return err;
+}
+
+MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
+: m_shardEngine(shardEngine),
+  m_pdmSlot(this, &Watcher::handleShardInfoSlot)
+{
+}
+
+MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo) {
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, "Shard engine notified about new shard");
+
+    return MojErrNone;
 }

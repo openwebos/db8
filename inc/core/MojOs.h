@@ -317,6 +317,7 @@ MojErr MojMkDir(const MojChar* path, MojModeT mode);
 MojErr MojRmDir(const MojChar* path);
 MojErr MojStat(const MojChar* path, MojStatT* buf);
 MojErr MojUnlink(const MojChar* path);
+MojErr MojSymlink(const MojChar* src, const MojChar* dst);
 
 MojErr MojSockAccept(MojSockT listenSock, MojSockT& sockOut, MojSockAddrT* addrOut = NULL, MojSockLenT* addrSizeOut = NULL);
 MojErr MojSockBind(MojSockT sock, const MojSockAddrT* addr, MojSockLenT addrSize);

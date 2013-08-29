@@ -19,6 +19,7 @@
 #include "db/MojDbShardEngine.h"
 #include "db/MojDb.h"
 #include "db/MojDbServiceDefs.h"
+#include "db/MojDbMediaLinkManager.h"
 #include <boost/crc.hpp>
 #include <string>
 
@@ -59,6 +60,7 @@ MojErr MojDbShardEngine::init (MojDb* ip_db)
     MojObject obj;
 
     mp_db = ip_db;
+    m_mediaLinkManager.reset(new MojDbMediaLinkManager());
 
     // add type
     err = obj.fromJson(ShardInfoKind1Str);
@@ -862,6 +864,32 @@ MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
 MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo) {
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Shard engine notified about new shard");
+
+    MojAssert(m_shardEngine->m_mediaLinkManager.get());
+
+    // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName;
+
+    if (shardInfo.active) { // inseted media
+        // TODO: generated shard id for shardInfo
+
+        // TODO !!! For testing of createLink set shardInfo.id to MagicId 777. God Bless. Remove it when shardInfo.id will be truly generated
+        shardInfo.id = 777;
+
+        if (shardInfo.id != 0) {
+            // TODO: createLink use shardInfo.id information. Does shardInfo.id contain shardId? If no, please modify createLink function
+            m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
+        }
+    } else { // removed media
+        // TODO: Get shardId for this shardInfo.
+        // NOTE: for USB stick with the same deviceId -> shardId MUST be the same
+
+        // TODO !!! For testing of createLink set shardInfo.id to MagicId 777. God Bless. Remove it when shardInfo.id will be truly generated
+        shardInfo.id = 777;
+
+        if (shardInfo.id != 0) {
+            m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
+        }
+    }
 
     return MojErrNone;
 }

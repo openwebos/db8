@@ -261,6 +261,18 @@ MojErr MojUnlink(const MojChar* path)
 }
 #endif /* MOJ_USE_UNLINK */
 
+#ifdef MOJ_USE_SYMLINK
+MojErr MojSymlink(const MojChar* src, const MojChar* dst)
+{
+    MojAssert(src && dst);
+
+    if (symlink(src, dst) != 0)
+        MojErrThrowErrno(_T("symlink"));
+
+    return MojErrNone;
+}
+#endif /* MOJ_USE_UNLINK */
+
 #ifdef MOJ_USE_SOCK_ACCEPT
 MojErr MojSockAccept(MojSockT listenSock, MojSockT& sockOut, MojSockAddrT* addrOut, MojSockLenT* addrSizeOut)
 {

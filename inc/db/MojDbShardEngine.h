@@ -24,9 +24,11 @@
 #include "core/MojErr.h"
 #include "core/MojString.h"
 #include "core/MojSignal.h"
+#include <auto_ptr.h>
 #include <list>
 
 class MojDb;
+class MojDbMediaLinkManager;
 
 class MojDbShardEngine : private MojNoCopy
 {
@@ -120,6 +122,7 @@ private:
     bool _computeId (MojString& i_media, MojUInt32& o_id);
     MojErr _get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info);
 
+    std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;
     static MojLogger s_log;
 

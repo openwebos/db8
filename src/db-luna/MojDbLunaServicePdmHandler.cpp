@@ -79,12 +79,13 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         MojLogError(s_log, _T("Luna error response: %s"), m_errTxt.data());
         MojAssert(found);
     } else {
-#ifdef MOJ_DEBUG
+//#ifdef MOJ_DEBUG
         MojString resStr;
         result.toJson(resStr);
 
-        MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
-#endif
+        //MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
+        MojLogInfo(s_log, _T("Device list: %s"), resStr.data());
+//#endif
         MojObject deviceList;
         MojErr err = result.getRequired("devices", deviceList);
         MojErrCheck(err);
@@ -101,7 +102,7 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
             MojLogDebug(s_log, _T("Device type is: %s"), deviceType.data());
 
             if (deviceType != "usb") {
-                MojLogDebug(s_log, "Got from PDM device, but device not usb media. Ignore it");
+                MojLogInfo(s_log, "Got from PDM device, but device not usb media. Ignore it");
                 // not usb media. PDM returns ALL list of media, like USB, Internal storage and other.
                 // db8 intresting only in usb sticks
                 continue;
@@ -125,13 +126,13 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
                 notProcessedIds.erase(shardInfo.deviceId);  // mark it as processed
 
                 if (!existInCache(shardInfo.deviceId)) {
-                    MojLogDebug(s_log, _T("Found new device %s. Add to device cache and send notification to shard engine"), shardInfo.deviceId.data());
+                    MojLogNotice(s_log, _T("Found new device %s. Add to device cache and send notification to shard engine"), shardInfo.deviceId.data());
 
                     m_shardCache[shardInfo.deviceId] = shardInfo;
                     err = m_mojDbLunaServicePdm->notifyShardEngine(shardInfo);
                     MojErrCheck(err);
                 } else {
-                    MojLogDebug(s_log, _T("Device uuid cached, it looks like it doesn't changed"));
+                    MojLogInfo(s_log, _T("Device uuid cached, it looks like it doesn't changed"));
                 }
             } // end subDevices loop
         }   // end main list of devices loop
@@ -140,7 +141,7 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         for (std::set<MojString>::const_iterator i = notProcessedIds.begin(); i != notProcessedIds.end(); ++i) {
             ShardInfoListType::iterator shardCacheIterator = m_shardCache.find(*i);
             if (shardCacheIterator != m_shardCache.end()) {
-                MojLogDebug(s_log, "Device %s not found in cache. Notify shard engine that shard not active", shardCacheIterator->second.deviceId.data());
+                MojLogInfo(s_log, "Device %s not found in cache. Notify shard engine that shard not active", shardCacheIterator->second.deviceId.data());
 
                 shardCacheIterator->second.active = false;
                 err = m_mojDbLunaServicePdm->notifyShardEngine(shardCacheIterator->second);

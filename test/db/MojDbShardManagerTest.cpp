@@ -147,7 +147,7 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     {
         //generate id
         str.format("MassStorageMedia%d",i);
-        ip_eng->computeShardId(str, id);
+        ip_eng->getId(str, id);
     }
 
     //verify id for root
@@ -202,6 +202,18 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     MojTestErrCheck(err);
 
     if (ip_eng->isIdExist(0xFFFFFFFF) == MojErrExists)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //test for 'update'
+    put_info.mountPath.assign("/media/sda");
+    err = ip_eng->update(put_info);
+    MojTestErrCheck(err);
+    err = ip_eng->get(0xFF, get_info);
+    MojTestErrCheck(err);
+
+    if (get_info.mountPath.compare(put_info.mountPath.data()) != 0)
         err = MojErrDbVerificationFailed;
 
     MojTestErrCheck(err);

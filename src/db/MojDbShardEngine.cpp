@@ -36,7 +36,7 @@ static const MojChar* const ShardInfoKind1Str =
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
 
 MojDbShardEngine::MojDbShardEngine(void)
-: m_pdmWatcher(this)
+    : m_pdmWatcher(this)
 {
     MojLogTrace(s_log);
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
@@ -337,7 +337,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
             }
 
             o_list.push_back(shard_info);
-           ++count;
+            ++count;
         }
 
         cursor.close();
@@ -378,28 +378,11 @@ MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
     err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
-    err = mp_db->find(query, cursor);
-
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        cursor.close();
-
-        if (found)
-        {
-            MojObject update;
-            err = update.put(_T("Active"), i_isActive);
-            MojErrCheck(err);
-            err = mp_db->merge(query, update, count);
-            MojErrCheck(err);
-        }
-    }
-    else
-    {
-        err = MojErrDbObjectNotFound;
-    }
+    MojObject update;
+    err = update.put(_T("Active"), i_isActive);
+    MojErrCheck(err);
+    err = mp_db->merge(query, update, count);
+    MojErrCheck(err);
 
     return err;
 }
@@ -430,28 +413,11 @@ MojErr MojDbShardEngine::setActivity (MojString& i_id_base64, bool i_isActive)
     err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
-    err = mp_db->find(query, cursor);
-
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        cursor.close();
-
-        if (found)
-        {
-            MojObject update;
-            err = update.put(_T("Active"), i_isActive);
-            MojErrCheck(err);
-            err = mp_db->merge(query, update, count);
-            MojErrCheck(err);
-        }
-    }
-    else
-    {
-        err = MojErrDbObjectNotFound;
-    }
+    MojObject update;
+    err = update.put(_T("Active"), i_isActive);
+    MojErrCheck(err);
+    err = mp_db->merge(query, update, count);
+    MojErrCheck(err);
 
     return err;
 }
@@ -483,28 +449,11 @@ MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
     err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
-    err = mp_db->find(query, cursor);
-
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        cursor.close();
-
-        if (found)
-        {
-            MojObject update;
-            err = update.put(_T("Transient"), i_isTransient);
-            MojErrCheck(err);
-            err = mp_db->merge(query, update, count);
-            MojErrCheck(err);
-        }
-    }
-    else
-    {
-        err = MojErrDbObjectNotFound;
-    }
+    MojObject update;
+    err = update.put(_T("Transient"), i_isTransient);
+    MojErrCheck(err);
+    err = mp_db->merge(query, update, count);
+    MojErrCheck(err);
 
     return err;
 }
@@ -535,6 +484,107 @@ MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransien
     err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
+    MojObject update;
+    err = update.put(_T("Transient"), i_isTransient);
+    MojErrCheck(err);
+    err = mp_db->merge(query, update, count);
+    MojErrCheck(err);
+
+    return err;
+}
+
+/**
+ * update shardInfo
+ */
+MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
+{
+    MojErr err = MojErrNone;
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    if(mp_db == nullptr)
+        return MojErrNotInitialized;
+#else
+    if(mp_db == NULL)
+        return MojErrNotInitialized;
+#endif
+
+    MojDbQuery query;
+    MojDbCursor cursor;
+    MojInt32 val = static_cast<MojInt32>(i_shardInfo.id);
+    MojObject obj(val);
+    MojObject dbObj;
+
+    err = query.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+    MojErrCheck(err);
+
+    MojObject update;
+    MojUInt32 count = 0;
+
+    MojObject obj2(i_shardInfo.active);
+    err = update.put(_T("Active"), obj2);
+    MojErrCheck(err);
+
+    err = update.put(_T("Transient"), i_shardInfo.transient);
+    MojErrCheck(err);
+
+    MojObject obj4(i_shardInfo.id_base64);
+    err = update.put(_T("IdBase64"), obj4);
+    MojErrCheck(err);
+
+    MojObject obj5(i_shardInfo.deviceId);
+    err = update.put(_T("deviceId"), obj5);
+    MojErrCheck(err);
+
+    MojObject obj6(i_shardInfo.deviceUri);
+    err = update.put(_T("deviceUri"), obj6);
+    MojErrCheck(err);
+
+    MojObject obj7(i_shardInfo.mountPath);
+    err = update.put(_T("mountPath"), obj7);
+    MojErrCheck(err);
+
+    MojObject obj8(i_shardInfo.deviceName);
+    err = update.put(_T("deviceName"), obj8);
+    MojErrCheck(err);
+
+    err = mp_db->merge(query, update, count);
+    MojErrCheck(err);
+
+    return err;
+}
+
+/**
+ * get shard id
+ * ------------
+ * search within db for i_deviceId, return id if found
+ * else
+ * allocate a new id
+ */
+MojErr MojDbShardEngine::getId (MojString& i_deviceId, MojUInt32& o_id)
+{
+    MojErr err = MojErrNone;
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    if(mp_db == nullptr)
+        return MojErrNotInitialized;
+#else
+    if(mp_db == NULL)
+        return MojErrNotInitialized;
+#endif
+
+    //get record from db, extract id
+    MojDbQuery query;
+    MojDbCursor cursor;
+    MojObject obj(i_deviceId);
+    MojObject dbObj;
+
+    err = query.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query.where(_T("deviceId"), MojDbQuery::OpEq, obj);
+    MojErrCheck(err);
+
     err = mp_db->find(query, cursor);
 
     if (err == MojErrNone)
@@ -542,45 +592,30 @@ MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransien
         bool found;
         err = cursor.get(dbObj, found);
         MojErrCheck(err);
-        cursor.close();
-
         if (found)
         {
-            MojObject update;
-            err = update.put(_T("Transient"), i_isTransient);
+            MojInt32 value;
+            err = dbObj.get(_T("ShardId"), value, found);
             MojErrCheck(err);
-            err = mp_db->merge(query, update, count);
-            MojErrCheck(err);
+
+            if (found)
+            {
+                o_id = static_cast<MojUInt32>(value);
+                return err;
+            }
         }
+        cursor.close();
     }
-    else
-    {
-        err = MojErrDbObjectNotFound;
-    }
+
+    err = allocateId(i_deviceId, o_id);
 
     return err;
-}
-
-// update shardInfo
-MojErr MojDbShardEngine::updateShard(const ShardInfo& shardInfo)
-{
-    // TODO: implement this
-    return MojErrNone;
-}
-
-//get shard id
-MojErr MojDbShardEngine::getShardId(MojString& i_media, MojUInt32& o_id)
-{
-    // TODO: implement this
-    o_id = 777; // to avoid crashing of DB8 while this function is skeleton
-
-    return MojErrNone;
 }
 
 /**
  * compute a new shard id
  */
-MojErr MojDbShardEngine::allocateShardId (MojString& i_media, MojUInt32& o_id)
+MojErr MojDbShardEngine::allocateId (MojString& i_media, MojUInt32& o_id)
 {
     MojErr err = MojErrNone;
     MojUInt32 id;
@@ -711,9 +746,10 @@ bool MojDbShardEngine::_computeId (MojString& i_media, MojUInt32& o_id)
     std::string str = i_media.data();
 
     //Create a 24 bit hash of the string
-    static boost::crc_32_type result;
+    boost::crc_32_type result;
     result.process_bytes(str.data(), str.length());
     MojInt32 code = result.checksum();
+    result.reset();
 
     //Prefix the 24 bit hash with 0x01 to create a 32 bit unique shard ID
     o_id = code & 0xFFFFFF;
@@ -872,29 +908,35 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
 }
 
 MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
-: m_shardEngine(shardEngine),
-  m_pdmSlot(this, &Watcher::handleShardInfoSlot)
+    : m_shardEngine(shardEngine),
+    m_pdmSlot(this, &Watcher::handleShardInfoSlot)
 {
 }
 
-MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo) {
+MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo)
+{
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Shard engine notified about new shard");
     MojAssert(m_shardEngine->m_mediaLinkManager.get());
     MojErr err;
 
     // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName;
-    err = m_shardEngine->getShardId(shardInfo.deviceId, shardInfo.id);
+    err = m_shardEngine->getId(shardInfo.deviceId, shardInfo.id);
     MojErrCheck(err);
-    err = m_shardEngine->updateShard(shardInfo);
+    err = m_shardEngine->update(shardInfo);
     MojErrCheck(err);
 
-    if (shardInfo.active) { // inseted media
-        if (shardInfo.id != 0) {
+    if (shardInfo.active)   // inseted media
+    {
+        if (shardInfo.id != 0)
+        {
             m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
         }
-    } else { // removed media
-        if (shardInfo.id != 0) {
+    }
+    else     // removed media
+    {
+        if (shardInfo.id != 0)
+        {
             m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
         }
     }

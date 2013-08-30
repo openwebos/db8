@@ -97,8 +97,8 @@ public:
     //get list of all active shards
     MojErr getAllActive (std::list<ShardInfo>& o_list, MojUInt32& o_count);
 
-    // update shardInfo
-    MojErr updateShard(const ShardInfo& shardInfo);
+    //update shardInfo
+    MojErr update (const ShardInfo& i_shardInfo);
 
     //set activity flag
     MojErr setActivity (MojUInt32 i_id, bool i_isActive);
@@ -109,10 +109,10 @@ public:
     MojErr setTransient (MojString& i_id_base64, bool i_isTransient);
 
     //get shard id
-    MojErr getShardId(MojString& i_media, MojUInt32& o_id);
+    MojErr getId (MojString& i_deviceId, MojUInt32& o_id);
 
     //allocate a new shard id
-    MojErr allocateShardId (MojString& i_media, MojUInt32& o_id);
+    MojErr allocateId (MojString& i_media, MojUInt32& o_id);
 
     //return: MojErrExists         --> exist
     //        MojErrNotFound       --> not found

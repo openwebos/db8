@@ -561,10 +561,26 @@ MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransien
     return err;
 }
 
+// update shardInfo
+MojErr MojDbShardEngine::updateShard(const ShardInfo& shardInfo)
+{
+    // TODO: implement this
+    return MojErrNone;
+}
+
+//get shard id
+MojErr MojDbShardEngine::getShardId(MojString& i_media, MojUInt32& o_id)
+{
+    // TODO: implement this
+    o_id = 777; // to avoid crashing of DB8 while this function is skeleton
+
+    return MojErrNone;
+}
+
 /**
  * compute a new shard id
  */
-MojErr MojDbShardEngine::computeShardId (MojString& i_media, MojUInt32& o_id)
+MojErr MojDbShardEngine::allocateShardId (MojString& i_media, MojUInt32& o_id)
 {
     MojErr err = MojErrNone;
     MojUInt32 id;
@@ -864,28 +880,20 @@ MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
 MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo) {
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Shard engine notified about new shard");
-
     MojAssert(m_shardEngine->m_mediaLinkManager.get());
+    MojErr err;
 
     // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName;
+    err = m_shardEngine->getShardId(shardInfo.deviceId, shardInfo.id);
+    MojErrCheck(err);
+    err = m_shardEngine->updateShard(shardInfo);
+    MojErrCheck(err);
 
     if (shardInfo.active) { // inseted media
-        // TODO: generated shard id for shardInfo
-
-        // TODO !!! For testing of createLink set shardInfo.id to MagicId 777. God Bless. Remove it when shardInfo.id will be truly generated
-        shardInfo.id = 777;
-
         if (shardInfo.id != 0) {
-            // TODO: createLink use shardInfo.id information. Does shardInfo.id contain shardId? If no, please modify createLink function
             m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
         }
     } else { // removed media
-        // TODO: Get shardId for this shardInfo.
-        // NOTE: for USB stick with the same deviceId -> shardId MUST be the same
-
-        // TODO !!! For testing of createLink set shardInfo.id to MagicId 777. God Bless. Remove it when shardInfo.id will be truly generated
-        shardInfo.id = 777;
-
         if (shardInfo.id != 0) {
             m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
         }

@@ -86,7 +86,7 @@ MojErr MojDecimal::stringValue(MojChar* buf, MojSize size) const
 }
 
 
-MojErr MojDecimal::assign(const MojChar* str)
+MojErr MojDecimal::assign(const MojChar* str, MojSize n)
 {
 	MojAssert(str);
 
@@ -108,8 +108,9 @@ MojErr MojDecimal::assign(const MojChar* str)
 	MojInt64 fracMultiplier = Numerator / 10;
 	bool negative = false;
 	bool negativeExp = false;
+    const MojChar* strEnd = str + n;
 
-	while ((c = *str)) {
+    while ((str != strEnd) && (c = *str)) {
 Redo:
 		switch (state) {
 		case StateSign: {

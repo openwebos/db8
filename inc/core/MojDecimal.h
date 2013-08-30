@@ -24,6 +24,8 @@
 
 #include "core/MojCoreDefs.h"
 #include "core/MojHasher.h"
+#include <core/MojString.h>
+
 
 class MojDecimal
 {
@@ -47,7 +49,8 @@ public:
 	MojInt64 rep() const { return m_rep; }
 	MojErr stringValue(MojChar* buf, MojSize size) const;
 
-	MojErr assign(const MojChar* str);
+    MojErr assign(const MojChar* str, MojSize n = MojSizeMax);
+    MojErr assign(const MojString &str) { return assign(str.data(), str.length()); }
 	void assign(MojInt64 magnitude, MojUInt32 fraction);
 	void assign(MojDouble d) { m_rep = llround(d * Numerator); }
 	void assignRep(MojInt64 rep) { m_rep = rep; }

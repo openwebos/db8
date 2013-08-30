@@ -509,7 +509,6 @@ MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
 #endif
 
     MojDbQuery query;
-    MojDbCursor cursor;
     MojInt32 val = static_cast<MojInt32>(i_shardInfo.id);
     MojObject obj(val);
     MojObject dbObj;
@@ -922,23 +921,19 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo)
 
     // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName;
     err = m_shardEngine->getId(shardInfo.deviceId, shardInfo.id);
+    MojLogDebug(s_log, _T("shardEngine for device %s generated shard id: %d"), shardInfo.deviceId.data(), shardInfo.id);
     MojErrCheck(err);
+
+    MojLogDebug(s_log, _T("update shard info"));
     err = m_shardEngine->update(shardInfo);
     MojErrCheck(err);
 
-    if (shardInfo.active)   // inseted media
-    {
-        if (shardInfo.id != 0)
-        {
-            m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
-        }
-    }
-    else     // removed media
-    {
-        if (shardInfo.id != 0)
-        {
-            m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
-        }
+    MojLogDebug(s_log, _T("Run softlink logic"));
+
+    if (shardInfo.active) {  // inseted media
+        m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
+    } else {     // removed media
+        m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
     }
 
     return MojErrNone;

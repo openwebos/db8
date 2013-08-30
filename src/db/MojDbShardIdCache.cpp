@@ -25,10 +25,12 @@
 using namespace std;
 
 static const MojChar* const dbPathName = _T("/var/db/shard_id_cache");
+static const MojChar* const dbgPathName = _T("/tmp/shard_id_cache");
 MojLogger MojDbShardIdCache::s_log(_T("db.shardIdCache"));
 
 MojDbShardIdCache::MojDbShardIdCache()
 {
+    m_mode = MojDbShardIdCache::NORMAL;
     MojLogTrace(s_log);
 }
 
@@ -37,8 +39,9 @@ MojDbShardIdCache::~MojDbShardIdCache()
     MojLogTrace(s_log);
 }
 
-MojErr MojDbShardIdCache::MojDbShardIdCache::init ()
+MojErr MojDbShardIdCache::MojDbShardIdCache::init (Mode i_mode)
 {
+    m_mode = i_mode;
     return (_read());
 }
 
@@ -92,7 +95,10 @@ MojErr MojDbShardIdCache::_write (void)
     ofstream out_file;
     std::set<MojUInt32>::iterator it;
 
-    out_file.open(dbPathName);
+    if(m_mode == MojDbShardIdCache::NORMAL)
+        out_file.open(dbPathName);
+    else
+        out_file.open(dbgPathName);
 
     if (out_file.is_open())
     {
@@ -126,7 +132,10 @@ MojErr MojDbShardIdCache::_read (void)
     ifstream in_file;
     MojUInt32 id;
 
-    in_file.open(dbPathName);
+    if(m_mode == MojDbShardIdCache::NORMAL)
+        in_file.open(dbPathName);
+    else
+        in_file.open(dbgPathName);
 
     if (in_file.is_open())
     {

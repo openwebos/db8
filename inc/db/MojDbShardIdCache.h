@@ -27,16 +27,23 @@
 class MojDbShardIdCache : private MojNoCopy
 {
 public:
+    enum Mode
+    {
+        NORMAL = 0,
+        TESTING
+    };
 
     MojDbShardIdCache();
     ~MojDbShardIdCache();
 
-    MojErr init ();
+    MojErr init (Mode i_mode = MojDbShardIdCache::NORMAL);
     bool isExist (MojUInt32 id);
     MojErr put (MojUInt32 id);
     MojErr del (MojUInt32 id);
 
 private:
+    Mode m_mode;
+
     MojErr _read (void);
     MojErr _write (void);
 

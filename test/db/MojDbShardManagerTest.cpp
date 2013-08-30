@@ -21,6 +21,7 @@
 #include "db/MojDb.h"
 #include "db/MojDbShardEngine.h"
 #include "db/MojDbShardIdCache.h"
+#include <stdarg.h>
 
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
@@ -33,7 +34,7 @@
 #endif
 
 #define SHARDID_CACHE_SIZE  100
-#define SHARD_ITEMS_NUMBER 10
+#define SHARD_ITEMS_NUMBER  10
 
 /**
  * Test description
@@ -101,10 +102,9 @@ MojErr MojDbShardManagerTest::run()
 MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
 {
     MojErr err = MojErrNone;
-    MojUInt32 arr[SHARDID_CACHE_SIZE + 1];
+    MojUInt32 arr[SHARDID_CACHE_SIZE];
 
-    ip_cache->init();
-    arr[SHARDID_CACHE_SIZE] = 0xFFFFFFFF;
+    ip_cache->init(MojDbShardIdCache::TESTING);
 
     //ShardIdCache: Put id's..
     for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
@@ -122,7 +122,7 @@ MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
         }
     }
 
-    if (ip_cache->isExist(arr[SHARDID_CACHE_SIZE]))
+    if (ip_cache->isExist(0xFFFFFFFF))
         err = MojErrDbVerificationFailed; //compare id6 is wrong
 
     //remove all id's

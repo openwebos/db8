@@ -660,7 +660,6 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
     bool retval = true;
     MojUInt32 count = 0;
     MojString shards_info;
-    MojString value;
 
     // Request list of active media and receive a JSON object
     std::list<MojDbShardEngine::ShardInfo> list;
@@ -699,8 +698,7 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
         MojErrCheck(err);
         err = writer.stringProp("mountPath", it->mountPath.data());
         MojErrCheck(err);
-        value.format("%d", (*it).id);
-        err = writer.stringProp("shardId", value.data());
+        err = writer.stringProp("shardId", it->id_base64);
         MojErrCheck(err);
 
         //"}"

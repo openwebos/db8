@@ -82,49 +82,19 @@ public:
     MojDbShardEngine(void);
     ~MojDbShardEngine(void);
 
-    //init
     MojErr init (MojDb* ip_db, MojDbReq &req);
-
-    //put a new shard description to db
-    MojErr put (const ShardInfo& i_info);
-
-    //get shard description by id
-    MojErr get (MojUInt32 i_id, ShardInfo& o_info);
-    MojErr get (MojString& i_id_base64, ShardInfo& o_info);
-
-    //get correspond shard id using path to device
-    MojErr getIdForPath (MojString& i_path, MojUInt32& o_id);
-
-    //get list of all active shards
-    MojErr getAllActive (std::list<ShardInfo>& o_list, MojUInt32& o_count);
-
-    //update shardInfo
+    MojErr put (const ShardInfo& shardInfo);
+    MojErr get (MojUInt32 shardId, ShardInfo& shardInfo, bool& found);
+    MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count);
     MojErr update (const ShardInfo& i_shardInfo);
+    MojErr getShardId (const MojString& deviceUuid, MojUInt32& shardId);
+    MojErr isIdExist (MojUInt32 shardId, bool& found);
 
-    //set activity flag
-    MojErr setActivity (MojUInt32 i_id, bool i_isActive);
-    MojErr setActivity (MojString& i_id_base64, bool i_isActive);
-
-    //set transient flag
-    MojErr setTransient (MojUInt32 i_id, bool i_isTransient);
-    MojErr setTransient (MojString& i_id_base64, bool i_isTransient);
-
-    //get shard id
-    MojErr getId (MojString& i_deviceId, MojUInt32& o_id);
-
-    //allocate a new shard id
-    MojErr allocateId (MojString& i_media, MojUInt32& o_id);
-
-    MojErr isIdExist (MojUInt32 i_id, bool& found);
-
-    //return: MojErrExists         --> exist
-    //        MojErrNotFound       --> not found
-    //        MojErrNotInitialized --> db was not initialized
-    MojErr isIdExist (MojString& i_id_base64, bool& found);
-
+    static MojErr convertId (const MojUInt32 i_id, MojString& o_id_base64);
+    static MojErr convertId (const MojString& i_id_base64, MojUInt32& o_id);
 private:
-    bool _computeId (MojString& i_media, MojUInt32& o_id);
-    MojErr _get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo& o_info);
+    MojErr allocateId (const MojString& deviceUuid, MojUInt32& shardId);
+    MojErr computeId (const MojString& mediaUuid, MojUInt32& sharId);
 
     std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;

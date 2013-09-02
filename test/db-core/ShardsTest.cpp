@@ -91,7 +91,9 @@ struct ShardsTest : public MojDbCoreTest
 
         // verify shard put
         shardInfo = {};
-        MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+        bool found;
+        MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+        ASSERT_TRUE( found );
         ASSERT_EQ( MagicId, shardInfo.id );
         ASSERT_TRUE( shardInfo.active );
     }
@@ -166,8 +168,10 @@ TEST_F(ShardsTest, putShardInfo)
     shardInfo.active = true;
     MojAssertNoErr( shardEngine->put( shardInfo ) );
 
+    bool found;
     // verify shard put
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    EXPECT_TRUE( found );
     EXPECT_EQ( MagicId, shardInfo.id );
     EXPECT_TRUE( shardInfo.active );
 }
@@ -180,26 +184,27 @@ TEST_F(ShardsTest, setActivity)
     registerShards();
 
     MojDbShardEngine::ShardInfo shardInfo;
+    bool found;
 
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    EXPECT_TRUE( found );
     EXPECT_EQ( MagicId, shardInfo.id );
     EXPECT_TRUE( shardInfo.active );
 
     // verify active state change
-    MojAssertNoErr( shardEngine->setActivity( MagicId, false ) );
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    shardInfo.active = false;
+    MojAssertNoErr( shardEngine->update(shardInfo) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    ASSERT_TRUE( found );
     EXPECT_EQ( MagicId, shardInfo.id );
     EXPECT_FALSE( shardInfo.active );
 
-    MojAssertNoErr( shardEngine->setActivity( MagicId, true ) );
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    shardInfo.active = true;
+    MojAssertNoErr( shardEngine->update(shardInfo) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    ASSERT_TRUE( found );
     EXPECT_EQ( MagicId, shardInfo.id );
     EXPECT_TRUE( shardInfo.active );
-
-    MojAssertNoErr( shardEngine->setActivity( MagicId, false ) );
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
-    EXPECT_EQ( MagicId, shardInfo.id );
-    EXPECT_FALSE( shardInfo.active );
 }
 
 /**
@@ -210,10 +215,15 @@ TEST_F(ShardsTest, setActivity)
 TEST_F(ShardsTest, nonexistingShard)
 {
     MojDbShardEngine::ShardInfo shardInfo = {};
-    EXPECT_EQ( MojErrDbObjectNotFound, shardEngine->get( MagicId, shardInfo ) )
-        << "Unexpectedly found shard { id = " << shardInfo.id << ", active = " << shardInfo.active << " }";
+    bool found;
 
-    EXPECT_EQ( MojErrDbObjectNotFound, shardEngine->setActivity( MagicId, true ) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    EXPECT_FALSE(found);
+
+    shardInfo = {};
+    shardInfo.id = MagicId;
+    shardInfo.active = true;
+    EXPECT_EQ( MojErrDbObjectNotFound, shardEngine->update(shardInfo) );
 
     MojObject obj;
     MojAssertNoErr( obj.putString("_kind", "Test:1") );
@@ -231,15 +241,18 @@ TEST_F(ShardsTest, initalInactivity)
     registerShards();
 
     MojDbShardEngine::ShardInfo shardInfo;
+    bool found;
 
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    ASSERT_TRUE( found );
     ASSERT_TRUE( shardInfo.active );
 
     MojAssertNoErr( db.close() );
     // re-open
     MojAssertNoErr( db.open(path.c_str()) );
 
-    MojAssertNoErr( shardEngine->get( MagicId, shardInfo ) );
+    MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
+    ASSERT_TRUE(found);
     EXPECT_FALSE( shardInfo.active );
 }
 
@@ -262,6 +275,14 @@ TEST_F(ShardsTest, queryInactiveShard)
     registerShards();
     fillData();
 
-    MojAssertNoErr( shardEngine->setActivity( MagicId, false ) );
+    MojDbShardEngine::ShardInfo shardInfo;
+    bool found;
+    MojAssertNoErr (shardEngine->get(MagicId, shardInfo, found));
+    ASSERT_TRUE(found);
+    EXPECT_EQ(MagicId, shardInfo.id);
+
+    shardInfo.active = false;
+    MojAssertNoErr (shardEngine->update(shardInfo));
+
     expect("[2,4,6,8,10]"); // no records from shard MagicId
 }

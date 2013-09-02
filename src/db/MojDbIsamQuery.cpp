@@ -432,13 +432,21 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
             //       id there is a still chance that some nasty client used
             //       96 bits encoded in base64. Or more correctly used
             //       string that can be decoded from base64 into 96 bits.
-            err = shardEngine->isIdExist(shardId, found); // TODO: change API for isIdExists
+            MojDbShardEngine::ShardInfo shardInfo;
+
+            // Note: shardEngine should keep ShardInfo in memory to keep
+            //       this reasonable.
+            err = shardEngine->get(shardId, shardInfo, found);
             MojErrCheck(err);
 
+            // Hope this is actually an shard id. But there is
+            // still exists a chance...
             if (G_LIKELY(found))
             {
-                // Hope this is actually an shard id. But there is
-                // still exists a chance...
+                // main shard is always active
+                if (!shardInfo.active) {
+                    excludeOut = true;
+                }
             }
             else
             {
@@ -454,20 +462,5 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
         }
     }
 
-    // main shard is always active
-    if (G_UNLIKELY(shardId != MojDbIdGenerator::MainShardId))
-    {
-        // get state of the shard
-        // Note: shardEngine should keep ShardInfo in memory to keep
-        //       this reasonable.
-        MojDbShardEngine::ShardInfo shardInfo;
-        err = shardEngine->get(shardId, shardInfo);
-        MojErrCheck( err );
-
-        if (!shardInfo.active)
-        {
-            excludeOut = true;
-        }
-    }
     return MojErrNone;
 }

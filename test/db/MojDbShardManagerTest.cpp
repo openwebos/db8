@@ -136,65 +136,52 @@ MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
 
 MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
 {
-    MojErr err = MojErrNone;
+    MojErr err;
     MojUInt32 id;
     MojString str;
+    bool found;
 
     //compute a new shard id
     for(MojInt32 i = 0; i < SHARD_ITEMS_NUMBER; ++i)
     {
         //generate id
         str.format("MassStorageMedia%d",i);
-        ip_eng->getId(str, id);
+        err = ip_eng->getShardId(str, id);
+        MojTestErrCheck(err);
     }
 
-    //verify id for root
-    str.assign("/");
-    ip_eng->getIdForPath(str, id);
-    if (id != 0)
-        err = MojErrDbVerificationFailed;
-
     //store sample shard info
-    MojDbShardEngine::ShardInfo put_info;
-    put_info.id = 0xFF;
-    put_info.mountPath.assign("/media/media01");
-    err = ip_eng->put(put_info);
+    MojDbShardEngine::ShardInfo shardInfo;
+    shardInfo.id = 0xFF;
+    shardInfo.mountPath.assign("/media/media01");
+    err = ip_eng->put(shardInfo);
     MojTestErrCheck(err);
-
     //get info
-    MojDbShardEngine::ShardInfo get_info;
-    err = ip_eng->get(0xFF, get_info);
+
+    err = ip_eng->get(0xFF, shardInfo, found);
     MojTestErrCheck(err);
+    MojAssert(found);
 
-    if (get_info.mountPath.compare(put_info.mountPath.data()) != 0)
-        err = MojErrDbVerificationFailed;
-
-    MojTestErrCheck(err);
-
-    //get id for path, verify
-    id = 0;
-    err = ip_eng->getIdForPath(put_info.mountPath, id);
-    MojTestErrCheck(err);
-
-    if (id != put_info.id)
+    if (shardInfo.mountPath.compare("/media/media01") != 0)
         err = MojErrDbVerificationFailed;
 
     MojTestErrCheck(err);
 
     //set activity, read and verify
-    err = ip_eng->setActivity(put_info.id, true);
+    shardInfo.active = true;
+    err = ip_eng->update(shardInfo);
     MojTestErrCheck(err);
 
-    err = ip_eng->get(0xFF, get_info);
+    err = ip_eng->get(0xFF, shardInfo, found);
     MojTestErrCheck(err);
+    MojAssert(found);
 
-    if (!get_info.active)
+    if (!shardInfo.active)
         err = MojErrDbVerificationFailed;
 
     MojTestErrCheck(err);
 
     //check existance of id, even for wrong id
-    bool found;
     err = ip_eng->isIdExist(0xFF, found);
     MojTestErrCheck(err);
 
@@ -207,19 +194,6 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
 
     if (found)
         err = MojErrDbVerificationFailed;
-    MojTestErrCheck(err);
-
-
-    //test for 'update'
-    put_info.mountPath.assign("/media/sda");
-    err = ip_eng->update(put_info);
-    MojTestErrCheck(err);
-    err = ip_eng->get(0xFF, get_info);
-    MojTestErrCheck(err);
-
-    if (get_info.mountPath.compare(put_info.mountPath.data()) != 0)
-        err = MojErrDbVerificationFailed;
-
     MojTestErrCheck(err);
 
     return err;

@@ -664,7 +664,8 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
 
     // Request list of active media and receive a JSON object
     std::list<MojDbShardEngine::ShardInfo> list;
-    m_db.shardEngine()->getAllActive(list, count);
+    err = m_db.shardEngine()->getAllActive(list, count);
+    MojErrCheck(err);
 
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
@@ -692,11 +693,11 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
         //"{"
         err = writer.beginObject();
         MojErrCheck(err);
-        err = writer.stringProp("deviceId", (*it).deviceId.data());
+        err = writer.stringProp("deviceId", it->deviceId.data());
         MojErrCheck(err);
-        err = writer.stringProp("deviceUri", (*it).deviceUri.data());
+        err = writer.stringProp("deviceUri", it->deviceUri.data());
         MojErrCheck(err);
-        err = writer.stringProp("mountPath", (*it).mountPath.data());
+        err = writer.stringProp("mountPath", it->mountPath.data());
         MojErrCheck(err);
         value.format("%d", (*it).id);
         err = writer.stringProp("shardId", value.data());
@@ -732,19 +733,19 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
     MojErr err;
 
     // get shard ID
-    MojString shardId;
-    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojString shardIdBase64;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardIdBase64);
     MojErrCheck(err);
 
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
 
-    if (shardId.empty()) // parameter is absent
+    if (shardIdBase64.empty()) // parameter is absent
     {
         err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
         MojErrCheck(err);
-        err = writer.stringProp("errorText", "Invalid Parameters");
+        err = writer.stringProp("errorText", "Invalid Parameters.");
         MojErrCheck(err);
         err = writer.stringProp("errorCode", "1");
         MojErrCheck(err);
@@ -752,26 +753,31 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
     else
     {
         bool found;
-        err = m_db.shardEngine()->isIdExist(shardId, found);
+
+        MojUInt32 shardId;
+        err = MojDbShardEngine::convertId(shardIdBase64, shardId);
+        MojErrCheck(err);
+
+        MojDbShardEngine::ShardInfo info;
+
+        err = m_db.shardEngine()->get(shardId, info, found);
         MojErrCheck(err);
 
         //validate id
-        if (found)
-        {
-            MojDbShardEngine::ShardInfo info;
-            err = m_db.shardEngine()->get(shardId, info);
-            MojErrCheck(err);
+        if (found) {
+            MojAssert(shardId == info.id);                  // Paranoic check
+            MojAssert(shardIdBase64 == info.id_base64);     // Paranoic check
 
             err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
             MojErrCheck(err);
             err = writer.stringProp("isActive", info.active ? "true" : "false");
             MojErrCheck(err);
-            err = writer.stringProp("shardId", shardId.data());
+
+            err = writer.stringProp("shardId", info.id_base64);
             MojErrCheck(err);
 
             //exist
-            if (info.active)
-            {
+            if (info.active) {
                 err = writer.stringProp("deviceId", info.deviceId.data());
                 MojErrCheck(err);
                 err = writer.stringProp("deviceName", info.deviceName.data());
@@ -782,7 +788,7 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
                 MojErrCheck(err);
             }
 
-            m_db.shardId(shardId);  // TODO: what this do?
+            m_db.shardId(info.id_base64);  // TODO: what this do?
        }
        else
        {
@@ -821,8 +827,8 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     MojErr err;
 
     // get shard ID
-    MojString shardId;
-    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojString shardIdBase64;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardIdBase64);
     MojErrCheck(err);
 
     // get kind
@@ -834,7 +840,7 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     err = writer.beginObject();
     MojErrCheck(err);
 
-    if ( G_UNLIKELY((shardId.length() == 0) || (kindStr.length() == 0) )) // parameters are absent
+    if ( G_UNLIKELY(shardIdBase64.empty() || kindStr.empty() )) // parameters are absent
     {
         err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
         MojErrCheck(err);
@@ -846,24 +852,29 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     else
     {
         bool found;
+        MojUInt32 shardId;
+
+        err = MojDbShardEngine::convertId(shardIdBase64, shardId);
+        MojErrCheck(err);
+
         err = m_db.shardEngine()->isIdExist(shardId, found);
         MojErrCheck(err);
 
-       if (G_LIKELY(found))
-       {
+        if (G_LIKELY(found))
+        {
             if (G_LIKELY(m_db.isValidKind(kindStr)))
             {
                 //ok
                 err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
                 MojErrCheck(err);
-                err = writer.stringProp("isSupported", m_db.isSupported(shardId, kindStr) ? "true" : "false");
+                err = writer.stringProp("isSupported", m_db.isSupported(shardIdBase64, kindStr) ? "true" : "false");
                 MojErrCheck(err);
-                err = writer.stringProp("shardId", shardId.data());
+                err = writer.stringProp("shardId", shardIdBase64.data());
                 MojErrCheck(err);
                 err = writer.stringProp("_kind", kindStr.data());
                 MojErrCheck(err);
 
-                m_db.shardId(shardId);
+                m_db.shardId(shardIdBase64);
             }
             else
             {
@@ -912,15 +923,15 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
     MojErr err;
 
     // get shard ID
-    MojString shardId;
-    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardId);
+    MojString shardIdBase64;
+    err = payload.getRequired(MojDbServiceDefs::ShardIdKey, shardIdBase64);
     MojErrCheck(err);
 
     MojObjectVisitor& writer = msg->writer();
     err = writer.beginObject();
     MojErrCheck(err);
 
-    if (shardId.length() == 0) // parameter is absent
+    if (shardIdBase64.empty()) // parameter is absent
     {
         err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
         MojErrCheck(err);
@@ -936,19 +947,25 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
         MojErrCheck(err);
 
         bool found;
-        err = m_db.shardEngine()->isIdExist(shardId, found);
+        MojUInt32 shardId;
+        MojDbShardEngine::ShardInfo shardInfo;
+
+        err = MojDbShardEngine::convertId(shardIdBase64, shardId);
+        MojErrCheck(err);
+
+        err = m_db.shardEngine()->get(shardId, shardInfo, found);
         MojErrCheck(err);
 
         //validate id
-        if ( found )
+        if (found)
         {
-            MojDbShardEngine::ShardInfo info;
-            err = m_db.shardEngine()->setTransient(shardId, transient);
+            shardInfo.transient = transient;
+            err = m_db.shardEngine()->update(shardInfo);
             MojErrCheck(err);
 
             err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
             MojErrCheck(err);
-            m_db.shardId(shardId);
+            m_db.shardId(shardInfo.id_base64);
        }
        else
        {

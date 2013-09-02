@@ -79,13 +79,12 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         MojLogError(s_log, _T("Luna error response: %s"), m_errTxt.data());
         MojAssert(found);
     } else {
-//#ifdef MOJ_DEBUG
+#ifdef MOJ_DEBUG
         MojString resStr;
         result.toJson(resStr);
 
-        //MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
-        MojLogInfo(s_log, _T("Device list: %s"), resStr.data());
-//#endif
+        MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
+#endif
         MojObject deviceList;
         MojErr err = result.getRequired("devices", deviceList);
         MojErrCheck(err);

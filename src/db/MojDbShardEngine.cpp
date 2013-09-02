@@ -54,7 +54,7 @@ MojDbShardEngine::~MojDbShardEngine(void)
 /**
  *
  */
-MojErr MojDbShardEngine::init (MojDb* ip_db)
+MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReq &req)
 {
     MojErr err;
     MojObject obj;
@@ -65,7 +65,7 @@ MojErr MojDbShardEngine::init (MojDb* ip_db)
     // add type
     err = obj.fromJson(ShardInfoKind1Str);
     MojErrCheck(err);
-    err = mp_db->putKind(obj);
+    err = mp_db->kindEngine()->putKind(obj, req, true); // add builtin kind
     MojErrCheck(err);
 
     return (MojErrNone);

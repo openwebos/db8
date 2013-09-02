@@ -87,8 +87,6 @@ MojErr MojDbShardManagerTest::run()
     MojDbShardIdCache* p_cache = db.shardIdCache();
     MojDbShardEngine* p_eng = db.shardEngine();
 
-    p_eng->init(&db);
-
     err = _testShardIdCache(p_cache);
     MojTestErrCheck(err);
     err = _testShardManager(p_eng);

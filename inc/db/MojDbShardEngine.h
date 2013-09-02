@@ -28,6 +28,7 @@
 #include <list>
 
 class MojDb;
+class MojDbReq;
 class MojDbMediaLinkManager;
 
 class MojDbShardEngine : private MojNoCopy
@@ -82,7 +83,7 @@ public:
     ~MojDbShardEngine(void);
 
     //init
-    MojErr init (MojDb* ip_db);
+    MojErr init (MojDb* ip_db, MojDbReq &req);
 
     //put a new shard description to db
     MojErr put (const ShardInfo& i_info);

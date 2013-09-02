@@ -76,47 +76,59 @@ MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReq &req)
 /**
  * put a new shard description to db
  */
-MojErr MojDbShardEngine::put (const ShardInfo& i_info)
+MojErr MojDbShardEngine::put (const ShardInfo& shardInfo)
 {
     MojLogTrace(s_log);
     MojAssert(mp_db);
+    MojAssert(shardInfo.id);
 
     MojObject obj;
     MojString tmp_string;
+    MojErr err;
 
-    MojErr err = obj.putString(_T("_kind"), _T("ShardInfo1:1"));
+    err = obj.putString(_T("_kind"), _T("ShardInfo1:1"));
     MojErrCheck(err);
 
-    MojInt32 val = static_cast<MojInt32>(i_info.id);
+    MojInt32 val = static_cast<MojInt32>(shardInfo.id);
     MojObject obj1(val); //keep numeric
     err = obj.put(_T("shardId"), obj1);
     MojErrCheck(err);
 
-    MojObject obj2(i_info.active);
+    MojObject obj2(shardInfo.active);
     err = obj.put(_T("active"), obj2);
     MojErrCheck(err);
 
-    MojObject obj3(i_info.transient);
+    MojObject obj3(shardInfo.transient);
     err = obj.put(_T("transient"), obj3);
     MojErrCheck(err);
 
-    MojObject obj4(i_info.id_base64);
-    err = obj.put(_T("idBase64"), obj4);
-    MojErrCheck(err);
+    if (!shardInfo.id_base64.empty()) {
+        MojObject obj4(shardInfo.id_base64);
+        err = obj.put(_T("idBase64"), obj4);
+        MojErrCheck(err);
+    } else {
+        MojString shardIdBase64;
+        err = MojDbShardEngine::convertId(shardInfo.id, shardIdBase64);
+        MojErrCheck(err);
 
-    MojObject obj5(i_info.deviceId);
+        MojObject obj4(shardIdBase64);
+        err = obj.put(_T("idBase64"), obj4);
+        MojErrCheck(err);
+    }
+
+    MojObject obj5(shardInfo.deviceId);
     err = obj.put(_T("deviceId"), obj5);
     MojErrCheck(err);
 
-    MojObject obj6(i_info.deviceUri);
+    MojObject obj6(shardInfo.deviceUri);
     err = obj.put(_T("deviceUri"), obj6);
     MojErrCheck(err);
 
-    MojObject obj7(i_info.mountPath);
+    MojObject obj7(shardInfo.mountPath);
     err = obj.put(_T("mountPath"), obj7);
     MojErrCheck(err);
 
-    MojObject obj8(i_info.deviceName);
+    MojObject obj8(shardInfo.deviceName);
     err = obj.put(_T("deviceName"), obj8);
     MojErrCheck(err);
 
@@ -304,14 +316,8 @@ MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
     return err;
 }
 
-/**
- * get shard id
- * ------------
- * search within db for i_deviceId, return id if found
- * else
- * allocate a new id
- */
-MojErr MojDbShardEngine::getShardId (const MojString& deviceUuid, MojUInt32& shardId)
+
+MojErr MojDbShardEngine::getByDeviceUuid (const MojString& deviceUuid, ShardInfo& shardInfo, bool& found)
 {
     MojLogTrace(s_log);
     MojAssert(mp_db);
@@ -331,19 +337,59 @@ MojErr MojDbShardEngine::getShardId (const MojString& deviceUuid, MojUInt32& sha
     err = mp_db->find(query, cursor);
     MojErrCheck(err);
 
-    bool found;
     err = cursor.get(dbObj, found);
     MojErrCheck(err);
+
     if (found)
     {
-        MojLogDebug(s_log, _T("Shard id for device %s found"), deviceUuid.data());
-
-        MojInt32 value;
-        err = dbObj.getRequired(_T("shardId"), value);
+        err = dbObj.getRequired(_T("shardId"), shardInfo.id);
         MojErrCheck(err);
 
-        shardId = static_cast<MojUInt32>(value);
-        MojLogDebug(s_log, _T("Shard id for device %d is"), shardId);
+        err = dbObj.getRequired(_T("idBase64"), shardInfo.id_base64);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("active"), shardInfo.active);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("transient"), shardInfo.transient);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("deviceId"), shardInfo.deviceId);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("deviceUri"), shardInfo.deviceUri);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("mountPath"), shardInfo.mountPath);
+        MojErrCheck(err);
+
+        err = dbObj.getRequired(_T("deviceName"), shardInfo.deviceName);
+        MojErrCheck(err);
+    }
+
+    return MojErrNone;
+}
+
+/**
+ * get shard id
+ * ------------
+ * search within db for i_deviceId, return id if found
+ * else
+ * allocate a new id
+ */
+MojErr MojDbShardEngine::getShardId (const MojString& deviceUuid, MojUInt32& shardId)
+{
+    MojLogTrace(s_log);
+    MojAssert(mp_db);
+    MojErr err;
+    ShardInfo shardInfo;
+    bool found;
+
+    err = getByDeviceUuid(deviceUuid, shardInfo, found);
+    MojErrCheck(err);
+    if (found)  {
+        shardId = shardInfo.id;
+        MojLogDebug(s_log, _T("Shard id for device %s is %d"), deviceUuid.data(), shardId);
     } else {
         MojLogDebug(s_log, _T("Shard id for device %s not found, generating it"), deviceUuid.data());
         err = allocateId(deviceUuid, shardId);
@@ -381,6 +427,8 @@ MojErr MojDbShardEngine::allocateId (const MojString& deviceUuid, MojUInt32& sha
             MojLogWarning(MojDbShardEngine::s_log, _T("id generation -> [%x] exist already, prefix = %u\n"), id, prefix);
             prefix++;
         } else {
+            MojAssert(id);
+
             shardId = id;
             break;  // exit from loop
         }
@@ -397,14 +445,14 @@ MojErr MojDbShardEngine::allocateId (const MojString& deviceUuid, MojUInt32& sha
     return err;
 }
 
-MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id, bool& found)
+MojErr MojDbShardEngine::isIdExist (MojUInt32 shardId, bool& found)
 {
     MojErr err;
     MojAssert(mp_db);
 
     MojDbQuery query;
     MojDbCursor cursor;
-    MojInt32 val = static_cast<MojInt32>(i_id);
+    MojInt32 val = static_cast<MojInt32>(shardId);
     MojObject obj(val);
     MojObject dbObj;
 
@@ -450,28 +498,51 @@ MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
 {
 }
 
-MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo shardInfo)
+MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
 {
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Shard engine notified about new shard");
     MojAssert(m_shardEngine->m_mediaLinkManager.get());
+
     MojErr err;
+    bool found;
+    ShardInfo databaseShardInfo;
 
     // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName;
-    err = m_shardEngine->getShardId(shardInfo.deviceId, shardInfo.id);
-    MojLogDebug(s_log, _T("shardEngine for device %s generated shard id: %d"), shardInfo.deviceId.data(), shardInfo.id);
+
+    err = m_shardEngine->getByDeviceUuid(pdmShardInfo.deviceId, databaseShardInfo, found);
     MojErrCheck(err);
 
-    MojLogDebug(s_log, _T("update shard info"));
-    err = m_shardEngine->update(shardInfo);
-    MojErrCheck(err);
+    if (found) {    // shard already registered in database
+        databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
+        databaseShardInfo.deviceName = pdmShardInfo.deviceName;
+        databaseShardInfo.mountPath = pdmShardInfo.mountPath;
+        databaseShardInfo.active = pdmShardInfo.active;
+
+        err = m_shardEngine->update(databaseShardInfo);
+        MojErrCheck(err);
+    } else {        // not found in database
+        err = m_shardEngine->allocateId(pdmShardInfo.deviceId, databaseShardInfo.id);
+        MojErrCheck(err);
+        MojLogDebug(s_log, _T("shardEngine for device %s generated shard id: %d"), databaseShardInfo.deviceId.data(), databaseShardInfo.id);
+
+        databaseShardInfo.deviceId = pdmShardInfo.deviceId;
+        databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
+        databaseShardInfo.deviceName = pdmShardInfo.deviceName;
+        databaseShardInfo.mountPath = pdmShardInfo.mountPath;
+        databaseShardInfo.active = pdmShardInfo.active;
+        // databaseShardInfo.transient = true; what setup by default?
+
+        err = m_shardEngine->put(databaseShardInfo);
+        MojErrCheck(err);
+    }
+    MojLogDebug(s_log, _T("updated shard info"));
 
     MojLogDebug(s_log, _T("Run softlink logic"));
-
-    if (shardInfo.active) {  // inseted media
-        m_shardEngine->m_mediaLinkManager->createLink(shardInfo);
+    if (databaseShardInfo.active) {  // inseted media
+        m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
     } else {     // removed media
-        m_shardEngine->m_mediaLinkManager->removeLink(shardInfo);
+        m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
     }
 
     return MojErrNone;

@@ -72,7 +72,7 @@ public:
     {
     public:
         Watcher(MojDbShardEngine* shardEngine);
-        MojErr handleShardInfoSlot(ShardInfo shardInfo);
+        MojErr handleShardInfoSlot(ShardInfo pdmShardInfo);
 
         MojDbShardEngine* m_shardEngine;
         ShardInfoSignal::Slot<Watcher> m_pdmSlot;
@@ -85,6 +85,7 @@ public:
     MojErr init (MojDb* ip_db, MojDbReq &req);
     MojErr put (const ShardInfo& shardInfo);
     MojErr get (MojUInt32 shardId, ShardInfo& shardInfo, bool& found);
+    MojErr getByDeviceUuid (const MojString& deviceUuid, ShardInfo& shardInfo, bool& found);
     MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count);
     MojErr update (const ShardInfo& i_shardInfo);
     MojErr getShardId (const MojString& deviceUuid, MojUInt32& shardId);

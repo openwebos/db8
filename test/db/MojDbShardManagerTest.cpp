@@ -194,15 +194,21 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     MojTestErrCheck(err);
 
     //check existance of id, even for wrong id
-    if (ip_eng->isIdExist(0xFF) == MojErrNotFound)
-        err = MojErrDbVerificationFailed;
-
+    bool found;
+    err = ip_eng->isIdExist(0xFF, found);
     MojTestErrCheck(err);
 
-    if (ip_eng->isIdExist(0xFFFFFFFF) == MojErrExists)
+    if (!found)
         err = MojErrDbVerificationFailed;
-
     MojTestErrCheck(err);
+
+    err = ip_eng->isIdExist(0xFFFFFFFF, found);
+    MojTestErrCheck(err);
+
+    if (found)
+        err = MojErrDbVerificationFailed;
+    MojTestErrCheck(err);
+
 
     //test for 'update'
     put_info.mountPath.assign("/media/sda");

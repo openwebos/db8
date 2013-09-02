@@ -115,15 +115,12 @@ public:
     //allocate a new shard id
     MojErr allocateId (MojString& i_media, MojUInt32& o_id);
 
-    //return: MojErrExists         --> exist
-    //        MojErrNotFound       --> not found
-    //        MojErrNotInitialized --> db was not initialized
-    MojErr isIdExist (MojUInt32 i_id);
+    MojErr isIdExist (MojUInt32 i_id, bool& found);
 
     //return: MojErrExists         --> exist
     //        MojErrNotFound       --> not found
     //        MojErrNotInitialized --> db was not initialized
-    MojErr isIdExist (MojString& i_id_base64);
+    MojErr isIdExist (MojString& i_id_base64, bool& found);
 
 private:
     bool _computeId (MojString& i_media, MojUInt32& o_id);

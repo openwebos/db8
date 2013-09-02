@@ -25,12 +25,15 @@
 
 using namespace std;
 
+
+
 static const MojChar* const ShardInfoKind1Str =
     _T("{\"id\":\"ShardInfo1:1\",")
     _T("\"owner\":\"mojodb.admin\",")
-    _T("\"indexes\":[ {\"name\":\"Info1\", \"props\":[ {\"name\":\"ShardId\"},{\"name\":\"Active\"},{\"name\":\"Transient\"},{\"name\":\"IdBase64\"}, \
-                                                       {\"name\":\"deviceId\"},{\"name\":\"deviceUri\"},{\"name\":\"mountPath\"},{\"name\":\"deviceName\"} ]}, \
-                      {\"name\":\"Info2\", \"props\":[ {\"name\":\"mountPath\"},{\"name\":\"ShardId\"} ]}, \
+    _T("\"indexes\":[ {\"name\":\"ShardId\",  \"props\":[ {\"name\":\"shardId\"} ]}, \
+                      {\"name\":\"DeviceId\", \"props\":[ {\"name\":\"deviceId\"} ]}, \
+                      {\"name\":\"IdBase64\", \"props\":[ {\"name\":\"idBase64\"} ]}, \
+                      {\"name\":\"Active\",   \"props\":[ {\"name\":\"active\"} ]}\
                     ]}");
 
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
@@ -92,19 +95,19 @@ MojErr MojDbShardEngine::put (const ShardInfo& i_info)
 
     MojInt32 val = static_cast<MojInt32>(i_info.id);
     MojObject obj1(val); //keep numeric
-    err = obj.put(_T("ShardId"), obj1);
+    err = obj.put(_T("shardId"), obj1);
     MojErrCheck(err);
 
     MojObject obj2(i_info.active);
-    err = obj.put(_T("Active"), obj2);
+    err = obj.put(_T("active"), obj2);
     MojErrCheck(err);
 
     MojObject obj3(i_info.transient);
-    err = obj.put(_T("Transient"), obj3);
+    err = obj.put(_T("transient"), obj3);
     MojErrCheck(err);
 
     MojObject obj4(i_info.id_base64);
-    err = obj.put(_T("IdBase64"), obj4);
+    err = obj.put(_T("idBase64"), obj4);
     MojErrCheck(err);
 
     MojObject obj5(i_info.deviceId);
@@ -136,8 +139,7 @@ MojErr MojDbShardEngine::put (const ShardInfo& i_info)
 MojErr MojDbShardEngine::get (MojUInt32 i_id, ShardInfo& o_info)
 {
     MojString str;
-    str.assign("");
-    return(_get(i_id, str, o_info));
+    return _get(i_id, str, o_info);
 }
 
 /**
@@ -197,7 +199,7 @@ MojErr MojDbShardEngine::getIdForPath (MojString& i_path, MojUInt32& o_id)
         if (found)
         {
             MojInt32 value;
-            err = dbObj.get(_T("ShardId"), value, found);
+            err = dbObj.get(_T("shardId"), value, found);
             MojErrCheck(err);
 
             if (found)
@@ -205,8 +207,6 @@ MojErr MojDbShardEngine::getIdForPath (MojString& i_path, MojUInt32& o_id)
             else
                 err = MojErrNotFound;
         }
-
-        cursor.close();
     }
     else
     {
@@ -243,7 +243,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("Active"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("active"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     err = mp_db->find(query, cursor);
@@ -260,7 +260,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
                 break;
 
             //Shard id
-            err = dbObj.get(_T("ShardId"), value_id, found);
+            err = dbObj.get(_T("shardId"), value_id, found);
             MojErrCheck(err);
 
             if (found)
@@ -271,7 +271,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
             }
 
             //Transient
-            found = dbObj.get(_T("Transient"), flag);
+            found = dbObj.get(_T("transient"), flag);
             MojErrCheck(err);
 
             if (found)
@@ -282,7 +282,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
             }
 
             //IdBase64
-            err = dbObj.get(_T("IdBase64"), value, found);
+            err = dbObj.get(_T("idBase64"), value, found);
             MojErrCheck(err);
 
             if (found)
@@ -339,8 +339,6 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
             o_list.push_back(shard_info);
             ++count;
         }
-
-        cursor.close();
     }
     else
     {
@@ -356,15 +354,8 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& o_list, MojUInt32& 
  */
 MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
 {
-    MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
+    MojErr err;
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -375,16 +366,16 @@ MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("shardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     MojObject update;
-    err = update.put(_T("Active"), i_isActive);
+    err = update.put(_T("active"), i_isActive);
     MojErrCheck(err);
     err = mp_db->merge(query, update, count);
     MojErrCheck(err);
 
-    return err;
+    return MojErrNone;
 }
 
 /**
@@ -392,15 +383,8 @@ MojErr MojDbShardEngine::setActivity (MojUInt32 i_id, bool i_isActive)
  */
 MojErr MojDbShardEngine::setActivity (MojString& i_id_base64, bool i_isActive)
 {
-    MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
+    MojErr err;
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -410,16 +394,16 @@ MojErr MojDbShardEngine::setActivity (MojString& i_id_base64, bool i_isActive)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("idBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     MojObject update;
-    err = update.put(_T("Active"), i_isActive);
+    err = update.put(_T("active"), i_isActive);
     MojErrCheck(err);
     err = mp_db->merge(query, update, count);
     MojErrCheck(err);
 
-    return err;
+    return MojErrNone;
 }
 
 /**
@@ -427,15 +411,8 @@ MojErr MojDbShardEngine::setActivity (MojString& i_id_base64, bool i_isActive)
  */
 MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
 {
-    MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
+    MojErr err;
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -446,16 +423,16 @@ MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("shardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     MojObject update;
-    err = update.put(_T("Transient"), i_isTransient);
+    err = update.put(_T("transient"), i_isTransient);
     MojErrCheck(err);
     err = mp_db->merge(query, update, count);
     MojErrCheck(err);
 
-    return err;
+    return MojErrNone;
 }
 
 /**
@@ -463,15 +440,8 @@ MojErr MojDbShardEngine::setTransient (MojUInt32 i_id, bool i_isTransient)
  */
 MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransient)
 {
-    MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
+    MojErr err;
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -481,16 +451,16 @@ MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransien
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("idBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     MojObject update;
-    err = update.put(_T("Transient"), i_isTransient);
+    err = update.put(_T("transient"), i_isTransient);
     MojErrCheck(err);
     err = mp_db->merge(query, update, count);
     MojErrCheck(err);
 
-    return err;
+    return MojErrNone;
 }
 
 /**
@@ -499,14 +469,7 @@ MojErr MojDbShardEngine::setTransient (MojString& i_id_base64, bool i_isTransien
 MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
 {
     MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
 
     MojDbQuery query;
     MojInt32 val = static_cast<MojInt32>(i_shardInfo.id);
@@ -515,21 +478,21 @@ MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+    err = query.where(_T("shardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     MojObject update;
     MojUInt32 count = 0;
 
     MojObject obj2(i_shardInfo.active);
-    err = update.put(_T("Active"), obj2);
+    err = update.put(_T("active"), obj2);
     MojErrCheck(err);
 
-    err = update.put(_T("Transient"), i_shardInfo.transient);
+    err = update.put(_T("transient"), i_shardInfo.transient);
     MojErrCheck(err);
 
     MojObject obj4(i_shardInfo.id_base64);
-    err = update.put(_T("IdBase64"), obj4);
+    err = update.put(_T("idBase64"), obj4);
     MojErrCheck(err);
 
     MojObject obj5(i_shardInfo.deviceId);
@@ -563,15 +526,8 @@ MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
  */
 MojErr MojDbShardEngine::getId (MojString& i_deviceId, MojUInt32& o_id)
 {
-    MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojErr err;
+    MojAssert(mp_db);
 
     //get record from db, extract id
     MojDbQuery query;
@@ -585,30 +541,28 @@ MojErr MojDbShardEngine::getId (MojString& i_deviceId, MojUInt32& o_id)
     MojErrCheck(err);
 
     err = mp_db->find(query, cursor);
+    MojErrCheck(err);
 
-    if (err == MojErrNone)
+    bool found;
+    err = cursor.get(dbObj, found);
+    MojErrCheck(err);
+    if (found)
     {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        if (found)
-        {
-            MojInt32 value;
-            err = dbObj.get(_T("ShardId"), value, found);
-            MojErrCheck(err);
+        MojLogDebug(s_log, _T("Shard id for device %s found"), i_deviceId.data());
 
-            if (found)
-            {
-                o_id = static_cast<MojUInt32>(value);
-                return err;
-            }
-        }
-        cursor.close();
+        MojInt32 value;
+        err = dbObj.getRequired(_T("shardId"), value);
+        MojErrCheck(err);
+
+        o_id = static_cast<MojUInt32>(value);
+        MojLogDebug(s_log, _T("Shard id for device %d is"), o_id);
+    } else {
+        MojLogDebug(s_log, _T("Shard id for device %s not found, generating it"), i_deviceId.data());
+        err = allocateId(i_deviceId, o_id);
+        MojErrCheck(err);
     }
 
-    err = allocateId(i_deviceId, o_id);
-
-    return err;
+    return MojErrNone;
 }
 
 /**
@@ -616,7 +570,7 @@ MojErr MojDbShardEngine::getId (MojString& i_deviceId, MojUInt32& o_id)
  */
 MojErr MojDbShardEngine::allocateId (MojString& i_media, MojUInt32& o_id)
 {
-    MojErr err = MojErrNone;
+    MojErr err;
     MojUInt32 id;
     MojUInt32 calc_id;
     MojUInt32 prefix = 1;
@@ -630,22 +584,15 @@ MojErr MojDbShardEngine::allocateId (MojString& i_media, MojUInt32& o_id)
         id = calc_id | (prefix * 0x01000000);
 
         //check the table to see if this ID already exists
-        err = isIdExist(id);
-        if (err == MojErrExists)
-        {
+        err = isIdExist(id, found);
+        MojErrCheck(err);
+
+        if (found) {
             MojLogWarning(MojDbShardEngine::s_log, _T("id generation -> [%x] exist already, prefix = %u\n"), id, prefix);
             prefix++;
-        }
-        else
-        {
-            if (err == MojErrNotFound)
-            {
-                o_id = id;
-                found = true;
-                break;
-            }
-            else
-                return err;
+        } else {
+            o_id = id;
+            break;  // exit from loop
         }
 
         if (prefix == 128)
@@ -660,17 +607,10 @@ MojErr MojDbShardEngine::allocateId (MojString& i_media, MojUInt32& o_id)
     return err;
 }
 
-MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id)
+MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id, bool& found)
 {
     MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -680,34 +620,26 @@ MojErr MojDbShardEngine::isIdExist (MojUInt32 i_id)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+
+    err = query.where(_T("shardId"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     err = mp_db->find(query, cursor);
+    MojErrCheck(err);
 
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        cursor.close();
-        return (found ? MojErrExists : MojErrNotFound);
-    }
+    err = cursor.get(dbObj, found);
+    MojErrCheck(err);
 
-    return err;
+    err = cursor.close();
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
-MojErr MojDbShardEngine::isIdExist (MojString& i_id_base64)
+MojErr MojDbShardEngine::isIdExist (MojString& i_id_base64, bool& found)
 {
     MojErr err = MojErrNone;
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    if(mp_db == nullptr)
-        return MojErrNotInitialized;
-#else
-    if(mp_db == NULL)
-        return MojErrNotInitialized;
-#endif
+    MojAssert(mp_db);
 
     MojDbQuery query;
     MojDbCursor cursor;
@@ -716,25 +648,18 @@ MojErr MojDbShardEngine::isIdExist (MojString& i_id_base64)
 
     err = query.from(_T("ShardInfo1:1"));
     MojErrCheck(err);
-    err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+
+    err = query.where(_T("idBase64"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
     err = mp_db->find(query, cursor);
+    MojErrCheck(err);
 
-    if (err == MojErrNone)
-    {
-        bool found;
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        cursor.close();
-        return (found ? MojErrExists : MojErrNotFound);
-    }
-    else
-    {
-        err = MojErrDbObjectNotFound;
-    }
+    err = cursor.get(dbObj, found);
+    MojErrCheck(err);
+    cursor.close();
 
-    return err;
+    return MojErrNone;
 }
 
 bool MojDbShardEngine::_computeId (MojString& i_media, MojUInt32& o_id)
@@ -780,13 +705,13 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
     {
         MojObject obj(i_id_base64);
         o_info.id_base64.assign(i_id_base64);
-        err = query.where(_T("IdBase64"), MojDbQuery::OpEq, obj);
+        err = query.where(_T("idBase64"), MojDbQuery::OpEq, obj);
     }
     else
     {
         MojObject obj(id);
         o_info.id = i_id;
-        err = query.where(_T("ShardId"), MojDbQuery::OpEq, obj);
+        err = query.where(_T("shardId"), MojDbQuery::OpEq, obj);
     }
 
     MojErrCheck(err);
@@ -805,7 +730,7 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
             if (i_id_base64.length() > 0) //switch
             {
                 //Shard id
-                err = dbObj.get(_T("ShardId"), id, found);
+                err = dbObj.get(_T("shardId"), id, found);
                 MojErrCheck(err);
 
                 if (found)
@@ -818,7 +743,7 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
             else
             {
                 //IdBase64
-                err = dbObj.get(_T("IdBase64"), value, found);
+                err = dbObj.get(_T("idBase64"), value, found);
                 MojErrCheck(err);
 
                 if (found)
@@ -830,7 +755,7 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
             }
 
             //Active
-            found = dbObj.get(_T("Active"), flag);
+            found = dbObj.get(_T("active"), flag);
             MojErrCheck(err);
 
             if (found)
@@ -841,7 +766,7 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
             }
 
             //Transient
-            found = dbObj.get(_T("Transient"), flag);
+            found = dbObj.get(_T("transient"), flag);
             MojErrCheck(err);
 
             if (found)
@@ -895,8 +820,6 @@ MojErr MojDbShardEngine::_get (MojUInt32 i_id, MojString& i_id_base64, ShardInfo
                 MojLogWarning(MojDbShardEngine::s_log, _T("not found field 'deviceName' for record with id [%x]\n"), o_info.id);
             }
         }
-
-        cursor.close();
     }
     else
     {

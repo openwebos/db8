@@ -427,17 +427,20 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
 
         if (G_UNLIKELY(shardId != MojDbIdGenerator::MainShardId))
         {
+            bool found;
             // Note: Even if we'll be able to extract some non main shard
             //       id there is a still chance that some nasty client used
             //       96 bits encoded in base64. Or more correctly used
             //       string that can be decoded from base64 into 96 bits.
-            err = shardEngine->isIdExist(shardId); // TODO: change API for isIdExists
-            if (G_LIKELY(err == MojErrExists))
+            err = shardEngine->isIdExist(shardId, found); // TODO: change API for isIdExists
+            MojErrCheck(err);
+
+            if (G_LIKELY(found))
             {
                 // Hope this is actually an shard id. But there is
                 // still exists a chance...
             }
-            else if (G_LIKELY(err == MojErrNotFound))
+            else
             {
                 // Arghh... Who did that?!
 
@@ -447,10 +450,6 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
 
                 MojLogNotice(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
                 shardId = MojDbIdGenerator::MainShardId; // ignore it and use main shard
-            }
-            else
-            {
-                MojErrCheck( err ); // rest "errors" probably actual errors
             }
         }
     }

@@ -207,7 +207,7 @@ MojErr MojDbServiceHandler::handleDelKind(MojServiceMessage* msg, MojObject& pay
 	MojObject id;
 	MojErr err = payload.getRequired(MojDbServiceDefs::IdKey, id);
 	MojErrCheck(err);
-	
+
 	bool found = false;
 	err = m_db.delKind(id, found, MojDb::FlagNone, req);
 	MojErrCheck(err);
@@ -246,7 +246,7 @@ MojErr MojDbServiceHandler::handleFind(MojServiceMessage* msg, MojObject& payloa
 {
 	MojAssert(msg);
 	MojLogTrace(s_log);
-	
+
 	bool doCount = false;
 	payload.get(MojDbServiceDefs::CountKey, doCount);
 
@@ -312,7 +312,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 	MojErr err = MojErrNone;
 	MojUInt32 count = 0;
 	MojObject obj;
-	
+
 
 	if (payload.get(MojDbServiceDefs::ObjectsKey, obj)) {
 		if (payload.contains(MojDbServiceDefs::QueryKey))
@@ -402,7 +402,7 @@ MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
-    
+
 	MojObject obj;
 	MojErr err = payload.getRequired(MojDbServiceDefs::ObjectsKey, obj);
 	MojErrCheck(err);
@@ -430,12 +430,12 @@ MojErr MojDbServiceHandler::handlePutKind(MojServiceMessage* msg, MojObject& pay
 {
 	MojAssert(msg);
 	MojLogTrace(s_log);
-    
+
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
-    // check alert level 
+    // check alert level
 	MojErr err = m_db.putKind(payload, MojDb::FlagNone, req);
 	MojErrCheck(err);
 	err = msg->replySuccess();
@@ -564,7 +564,7 @@ MojErr MojDbServiceHandler::handleSearch(MojServiceMessage* msg, MojObject& payl
     MojString localeStr;
     MojErr err = m_db.getLocale(localeStr, req);
 	MojErrCheck(err);
-    
+
 	MojDbSearchCursor cursor(localeStr);
     err = findImpl(msg, payload, req, cursor, true);
 	MojErrCheck(err);
@@ -589,7 +589,7 @@ MojErr MojDbServiceHandler::handleStats(MojServiceMessage* msg, MojObject& paylo
 	MojErrCheck(err);
 	if (found)
 		pKind = &forKind;
-	
+
 
 	MojObject results;
 	err = m_db.stats(results, req, verify, pKind);
@@ -616,7 +616,7 @@ MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& paylo
 	MojObject queryObj;
 	MojErr err = payload.getRequired(MojDbServiceDefs::QueryKey, queryObj);
 	MojErrCheck(err);
-	
+
 	MojRefCountedPtr<Watcher> watcher(new Watcher(msg));
 	MojAllocCheck(watcher.get());
 
@@ -740,7 +740,7 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
     err = writer.beginObject();
     MojErrCheck(err);
 
-    if (shardId.length() == 0) // parameter is absent
+    if (shardId.empty()) // parameter is absent
     {
         err = writer.boolProp(MojServiceMessage::ReturnValueKey, false);
         MojErrCheck(err);
@@ -751,8 +751,12 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
     }
     else
     {
+        bool found;
+        err = m_db.shardEngine()->isIdExist(shardId, found);
+        MojErrCheck(err);
+
         //validate id
-        if ( (shardId.compare("0") != 0) && (m_db.shardEngine()->isIdExist(shardId) == MojErrExists) )
+        if (found)
         {
             MojDbShardEngine::ShardInfo info;
             err = m_db.shardEngine()->get(shardId, info);
@@ -778,7 +782,7 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
                 MojErrCheck(err);
             }
 
-            m_db.shardId(shardId);
+            m_db.shardId(shardId);  // TODO: what this do?
        }
        else
        {
@@ -841,7 +845,11 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
     }
     else
     {
-       if (G_LIKELY(m_db.shardEngine()->isIdExist(shardId) == MojErrExists))
+        bool found;
+        err = m_db.shardEngine()->isIdExist(shardId, found);
+        MojErrCheck(err);
+
+       if (G_LIKELY(found))
        {
             if (G_LIKELY(m_db.isValidKind(kindStr)))
             {
@@ -927,8 +935,12 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
         err = payload.getRequired(MojDbServiceDefs::TransientKey, transient);
         MojErrCheck(err);
 
+        bool found;
+        err = m_db.shardEngine()->isIdExist(shardId, found);
+        MojErrCheck(err);
+
         //validate id
-        if ( (shardId.compare("0") != 0) && (m_db.shardEngine()->isIdExist(shardId) == MojErrExists) )
+        if ( found )
         {
             MojDbShardEngine::ShardInfo info;
             err = m_db.shardEngine()->setTransient(shardId, transient);

@@ -27,7 +27,7 @@
 #include "db/MojDb.h"
 #include "core/MojUtil.h"
 
-#include "Runner.h"
+#include "MojDbCoreTest.h"
 
 static const MojChar* const MojLoadTestFileName = _T("loadtest.json");
 static const MojChar* const MojDumpTestFileName = _T("dumptest.json");
@@ -45,24 +45,22 @@ static const MojChar* const MojTestStr =
 	_T("{\"_kind\":\"LoadTest:1\",\"foo\":\"hello\",\"bar\":\"world\"}")
 	_T("{\"_kind\":\"LoadTest:1\",\"foo\":\"hello\",\"bar\":\"world\"}");
 
-struct DatabaseSuite : public ::testing::Test
+struct DatabaseSuite : public MojDbCoreTest
 {
-    MojDb db;
     MojString kindId;
 
     void SetUp()
     {
-        // open
-        MojAssertNoErr( db.open(tempFolder) );
+        MojDbCoreTest::SetUp();
         MojAssertNoErr( kindId.assign(_T("LoadTest:1")) );
     }
 
     void TearDown()
     {
-        MojExpectNoErr( db.close() );
+        MojDbCoreTest::TearDown();
 
-        MojUnlink(MojLoadTestFileName);
-        MojUnlink(MojDumpTestFileName);
+        MojExpectNoErr( MojUnlink(MojLoadTestFileName) );
+        MojExpectNoErr( MojUnlink(MojDumpTestFileName) );
     }
 
     void checkCount()

@@ -2,7 +2,7 @@
     "role": {
         "exeName":"@WEBOS_INSTALL_SBINDIR@/mojodb-luna",
         "type": "regular",
-        "allowedNames": ["com.palm.db","com.palm.tempdb","com.webos.mediadb"]
+        "allowedNames": ["com.palm.db","com.palm.tempdb","com.webos.mediadb", "com.palm.mojodbclient"]
     },
     "permissions": [
         {
@@ -14,6 +14,11 @@
             "service":"com.webos.mediadb",
             "inbound":["*"],
             "outbound":[]
+        },
+        {
+            "service": "com.palm.mojodbclient",
+            "inbound":[],
+            "outbound":["com.webos.service.attachedstoragemanager"]
         }
     ]
 }

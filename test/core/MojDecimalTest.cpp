@@ -23,6 +23,8 @@
 ****************************************************************************************************
 **/
 
+#include <cmath>
+
 #include "MojDecimalTest.h"
 #include "core/MojDecimal.h"
 
@@ -58,10 +60,11 @@ MojErr MojDecimalTest::run()
 	MojTestAssert(d1.magnitude() == 0 && d1.fraction() == 0);
 	MojTestAssert(d2.magnitude() == 100 && d2.fraction() == 65432);
 	MojDouble d = d2.floatValue();
-	MojTestAssert(d == 100.065432);
+    // to work-around x*10^(-n) to y*2^(-m) conversion use integer part
+    MojTestAssert(round(d * 1000000) == 100065432);
 	MojTestAssert(d3.magnitude() == 3 && d3.fraction() == 141500);
 	d = d3.floatValue();
-	MojTestAssert(d == 3.1415);
+    MojTestAssert(round(d * 10000) == 31415);
 	MojTestAssert(d4.magnitude() == 100 && d2.fraction() == 65432);
 
 	MojTestAssert(d1 < d3);
@@ -81,14 +84,14 @@ MojErr MojDecimalTest::run()
 
 	d1.assign(-5.28);
 	d = d1.floatValue();
-	MojTestAssert(d == -5.28);
+    MojTestAssert(round(d * 100) == -528);
 	MojInt64 m = d1.magnitude();
 	MojInt64 f = d1.fraction();
 	MojTestAssert(m == -5 && f == 280000);
 	d1.assign(-987, 654);
 	MojTestAssert(d1.magnitude() == -987 && d1.fraction() == 654);
 	d = d1.floatValue();
-	MojTestAssert(d == -987.000654);
+    MojTestAssert(round(d * 1000000) == -987000654);
 
 	MojChar buf[MojDecimal::MaxStringSize];
 	MojErr err = MojDecimal().stringValue(buf, sizeof(buf));

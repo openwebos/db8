@@ -26,12 +26,12 @@ respawn
 # Comment this line out to suppress logs on the console
 #console output
 
-script
+pre-start script
 	# move logs
 	if [ -d @WEBOS_INSTALL_LOCALSTATEDIR@/dblog ]; then
 		mv @WEBOS_INSTALL_LOCALSTATEDIR@/dblog/* @WEBOS_INSTALL_LOCALSTATEDIR@/db
 		rmdir @WEBOS_INSTALL_LOCALSTATEDIR@/dblog
 	fi
-
-	@WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db
 end script
+
+exec @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db

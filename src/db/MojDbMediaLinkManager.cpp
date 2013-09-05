@@ -18,7 +18,8 @@
 
 #include "db/MojDbMediaLinkManager.h"
 #include "db/MojDbServiceDefs.h"
-#include <db/MojDb.h>
+#include "db/MojDb.h"
+#include "core/MojOs.h"
 #include <sstream>
 #include <algorithm>
 
@@ -32,31 +33,38 @@ MojDbMediaLinkManager::MojDbMediaLinkManager()
     MojLogTrace(s_log);
 
     m_dir.assign(MediaLinkDirectory);
+    m_baseDirCreated = false;
 }
 
 MojErr MojDbMediaLinkManager::setLinkDirectory(const MojString& dir)
 {
     m_dir = dir;
+    m_baseDirCreated = false;
     return MojErrNone;
 }
 
 MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath)
 {
     std::stringstream sstream;
-    sstream << "0x" << std::hex << shardId;
-    std::string result = sstream.str();
-
-    std::transform(result.begin(), result.end(), result.begin(), toupper);
-
-    return linkPath.format("%s/%s", m_dir.data(), result.c_str());
+    sstream << std::hex << std::uppercase << shardId;
+    std::string linkname = sstream.str();
+    return linkPath.format("%s/%s", m_dir.data(), linkname.c_str());
 }
 
-MojErr MojDbMediaLinkManager::createLink(const MojDbShardEngine::ShardInfo& shardInfo)
+MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
 {
     MojLogTrace(s_log);
 
     MojErr err;
     MojString linkPath;
+
+    // ensure base mount path exists
+    if (!m_baseDirCreated) {
+        err = MojMkDir(m_dir, MOJ_S_IRWXU);
+        MojErrCheck(err);
+        MojLogNotice (s_log, _T("Create base folder for mount symlinks: %s"), m_dir.data());
+        m_baseDirCreated = true;
+    }
 
     err = getLinkPath(shardInfo.id, linkPath);
     MojErrCheck(err);
@@ -64,9 +72,12 @@ MojErr MojDbMediaLinkManager::createLink(const MojDbShardEngine::ShardInfo& shar
     MojLogDebug(s_log, _T("create link %s"), linkPath.data());
 
     MojUnlink(linkPath);
-    err = MojSymlink(shardInfo.mountPath, linkPath);
-    if (err != MojErrNone) {
-        MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.mountPath.data());
+    err = MojSymlink(shardInfo.deviceUri, linkPath);
+    if (err == MojErrNone) {
+        shardInfo.mountPath = linkPath;
+        MojLogInfo(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
+    } else {
+        MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
     }
 
     return err;
@@ -77,13 +88,9 @@ MojErr MojDbMediaLinkManager::removeLink(const MojDbShardEngine::ShardInfo& shar
     MojLogTrace(s_log);
     MojErr err;
 
-    MojString linkPath;
-    err = getLinkPath(shardInfo.id, linkPath);
-    MojErrCheck(err);
-
-    err = MojUnlink(linkPath);
+    err = MojUnlink(shardInfo.mountPath);
     if (err != MojErrNone) {
-        MojLogWarning(s_log, _T("Can't remove symlink %s"), linkPath.data());
+        MojLogWarning(s_log, _T("Can't remove symlink %s"), shardInfo.mountPath.data());
     }
 
     return err;

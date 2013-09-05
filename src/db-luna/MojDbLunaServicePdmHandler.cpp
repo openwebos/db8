@@ -189,9 +189,6 @@ MojErr MojDbLunaServicePdmHandler::processLunaResponse(const MojObject* response
     MojErrCheck(err);
     MojLogDebug(s_log, _T("device uri is: %s"), result->deviceUri.data());
 
-    // for media deviceUri and mount path are the same
-    result->mountPath = result->deviceUri;
-
     return MojErrNone;
 }
 

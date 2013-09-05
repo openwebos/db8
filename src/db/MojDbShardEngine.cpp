@@ -516,8 +516,13 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
     if (found) {    // shard already registered in database
         databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
         databaseShardInfo.deviceName = pdmShardInfo.deviceName;
-        databaseShardInfo.mountPath = pdmShardInfo.mountPath;
         databaseShardInfo.active = pdmShardInfo.active;
+
+        if (databaseShardInfo.active) {  // inseted media
+            m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
+        } else {     // removed media
+            m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
+        }
 
         err = m_shardEngine->update(databaseShardInfo);
         MojErrCheck(err);
@@ -529,9 +534,14 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
         databaseShardInfo.deviceId = pdmShardInfo.deviceId;
         databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
         databaseShardInfo.deviceName = pdmShardInfo.deviceName;
-        databaseShardInfo.mountPath = pdmShardInfo.mountPath;
         databaseShardInfo.active = pdmShardInfo.active;
-        // databaseShardInfo.transient = true; what setup by default?
+        databaseShardInfo.transient = false;
+
+        if (databaseShardInfo.active) {  // inseted media
+            m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
+        } else {     // removed media
+            m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
+        }
 
         err = m_shardEngine->put(databaseShardInfo);
         MojErrCheck(err);

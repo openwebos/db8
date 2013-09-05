@@ -27,12 +27,13 @@ public:
     MojDbMediaLinkManager();
     MojErr setLinkDirectory(const MojString& dir);
 
-    MojErr createLink(const MojDbShardEngine::ShardInfo& shardInfo);
+    MojErr createLink(MojDbShardEngine::ShardInfo& shardInfo);
     MojErr removeLink(const MojDbShardEngine::ShardInfo& shardInfo);
 private:
     MojErr getLinkPath(MojUInt32 shardId, MojString& linkPath);
 
     MojString m_dir;
+    bool m_baseDirCreated;
 
     static MojLogger s_log;
 };

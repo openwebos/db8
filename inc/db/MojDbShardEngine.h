@@ -24,7 +24,13 @@
 #include "core/MojErr.h"
 #include "core/MojString.h"
 #include "core/MojSignal.h"
-#include <auto_ptr.h>
+
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    #include <boost/smart_ptr/scoped_ptr.hpp>
+#else
+    #include <auto_ptr.h>
+#endif
+
 #include <list>
 
 class MojDb;

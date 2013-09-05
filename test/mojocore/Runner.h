@@ -30,6 +30,10 @@
 #define MojAssertNoErr( E ) ASSERT_EQ( MojErrNone, E )
 #define MojExpectNoErr( E ) EXPECT_EQ( MojErrNone, E )
 
+class MojDecimal;
+
 extern const char *tempFolder;
+
+void PrintTo(const MojDecimal &decimal, ::std::ostream* os);
 
 #endif

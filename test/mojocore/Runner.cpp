@@ -25,9 +25,24 @@
 #include <cstdlib>
 #include "gtest/gtest.h"
 
+#include <core/MojDecimal.h>
 #include "core/MojUtil.h"
 
+#include "Runner.h"
+
 const char *tempFolder;
+
+/**
+ * Teach Google Test framework how to print our MojDecimal
+ */
+void PrintTo(const MojDecimal &decimal, ::std::ostream* os)
+{
+    char buf[MojDecimal::MaxStringSize];
+
+    MojAssertNoErr( decimal.stringValue(buf, sizeof(buf)) );
+
+    *os << buf;
+}
 
 int main(int argc, char **argv) {
     char buf[128] = "/tmp/mojo-test-dir-XXXXXX";

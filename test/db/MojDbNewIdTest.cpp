@@ -144,8 +144,8 @@ MojErr MojDbNewIdTest::run()
     MojTestErrCheck(err);
 
     // put shardIds into shardIdCache
-    MojDbShardIdCache* p_cache = db.shardIdCache();
-    err = initShardIdCache(p_cache);
+    MojDbShardEngine* p_engine = db.shardEngine();
+    err = initShardEngine(p_engine);
     MojTestErrCheck(err);
 
     // put kinds
@@ -175,13 +175,15 @@ void MojDbNewIdTest::cleanup()
     (void) MojRmDirRecursive(MojDbTestDir);
 }
 
-MojErr MojDbNewIdTest::initShardIdCache (MojDbShardIdCache* ip_cache)
+MojErr MojDbNewIdTest::initShardEngine (MojDbShardEngine* ip_engine)
 {
     MojUInt32 arr[] = { 0xFFFFFFFA, 0xFFFFFFFB, 0xFFFFFFFC, 0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF };
 
     for (MojSize i = 0; i < 6; i++)
     {
-        ip_cache->put(arr[i]);
+        MojDbShardEngine::ShardInfo shard;
+        shard.id = arr[i];
+        ip_engine->put(shard);
     }
 
     return MojErrNone;

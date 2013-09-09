@@ -21,7 +21,7 @@
 #define MOJDBNEWIDTEST_H_
 
 #include "MojDbTestRunner.h"
-#include "db/MojDbShardIdCache.h"
+#include "db/MojDbShardEngine.h"
 
 class MojDbNewIdTest : public MojTestCase
 {
@@ -32,7 +32,7 @@ public:
     virtual void cleanup();
 
 private:
-    MojErr initShardIdCache (MojDbShardIdCache* ip_cache);
+    MojErr initShardEngine (MojDbShardEngine* ip_engine);
     MojErr putTestKind(MojDb& db);
     MojErr putTest(MojDb& db);
     MojErr duplicateTest(MojDb& db);

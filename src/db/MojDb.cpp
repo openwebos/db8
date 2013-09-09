@@ -492,9 +492,11 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
         for (MojVector<MojByte>::ConstIterator byte = shardIdVector.begin(); byte != shardIdVector.end(); ++byte) {
             id = (id << 8) | (*byte);
         }
-        // Max shard ID(0xFFFFFFFF) converted base-64 is "zzzzzk"
-        // Shard ID should exist in shard_id_cache
-        if(m_shardId.length() > 6 || m_shardId.compare(_T("zzzzzk")) > 0 || !m_shardIdCache.isExist(id)) {
+        // Length of max shard ID(0xFFFFFFFF) converted base-64 is 6("zzzzzk")
+        // Shard ID should be registered within shard engine
+        bool found = false;
+        err = shardEngine()->isIdExist(id, found);
+        if(!found) {
             MojLogWarning(s_log, _T("Invalid shard ID\n"));
             MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID"));
         }

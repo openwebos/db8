@@ -20,6 +20,8 @@
 #ifndef MOJDECIMAL_H_
 #define MOJDECIMAL_H_
 
+#include <cmath>
+
 #include "core/MojCoreDefs.h"
 #include "core/MojHasher.h"
 
@@ -47,7 +49,7 @@ public:
 
 	MojErr assign(const MojChar* str);
 	void assign(MojInt64 magnitude, MojUInt32 fraction);
-	void assign(MojDouble d) { m_rep = (MojInt64) (d * ((MojDouble) Numerator)); }
+	void assign(MojDouble d) { m_rep = llround(d * Numerator); }
 	void assignRep(MojInt64 rep) { m_rep = rep; }
 
 	MojDecimal& operator=(const MojDecimal& rhs) { m_rep = rhs.m_rep; return *this; }

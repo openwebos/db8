@@ -27,6 +27,7 @@ add_executable(${PROJECT_NAME}
                Runner.cpp
                AtomicIntTest.cpp
                DecimalTest.cpp
+               NumberTest.cpp
                )
 
 target_link_libraries(${PROJECT_NAME}

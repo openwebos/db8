@@ -132,7 +132,7 @@ TEST(DecimalTest, parse_9e12)
 
 TEST(DecimalTest, floatValue_reconvert)
 {
-    for (MojUInt32 fraction = 0; fraction < MojDecimal::Numerator; ++fraction)
+    for (int fraction = 0; fraction < MojDecimal::Numerator; ++fraction)
     {
         MojDecimal d(0, fraction);
         ASSERT_EQ( d, MojDecimal(d.floatValue()) );

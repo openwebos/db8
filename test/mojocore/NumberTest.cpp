@@ -155,3 +155,145 @@ TEST(NumberTest, lexer_invalid)
             << "Lexer should report correct error on parsing '" << sample << "'";
     }
 }
+
+/**
+ * Basic test for parser
+ */
+TEST(NumberTest, parser)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "-3.14e0") );
+    EXPECT_TRUE( parser.haveFraction() );
+
+    MojDecimal d;
+    MojAssertNoErr( parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(-3, 140000), d );
+}
+
+TEST(NumberTest, parse_with_rounding)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "0.123456789") );
+    EXPECT_TRUE( parser.haveFraction() );
+
+    MojDecimal d;
+    MojAssertNoErr( parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(0, 123457), d );
+}
+
+/**
+ * @test Situation when number without exponent can't be represented in numbers
+ *       grid of mantissa. I.e. 0.000000123e7 = 1.23
+ */
+TEST(NumberTest, parse_unbalanced_small)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "0.000000123e7") );
+    EXPECT_TRUE( parser.haveFraction() );
+
+    MojDecimal d;
+    MojAssertNoErr( parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(1,230000), d );
+}
+
+/**
+ * @test Similar to parse_unbalanced_small but with big number.
+ *       I.e. 123000000000000000000e-20 = 1.23
+ */
+TEST(NumberTest, parse_unbalanced_big)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "123000000000000000000e-20") );
+    EXPECT_TRUE( parser.haveFraction() );
+
+    MojDecimal d;
+    MojAssertNoErr( parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(1,230000), d );
+}
+
+/**
+ * @test Situation when mantissa digits can't be stored in native number
+ */
+TEST(NumberTest, parse_mantissa_overflow)
+{
+    MojNumber::Parser parser;
+
+    EXPECT_EQ( MojErrValueOutOfRange, MojNumber::Lexer::parse(parser, "11111111111111111111") );
+}
+
+/**
+ * @test Situation when exponent digits can't be stored in native number
+ */
+TEST(NumberTest, parse_exponent_overflow)
+{
+    MojNumber::Parser parser;
+
+    EXPECT_EQ( MojErrValueOutOfRange, MojNumber::Lexer::parse(parser, "0e100000000000000000000") );
+}
+
+/**
+ * @test Decimal overflow situation due to big mantissa
+ */
+TEST(NumberTest, parse_decimal_overflow_by_mantissa)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "123000000000000000000") );
+
+    // note that in this case we should get error during rendering
+    MojDecimal d;
+    EXPECT_EQ( MojErrValueOutOfRange, parser.toDecimal(d) );
+}
+
+/**
+ * @test Decimal overflow situation due to big exponent
+ */
+TEST(NumberTest, parse_decimal_overflow_by_exponent)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "1.23e20") );
+
+    MojDecimal d;
+    EXPECT_EQ( MojErrValueOutOfRange, parser.toDecimal(d) );
+}
+
+/**
+ * @test Boundary case for decimal overflow situation when exponent is still in
+ *       allowed range, but product of both mantissa and exponent goes out of
+ *       MojDecimal.
+ */
+TEST(NumberTest, parse_decimal_overflow_by_exponent_bound)
+{
+    MojNumber::Parser parser;
+    MojDecimal d(0,0);
+
+    // log_10 {2^63 - 1} = 18.96
+    // 18 - MojDecimal::Precision = 12
+    // M * 10^12 > ((2^63 - 1) / 10^6 )  ==>  M > 9.22
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "11e12") );
+    EXPECT_EQ( MojErrValueOutOfRange, parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(0,0), d ); // should keep old value
+}
+
+/**
+ * @test number very close to boundary of maximum MojDecimal but still
+ *       parsable.
+ *       I.e. ((2^63 - 1) / 10^6) / 10^12 = 9.223372036854775
+ *       But double have issue to represent that number exactly, so we found
+ *       some other that is close enough.
+ */
+TEST(NumberTest, parse_decimal_exponent_bound)
+{
+    MojNumber::Parser parser;
+    MojDecimal d;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "9.22337203685477376e12") );
+    MojExpectNoErr( parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(9.223372036854774376e12), d );
+}

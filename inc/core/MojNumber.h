@@ -27,5 +27,6 @@
 #define __MOJNUMBER_H
 
 #include <core/internal/MojNumberLexer.h>
+#include <core/internal/MojNumberParser.h>
 
 #endif

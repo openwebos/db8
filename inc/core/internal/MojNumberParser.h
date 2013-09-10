@@ -70,14 +70,25 @@ namespace MojNumber {
         static constexpr int exponentBase = 10;
         static constexpr int exponentBound = (INT_MAX - base + 1) / base;
 
+        static constexpr int int64_pow10_max = 18; // log_10 {2^63 - 1} = 18.96
+
     public:
-        Parser() :
-            positive(true),
-            value(0),
-            valueExp(0),
-            exponentPositive(true),
-            exponent(0)
-        {}
+        Parser()
+        { reset(); }
+
+        /**
+         * Reset parser to initial state
+         *
+         * Can be used for parser re-use
+         */
+        void reset()
+        {
+            positive = true;
+            value = 0;
+            valueExp = 0;
+            exponentPositive = true;
+            exponent = 0;
+        }
 
         /**
          * Check if we have any fractional part
@@ -112,7 +123,22 @@ namespace MojNumber {
             }
             else
             {
-                rep *= npow((uint64_t)base, alignExp);
+                // check that we able to call npow(10, alignExp)
+                if (G_UNLIKELY(alignExp > int64_pow10_max))
+                {
+                    MojErrThrowMsg( MojErrValueOutOfRange, "Too big value for MojDecimal %" PRIu64 " * %d^%d",
+                                    value, base, alignExp - MojDecimal::Precision );
+                }
+
+                const int64_t factor = npow((uint64_t)base, alignExp);
+
+                // check that value with exponent will not cross boundary
+                if (G_UNLIKELY(value > (INT64_MAX / factor)))
+                {
+                    MojErrThrowMsg( MojErrValueOutOfRange, "Too big value for MojDecimal %" PRIu64 " * %" PRIu64 " / %d",
+                                    value, factor, MojDecimal::Numerator );
+                }
+                rep *= factor;
             }
             if (!positive) rep = -rep;
             decimal.assignRep(rep);

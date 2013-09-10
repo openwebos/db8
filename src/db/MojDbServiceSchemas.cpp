@@ -188,7 +188,15 @@ const MojChar* const MojDbServiceHandler::PutPermissionsSchema =
 				 _T("\"type\":{\"type\":\"string\"},")
  				 _T("\"caller\":{\"type\":\"string\"},")
 				 _T("\"object\":{\"type\":\"string\"},")
- 				 _T("\"operations\":{\"type\":\"object\",\"additionalProperties\":{\"enum\":[\"allow\",\"deny\"]}}}}}},")
+ 				 _T("\"operations\":{\"type\":\"object\",")
+				 	_T("\"additionalProperties\":false,")
+				 	_T("\"properties\":{")
+				 		_T("\"read\":{\"enum\":[\"allow\",\"deny\"]},")
+				 		_T("\"update\":{\"enum\":[\"allow\",\"deny\"]},")
+				 		_T("\"create\":{\"enum\":[\"allow\",\"deny\"]},")
+				 		_T("\"delete\":{\"enum\":[\"allow\",\"deny\"]},")
+				 		_T("\"extend\":{\"enum\":[\"allow\",\"deny\"]}")
+				  _T("}}}}}},")
 	 _T("\"additionalProperties\":false}");
 
 const MojChar* const MojDbServiceHandler::PutQuotasSchema =

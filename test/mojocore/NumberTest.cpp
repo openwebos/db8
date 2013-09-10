@@ -222,7 +222,31 @@ TEST(NumberTest, parse_mantissa_overflow)
 {
     MojNumber::Parser parser;
 
-    EXPECT_EQ( MojErrValueOutOfRange, MojNumber::Lexer::parse(parser, "11111111111111111111") );
+    EXPECT_EQ( MojErrValueOutOfRange, MojNumber::Lexer::parse(parser, "111111111111111111111") );
+}
+
+/**
+ * @test Situation when mantissa digits are close to boundary
+ */
+TEST(NumberTest, parse_mantissa_bound)
+{
+    MojNumber::Parser parser;
+
+    // MojNumber::Parser allows mantissa nearly as big
+    // as: (2^64-1 - 9) `div` 10 * 10 + 9 = 18446744073709551609
+    MojExpectNoErr( MojNumber::Lexer::parse(parser, "18446744073709551609") );
+}
+
+/**
+ * @test Situation when mantissa digits are just crossing boundary
+ */
+TEST(NumberTest, parse_mantissa_overflow_bound)
+{
+    MojNumber::Parser parser;
+
+    // note that if we'll use zero as last digit it will not go to exponent
+    // rather than to mantissa
+    EXPECT_EQ( MojErrValueOutOfRange, MojNumber::Lexer::parse(parser, "18446744073709551611") );
 }
 
 /**

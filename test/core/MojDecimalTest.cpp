@@ -175,7 +175,7 @@ MojErr MojDecimalTest::run()
 	MojTestAssert(d1 == MojDecimal(1, 123456));
 	err = d1.assign(_T("+1.12345678"));
 	MojTestErrCheck(err);
-	MojTestAssert(d1 == MojDecimal(1, 123456));
+	MojTestAssert(d1 == MojDecimal(1, 123457));
 	err = d1.assign(_T("1e3"));
 	MojTestErrCheck(err);
 	MojTestAssert(d1 == MojDecimal(1000, 0));
@@ -190,7 +190,7 @@ MojErr MojDecimalTest::run()
 	MojTestAssert(d1 == MojDecimal(0, 1000));
 	err = d1.assign(_T("+1.12345678e5"));
 	MojTestErrCheck(err);
-	MojTestAssert(d1 == MojDecimal(112345, 600000));
+	MojTestAssert(d1 == MojDecimal(112345, 678000));
 	err = d1.assign(_T("+1.12345678e-5"));
 	MojTestErrCheck(err);
 	MojTestAssert(d1 == MojDecimal(0, 11));

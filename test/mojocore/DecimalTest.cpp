@@ -242,7 +242,7 @@ TEST(DecimalTest, original)
     MojAssertNoErr( d1.assign(_T("1.123456")) );
     EXPECT_EQ( MojDecimal(1, 123456), d1 );
     MojAssertNoErr( d1.assign(_T("+1.12345678")) );
-    EXPECT_EQ( MojDecimal(1, 123456), d1 );
+    EXPECT_EQ( MojDecimal(1, 123457), d1 );
     MojAssertNoErr( d1.assign(_T("1e3")) );
     EXPECT_EQ( MojDecimal(1000, 0), d1 );
     MojAssertNoErr( d1.assign(_T("1.0e3")) );
@@ -252,7 +252,7 @@ TEST(DecimalTest, original)
     MojAssertNoErr( d1.assign(_T("1e-3")) );
     EXPECT_EQ( MojDecimal(0, 1000), d1 );
     MojAssertNoErr( d1.assign(_T("+1.12345678e5")) );
-    EXPECT_EQ( MojDecimal(112345, 600000), d1 );
+    EXPECT_EQ( MojDecimal(112345, 678000), d1 );
     MojAssertNoErr( d1.assign(_T("+1.12345678e-5")) );
     EXPECT_EQ( MojDecimal(0, 11), d1 );
 }

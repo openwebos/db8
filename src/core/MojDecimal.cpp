@@ -16,7 +16,7 @@
 *
 * LICENSE@@@ */
 
-
+#include "core/MojNumber.h"
 #include "core/MojDecimal.h"
 #include "core/MojUtil.h"
 
@@ -90,140 +90,14 @@ MojErr MojDecimal::assign(const MojChar* str, MojSize n)
 {
 	MojAssert(str);
 
-	enum State {
-		StateSign,
-		StateIntegerBegin,
-		StateInteger,
-		StateFractionBegin,
-		StateFraction,
-		StateExponentSign,
-		StateExponentBegin,
-		StateExponent,
-	};
+    MojNumber::Parser p;
+    MojErr err;
 
-	MojChar c = 0;
-	State state = StateSign;
-	MojInt64 rep = 0;
-	MojInt64 exp = 0;
-	MojInt64 fracMultiplier = Numerator / 10;
-	bool negative = false;
-	bool negativeExp = false;
-    const MojChar* strEnd = str + n;
+    err = MojNumber::Lexer::parse(p, str, n);
+    MojErrCheck( err );
 
-    while ((str != strEnd) && (c = *str)) {
-Redo:
-		switch (state) {
-		case StateSign: {
-			switch (c) {
-			case '-':
-				negative = true;
-			case '+':
-				state = StateIntegerBegin;
-				break;
-			default:
-				state = StateIntegerBegin;
-				goto Redo;
-			}
-			break;
-		}
-		case StateIntegerBegin: {
-			if (!MojIsDigit(c))
-				MojErrThrow(MojErrInvalidDecimal);
-			rep = (c - '0') * Numerator;
-			state = StateInteger;
-			break;
-		}
-		case StateInteger: {
-			switch (c) {
-			case '.':
-				state = StateFractionBegin;
-				break;
-			case 'E':
-			case 'e':
-				state = StateExponentSign;
-				break;
-			default:
-				if (!MojIsDigit(c))
-					MojErrThrow(MojErrInvalidDecimal);
-				// TODO: deal with overflow
-				rep = (rep * 10) + ((c - '0') * Numerator);
-				break;
-			}
-			break;
-		}
-		case StateFractionBegin: {
-			if (!MojIsDigit(c))
-				MojErrThrow(MojErrInvalidDecimal);
-			rep += (c - '0') * fracMultiplier;
-			state = StateFraction;
-			break;
-		}
-		case StateFraction: {
-			switch (c) {
-			case 'E':
-			case 'e':
-				state = StateExponentSign;
-				break;
-			default:
-				if (!MojIsDigit(c))
-					MojErrThrow(MojErrInvalidDecimal);
-				fracMultiplier /= 10;
-				rep += (c - '0') * fracMultiplier;
-				break;
-			}
-			break;
-		}
-		case StateExponentSign: {
-			switch (c) {
-			case '-':
-				negativeExp = true;
-			case '+':
-				state = StateExponentBegin;
-				break;
-			default:
-				state = StateExponentBegin;
-				goto Redo;
-			}
-			break;
-		}
-		case StateExponentBegin: {
-			if (!MojIsDigit(c))
-				MojErrThrow(MojErrInvalidDecimal);
-			exp = c - '0';
-			state = StateExponent;
-			break;
-		}
-		case StateExponent: {
-			if (!MojIsDigit(c))
-				MojErrThrow(MojErrInvalidDecimal);
-			exp = (exp * 10) + (c - '0');
-			break;
-		}
-		}
-		str++;
-	}
+    err = p.toDecimal( *this );
+    MojErrCheck( err );
 
-	// must be in valid end state
-	if (state != StateInteger && state != StateFraction && state != StateExponent)
-		MojErrThrow(MojErrInvalidDecimal);
-	// apply exponent
-	if (negativeExp) {
-		while (exp) {
-			rep /= 10;
-			exp--;
-		}
-	} else {
-		while (exp) {
-			// TODO: deal with overflow
-			rep *= 10;
-			exp--;
-		}
-	}
-	// and negate
-	if (negative)
-		rep = -rep;
-
-	m_rep = rep;
-
-	return MojErrNone;
+    return MojErrNone;
 }

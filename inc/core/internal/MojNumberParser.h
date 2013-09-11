@@ -27,7 +27,10 @@
 #ifndef __MOJNUMBERPARSER_H
 #define __MOJNUMBERPARSER_H
 
-#include <cinttypes>
+// Bring part of ISO C99 into C++
+// Note: C++11 have <cinttypes> that includes those macros as well
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
 
 #include <glib.h>
 
@@ -42,7 +45,7 @@ namespace MojNumber {
     template<typename T>
     T npow(T x, size_t exp)
     {
-        constexpr size_t firstBit = (INT_MAX >> 1) + 1;
+        const size_t firstBit = (INT_MAX >> 1) + 1;
         T y = 1;
         for(size_t bit = firstBit; bit != 0; bit >>= 1)
         {
@@ -64,13 +67,13 @@ namespace MojNumber {
         bool exponentPositive;
         int exponent;
 
-        static constexpr int base = 10;
-        static constexpr uint64_t bound = (UINT64_MAX - (base - 1)) / base;
+        static const int base = 10;
+        static const uint64_t bound = (MojUInt64Max - (base - 1)) / base;
 
-        static constexpr int exponentBase = 10;
-        static constexpr int exponentBound = (INT_MAX - (base - 1)) / base;
+        static const int exponentBase = 10;
+        static const int exponentBound = (INT_MAX - (base - 1)) / base;
 
-        static constexpr int int64_pow10_max = 18; // log_10 {2^63 - 1} = 18.96
+        static const int int64_pow10_max = 18; // log_10 {2^63 - 1} = 18.96
 
     public:
         Parser()
@@ -133,7 +136,7 @@ namespace MojNumber {
                 const int64_t factor = npow((uint64_t)base, alignExp);
 
                 // check that value with exponent will not cross boundary
-                if (G_UNLIKELY(value > (INT64_MAX / factor)))
+                if (G_UNLIKELY(value > (MojInt64Max / factor)))
                 {
                     MojErrThrowMsg( MojErrValueOutOfRange, "Too big value for MojDecimal %" PRIu64 " * %" PRIu64 " / %d",
                                     value, factor, MojDecimal::Numerator );

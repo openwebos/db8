@@ -74,7 +74,7 @@ namespace MojNumber {
             MojErr err;
 
             for (const char *numberEnd = number + length;
-                 number != numberEnd;
+                 (number != numberEnd) && (G_LIKELY(length != MojSizeMax) || *number != '\0');
                  ++number)
             {
                 char c = *number;

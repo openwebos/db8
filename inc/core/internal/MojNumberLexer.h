@@ -66,8 +66,11 @@ namespace MojNumber {
             enum {
                 StateNumber,
                 StateMagnitude,
+                StateMagnitudeDigits,
                 StateFraction,
+                StateFractionDigits,
                 StateExponent,
+                StateExponentFirstDigit,
                 StateExponentDigits
             } state = StateNumber;
 
@@ -99,6 +102,10 @@ namespace MojNumber {
                     // fall through case label
 
                 case StateMagnitude:
+                    state = StateMagnitudeDigits;
+                    // fall through case label
+
+                case StateMagnitudeDigits:
                     switch (c)
                     {
                     case '0' ... '9':
@@ -122,6 +129,19 @@ namespace MojNumber {
                     case '0' ... '9':
                         err = visitor.fractionDigit(c - '0');
                         MojErrCheck( err );
+                        state = StateFractionDigits;
+                        break;
+                    default:
+                        MojErrThrowMsg(MojErrInvalidDecimal, "Expected digit for fraction but got '%c'", c);
+                    }
+                    break;
+
+                case StateFractionDigits:
+                    switch (c)
+                    {
+                    case '0' ... '9':
+                        err = visitor.fractionDigit(c - '0');
+                        MojErrCheck( err );
                         break;
                     case 'e': case 'E':
                         state = StateExponent;
@@ -132,7 +152,7 @@ namespace MojNumber {
                     break;
 
                 case StateExponent:
-                    state = StateExponentDigits;
+                    state = StateExponentFirstDigit;
                     if (c == '-')
                     {
                         err = visitor.negativeExponent();
@@ -151,6 +171,10 @@ namespace MojNumber {
 #endif
                     // fall through case label
 
+                case StateExponentFirstDigit:
+                    state = StateExponentDigits;
+                    // fall through case label
+
                 case StateExponentDigits:
                     switch (c)
                     {
@@ -164,6 +188,20 @@ namespace MojNumber {
                     break;
                 }
             }
+
+            // validate final state
+            switch (state)
+            {
+            case StateMagnitudeDigits:
+            case StateFractionDigits:
+            case StateExponentDigits:
+                // looks good
+                break;
+
+            default:
+                MojErrThrowMsg( MojErrInvalidDecimal, "Unexpected end of number in state %d", state );
+            };
+
             err = visitor.end();
             MojErrCheck( err );
 

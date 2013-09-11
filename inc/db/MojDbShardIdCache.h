@@ -22,34 +22,26 @@
 
 #include "core/MojCoreDefs.h"
 #include "core/MojErr.h"
-#include <set>
+#include <map>
+
+class MojObject;
 
 class MojDbShardIdCache : private MojNoCopy
 {
 public:
-    enum Mode
-    {
-        NORMAL = 0,
-        TESTING
-    };
-
     MojDbShardIdCache();
     ~MojDbShardIdCache();
 
-    MojErr init (Mode i_mode = MojDbShardIdCache::NORMAL);
-    bool isExist (MojUInt32 id);
-    MojErr put (MojUInt32 id);
-    MojErr del (MojUInt32 id);
+    bool isExist (const MojUInt32 id) const;
+    void put (const MojUInt32 id, const MojObject& obj);
+    bool get (const MojUInt32 id, MojObject& o_obj) const;
+    bool update (const MojUInt32 id, const MojObject& i_obj);
+    void del (const MojUInt32 id);
+    void clear (void);
 
 private:
-    Mode m_mode;
-
-    MojErr _read (void);
-    MojErr _write (void);
-
-    std::set<MojUInt32> m_set;
+    std::map<MojUInt32,MojObject> m_map;
     static MojLogger s_log;
 };
-
 
 #endif /* MOJDBSHARDIDCACHE_H_ */

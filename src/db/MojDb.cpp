@@ -184,10 +184,6 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	err = m_quotaEngine.open(m_conf, this, req);
 	MojErrCheck(err);
 
-    // shard id
-    MojLogInfo(s_log, _T("Init shard id cache"));
-    (void)m_shardIdCache.init();
-
     // shard's
     MojLogInfo(s_log, _T("Init shard engine"));
     (void)m_shardEngine.init(this, req);

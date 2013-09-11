@@ -106,7 +106,6 @@ public:
 	MojDbQuotaEngine* quotaEngine() { return &m_quotaEngine; }
 	MojDbStorageEngine* storageEngine() { return m_storageEngine.get(); }
 	MojDbStorageDatabase* storageDatabase() { return m_objDb.get(); }
-    MojDbShardIdCache* shardIdCache () { return &m_shardIdCache; }
     MojDbShardEngine* shardEngine () { return &m_shardEngine; }
 	MojInt64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
@@ -186,7 +185,6 @@ private:
 	MojDbKindEngine m_kindEngine;
 	MojDbPermissionEngine m_permissionEngine;
     MojDbQuotaEngine m_quotaEngine;
-    MojDbShardIdCache m_shardIdCache;
 	MojDbShardEngine m_shardEngine;
 	MojThreadRwLock m_schemaLock;
 	MojString m_engineName;

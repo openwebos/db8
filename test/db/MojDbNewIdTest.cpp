@@ -178,13 +178,33 @@ void MojDbNewIdTest::cleanup()
 MojErr MojDbNewIdTest::initShardEngine (MojDbShardEngine* ip_engine)
 {
     MojUInt32 arr[] = { 0xFFFFFFFA, 0xFFFFFFFB, 0xFFFFFFFC, 0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF };
+    MojDbShardEngine::ShardInfo info;
 
     for (MojSize i = 0; i < 6; i++)
     {
-        MojDbShardEngine::ShardInfo shard;
-        shard.id = arr[i];
-        ip_engine->put(shard);
+        generateItem(arr[i], info);
+        ip_engine->put(info);
     }
+
+    return MojErrNone;
+}
+
+MojErr MojDbNewIdTest::generateItem (MojUInt32 i_id, MojDbShardEngine::ShardInfo& o_shardInfo)
+{
+    static MojUInt32 id = 0xFF;
+
+    if(i_id != 0)
+        o_shardInfo.id = i_id;
+    else
+        o_shardInfo.id = ++id;
+
+    MojDbShardEngine::convertId(o_shardInfo.id, o_shardInfo.id_base64);
+    o_shardInfo.active = false;
+    o_shardInfo.transient = false;
+    o_shardInfo.deviceId.format("ID%x", o_shardInfo.id);
+    o_shardInfo.deviceUri.format("URI%x", o_shardInfo.id);
+    o_shardInfo.mountPath.format("/tmp/db8-test/media%x", o_shardInfo.id);
+    o_shardInfo.deviceName.format("TEST-%x", o_shardInfo.id);
 
     return MojErrNone;
 }

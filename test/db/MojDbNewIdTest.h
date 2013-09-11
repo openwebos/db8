@@ -38,6 +38,7 @@ private:
     MojErr duplicateTest(MojDb& db);
     MojUInt32 getKindCount (const MojChar* MojQueryStr, MojDb& db);
     MojErr addShardIdTest(MojDb& db);
+    MojErr generateItem (MojUInt32 i_id, MojDbShardEngine::ShardInfo& o_shardInfo);
 };
 
 #endif /* MOJDBNEWIDTEST_H_ */

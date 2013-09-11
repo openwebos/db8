@@ -24,6 +24,7 @@
 #include "core/MojErr.h"
 #include "core/MojString.h"
 #include "core/MojSignal.h"
+#include "core/MojObject.h"
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     #include <boost/smart_ptr/scoped_ptr.hpp>
@@ -32,6 +33,7 @@
 #endif
 
 #include <list>
+#include "db/MojDbShardIdCache.h"
 
 class MojDb;
 class MojDbReq;
@@ -88,23 +90,98 @@ public:
     MojDbShardEngine(void);
     ~MojDbShardEngine(void);
 
-    MojErr init (MojDb* ip_db, MojDbReq &req);
+
+    /**
+     * initialize MojDbShardEngine
+     */
+    MojErr init (MojDb* ip_db, MojDbReq &io_req);
+
+    /**
+    * put a new shard description to db
+    */
     MojErr put (const ShardInfo& shardInfo);
+
+    /**
+     * get shard description by id
+     */
     MojErr get (MojUInt32 shardId, ShardInfo& shardInfo, bool& found);
+
+    /**
+     * get shard description by uuid
+     */
     MojErr getByDeviceUuid (const MojString& deviceUuid, ShardInfo& shardInfo, bool& found);
+
+    /**
+     * get list of all active shards
+     */
     MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count);
+
+    /**
+     * update shardInfo
+     */
     MojErr update (const ShardInfo& i_shardInfo);
+
+    /**
+     * get device id by uuid
+     *
+     * search within db for i_deviceId, return id if found
+     * else
+     * allocate a new id
+     */
     MojErr getShardId (const MojString& deviceUuid, MojUInt32& shardId);
+
+    /**
+     * is device id exist?
+     */
     MojErr isIdExist (MojUInt32 shardId, bool& found);
 
+    /**
+     * convert device id to base64 string
+     */
     static MojErr convertId (const MojUInt32 i_id, MojString& o_id_base64);
+
+    /**
+     * convert base64 string to device id
+     */
     static MojErr convertId (const MojString& i_id_base64, MojUInt32& o_id);
+
+    /**
+     * convert device info to MojObject
+     */
+    static MojErr convert (const ShardInfo& i_shardInfo, MojObject& o_obj);
+
+    /**
+     * convert MojObject to device info
+     */
+    static MojErr convert (const MojObject& i_obj, ShardInfo& o_shardInfo);
+
 private:
+
+    /**
+     * compute a new shard id
+     */
     MojErr allocateId (const MojString& deviceUuid, MojUInt32& shardId);
+
+    /**
+     * compute device id by media uuid
+     */
     MojErr computeId (const MojString& mediaUuid, MojUInt32& sharId);
+
+    /**
+    * all devices should not be active at startup:
+    * - reset 'active flag'
+    * - reset 'mountPath'
+    */
+    MojErr resetShards (MojDbReq& io_req);
+
+    /**
+     * init cache
+     */
+    MojErr initCache (MojDbReq& io_req);
 
     std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;
+    MojDbShardIdCache m_cache;
     static MojLogger s_log;
 
 public:

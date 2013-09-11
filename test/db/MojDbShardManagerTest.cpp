@@ -19,8 +19,6 @@
 
 #include "MojDbShardManagerTest.h"
 #include "db/MojDb.h"
-#include "db/MojDbShardEngine.h"
-#include "db/MojDbShardIdCache.h"
 #include <stdarg.h>
 
 #ifdef MOJ_USE_BDB
@@ -84,12 +82,13 @@ MojErr MojDbShardManagerTest::run()
     err = db.open(MojDbTestDir);
     MojTestErrCheck(err);
 
-    MojDbShardIdCache* p_cache = db.shardIdCache();
     MojDbShardEngine* p_eng = db.shardEngine();
-
-    err = _testShardIdCache(p_cache);
+    MojDbShardIdCache cache;
+    err = testShardIdCacheIndexes(&cache);
     MojTestErrCheck(err);
-    err = _testShardManager(p_eng);
+    err = testShardIdCacheOperations(&cache);
+    MojTestErrCheck(err);
+    err = testShardEngine(p_eng);
     MojTestErrCheck(err);
     err = db.close();
     MojTestErrCheck(err);
@@ -97,18 +96,19 @@ MojErr MojDbShardManagerTest::run()
     return err;
 }
 
-MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
+MojErr MojDbShardManagerTest::testShardIdCacheIndexes (MojDbShardIdCache* ip_cache)
 {
+    MojAssert(ip_cache);
+
+    MojObject obj;
     MojErr err = MojErrNone;
     MojUInt32 arr[SHARDID_CACHE_SIZE];
-
-    ip_cache->init(MojDbShardIdCache::TESTING);
 
     //ShardIdCache: Put id's..
     for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
     {
         arr[i] = i * 100L; //generate id and keep it
-        ip_cache->put(arr[i]);
+        ip_cache->put(arr[i], obj);
     }
 
     //compare..
@@ -124,55 +124,122 @@ MojErr MojDbShardManagerTest::_testShardIdCache (MojDbShardIdCache* ip_cache)
         err = MojErrDbVerificationFailed; //compare id6 is wrong
 
     //remove all id's
-    for (MojInt16 i = 0; i < SHARDID_CACHE_SIZE; i++)
-    {
-        ip_cache->del(arr[i]);
-    }
+    ip_cache->clear();
 
     //done
 
     return err;
 }
 
-MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
+MojErr MojDbShardManagerTest::testShardIdCacheOperations (MojDbShardIdCache* ip_cache)
 {
+    MojAssert(ip_cache);
+
+    MojErr err = MojErrNone;
+    MojUInt32 id1 = 0xFF, id2 = 0xFFFF;
+    MojObject obj1, obj2;
+    MojObject v_obj1, v_obj2;
+    //generate new object1
+    MojObject d1_obj1(static_cast<MojInt32>(id1));
+    err = obj1.put(_T("shardId"), d1_obj1);
+    MojObject d1_obj2(true);
+    err = obj1.put(_T("active"), d1_obj2);
+    MojErrCheck(err);
+
+    //generate new object2
+    MojObject d2_obj1(static_cast<MojInt32>(id2));
+    err = obj1.put(_T("shardId"), d2_obj1);
+    MojObject d2_obj2(true);
+    err = obj1.put(_T("active"), d2_obj2);
+    MojErrCheck(err);
+
+    //store
+    ip_cache->put(id1, obj1);
+    ip_cache->put(id2, obj2);
+
+    //get
+    if(!ip_cache->get(id1, v_obj1))
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    if(!ip_cache->get(id2, v_obj2))
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //verify
+    if(v_obj1.compare(obj1) != 0)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    if(v_obj2.compare(obj1) == 0)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //update
+    ip_cache->update(id1, obj2);
+
+    if(!ip_cache->get(id1, v_obj1))
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //verify
+    if(v_obj1.compare(obj2) != 0)
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //del
+    ip_cache->del(id2);
+
+    if(ip_cache->get(id2, v_obj2))
+        err = MojErrDbVerificationFailed;
+
+    MojTestErrCheck(err);
+
+    //clear
+    ip_cache->clear();
+
+    return err;
+}
+
+MojErr MojDbShardManagerTest::testShardEngine (MojDbShardEngine* ip_eng)
+{
+    MojAssert(ip_eng);
+
     MojErr err;
     MojUInt32 id;
     MojString str;
     bool found;
 
-    //compute a new shard id
-    for(MojInt32 i = 0; i < SHARD_ITEMS_NUMBER; ++i)
-    {
-        //generate id
-        str.format("MassStorageMedia%d",i);
-        err = ip_eng->getShardId(str, id);
-        MojTestErrCheck(err);
-    }
-
     //store sample shard info
     MojDbShardEngine::ShardInfo shardInfo;
-    shardInfo.id = 0xFF;
-    shardInfo.mountPath.assign("/media/media01");
+    generateItem(shardInfo);
+    shardInfo.mountPath.assign("/tmp/db8-test/media01");
+    id = shardInfo.id;
     err = ip_eng->put(shardInfo);
     MojTestErrCheck(err);
-    //get info
 
-    err = ip_eng->get(0xFF, shardInfo, found);
+    //get info
+    err = ip_eng->get(id, shardInfo, found);
     MojTestErrCheck(err);
     MojAssert(found);
 
-    if (shardInfo.mountPath.compare("/media/media01") != 0)
+    if (shardInfo.mountPath.compare("/tmp/db8-test/media01") != 0)
         err = MojErrDbVerificationFailed;
 
     MojTestErrCheck(err);
 
-    //set activity, read and verify
+    //set activity flag, read and verify it
     shardInfo.active = true;
     err = ip_eng->update(shardInfo);
     MojTestErrCheck(err);
 
-    err = ip_eng->get(0xFF, shardInfo, found);
+    err = ip_eng->get(id, shardInfo, found);
     MojTestErrCheck(err);
     MojAssert(found);
 
@@ -182,7 +249,7 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     MojTestErrCheck(err);
 
     //check existance of id, even for wrong id
-    err = ip_eng->isIdExist(0xFF, found);
+    err = ip_eng->isIdExist(id, found);
     MojTestErrCheck(err);
 
     if (!found)
@@ -197,6 +264,21 @@ MojErr MojDbShardManagerTest::_testShardManager (MojDbShardEngine* ip_eng)
     MojTestErrCheck(err);
 
     return err;
+}
+
+MojErr MojDbShardManagerTest::generateItem (MojDbShardEngine::ShardInfo& o_shardInfo)
+{
+    static MojUInt32 id = 0xFF;
+    o_shardInfo.id = ++id;
+    MojDbShardEngine::convertId(o_shardInfo.id, o_shardInfo.id_base64);
+    o_shardInfo.active = false;
+    o_shardInfo.transient = false;
+    o_shardInfo.deviceId.format("ID%x", o_shardInfo.id);
+    o_shardInfo.deviceUri.format("URI%x", o_shardInfo.id);
+    o_shardInfo.mountPath.format("/tmp/db8-test/media%x", o_shardInfo.id);
+    o_shardInfo.deviceName.format("TEST-%x", o_shardInfo.id);
+
+    return MojErrNone;
 }
 
 MojErr MojDbShardManagerTest::displayMessage(const MojChar* format, ...)

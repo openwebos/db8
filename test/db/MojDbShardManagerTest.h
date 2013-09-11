@@ -21,9 +21,8 @@
 #define MOJDBSHARDMANAGERTEST_H_
 
 #include "MojDbTestRunner.h"
-
-class MojDbShardIdCache;
-class MojDbShardEngine;
+#include "db/MojDbShardEngine.h"
+#include "db/MojDbShardIdCache.h"
 
 class MojDbShardManagerTest : public MojTestCase
 {
@@ -33,9 +32,11 @@ public:
     virtual MojErr run(void);
 
 private:
-    MojErr _testShardIdCache (MojDbShardIdCache* ip_cache);
-    MojErr _testShardManager (MojDbShardEngine* ip_eng);
+    MojErr testShardIdCacheIndexes (MojDbShardIdCache* ip_cache);
+    MojErr testShardIdCacheOperations (MojDbShardIdCache* ip_cache);
+    MojErr testShardEngine (MojDbShardEngine* ip_eng);
 
+    MojErr generateItem (MojDbShardEngine::ShardInfo& o_shardInfo);
     MojErr displayMessage(const MojChar* format, ...);
     void cleanup(void);
 };

@@ -92,8 +92,8 @@ public:
 	MojErr merge(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(obj, flags | FlagMerge, req); }
 	MojErr merge(MojObject* begin, const MojObject* end, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq()) { return put(begin, end, flags | FlagMerge, req); }
 	MojErr merge(const MojDbQuery& query, const MojObject& props, MojUInt32& countOut, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr put(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
-	MojErr put(MojObject* begin, const MojObject* end, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
+    MojErr put(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq(), MojString shardId = MojString());
+    MojErr put(MojObject* begin, const MojObject* end, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq(), MojString shardId = MojString());
 	MojErr putKind(MojObject& obj, MojUInt32 flags = FlagNone, MojDbReqRef req = MojDbReq());
 	MojErr putPermissions(MojObject* begin, const MojObject* end, MojDbReqRef req = MojDbReq()) { return putConfig(begin, end, req, m_permissionEngine); }
 	MojErr putQuotas(MojObject* begin, const MojObject* end, MojDbReqRef req = MojDbReq()) { return putConfig(begin, end, req, m_quotaEngine); }
@@ -111,7 +111,6 @@ public:
 	MojInt64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
     MojInt64 purgeWindow() {return m_purgeWindow;}
-    void shardId(const MojString& shardId) {m_shardId = shardId;}
 
     //verify _kind
     bool isValidKind (MojString& i_kindStr);
@@ -148,13 +147,13 @@ private:
 	MojErr requireNotOpen();
 	MojErr mergeInto(MojObject& dest, const MojObject& obj, const MojObject& prev);
 	MojErr mergeArray(MojObject& dest, const MojObject& obj, MojObject& prev);
-	MojErr putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
-				  MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema = true);
+    MojErr putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
+                  MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema = true, MojString shardId = MojString());
 	MojErr delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
 	MojErr delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
 	MojErr delImpl(const MojDbQuery& query, MojUInt32& countOut, MojDbReq& req, MojUInt32 flags = FlagNone);
-	MojErr putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema = true);
-    MojErr addShardIdToMasterKind(MojObject& obj, MojDbReqRef req);
+    MojErr putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema = true, MojString shardId = MojString());
+    MojErr addShardIdToMasterKind(MojString shardId, MojObject& obj, MojDbReqRef req);
 	MojErr putConfig(MojObject* begin, const MojObject* end, MojDbReq& req, MojDbPutHandler& handler);
 
 	MojErr updateLocaleImpl(const MojString& oldLocale, const MojString& newLocale, MojDbReq& req);
@@ -168,7 +167,7 @@ private:
 	MojErr loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req);
 	MojErr purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req);
 
-    MojErr attachShardId(MojObject& id);
+    MojErr attachShardId(MojString shardId, MojObject& id);
 	MojErr nextId(MojInt64& idOut);
 	MojErr getState(const MojChar* key, MojObject& valOut, MojDbReq& req);
 	MojErr updateState(const MojChar* key, const MojObject& val, MojDbReq& req);
@@ -195,7 +194,6 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
-    MojString m_shardId;
 
 };
 

@@ -225,9 +225,8 @@ MojErr MojDbNewIdTest::putTest(MojDb& db)
 
         MojString shardId;
         shardId.assign(MojNewIdTestShardIds1[i]);
-        db.shardId(shardId);
 
-        err = db.put(obj);
+        err = db.put(obj, MojDb::FlagNone, MojDbReq(), shardId);
         bool result = (err == 0);
 
         MojTestAssert(MojNewIdTestExpectResult1[i] == result);
@@ -288,9 +287,8 @@ MojErr MojDbNewIdTest::addShardIdTest(MojDb& db)
 
         MojString shardId;
         shardId.assign(MojNewIdTestShardIds3[i]);
-        db.shardId(shardId);
 
-        err = db.put(obj);
+        err = db.put(obj, MojDb::FlagNone, MojDbReq(), shardId);
     }
 
     // get object with _id from db

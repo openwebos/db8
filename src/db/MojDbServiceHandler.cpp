@@ -412,13 +412,12 @@ MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload
     bool foundOut;
     err = payload.get(MojDbServiceDefs::ShardIdKey, shardId, foundOut);
     MojErrCheck(err);
-    m_db.shardId(shardId);
 
 	MojObject::ArrayIterator begin;
 	err = obj.arrayBegin(begin);
 	MojErrCheck(err);
 	MojObject::ConstArrayIterator end = obj.arrayEnd();
-	err = m_db.put(begin, end, MojDb::FlagNone, req);
+    err = m_db.put(begin, end, MojDb::FlagNone, req, shardId);
 	MojErrCheck(err);
 	err = formatPut(msg, begin, end);
 	MojErrCheck(err);
@@ -785,8 +784,6 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
                 err = writer.stringProp("mountPath", info.mountPath.data());
                 MojErrCheck(err);
             }
-
-            m_db.shardId(info.id_base64);  // TODO: what this do?
        }
        else
        {
@@ -871,8 +868,6 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
                 MojErrCheck(err);
                 err = writer.stringProp("_kind", kindStr.data());
                 MojErrCheck(err);
-
-                m_db.shardId(shardIdBase64);
             }
             else
             {
@@ -963,7 +958,6 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
 
             err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
             MojErrCheck(err);
-            m_db.shardId(shardInfo.id_base64);
        }
        else
        {

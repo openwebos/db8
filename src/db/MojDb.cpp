@@ -467,26 +467,26 @@ MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, MojUInt32& 
 	return MojErrNone;
 }
 
-MojErr MojDb::put(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::put(MojObject& obj, MojUInt32 flags, MojDbReqRef req, MojString shardId)
 {
 	MojLogTrace(s_log);
 
-	MojErr err = put(&obj, &obj + 1, flags, req);
+    MojErr err = put(&obj, &obj + 1, flags, req, shardId);
 	MojErrCheck(err);
 
 	return MojErrNone;
 }
 
-MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDbReqRef req)
+MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDbReqRef req, MojString shardId)
 {
 	MojAssert(begin || begin == end);
 	MojAssert(end >= begin);
 	MojLogTrace(s_log);
 
-    if (!m_shardId.empty()) {
+    if (!shardId.empty()) {
         // extract UInt32 shard info from shard Id
         MojVector<MojByte> shardIdVector;
-        MojErr err = m_shardId.base64Decode(shardIdVector);
+        MojErr err = shardId.base64Decode(shardIdVector);
         MojErrCheck(err);
         MojUInt32 id = 0;
         for (MojVector<MojByte>::ConstIterator byte = shardIdVector.begin(); byte != shardIdVector.end(); ++byte) {
@@ -506,7 +506,7 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
 	MojErrCheck(err);
 
 	for (MojObject* i = begin; i != end; ++i) {
-        err = addShardIdToMasterKind(*i, req);
+        err = addShardIdToMasterKind(shardId, *i, req);
         MojErrCheck(err);
 		err = putImpl(*i, flags, req);
 		MojErrCheck(err);
@@ -733,7 +733,7 @@ MojErr MojDb::mergeInto(MojObject& dest, const MojObject& obj, const MojObject& 
 }
 
 MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
-					 MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema)
+                     MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema, MojString shardId)
 {
 	MojLogTrace(s_log);
 
@@ -751,11 +751,10 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
 	// assign id
 	MojObject putId = id;
 	if (putId.undefined()) {
-        err = m_idGenerator.id(putId, m_shardId);
+        err = m_idGenerator.id(putId, shardId);
 		MojErrCheck(err);
 		err = obj.put(IdKey, putId);
 		MojErrCheck(err);
-        m_shardId.clear();
 	}
 
 	// assign ids to subobjects in arrays - only for regular objects
@@ -975,13 +974,13 @@ MojErr MojDb::getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op
  * 3. Extract shardIds array from the tuple
  * 4. Push shardId if shardId does not exist in extracted shardIds array
  ***********************************************************************/
-MojErr MojDb::addShardIdToMasterKind(MojObject& obj, MojDbReqRef req)
+MojErr MojDb::addShardIdToMasterKind(MojString shardId, MojObject& obj, MojDbReqRef req)
 {
     bool foundOut;
     MojString kindId;
     MojErr err = obj.get(KindKey, kindId, foundOut);
     MojErrCheck(err);
-    if(foundOut && !m_shardId.empty() && !kindId.startsWith(MojDbKindEngine::KindKindId)) {
+    if(foundOut && !shardId.empty() && !kindId.startsWith(MojDbKindEngine::KindKindId)) {
         // get _id from _kind
         MojString id;
         err = formatKindId(kindId.data(), id);
@@ -1015,14 +1014,14 @@ MojErr MojDb::addShardIdToMasterKind(MojObject& obj, MojDbReqRef req)
             MojString shardIdStr;
             for(MojSize i=0; i<shardIdsObj.size(); i++) {
                 shardIdsObj.at(i, shardIdStr, foundOut);
-                if(shardIdStr.compare(m_shardId.data()) == 0) {
+                if(shardIdStr.compare(shardId.data()) == 0) {
                     isExist = true;
                     break;
                 }
             }
             if(!isExist) {
                 // push shardId
-                err = shardIdsObj.pushString(m_shardId.data());
+                err = shardIdsObj.pushString(shardId.data());
                 MojErrCheck(err);
                 err = mergedObj.put(MojDbServiceDefs::ShardIdKey, shardIdsObj);
                 MojErrCheck(err);
@@ -1038,7 +1037,7 @@ MojErr MojDb::addShardIdToMasterKind(MojObject& obj, MojDbReqRef req)
     return MojErrNone;
 }
 
-MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema)
+MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema, MojString shardId)
 {
 	MojLogTrace(s_log);
 
@@ -1047,7 +1046,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
 	if (obj.get(IdKey, id)) {
         // Attach shard ID only put query but putKind and merge when shard ID exists
         if (MojFlagGet(flags, FlagNone)) {
-            MojErr err = attachShardId(id);
+            MojErr err = attachShardId(shardId, id);
             MojErrCheck(err);
         }
 		// get previous revision if we have an id
@@ -1101,7 +1100,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
 	}
 
 	// save it
-	MojErr err = putObj(id, obj, prevPtr, prevItem.get(), req, op, checkSchema);
+    MojErr err = putObj(id, obj, prevPtr, prevItem.get(), req, op, checkSchema, shardId);
 	MojErrCheck(err);
 
 	if (prevItem.get()) {
@@ -1120,7 +1119,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
  * 3. merge shard ID byte vector and _id byte vector
  * 4. replace old _id with new one
  ***********************************************************************/
-MojErr MojDb::attachShardId(MojObject& id)
+MojErr MojDb::attachShardId(MojString shardId, MojObject& id)
 {
     MojString idStr;
     MojErr err = id.stringValue(idStr);
@@ -1131,7 +1130,7 @@ MojErr MojDb::attachShardId(MojObject& id)
         if (idStr.length() > 16 || idStr.compare(_T("zzzzzzzzzzzzzzzz")) > 0) {
             MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid _id length"));
         }
-        if (!m_shardId.empty()) {
+        if (!shardId.empty()) {
             // Max 64bit _id(0xFFFFFFFFFFFFFFFF) converted base-64 is "zzzzzzzzzzw"
             if(idStr.length() <= 11 && idStr.compare(_T("zzzzzzzzzzw")) <= 0) {
                 // decode _id
@@ -1140,7 +1139,7 @@ MojErr MojDb::attachShardId(MojObject& id)
                 MojErrCheck(err);
                 // decode shard ID
                 MojVector<MojByte> byteVec;
-                err = m_shardId.base64Decode(byteVec);
+                err = shardId.base64Decode(byteVec);
                 MojErrCheck(err);
                 // attach shard ID in front of _id
                 byteVec.append(idByteVec.begin(), idByteVec.end());

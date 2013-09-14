@@ -135,6 +135,7 @@ public:
 	ConstArrayIterator arrayEnd() const { return impl()->arrayEnd(); }
 	MojErr push(const MojObject& val);
 	MojErr pushString(const MojChar* val);
+    MojErr delString(MojSize idx);
 	MojErr setAt(MojSize idx, const MojObject& val);
 	bool at(MojSize idx, MojObject& objOut) const { return impl()->at(idx, objOut); }
 	bool at(MojSize idx, bool& valOut) const;

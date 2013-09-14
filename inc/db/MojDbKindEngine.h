@@ -63,6 +63,9 @@ public:
 	MojErr delKind(const MojString& id, MojDbReq& req);
 	MojErr reloadKind(const MojString& id, const MojObject& kindObj, MojDbReq& req);
 
+    MojErr addShardIdToMasterKind (MojString shardId, MojObject& obj, MojDbReq& req);
+    MojErr removeShardIdsFromMasterKind (const MojString& id, const MojVector<MojUInt32>& shardIds, MojDbReq& req);
+
 	MojDb* db() { return m_db; }
 	MojDbPermissionEngine* permissionEngine();
 	MojDbQuotaEngine* quotaEngine();
@@ -76,6 +79,7 @@ public:
 	MojErr getKind(const MojObject& obj, MojDbKind*& kind);
 	MojErr getKind(const MojChar* kindName, MojDbKind*& kind);
 
+    static MojErr formatKindId(const MojChar* id, MojString& dbIdOut);
 
 private:
 	typedef MojHashMap<MojInt64, MojString> TokMap;

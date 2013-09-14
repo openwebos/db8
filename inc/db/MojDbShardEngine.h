@@ -25,6 +25,7 @@
 #include "core/MojString.h"
 #include "core/MojSignal.h"
 #include "core/MojObject.h"
+#include "db/MojDbReq.h"
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     #include <boost/smart_ptr/scoped_ptr.hpp>
@@ -34,6 +35,7 @@
 
 #include <list>
 #include "db/MojDbShardIdCache.h"
+#include "core/MojTime.h"
 
 class MojDb;
 class MojDbReq;
@@ -47,6 +49,7 @@ public:
         bool active;
         bool transient;
         MojUInt32 id;
+        MojInt64 timestamp;
         MojString id_base64;
         MojString deviceId;
         MojString deviceUri;
@@ -58,6 +61,7 @@ public:
             id = _id;
             active = _active;
             transient = _transient;
+            timestamp = 0;
         }
 
         ShardInfo& operator=(const ShardInfo& i_src)
@@ -94,12 +98,12 @@ public:
     /**
      * initialize MojDbShardEngine
      */
-    MojErr init (MojDb* ip_db, MojDbReq &io_req);
+    MojErr init (MojDb* ip_db, MojDbReqRef req = MojDbReq());
 
     /**
     * put a new shard description to db
     */
-    MojErr put (const ShardInfo& shardInfo);
+    MojErr put (const ShardInfo& shardInfo, MojDbReqRef req = MojDbReq());
 
     /**
      * get shard description by id
@@ -114,12 +118,12 @@ public:
     /**
      * get list of all active shards
      */
-    MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count);
+    MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count, MojDbReqRef req = MojDbReq());
 
     /**
      * update shardInfo
      */
-    MojErr update (const ShardInfo& i_shardInfo);
+    MojErr update (const ShardInfo& i_shardInfo, MojDbReqRef req = MojDbReq());
 
     /**
      * get device id by uuid
@@ -155,6 +159,24 @@ public:
      */
     static MojErr convert (const MojObject& i_obj, ShardInfo& o_shardInfo);
 
+    /**
+     * Support garbage collection of obsolete shards
+     * remove shard objects by vector of id's
+     */
+    MojErr removeShardObjects (const MojVector<MojUInt32>& arrShardIds, MojDbReqRef req = MojDbReq());
+
+    /**
+     * Support garbage collection of obsolete shards
+     * remove shard objects by shard id
+     */
+    MojErr removeShardObjects (const MojString& strShardIdToRemove, MojDbReqRef req = MojDbReq());
+
+    /**
+     * Support garbage collection of obsolete shards
+     * remove shard objects older <numDays> days
+     */
+    MojErr purgeShardObjects (MojInt64 numDays, MojDbReqRef req = MojDbReq());
+
 private:
 
     /**
@@ -178,6 +200,16 @@ private:
      * init cache
      */
     MojErr initCache (MojDbReq& io_req);
+
+    /**
+     * remove all records for shard within kind
+     */
+    MojErr removeShardRecords (const MojUInt32 shardId, const MojString& kindId, MojDbReq& req);
+
+    /**
+     * update ShardInfo::timestamp with current time value
+     */
+    MojErr updateTimestamp (ShardInfo& shardInfo);
 
     std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;

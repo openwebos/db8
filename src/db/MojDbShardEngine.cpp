@@ -17,10 +17,12 @@
 * LICENSE@@@ */
 
 #include "db/MojDbShardEngine.h"
+#include "db/MojDbKind.h"
 #include "db/MojDb.h"
 #include "db/MojDbServiceDefs.h"
 #include "db/MojDbMediaLinkManager.h"
 #include "core/MojDataSerialization.h"
+#include "core/MojLog.h"
 #include <boost/crc.hpp>
 #include <string>
 
@@ -31,10 +33,12 @@ using namespace std;
 static const MojChar* const ShardInfoKind1Str =
     _T("{\"id\":\"ShardInfo1:1\",")
     _T("\"owner\":\"mojodb.admin\",")
-    _T("\"indexes\":[ {\"name\":\"ShardId\",  \"props\":[ {\"name\":\"shardId\"} ]}, \
-                      {\"name\":\"DeviceId\", \"props\":[ {\"name\":\"deviceId\"} ]}, \
-                      {\"name\":\"IdBase64\", \"props\":[ {\"name\":\"idBase64\"} ]}, \
-                      {\"name\":\"Active\",   \"props\":[ {\"name\":\"active\"} ]}\
+    _T("\"indexes\":[ {\"name\":\"ShardId\",   \"props\":[ {\"name\":\"shardId\"} ]}, \
+                      {\"name\":\"DeviceId\",  \"props\":[ {\"name\":\"deviceId\"} ]}, \
+                      {\"name\":\"IdBase64\",  \"props\":[ {\"name\":\"idBase64\"} ]}, \
+                      {\"name\":\"Active\",    \"props\":[ {\"name\":\"active\"} ]}, \
+                      {\"name\":\"Transient\", \"props\":[ {\"name\":\"transient\"} ]}, \
+                      {\"name\":\"Timestamp\", \"props\":[ {\"name\":\"timestamp\"} ]}\
                     ]}");
 
 MojLogger MojDbShardEngine::s_log(_T("db.shardEngine"));
@@ -62,7 +66,7 @@ MojDbShardEngine::~MojDbShardEngine(void)
  *
  * @return MojErr
  */
-MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReq &io_req)
+MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     MojAssert(ip_db);
@@ -75,14 +79,14 @@ MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReq &io_req)
     // add type
     err = obj.fromJson(ShardInfoKind1Str);
     MojErrCheck(err);
-    err = mp_db->kindEngine()->putKind(obj, io_req, true); // add builtin kind
+    err = mp_db->kindEngine()->putKind(obj, req, true); // add builtin kind
     MojErrCheck(err);
 
     //all devices should not be active at startup
-    err = resetShards(io_req);
+    err = resetShards(req);
     MojErrCheck(err);
 
-    err = initCache(io_req);
+    err = initCache(req);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -127,7 +131,7 @@ MojErr MojDbShardEngine::resetShards (MojDbReq& io_req)
  *
  * @return MojErr
  */
-MojErr MojDbShardEngine::put (const ShardInfo& shardInfo)
+MojErr MojDbShardEngine::put (const ShardInfo& shardInfo, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     MojAssert(mp_db);
@@ -139,18 +143,18 @@ MojErr MojDbShardEngine::put (const ShardInfo& shardInfo)
     err = obj.putString(_T("_kind"), _T("ShardInfo1:1"));
     MojErrCheck(err);
 
-    if (shardInfo.id_base64.empty())
-    {
-        ShardInfo tempShardInfo = shardInfo;
-        err = MojDbShardEngine::convertId(shardInfo.id, tempShardInfo.id_base64);
-        MojErrCheck(err);
-        err = convert(tempShardInfo, obj);
-    }
-    else
-        err = convert(shardInfo, obj);
+    ShardInfo info = shardInfo;
+    updateTimestamp(info);
 
+    if (info.id_base64.empty())
+    {
+        err = MojDbShardEngine::convertId(info.id, info.id_base64);
+        MojErrCheck(err);
+    }
+
+    err = convert(info, obj);
     MojErrCheck(err);
-    err = mp_db->put(obj);
+    err = mp_db->put(obj, MojDb::FlagNone, req);
     MojErrCheck(err);
 
     m_cache.put(shardInfo.id, obj);
@@ -201,7 +205,7 @@ MojErr MojDbShardEngine::get (MojUInt32 shardId, ShardInfo& shardInfo, bool& fou
  *
  * @return MojErr
  */
-MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& shardInfoList, MojUInt32& count)
+MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& shardInfoList, MojUInt32& count, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     MojAssert(mp_db);
@@ -218,7 +222,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& shardInfoList, MojU
     err = query.where(_T("active"), MojDbQuery::OpEq, obj);
     MojErrCheck(err);
 
-    err = mp_db->find(query, cursor);
+    err = mp_db->find(query, cursor, req);
     MojErrCheck(err);
 
     count = 0;
@@ -252,7 +256,7 @@ MojErr MojDbShardEngine::getAllActive (std::list<ShardInfo>& shardInfoList, MojU
  *
  * @return MojErr
  */
-MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
+MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     MojAssert(mp_db);
@@ -270,10 +274,13 @@ MojErr MojDbShardEngine::update (const ShardInfo& i_shardInfo)
     MojObject update;
     MojUInt32 count = 0;
 
-    err = convert(i_shardInfo, update);
+    ShardInfo shardInfo = i_shardInfo;
+    updateTimestamp(shardInfo);
+
+    err = convert(shardInfo, update);
     MojErrCheck(err);
 
-    err = mp_db->merge(query, update, count);
+    err = mp_db->merge(query, update, count, MojDb::FlagNone, req);
     MojErrCheck(err);
 
     if (count == 0)
@@ -642,6 +649,11 @@ MojErr MojDbShardEngine::convert (const ShardInfo& i_shardInfo, MojObject& o_obj
     err = o_obj.put(_T("deviceName"), obj7);
     MojErrCheck(err);
 
+    MojObject obj8(i_shardInfo.timestamp);
+    err = o_obj.put(_T("timestamp"), obj8);
+    MojErrCheck(err);
+
+
     return MojErrNone;
 }
 
@@ -682,6 +694,291 @@ MojErr MojDbShardEngine::convert (const MojObject& i_obj, ShardInfo& o_shardInfo
     err = i_obj.getRequired(_T("deviceName"), o_shardInfo.deviceName);
     MojErrCheck(err);
 
+    err = i_obj.getRequired(_T("timestamp"), o_shardInfo.timestamp);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+/**
+ * removeShardObjects
+ *
+ * @param strShardIdToRemove
+ *   device id
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbShardEngine::removeShardObjects (const MojString& strShardIdToRemove, MojDbReqRef req)
+{
+    MojUInt32 shardId;
+
+    MojVector<MojUInt32> shardIds;
+    MojErr err = MojDbShardEngine::convertId(strShardIdToRemove, shardId);
+    MojErrCheck(err);
+    err = shardIds.push(shardId);
+    MojErrCheck(err);
+    MojLogNotice(s_log, _T("purging objects for shard: %s"), strShardIdToRemove.data());
+
+
+    return(removeShardObjects(shardIds, req));
+}
+
+/**
+ * removeShardObjects
+ *
+ * @param shardId
+ *   device id
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShardIds, MojDbReqRef req)
+{
+    MojAssert(mp_db);
+
+    MojVector<MojObject> objList;
+    MojString kindId;
+    bool foundOut;
+    MojErr err;
+
+    if (arrShardIds.size() > 0) {
+
+        MojDbKindEngine::KindMap& map = mp_db->kindEngine()->kindMap();
+
+        for (MojDbKindEngine::KindMap::ConstIterator it = map.begin();
+             it != map.end();
+             ++it)
+        {
+            if (it.value()->isBuiltin())
+                continue;
+
+            kindId = it.key();
+            MojLogNotice(s_log, _T("Kind: %s"), kindId.data());
+
+            // Might this kind have shards?
+            // TODO:  Skip over Kinds without shards
+
+            for (MojVector<MojUInt32>::ConstIterator itShardId = arrShardIds.begin();
+                itShardId != arrShardIds.end();
+                ++itShardId)
+            {
+                err = removeShardRecords(*itShardId, kindId, req);
+                MojErrCheck(err);
+                MojLogNotice(s_log, _T("Get next shard for %s"), kindId.data()); // TODO: to debug
+            }
+
+            err = mp_db->kindEngine()->removeShardIdsFromMasterKind(kindId, arrShardIds, req);
+            MojLogNotice(s_log, _T("Returned from removeShardIds")); // TODO: to debug
+            MojErrCheck(err);
+
+            MojLogNotice(s_log, _T("Get next kind")); // TODO: to debug
+        }
+    } else {
+        MojLogNotice(s_log, _T("List of shard IDs is empty")); // TODO: to info
+    }
+
+    return MojErrNone;
+}
+
+/**
+ * removeShardRecords
+ *
+ * @param shardIdStr
+ *   device id
+ *
+ * @param kindId
+ *   kind id
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbShardEngine::removeShardRecords (const MojUInt32 shardId, const MojString& kindId, MojDbReq& req)
+{
+    MojAssert(mp_db);
+    // make query
+    bool found;
+    uint32_t countDeleted = 0;
+    uint32_t countRead = 0;
+    MojDbQuery query;
+    MojErr err = query.from(kindId);
+    MojErrCheck(err);
+    query.setIgnoreInactiveShards(false);
+
+    MojDbCursor cursor;
+    err = mp_db->find(query, cursor, req);
+    MojErrCheck(err);
+
+    MojString shardIdStr;
+    err = MojDbShardEngine::convertId(shardId, shardIdStr);
+    MojErrCheck(err);
+
+    MojLogNotice(s_log, _T("purging objects for shard: [%s], Kind: [%s]"), shardIdStr.data(), kindId.data());// todo: convert to Info
+
+    MojObject record;
+    MojObject recordId;
+    MojUInt32 cmpShardId;
+
+    while(true)
+    {
+        err = cursor.get(record, found);
+        MojErrCheck(err);
+
+        if (!found)
+            break;
+
+        err = record.getRequired(MojDb::IdKey, recordId);
+        MojErrCheck(err);
+        countRead ++;
+
+        err = MojDbIdGenerator::extractShard(recordId, cmpShardId);
+        MojErrCheck(err);
+
+        if (cmpShardId != shardId)
+            continue;
+
+        err = mp_db->del(recordId, found, MojDb::FlagNone, req);
+        MojErrCheck(err);
+        countDeleted++;
+    }
+
+    if (countDeleted) {
+        MojLogNotice(s_log, _T("purged %d of %d objects for shard: [%s] from Kind: [%s]"), countDeleted, countRead, shardIdStr.data(), kindId.data());
+    } else {
+        MojLogNotice(s_log, _T("none purged out of %d objects"), countRead); // todo: convert to Info
+    }
+
+    return MojErrNone;
+}
+
+/**
+ * Support garbage collection of obsolete shards
+ * remove shard objects older <numDays> days
+ *
+ * @param numDays
+ *   days
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
+{
+    MojDbQuery query1, query2;
+    MojDbCursor cursor;
+    MojInt32 value_id = 0;
+    MojInt64 value_timestamp;
+    MojObject obj(value_id);
+    MojObject dbObj;
+    MojObject obj_active(false);
+    MojVector<MojUInt32> arrShardIds;
+    MojString shardIdStr;
+    bool found;
+    bool value_active;
+
+    MojTime time;
+    MojErrCheck( MojGetCurrentTime(time) );
+    MojInt64 purgeTime = time.microsecs() - (MojTime::UnitsPerDay * numDays);
+    MojLogNotice(s_log, _T("purging objects for shards inactive for more than %lld days..."), numDays);
+
+    //collect 'old' shards
+    //--------------------
+    MojErr err = query1.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query1.where(_T("timestamp"), MojDbQuery::OpLessThanEq, purgeTime);
+    MojErrCheck(err);
+    query1.setIgnoreInactiveShards(false);
+
+    err = mp_db->find(query1, cursor, req);
+    MojErrCheck(err);
+
+    while (true)
+    {
+        err = cursor.get(dbObj, found);
+        MojErrCheck(err);
+        if(!found)
+            break;
+
+        err = dbObj.getRequired(_T("shardId"), value_id);
+        MojErrCheck(err);
+        err = MojDbShardEngine::convertId(value_id, shardIdStr);
+        MojErrCheck(err);
+        err = dbObj.getRequired(_T("active"), value_active);
+        MojErrCheck(err);
+
+        if(!value_active)
+        {
+            err = arrShardIds.pushUnique(value_id);
+            MojErrCheck(err);
+            MojLogNotice(s_log, _T("Need to purge records for old shard: [%s]"), shardIdStr.data());
+        } else { // TODO: Remove
+            MojLogNotice(s_log, _T("Ignore active shard: [%s]"), shardIdStr.data());
+        }
+
+    }
+
+    MojErrCheck(cursor.close());
+
+    //collect transient shards
+    //------------------------
+    bool transient = true;
+    err = query2.from(_T("ShardInfo1:1"));
+    MojErrCheck(err);
+    err = query2.where(_T("transient"), MojDbQuery::OpLessThanEq, transient);
+    MojErrCheck(err);
+    query2.setIgnoreInactiveShards(false);
+
+    err = mp_db->find(query2, cursor, req);
+    MojErrCheck(err);
+
+    while (true)
+    {
+        err = cursor.get(dbObj, found);
+        MojErrCheck(err);
+        if(!found)
+            break;
+
+        err = dbObj.getRequired(_T("shardId"), value_id);
+        MojErrCheck(err);
+        err = MojDbShardEngine::convertId(value_id, shardIdStr);
+        MojErrCheck(err);
+        err = dbObj.getRequired(_T("active"), value_active);
+        MojErrCheck(err);
+
+        if(!value_active)
+        {
+            err = arrShardIds.pushUnique(value_id);
+            MojErrCheck(err);
+            MojLogNotice(s_log, _T("Need to purge records for transient shard: [%s]"), shardIdStr.data());
+        } else { // TODO: Remove
+            MojLogNotice(s_log, _T("Ignore active transient shard: [%s]"), shardIdStr.data());
+
+        }
+    }
+
+    MojErrCheck(cursor.close());
+
+    removeShardObjects(arrShardIds, req);
+    MojLogNotice(s_log, _T("Ended"));
+
+    return MojErrNone;
+}
+
+/**
+ * update ShardInfo::timestamp with current time value
+ */
+MojErr MojDbShardEngine::updateTimestamp (ShardInfo& shardInfo)
+{
+    MojTime time;
+    MojErrCheck( MojGetCurrentTime(time) );
+    shardInfo.timestamp = time.microsecs();
     return MojErrNone;
 }
 

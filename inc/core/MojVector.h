@@ -61,6 +61,7 @@ public:
 	MojErr reserve(MojSize numElems);
 	MojErr resize(MojSize numElems, const ValueType& val = ValueType());
 	MojErr push(const ValueType& ValueType);
+    MojErr pushUnique(const ValueType& ValueType) { if(find(ValueType, 0) == MojInvalidIndex) { push(ValueType);} return MojErrNone; }
 	MojErr pop() { MojAssert(!empty()); return erase(size() - 1); }
 	MojErr setAt(MojSize idx, const ValueType& val);
 	MojErr append(ConstIterator rangeBegin, ConstIterator rangeEnd);

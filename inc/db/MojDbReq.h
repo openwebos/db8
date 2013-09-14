@@ -63,7 +63,6 @@ public:
 	bool fixmode() const {return m_fixmode;}
 	bool verifymode() {return m_vmode;}
 	MojInt32 batchsize() {return m_batchSize;}
-
 	operator MojDbReqRef() { return MojDbReqRef(*this); }
 	
 

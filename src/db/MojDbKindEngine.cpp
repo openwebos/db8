@@ -500,3 +500,206 @@ MojErr MojDbKindEngine::getKind(const MojChar* kindName, MojDbKind*& kind)
 
 	return MojErrNone;
 }
+
+MojErr MojDbKindEngine::formatKindId(const MojChar* id, MojString& dbIdOut)
+{
+    MojErr err = dbIdOut.format(_T("_kinds/%s"), id);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+/**
+ * addShardIdToMasterKind
+ * ###################################################################
+ * TODO: Rewrite this function for MojDbKindEngine usage! [18 Sep 13]
+ * ###################################################################
+ * Add shard ID into Kind:1
+ * 1. Find a tuple that matches _kind from Kind:1
+ * 2. If _kind does not exist in Kind:1, return "Kind not Registered"
+ * 3. Extract shardIds array from the tuple
+ * 4. Push shardId if shardId does not exist in extracted shardIds array
+ *
+ * @param shardId
+ *   shard id
+ *
+ * @param obj
+ *   kind id
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbKindEngine::addShardIdToMasterKind (MojString shardId, MojObject& obj, MojDbReq& req)
+{
+    bool foundOut;
+    MojString kindId;
+    MojErr err = obj.get(MojDb::KindKey, kindId, foundOut);
+    MojErrCheck(err);
+    if(foundOut && !shardId.empty() && !kindId.startsWith(MojDbKindEngine::KindKindId)) {
+        // get _id from _kind
+        MojString id;
+        err = formatKindId(kindId.data(), id);
+        MojErrCheck(err);
+        // make query
+        MojDbQuery query;
+        err = query.from(MojDbKindEngine::KindKindId);
+        MojErrCheck(err);
+        MojObject idObj(id);
+        err = query.where(MojDb::IdKey, MojDbQuery::OpEq, idObj);
+        MojErrCheck(err);
+        // find cursor using query
+        MojDbCursor cursor;
+        err = m_db->find(query, cursor);
+        MojErrCheck(err);
+        // get item from cursor
+        MojDbStorageItem* prevItem = NULL;
+        err = cursor.get(prevItem, foundOut);
+        MojErrCheck(err);
+        if(foundOut) {
+            // convert extracted item to object type
+            MojObject oldObj;
+            err = prevItem->toObject(oldObj, m_db->m_kindEngine);
+            MojErrCheck(err);
+            MojObject mergedObj(oldObj);
+            // extract shardIds from result object
+            MojObject shardIdsObj;
+            oldObj.get(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+            // check if shardId exists in extracted shardIds
+            bool isExist = false;
+            MojString shardIdStr;
+            for(MojSize i=0; i<shardIdsObj.size(); i++) {
+                shardIdsObj.at(i, shardIdStr, foundOut);
+                if(shardIdStr.compare(shardId.data()) == 0) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if(!isExist) {
+                // push shardId
+                err = shardIdsObj.pushString(shardId.data());
+                MojErrCheck(err);
+                err = mergedObj.put(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+                MojErrCheck(err);
+                // update Kind:1
+                err = m_db->putObj(id, mergedObj, &oldObj, prevItem, req, OpUpdate);
+                MojErrCheck(err);
+            }
+        } else {
+            MojErrThrow(MojErrDbKindNotRegistered);
+        }
+    }
+
+    return MojErrNone;
+}
+
+/**
+ * removeShardIdsFromMasterKind
+ * ###################################################################
+ * TODO: Rewrite this function for MojDbKindEngine usage! [18 Sep 13]
+ * ###################################################################
+ *
+ * @param kindId
+ *   kind id
+ *
+ * @param shardIds
+ *   vector of shard id's to remove
+ *
+ * @param req
+ *   batch support
+ *
+ * @return MojErr
+ */
+MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, const MojVector<MojUInt32>& shardIds, MojDbReq& req)
+{
+    bool foundOut;
+    MojErr err;
+    bool forceCommit = false;
+
+    if(!kindId.empty() && (shardIds.size() > 0))
+    {
+        //MojErrCheck( db()->beginReq(req) );
+        err = req.begin(db(), false);
+        MojErrCheck(err);
+        MojLogNotice(s_log, _T("Starting for Kind: %s"), kindId.data());
+        // get _id from _kind
+        MojString id;
+        err = formatKindId(kindId.data(), id);
+        MojErrCheck(err);
+        // make query
+        MojDbQuery query;
+        err = query.from(MojDbKindEngine::KindKindId);
+        MojErrCheck(err);
+        MojObject idObj(id);
+        err = query.where(MojDb::IdKey, MojDbQuery::OpEq, idObj);
+        MojErrCheck(err);
+        // find cursor using query
+        MojDbCursor cursor;
+        err = m_db->find(query, cursor, req);
+        MojErrCheck(err);
+        // get item from cursor
+        MojDbStorageItem* prevItem = NULL;
+        err = cursor.get(prevItem, foundOut);
+        MojErrCheck(err);
+
+        if(foundOut) {
+            // convert extracted item to object type
+            MojObject oldObj;
+            MojLogNotice(s_log, _T("Processing Kind: %s"), kindId.data());
+            err = prevItem->toObject(oldObj, m_db->m_kindEngine);
+            MojErrCheck(err);
+            MojObject mergedObj(oldObj);
+            // extract shardIds from result object
+            MojObject shardIdsObj;
+            oldObj.get(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+            if (shardIdsObj.size() > 0) { // shard array may be empty
+                MojString shardIdStr;
+                MojUInt32 id_uint32;
+                uint32_t countDeleted = 0;;
+                for(MojSize i=0; i<shardIdsObj.size(); ) { //  shards registered for the Kind
+                    shardIdsObj.at(i, shardIdStr, foundOut);
+                    err = MojDbShardEngine::convertId(shardIdStr, id_uint32);
+                    MojErrCheck(err);
+
+                    if(shardIds.find(id_uint32) != MojInvalidIndex) { // is shard from Kind in the delete shard list ?
+                        shardIdsObj.delString(i);
+                        countDeleted ++;  // Note:  don't increment 'i' if we delete an entry in the array, otherwise we will skip elements
+                        MojLogNotice(s_log, _T("removed shard id %s for Kind: %s"), shardIdStr.data(), kindId.data());
+                    } else {
+                        MojLogNotice(s_log, _T("shard id %s not associated with Kind: %s"), shardIdStr.data(), kindId.data());
+                        i++;
+                    }
+                }
+
+                if (countDeleted) { // Only update if a change has been made !!
+                    err = mergedObj.put(MojDbServiceDefs::ShardIdKey, shardIdsObj);
+                    MojErrCheck(err);
+                    // update Kind:1
+                    err = m_db->putObj(id, mergedObj, &oldObj, prevItem, req, OpUpdate);
+                    MojErrCheck(err);
+                    MojLogNotice(s_log, _T("Update object for Kind: %s"), kindId.data());
+                    forceCommit = true;
+                } else {
+                    MojLogNotice(s_log, _T("No matching shards for Kind: %s"), kindId.data()); // TODO:  to info
+                }
+            } else {
+                MojLogNotice(s_log, _T("No shards known for Kind: %s"), kindId.data()); // TODO:  to info
+            }
+        }
+        else {
+            MojErrThrow(MojErrDbKindNotRegistered);
+        }
+
+        err = req.end(forceCommit);
+        MojErrCheck(err);
+
+        MojLogNotice(s_log, _T("End for Kind: %s"), kindId.data()); // TODO: remove
+    } else {
+        MojLogWarning(s_log, _T("Empty parameters for Kind: %s"), kindId.data());
+    }
+
+
+    return MojErrNone;
+}
+

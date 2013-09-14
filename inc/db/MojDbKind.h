@@ -70,6 +70,7 @@ public:
 	const MojObject& object() const { return m_obj; }
 	const StringVec& superIds() const { return m_superIds; }
 	const KindVec& supers() const { return m_supers; }
+    bool isBuiltin() const { return m_builtin; }
 	MojDbKindEngine* kindEngine() const { return m_kindEngine; }
 	MojInt64 token() const { return m_state->token(); }
 	MojUInt32 version() const { return m_version; }

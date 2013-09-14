@@ -32,12 +32,69 @@ public:
     virtual MojErr run(void);
 
 private:
+    /**
+     * test cache indexes
+     */
     MojErr testShardIdCacheIndexes (MojDbShardIdCache* ip_cache);
+
+    /**
+     * test cache operations
+     */
     MojErr testShardIdCacheOperations (MojDbShardIdCache* ip_cache);
+
+    /**
+     * test engine
+     */
     MojErr testShardEngine (MojDbShardEngine* ip_eng);
 
+    /**
+     * test operations with shards
+     */
+    MojErr testShardCreateAndRemoveWithRecords (MojDb& db);
+
+    /**
+     * create objects for shard 1
+     */
+    MojErr createShardObjects1 (MojDb& db, MojDbShardEngine::ShardInfo& shard);
+
+    /**
+     * create objects for shard 2
+     */
+    MojErr createShardObjects2 (MojDb& db, MojDbShardEngine::ShardInfo& shard);
+
+    /**
+     * add kind to db
+     */
+    MojErr addKind (const MojChar* strKind, MojDb& db);
+
+    /**
+     * is kind exist?
+     */
+    MojErr verifyKindExistance (MojString kindId, MojDb& db);
+
+    /**
+     * get number of records for kind
+     */
+    MojErr verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardEngine::ShardInfo& shard, MojUInt32& count);
+
+    /**
+     * is shard exist?
+     */
+    MojErr verifyShardExistance (MojDb& db, const MojDbShardEngine::ShardInfo& shard);
+
+    /**
+     * generate dummy shard info
+     */
     MojErr generateItem (MojDbShardEngine::ShardInfo& o_shardInfo);
+
+    /**
+     * display message
+     */
     MojErr displayMessage(const MojChar* format, ...);
+
+    /**
+     * cleanup
+     */
     void cleanup(void);
 };
 

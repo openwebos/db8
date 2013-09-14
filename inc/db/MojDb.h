@@ -176,8 +176,6 @@ private:
 	MojErr reloadKind(const MojString& id);
 	MojErr assignIds(MojObject& objOut);
 
-	static MojErr formatKindId(const MojChar* id, MojString& dbIdOut);
-
 	MojRefCountedPtr<MojDbStorageEngine> m_storageEngine;
 	MojRefCountedPtr<MojDbStorageDatabase> m_objDb;
 	MojRefCountedPtr<MojDbStorageSeq> m_idSeq;
@@ -192,7 +190,6 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
-
 };
 
 #endif /* MOJDB_H_ */

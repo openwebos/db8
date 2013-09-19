@@ -191,11 +191,11 @@ const MojChar* const MojDbServiceHandler::PutPermissionsSchema =
  				 _T("\"operations\":{\"type\":\"object\",")
 				 	_T("\"additionalProperties\":false,")
 				 	_T("\"properties\":{")
-				 		_T("\"read\":{\"enum\":[\"allow\",\"deny\"]},")
-				 		_T("\"update\":{\"enum\":[\"allow\",\"deny\"]},")
-				 		_T("\"create\":{\"enum\":[\"allow\",\"deny\"]},")
-				 		_T("\"delete\":{\"enum\":[\"allow\",\"deny\"]},")
-				 		_T("\"extend\":{\"enum\":[\"allow\",\"deny\"]}")
+				 		_T("\"read\":{\"enum\":[\"allow\",\"deny\"],\"optional\":true},")
+				 		_T("\"update\":{\"enum\":[\"allow\",\"deny\"],\"optional\":true},")
+				 		_T("\"create\":{\"enum\":[\"allow\",\"deny\"],\"optional\":true},")
+				 		_T("\"delete\":{\"enum\":[\"allow\",\"deny\"],\"optional\":true},")
+				 		_T("\"extend\":{\"enum\":[\"allow\",\"deny\"],\"optional\":true}")
 				  _T("}}}}}},")
 	 _T("\"additionalProperties\":false}");
 

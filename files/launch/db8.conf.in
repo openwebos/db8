@@ -34,4 +34,4 @@ pre-start script
 	fi
 end script
 
-exec nice -n -5 @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db
+exec @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db

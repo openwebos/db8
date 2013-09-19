@@ -34,4 +34,11 @@ pre-start script
 	fi
 end script
 
-exec @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db
+script
+	# Use centralized nice script
+	if [ -f @WEBOS_INSTALL_SYSCONFDIR@/init.d/webos-nicer.sh ]
+	then
+		. @WEBOS_INSTALL_SYSCONFDIR@/init.d/webos-nicer.sh
+	fi
+	exec $WEBOS_NICE @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_LOCALSTATEDIR@/db
+end script

@@ -79,6 +79,8 @@ protected:
 	MojAutoPtr<MojDbQueryPlan> m_plan;
     MojString m_distinct;
     MojRefCountedPtr<MojDbObjectItem> m_lastItem;
+    bool m_ignoreInactiveShards;
+
 };
 
 #endif /* MOJDBISAMQUERY_H_ */

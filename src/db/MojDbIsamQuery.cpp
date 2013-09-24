@@ -47,6 +47,7 @@ MojErr MojDbIsamQuery::open(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* tx
 	m_txn = txn;
 	m_endKey.clear();
     m_distinct = m_plan->query().distinct();
+    m_ignoreInactiveShards = m_plan->query().ignoreInactiveShards();
 
 	return MojErrNone;
 }
@@ -291,6 +292,10 @@ MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 	foundOut = false;
 	MojErr err = MojErrNone;
 	RangeVec::ConstIterator end = m_plan->ranges().end();
+#if defined (MOJ_DEBUG)
+    uint32_t countFound = 0;
+    uint32_t countIgnored = 0;
+#endif
 
 	// Note, we consider the limit enforced when the count equals the limit.
 	// The count is incremented outside of getKey, depending on
@@ -314,16 +319,23 @@ MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 		// check to see if we're still in the range
 		if (match()) {
             // XXX: virtual shards (will be removed later)
-            bool exclude;
-            err = checkShard(exclude);
-            MojErrCheck( err );
-            if (exclude)
-            {
-                // skip excluded records
-                // this actually will loop through next one/several records
-                // once match() ends we will jump to next range
-                m_state = StateNext;
-                continue;
+#if defined (MOJ_DEBUG)
+             countFound++;
+#endif
+            if (m_ignoreInactiveShards) {
+                bool exclude;
+                err = checkShard(exclude);
+                MojErrCheck( err );
+                if (exclude) {
+                    // skip excluded records
+                    // this actually will loop through next one/several records
+                    // once match() ends we will jump to next range
+                    m_state = StateNext;
+#if defined (MOJ_DEBUG)
+                    countIgnored++;
+#endif
+                    continue;
+                }
             }
 
 			groupOut = m_iter->group();
@@ -334,6 +346,7 @@ MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 		m_state = StateSeek;
 		++m_iter;
 	}
+    MojLogDebug (MojDb::s_log, "Matching records found: %d, ignore: %d", countFound, countIgnored);
 	return MojErrNone;
 }
 

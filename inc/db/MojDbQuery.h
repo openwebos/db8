@@ -121,6 +121,7 @@ public:
 	MojErr distinct(const MojChar* distinct);
 	MojErr includeDeleted(bool val = true);
 	void desc(bool val) { m_desc = val; }
+    void setIgnoreInactiveShards(bool val = true) { m_ignoreInactiveShards = val; }
 	void limit(MojUInt32 numResults) { m_limit = numResults; }
 	void page(const Page& page) { m_page = page; }
 
@@ -135,6 +136,7 @@ public:
 	const Page& page() const { return m_page; }
 	bool desc() const { return m_desc; }
 	MojUInt32 limit() const { return m_limit; }
+    bool ignoreInactiveShards() const {return m_ignoreInactiveShards;}
 	bool operator==(const MojDbQuery& rhs) const;
 
 	static MojErr stringToOp(const MojChar* str, CompOp& opOut);
@@ -170,6 +172,7 @@ private:
 	MojString m_distinct;
 	MojUInt32 m_limit;
 	bool m_desc;
+    bool m_ignoreInactiveShards;
 
 	static MojLogger s_log;
 	MojDbIndex *m_forceIndex;		// for debugging in stats

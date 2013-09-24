@@ -113,11 +113,12 @@ struct ShardsTest : public MojDbCoreTest
         }
     }
 
-    void expect(const MojChar* expectedJson)
+    void expect(const MojChar* expectedJson, bool includeInactive = false)
     {
         MojDbQuery query;
         query.clear();
         MojAssertNoErr( query.from(_T("Test:1")) );
+        if (includeInactive) query.setIgnoreInactiveShards( false );
 
         MojString str;
         MojDbSearchCursor cursor(str);
@@ -285,4 +286,25 @@ TEST_F(ShardsTest, queryInactiveShard)
     MojAssertNoErr (shardEngine->update(shardInfo));
 
     expect("[2,4,6,8,10]"); // no records from shard MagicId
+}
+
+/*
+ * @test Verify that query.setIgnoreInactiveShards(false) results in all
+ * records returned (even for inactive shards).
+ */
+TEST_F(ShardsTest, queryInactiveShardWithoutIgnore)
+{
+    registerShards();
+    fillData();
+
+    MojDbShardEngine::ShardInfo shardInfo;
+    bool found;
+    MojAssertNoErr (shardEngine->get(MagicId, shardInfo, found));
+    ASSERT_TRUE(found);
+    EXPECT_EQ(MagicId, shardInfo.id);
+
+    shardInfo.active = false;
+    MojAssertNoErr (shardEngine->update(shardInfo));
+
+    expect("[1,3,5,7,9,2,4,6,8,10]", true); // re-order by shard prefix vs timestamp
 }

@@ -429,6 +429,7 @@ void MojDbQuery::init()
 	m_limit = LimitDefault;
 	m_desc = false;
 	m_forceIndex = NULL;
+    m_ignoreInactiveShards = true;
 }
 
 MojErr MojDbQuery::addClauses(WhereMap& map, const MojObject& array)

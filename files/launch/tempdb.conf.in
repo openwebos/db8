@@ -18,7 +18,7 @@
 
 description "@WEBOS_PROJECT_SUMMARY@"
 
-start on stopped TV-is-ready
+start on minimal-boot-done
 
 task
 

@@ -767,9 +767,10 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
 
             err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
             MojErrCheck(err);
-            err = writer.stringProp("isActive", info.active ? "true" : "false");
+            err = writer.boolProp("isActive", info.active);
             MojErrCheck(err);
-
+            err = writer.boolProp("isTransient", info.transient);
+            MojErrCheck(err);
             err = writer.stringProp("shardId", info.id_base64);
             MojErrCheck(err);
 

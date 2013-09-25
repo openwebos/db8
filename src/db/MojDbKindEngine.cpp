@@ -589,6 +589,8 @@ MojErr MojDbKindEngine::addShardIdToMasterKind (MojString shardId, MojObject& ob
         } else {
             MojErrThrow(MojErrDbKindNotRegistered);
         }
+
+        cursor.close();
     }
 
     return MojErrNone;
@@ -691,6 +693,7 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
             MojErrThrow(MojErrDbKindNotRegistered);
         }
 
+        cursor.close();
         err = req.end(forceCommit);
         MojErrCheck(err);
 

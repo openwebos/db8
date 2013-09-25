@@ -388,7 +388,7 @@ MojErr MojObject::delString(MojSize idx)
 {
     ArrayImpl& array = ensureArray();
 
-    if (array.m_vec.size() <= idx)
+    if (idx <= array.m_vec.size())
     {
         MojErr err = array.m_vec.erase(idx);
         MojErrCheck(err);

@@ -86,7 +86,7 @@ MojErr MojDbLevelQuery::getById(const MojObject& id, MojDbStorageItem*& itemOut,
             char s[1024];
             size_t size = primaryKey.size();
             (void) MojByteArrayToHex(primaryKey.data(), size, s);
-            MojLogNotice(MojDbLevelEngine::s_log, _T("bdbq_byId_warnindex: KeySize: %zu; %s ;id: %s \n"),
+            MojLogInfo(MojDbLevelEngine::s_log, _T("bdbq_byId_warnindex: KeySize: %zu; %s ;id: %s \n"),
                                  size, s, primaryKey.data()+1);
 
             //MojErrThrow(MojErrDbInconsistentIndex);

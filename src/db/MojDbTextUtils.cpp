@@ -67,3 +67,31 @@ MojErr MojDbTextUtils::unicodeToStr(const UChar* src, MojSize len, MojString& de
 	return MojErrNone;
 }
 
+/***********************************************************************
+ * strToUpper
+ *
+ * Convert string to upper case by using delivered locale info
+ ***********************************************************************/
+MojErr MojDbTextUtils::strToUpper(const MojString& src, const MojChar* locale, UnicodeVec& destOut)
+{
+    MojDbTextUtils::UnicodeVec chars;
+    MojErr err = MojDbTextUtils::strToUnicode(src, chars);
+    MojErrCheck(err);
+
+    UErrorCode status = U_ZERO_ERROR;
+    MojSize charSize = chars.size();
+    // set enough initial size for dest string
+    err = destOut.resize(charSize*2);
+    MojErrCheck(err);
+    UnicodeVec::Iterator iter;
+    err = destOut.begin(iter);
+    MojErrCheck(err);
+    int32_t destCharSize = u_strToUpper(iter, (int32_t)charSize*2, chars.begin(), (int32_t)charSize, locale, &status);
+    MojUnicodeErrCheck(status);
+    // resize from result
+    err = destOut.resize(destCharSize);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+

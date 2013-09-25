@@ -31,6 +31,7 @@ public:
 
 	static MojErr strToUnicode(const MojString& src, UnicodeVec& destOut);
 	static MojErr unicodeToStr(const UChar* src, MojSize len, MojString& destOut);
+    static MojErr strToUpper(const MojString& src, const MojChar* locale, UnicodeVec& destOut);
 };
 
 #define MojUnicodeErrCheck(STATUS) if (U_FAILURE(STATUS)) MojErrThrowMsg(MojErrDbUnicode, _T("icu: %s"), u_errorName(STATUS))

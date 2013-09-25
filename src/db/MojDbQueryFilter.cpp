@@ -18,6 +18,8 @@
 
 
 #include "db/MojDbQueryFilter.h"
+#include "db/MojDbTextUtils.h"
+#include "unicode/ustring.h"
 
 MojDbQueryFilter::MojDbQueryFilter()
 {
@@ -148,6 +150,9 @@ bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const Mo
 	case MojDbQuery::OpGreaterThanEq:
 		return val >= lowerVal;
 
+    case MojDbQuery::OpSubString:
+        return findSubString(val, lowerVal);
+
 	default:
 		MojAssertNotReached();
 		return false;
@@ -172,3 +177,53 @@ bool MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const Mo
 		return false;
 	}
 }
+
+/***********************************************************************
+ * findSubString
+ *
+ * Find whether "subString" exists in "src" or not recursively
+ * through the following sequence.
+ *   1. Check "subString" type is array or not.
+ *   2. If type of "src" and "subString" is string,
+ *      convert their to upper case for case insensitivity
+ *   3. If "subString" is found in "src", return true.
+ ***********************************************************************/
+bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subString)
+{
+    if (subString.type() == MojObject::TypeArray) {
+        // If "subString" type is array, take out each items for recursive process
+        MojObject::ConstArrayIterator end = subString.arrayEnd();
+        for (MojObject::ConstArrayIterator i = subString.arrayBegin(); i != end; ++i) {
+            if(findSubString(src, *i)) {
+                return true;
+            }
+        }
+    } else {
+        // Type of "src" and "subString" should be string.
+        if(src.type() != MojObject::TypeString || subString.type() != MojObject::TypeString) {
+            return false;
+        }
+        // convert "src" to upper case.
+        MojString srcStr;
+        MojErr err;
+        err = src.stringValue(srcStr);
+        MojErrCheck(err);
+        MojDbTextUtils::UnicodeVec srcOut;
+        // locale info did not set for locale insesitivity.
+        err = MojDbTextUtils::strToUpper(srcStr, _T(""), srcOut);
+        MojErrCheck(err);
+        // convert "subString" to upper case.
+        MojString subStringStr;
+        err = subString.stringValue(subStringStr);
+        MojErrCheck(err);
+        MojDbTextUtils::UnicodeVec subStringOut;
+        err = MojDbTextUtils::strToUpper(subStringStr, _T(""), subStringOut);
+        MojErrCheck(err);
+        // If "subString" is found in "src", return true.
+        if(u_strstr(srcOut.begin(), subStringOut.begin())) {
+            return true;
+        }
+    }
+    return false;
+}
+

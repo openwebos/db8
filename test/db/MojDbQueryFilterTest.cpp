@@ -137,6 +137,15 @@ MojErr MojDbQueryFilterTest::run()
 				_T("[{\"prop\":\"foo\",\"op\":\">\",\"val\":1},{\"prop\":\"bar\",\"op\":\"<\",\"val\":5}]"),
 				false);
 	MojTestErrCheck(err);
+    // %%
+    err = check(_T("{\"file\":{\"name\":\"abcdefg-hijklmn.mp3\"}}"),
+                _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"fg-h\"}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"name\":\"Have a nice day!\"}}"),
+                _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"CE DA\"}]"),
+                true);
+    MojTestErrCheck(err);
 
 	return MojErrNone;
 }

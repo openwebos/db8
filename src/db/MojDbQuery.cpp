@@ -469,10 +469,10 @@ MojErr MojDbQuery::addClause(WhereMap& map, const MojChar* propName, CompOp op, 
 	MojAssert(propName);
 
 	// only allow valid ops
-	if (!(op >= OpEq && op <= OpSearch))
+    if (!(op >= OpEq && op <= OpSubString))
 		MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: invalid query op"));
-	// only allow array values for = or % ops
-	if (val.type() == MojObject::TypeArray && op != OpEq && op != OpPrefix)
+    // only allow array values for = or % or %% ops
+    if (val.type() == MojObject::TypeArray && op != OpEq && op != OpPrefix && op != OpSubString)
 		MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: query contains array value for non-eq op"));
 
 	// check to see if the prop is referenced in a prior clause
@@ -558,6 +558,7 @@ const MojDbQuery::StrOp MojDbQuery::s_ops[] = {
 	{_T(">="), OpGreaterThanEq},
 	{_T("%"), OpPrefix},
 	{_T("?"), OpSearch},
+    {_T("%%"), OpSubString},
 	{NULL, OpNone}
 };
 
@@ -574,7 +575,7 @@ MojErr MojDbQuery::stringToOp(const MojChar* str, CompOp& opOut)
 
 const MojChar* MojDbQuery::opToString(CompOp op)
 {
-	if (op == OpNone || op > OpPrefix)
+    if (op == OpNone || op > OpSubString)
 		return NULL;
 	return s_ops[op-1].m_str;
 }

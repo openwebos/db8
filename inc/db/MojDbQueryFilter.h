@@ -36,6 +36,7 @@ public:
 private:
 	static bool testLower(const MojDbQuery::WhereClause& clause, const MojObject& val);
 	static bool testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val);
+    static bool findSubString(const MojObject& src, const MojObject& subString);
 
 	MojDbQuery::WhereMap m_clauses;
 };

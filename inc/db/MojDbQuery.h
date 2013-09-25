@@ -41,7 +41,8 @@ public:
 		OpGreaterThan,
 		OpGreaterThanEq,
 		OpPrefix,
-		OpSearch
+        OpSearch,
+        OpSubString
 	} CompOp;
 
 	class WhereClause

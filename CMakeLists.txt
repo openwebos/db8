@@ -27,7 +27,7 @@ set(CMAKE_INSTALL_RPATH "")
 
 include(webOS/webOS)
 webos_modules_init(1 0 0 QUALIFIER RC4)
-webos_component(3 0 0)
+webos_component(3 1 0)
 
 include(FindPkgConfig)
 

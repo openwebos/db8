@@ -621,6 +621,8 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
 
     if(!kindId.empty() && (shardIds.size() > 0))
     {
+        bool oldAdminMode = req.admin();
+        req.admin(true); // invoke admin mode to fix permissions block on Kind:1
         //MojErrCheck( db()->beginReq(req) );
         err = req.begin(db(), false);
         MojErrCheck(err);
@@ -693,9 +695,11 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
             MojErrThrow(MojErrDbKindNotRegistered);
         }
 
+
         cursor.close();
         err = req.end(forceCommit);
         MojErrCheck(err);
+        req.admin(oldAdminMode);
 
         MojLogNotice(s_log, _T("End for Kind: %s"), kindId.data()); // TODO: remove
     } else {

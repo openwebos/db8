@@ -58,7 +58,6 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     if (err != MojErrNone) {
         MojString msg;
         MojErrToString(err, msg);
-        MojErrCheck(err);
         MojLogError(s_log, _T("Error opening %s/%s - %s (%d)"), baseDir, subDir, msg.data(), (int) err);
     }
     MojErrCheck(err);

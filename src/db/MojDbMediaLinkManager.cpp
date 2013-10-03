@@ -21,6 +21,7 @@
 #include "db/MojDb.h"
 #include "core/MojOs.h"
 #include <sstream>
+#include <unistd.h>
 #include <algorithm>
 
 const MojChar* const MediaLinkDirectory = _T("/media/mountpoint");
@@ -33,13 +34,11 @@ MojDbMediaLinkManager::MojDbMediaLinkManager()
     MojLogTrace(s_log);
 
     m_dir.assign(MediaLinkDirectory);
-    m_baseDirCreated = false;
 }
 
 MojErr MojDbMediaLinkManager::setLinkDirectory(const MojString& dir)
 {
     m_dir = dir;
-    m_baseDirCreated = false;
     return MojErrNone;
 }
 
@@ -58,27 +57,23 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
     MojErr err;
     MojString linkPath;
 
-    // ensure base mount path exists
-    if (!m_baseDirCreated) {
-        err = MojMkDir(m_dir, MOJ_S_IRWXU);
-        MojErrCheck(err);
-        MojLogDebug(s_log, _T("Create base folder for mount symlinks: %s"), m_dir.data());
-        m_baseDirCreated = true;
-    }
-
     err = getLinkPath(shardInfo.id, linkPath);
     MojErrCheck(err);
 
-    MojLogDebug(s_log, _T("create link %s"), linkPath.data());
+    if ( access(linkPath.data(), F_OK) != 0)
+    {
+         MojLogDebug(s_log, _T("create link %s"), linkPath.data());
+         err = MojSymlink(shardInfo.deviceUri, linkPath);
 
-    MojUnlink(linkPath);
-    err = MojSymlink(shardInfo.deviceUri, linkPath);
-    if (err == MojErrNone) {
-        shardInfo.mountPath = linkPath;
-        MojLogDebug(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
-    } else {
-        MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
+         if (err == MojErrNone) {
+             MojLogDebug(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
+         } else {
+             MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
+             return MojErrAccessDenied;
+         }
     }
+
+    shardInfo.mountPath = linkPath;
 
     return err;
 }

@@ -33,7 +33,6 @@ private:
     MojErr getLinkPath(MojUInt32 shardId, MojString& linkPath);
 
     MojString m_dir;
-    bool m_baseDirCreated;
 
     static MojLogger s_log;
 };

@@ -395,7 +395,7 @@ bool MojLunaService::handleCancel(LSHandle* sh, LSMessage* msg, void* ctx)
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg));
 	MojAllocCheck(request.get());
-	MojLogInfo(s_log, _T("cancel received: %s"), request->payload());
+	MojLogDebug(s_log, _T("cancel received: %s"), request->payload());
 	MojErr err = service->MojService::handleCancel(request.get());
 	MojErrCatchAll(err);
 

@@ -132,7 +132,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErr err = requireNotOpen();
 	MojErrCheck(err);
 
-    MojLogNotice(s_log, _T("opening: '%s'..."), path);
+    MojLogDebug(s_log, _T("opening: '%s'..."), path);
 
 	MojAutoCloser<MojDb> closer(this);
 	m_isOpen = true;
@@ -158,25 +158,25 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErrCheck(err);
 
 	// db
-    MojLogInfo(s_log, _T("Open Database: '%s'"), ObjDbName);
+    MojLogDebug(s_log, _T("Open Database: '%s'"), ObjDbName);
 	err = m_storageEngine->openDatabase(ObjDbName, req.txn(), m_objDb);
 	MojErrCheck(err);
 	MojAssert(m_objDb.get());
 
 	// seq
-    MojLogInfo(s_log, _T("Open Database: '%s'"), IdSeqName);
+    MojLogDebug(s_log, _T("Open Database: '%s'"), IdSeqName);
 	err = m_storageEngine->openSequence(IdSeqName, req.txn(), m_idSeq);
 	MojErrCheck(err);
 	MojAssert(m_idSeq.get());
 
 	// kinds
-    MojLogInfo(s_log, _T("Open Kind Engine"));
+    MojLogDebug(s_log, _T("Open Kind Engine"));
 	err = m_kindEngine.open(this, req);
-    MojLogInfo(s_log, _T("Kind Opened..."));
+    MojLogDebug(s_log, _T("Kind Opened..."));
 	MojErrCheck(err);
 
 	// perms
-    MojLogInfo(s_log, _T("Open Permissions"));
+    MojLogDebug(s_log, _T("Open Permissions"));
 	err = m_permissionEngine.open(m_conf, this, req);
 	MojErrCheck(err);
 
@@ -185,7 +185,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErrCheck(err);
 
     // shard's
-    MojLogInfo(s_log, _T("Init shard engine"));
+    MojLogDebug(s_log, _T("Init shard engine"));
     (void)m_shardEngine.init(this, req);
 
     // explicitly finish request
@@ -197,7 +197,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErrCheck(err);
 
 	closer.release();
-    MojLogNotice(s_log, _T("open completed"));
+    MojLogDebug(s_log, _T("open completed"));
 
 	return MojErrNone;
 }
@@ -211,7 +211,7 @@ MojErr MojDb::close()
 	MojErr errClose = MojErrNone;
 
 	if (m_isOpen) {
-        MojLogNotice(s_log, _T("closing..."));
+        MojLogDebug(s_log, _T("closing..."));
 
 		errClose = m_quotaEngine.close();
 		MojErrAccumulate(err, errClose);
@@ -235,7 +235,7 @@ MojErr MojDb::close()
 			m_storageEngine.reset();
 		}
 		m_isOpen = false;
-        MojLogNotice(s_log, _T("close completed"));
+        MojLogDebug(s_log, _T("close completed"));
 	}
 	return err;
 }
@@ -326,7 +326,7 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 		MojErrThrow(MojErrDbKindHasSubKinds);
 	}
     else
-        MojLogNotice(s_log, _T("delKind: %s \n"), idStr.data());
+        MojLogDebug(s_log, _T("delKind: %s \n"), idStr.data());
 
 	err = m_kindEngine.checkOwnerPermission(idStr, req);
 	MojErrCheck(err);
@@ -527,7 +527,7 @@ MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
     err = obj.getRequired(MojDbServiceDefs::IdKey, id);
     MojErrCheck(err);
 
-	MojLogInfo(s_log, _T("putKind: %s \n"), id.data());
+	MojLogDebug(s_log, _T("putKind: %s \n"), id.data());
 
 	// set _kind and _id
 	err = obj.putString(KindKey, MojDbKindEngine::KindKindId);
@@ -906,7 +906,7 @@ MojErr MojDb::delImpl(const MojDbQuery& quer, MojUInt32& countOut, MojDbReq& req
         }
 
         if (warns > 0)
-            MojLogNotice(s_log, _T("delquery index_warnings: %s, count: %d\n"), newQuery.from().data(), warns);
+            MojLogDebug(s_log, _T("delquery index_warnings: %s, count: %d\n"), newQuery.from().data(), warns);
         countOut += count;
 
         err = cursor.close();
@@ -1199,19 +1199,19 @@ MojErr MojDb::commitBatch(MojDbReq& req)
 
 	err = req.end();
 	if (err != MojErrNone)
-        MojLogNotice(s_log, _T("CommitBatch req.end: err= %d\n"), (int)err);
+        MojLogDebug(s_log, _T("CommitBatch req.end: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	err = req.endBatch();
 	if (err != MojErrNone)
-        MojLogNotice(s_log, _T("CommitBatch req.endbatch: err= %d\n"), (int)err);
+        MojLogDebug(s_log, _T("CommitBatch req.endbatch: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	req.beginBatch();
 
 	err = beginReq(req, false);
 	if (err != MojErrNone)
-        MojLogNotice(s_log, _T("CommitBatch ended: err= %d\n"), (int)err);
+        MojLogDebug(s_log, _T("CommitBatch ended: err= %d\n"), (int)err);
 	MojErrCheck(err);
 
 	return MojErrNone;

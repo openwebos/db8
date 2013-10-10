@@ -720,7 +720,7 @@ MojErr MojDbShardEngine::removeShardObjects (const MojString& strShardIdToRemove
     MojErrCheck(err);
     err = shardIds.push(shardId);
     MojErrCheck(err);
-    MojLogNotice(s_log, _T("purging objects for shard: %s"), strShardIdToRemove.data());
+    MojLogDebug(s_log, _T("purging objects for shard: %s"), strShardIdToRemove.data());
 
 
     return(removeShardObjects(shardIds, req));
@@ -758,7 +758,7 @@ MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShar
                 continue;
 
             kindId = it.key();
-            MojLogNotice(s_log, _T("Kind: %s"), kindId.data());
+            MojLogDebug(s_log, _T("Kind: %s"), kindId.data());
 
             // Might this kind have shards?
             // TODO:  Skip over Kinds without shards
@@ -769,17 +769,17 @@ MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShar
             {
                 err = removeShardRecords(*itShardId, kindId, req);
                 MojErrCheck(err);
-                MojLogNotice(s_log, _T("Get next shard for %s"), kindId.data()); // TODO: to debug
+                MojLogDebug(s_log, _T("Get next shard for %s"), kindId.data()); // TODO: to debug
             }
 
             err = mp_db->kindEngine()->removeShardIdsFromMasterKind(kindId, arrShardIds, req);
-            MojLogNotice(s_log, _T("Returned from removeShardIds")); // TODO: to debug
+           MojLogDebug(s_log, _T("Returned from removeShardIds")); // TODO: to debug
             MojErrCheck(err);
 
-            MojLogNotice(s_log, _T("Get next kind")); // TODO: to debug
+            MojLogDebug(s_log, _T("Get next kind")); // TODO: to debug
         }
     } else {
-        MojLogNotice(s_log, _T("List of shard IDs is empty")); // TODO: to info
+        MojLogDebug(s_log, _T("List of shard IDs is empty")); // TODO: to info
     }
 
     return MojErrNone;
@@ -819,7 +819,7 @@ MojErr MojDbShardEngine::removeShardRecords (const MojUInt32 shardId, const MojS
     err = MojDbShardEngine::convertId(shardId, shardIdStr);
     MojErrCheck(err);
 
-    MojLogNotice(s_log, _T("purging objects for shard: [%s], Kind: [%s]"), shardIdStr.data(), kindId.data());// todo: convert to Info
+    MojLogDebug(s_log, _T("purging objects for shard: [%s], Kind: [%s]"), shardIdStr.data(), kindId.data());// todo: convert to Info
 
     MojObject record;
     MojObject recordId;
@@ -849,9 +849,9 @@ MojErr MojDbShardEngine::removeShardRecords (const MojUInt32 shardId, const MojS
     }
 
     if (countDeleted) {
-        MojLogNotice(s_log, _T("purged %d of %d objects for shard: [%s] from Kind: [%s]"), countDeleted, countRead, shardIdStr.data(), kindId.data());
+        MojLogDebug(s_log, _T("purged %d of %d objects for shard: [%s] from Kind: [%s]"), countDeleted, countRead, shardIdStr.data(), kindId.data());
     } else {
-        MojLogNotice(s_log, _T("none purged out of %d objects"), countRead); // todo: convert to Info
+        MojLogDebug(s_log, _T("none purged out of %d objects"), countRead); // todo: convert to Info
     }
 
     return MojErrNone;
@@ -886,7 +886,7 @@ MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
     MojTime time;
     MojErrCheck( MojGetCurrentTime(time) );
     MojInt64 purgeTime = time.microsecs() - (MojTime::UnitsPerDay * numDays);
-    MojLogNotice(s_log, _T("purging objects for shards inactive for more than %lld days..."), numDays);
+    MojLogDebug(s_log, _T("purging objects for shards inactive for more than %lld days..."), numDays);
 
     //collect 'old' shards
     //--------------------
@@ -917,9 +917,9 @@ MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
         {
             err = arrShardIds.pushUnique(value_id);
             MojErrCheck(err);
-            MojLogNotice(s_log, _T("Need to purge records for old shard: [%s]"), shardIdStr.data());
+            MojLogDebug(s_log, _T("Need to purge records for old shard: [%s]"), shardIdStr.data());
         } else { // TODO: Remove
-            MojLogNotice(s_log, _T("Ignore active shard: [%s]"), shardIdStr.data());
+            MojLogDebug(s_log, _T("Ignore active shard: [%s]"), shardIdStr.data());
         }
 
     }
@@ -956,9 +956,9 @@ MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
         {
             err = arrShardIds.pushUnique(value_id);
             MojErrCheck(err);
-            MojLogNotice(s_log, _T("Need to purge records for transient shard: [%s]"), shardIdStr.data());
+            MojLogDebug(s_log, _T("Need to purge records for transient shard: [%s]"), shardIdStr.data());
         } else { // TODO: Remove
-            MojLogNotice(s_log, _T("Ignore active transient shard: [%s]"), shardIdStr.data());
+            MojLogDebug(s_log, _T("Ignore active transient shard: [%s]"), shardIdStr.data());
 
         }
     }
@@ -966,7 +966,7 @@ MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
     MojErrCheck(cursor.close());
 
     removeShardObjects(arrShardIds, req);
-    MojLogNotice(s_log, _T("Ended"));
+    MojLogDebug(s_log, _T("Ended"));
 
     return MojErrNone;
 }

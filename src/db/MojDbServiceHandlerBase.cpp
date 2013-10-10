@@ -87,7 +87,7 @@ MojErr MojDbServiceHandlerBase::invokeImpl(Callback method, MojServiceMessage* m
 	err = (this->*((DbCallback) method))(msg, payload, req);
 	(void) MojErrToString(err, errStr);
 	(void) payload.toJson(payloadstr);
-	MojLogInfo(s_log, _T("db_method: %s, err: (%d) - %s; sender= %s;\n payload=%s; \n response= %s\n"),
+	MojLogDebug(s_log, _T("db_method: %s, err: (%d) - %s; sender= %s;\n payload=%s; \n response= %s\n"),
 				msg->method(), (int)err, errStr.data(), msg->senderName(), payloadstr.data(), ((MojJsonWriter&)(msg->writer())).json().data());
 
 	MojErrCheck(err);

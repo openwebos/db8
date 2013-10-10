@@ -65,7 +65,7 @@ MojErr MojDbLunaServicePdm::open(MojGmainReactor& reactor, const MojChar* MojdbP
     MojLogTrace(s_log);
     MojAssert(MojdbPDMClientName);
     MojAssert(pdmServiceName);
-    MojLogInfo(s_log, "Open connectoin to PDM");
+    MojLogDebug(s_log, "Open connectoin to PDM");
 
     // open service
     MojErr err = m_service.open(MojdbPDMClientName);

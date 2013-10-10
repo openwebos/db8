@@ -415,7 +415,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 	MojDouble percentUsed =
 		((MojDouble)blocksUsed / (MojDouble)dbFsStat.f_blocks) * 100.0;
 
-	MojLogInfo(s_log, _T("Database volume %.1f full"), percentUsed);
+	MojLogDebug(s_log, _T("Database volume %.1f full"), percentUsed);
 
     if (MASSIVE_AVAILABLE_SPACE > bigBytesAvailable) { // regardless of percent used, if available space is massive, don't set space alert
         int level;
@@ -434,7 +434,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 	} else {
 		if ((AlertLevel)alertLevel != m_spaceAlertLevel) {
 			// Generate 'ok' message only if there has been a transition.
-            MojLogInfo(s_log, _T("Database volume usage %1.f, space ok, no warning needed.\n"), percentUsed);
+            MojLogDebug(s_log, _T("Database volume usage %1.f, space ok, no warning needed.\n"), percentUsed);
 		}
 	}
 

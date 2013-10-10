@@ -45,7 +45,7 @@ void MojDbShardIdCache::put (const MojUInt32 id, const MojObject& obj)
 
     if(ret.second)
     {
-        MojLogInfo(MojDbShardIdCache::s_log, _T("new element was inserted: [%x]\n"), id);
+        MojLogDebug(MojDbShardIdCache::s_log, _T("new element was inserted: [%x]\n"), id);
     }
     else
     {
@@ -61,7 +61,7 @@ bool MojDbShardIdCache::get (const MojUInt32 id, MojObject& o_obj) const
     if(it != m_map.end())
     {
         o_obj = it->second;
-        MojLogInfo(MojDbShardIdCache::s_log, _T("get element by id [%x]\n"), id);
+        MojLogDebug(MojDbShardIdCache::s_log, _T("get element by id [%x]\n"), id);
         return true;
     }
 
@@ -76,7 +76,7 @@ bool MojDbShardIdCache::update (const MojUInt32 id, const MojObject& i_obj)
     if(it != m_map.end())
     {
         (*it).second = i_obj;
-        MojLogInfo(MojDbShardIdCache::s_log, _T("update element by id [%x]\n"), id);
+        MojLogDebug(MojDbShardIdCache::s_log, _T("update element by id [%x]\n"), id);
         return true;
     }
 
@@ -87,7 +87,7 @@ void MojDbShardIdCache::del (const MojUInt32 id)
 {
     if(m_map.erase(id) > 0) //was erased
     {
-        MojLogInfo(MojDbShardIdCache::s_log, _T("id [%x] was erased\n"), id);
+        MojLogDebug(MojDbShardIdCache::s_log, _T("id [%x] was erased\n"), id);
     }
     else
     {
@@ -98,6 +98,6 @@ void MojDbShardIdCache::del (const MojUInt32 id)
 void MojDbShardIdCache::clear (void)
 {
     m_map.clear();
-    MojLogInfo(MojDbShardIdCache::s_log, _T("map was cleaned\n"));
+    MojLogDebug(MojDbShardIdCache::s_log, _T("map was cleaned\n"));
 }
 

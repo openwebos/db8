@@ -428,7 +428,7 @@ MojErr MojService::CategoryHandler::invoke(const MojChar* method, MojServiceMess
 	MojTime endTime;
 	err = MojGetCurrentTime(endTime);
 	MojErrCheck(err);
-	MojLogInfo(s_log, _T("%s invoked: %.3fms"), method, (double) (endTime.microsecs() - startTime.microsecs()) / 1000);
+	MojLogDebug(s_log, _T("%s invoked: %.3fms"), method, (double) (endTime.microsecs() - startTime.microsecs()) / 1000);
 
 	return MojErrNone;
 }

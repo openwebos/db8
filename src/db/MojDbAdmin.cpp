@@ -90,12 +90,12 @@ MojErr MojDb::compact()
 	MojErr err = requireOpen();
 	MojErrCheck(err);
 
-	MojLogNotice(s_log, _T("compacting..."));
+	MojLogDebug(s_log, _T("compacting..."));
 
 	err = m_storageEngine->compact();
 	MojErrCheck(err);
 
-	MojLogNotice(s_log, _T("compaction complete"));
+	MojLogDebug(s_log, _T("compaction complete"));
 
 	return MojErrNone;
 }
@@ -130,7 +130,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
 
-	MojLogNotice(s_log, _T("purging objects deleted more than %lld days ago..."), numDays);
+	MojLogDebug(s_log, _T("purging objects deleted more than %lld days ago..."), numDays);
 
 	MojTime time;
 	err = MojGetCurrentTime(time);
@@ -182,7 +182,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 		batchCount = 0;
 		req->fixmode(true);		// purge even if index mis-matches
 		err = purgeImpl(obj, batchCount, req);
-		MojLogInfo(s_log, _T("purge batch processed: batch: %d; total: %d; err = %d\n"), 
+		MojLogDebug(s_log, _T("purge batch processed: batch: %d; total: %d; err = %d\n"),
 					batchCount, (totalCount + batchCount), err);
 		MojErrCheck(err);
 		totalCount += batchCount;
@@ -198,7 +198,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	err = req->end();
 	MojErrCheck(err);
 
-	MojLogNotice(s_log, _T("purged %d objects"), countOut);
+	MojLogDebug(s_log, _T("purged %d objects"), countOut);
 
 	
 	return MojErrNone;
@@ -340,7 +340,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	int total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize;
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-	MojLogInfo(s_log, _T("Starting load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+	MojLogDebug(s_log, _T("Starting load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
 						path,	total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 
 	int orig_mutexes_used = mutexes_used;
@@ -377,7 +377,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 					// For debugging mutex consumption during load operations, we periodically retrieve the mutex stats.
 					m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-					MojLogInfo(s_log, _T("Loading %s record %d, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+					MojLogDebug(s_log, _T("Loading %s record %d, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
 							path, total, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 				}
 				
@@ -388,7 +388,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 				
 				if ((m_loadStepSize > 0) && ((total % m_loadStepSize) == 0)) {
 					// Close and reopen transaction, to prevent a very large transaction from building up.
-					MojLogInfo(s_log, _T("Loading %s record %d, closing and reopening transaction.\n"),
+					MojLogDebug(s_log, _T("Loading %s record %d, closing and reopening transaction.\n"),
 							path, total);
 
 					struct timeval transactionStartTime = {0,0}, transactionStopTime = {0,0};
@@ -438,10 +438,10 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-	MojLogInfo(s_log, _T("Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+	MojLogDebug(s_log, _T("Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
 						path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 	
-    MojLogNotice(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
+    MojLogDebug(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
 		path, total, elapsedTimeMS, total_transaction_time, transactions, mutexes_used - orig_mutexes_used, mutexes_free, total_mutexes);
 	
 	return MojErrNone;
@@ -539,7 +539,7 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
     if (warns > 0) {
         MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), (int)warns);
     } else {
-        MojLogNotice(s_log, _T("Finished Backup with no warnings \n"));
+        MojLogDebug(s_log, _T("Finished Backup with no warnings \n"));
     }
 	
 	// construct the next incremental key

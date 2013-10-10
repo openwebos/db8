@@ -301,7 +301,7 @@ MojErr MojDbKindEngine::putKind(const MojObject& obj, MojDbReq& req, bool builti
 		MojErrCheck(err);
 	} else {
 		// existing kind
-        MojLogNotice(s_log, _T("UpdatingKind: %s \n"), id.data());
+        MojLogDebug(s_log, _T("UpdatingKind: %s \n"), id.data());
 		err = (*i)->configure(obj, m_kinds, m_locale, req);
 		MojErrCheck(err);
 	}
@@ -626,7 +626,7 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
         //MojErrCheck( db()->beginReq(req) );
         err = req.begin(db(), false);
         MojErrCheck(err);
-        MojLogNotice(s_log, _T("Starting for Kind: %s"), kindId.data());
+        MojLogDebug(s_log, _T("Starting for Kind: %s"), kindId.data());
         // get _id from _kind
         MojString id;
         err = formatKindId(kindId.data(), id);
@@ -650,7 +650,7 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
         if(foundOut) {
             // convert extracted item to object type
             MojObject oldObj;
-            MojLogNotice(s_log, _T("Processing Kind: %s"), kindId.data());
+            MojLogDebug(s_log, _T("Processing Kind: %s"), kindId.data());
             err = prevItem->toObject(oldObj, m_db->m_kindEngine);
             MojErrCheck(err);
             MojObject mergedObj(oldObj);
@@ -669,9 +669,9 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
                     if(shardIds.find(id_uint32) != MojInvalidIndex) { // is shard from Kind in the delete shard list ?
                         shardIdsObj.delString(i);
                         countDeleted ++;  // Note:  don't increment 'i' if we delete an entry in the array, otherwise we will skip elements
-                        MojLogNotice(s_log, _T("removed shard id %s for Kind: %s"), shardIdStr.data(), kindId.data());
+                        MojLogDebug(s_log, _T("removed shard id %s for Kind: %s"), shardIdStr.data(), kindId.data());
                     } else {
-                        MojLogNotice(s_log, _T("shard id %s not associated with Kind: %s"), shardIdStr.data(), kindId.data());
+                        MojLogDebug(s_log, _T("shard id %s not associated with Kind: %s"), shardIdStr.data(), kindId.data());
                         i++;
                     }
                 }
@@ -682,13 +682,13 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
                     // update Kind:1
                     err = m_db->putObj(id, mergedObj, &oldObj, prevItem, req, OpUpdate);
                     MojErrCheck(err);
-                    MojLogNotice(s_log, _T("Update object for Kind: %s"), kindId.data());
+                    MojLogDebug(s_log, _T("Update object for Kind: %s"), kindId.data());
                     forceCommit = true;
                 } else {
-                    MojLogNotice(s_log, _T("No matching shards for Kind: %s"), kindId.data()); // TODO:  to info
+                    MojLogDebug(s_log, _T("No matching shards for Kind: %s"), kindId.data()); // TODO:  to info
                 }
             } else {
-                MojLogNotice(s_log, _T("No shards known for Kind: %s"), kindId.data()); // TODO:  to info
+                MojLogDebug(s_log, _T("No shards known for Kind: %s"), kindId.data()); // TODO:  to info
             }
         }
         else {
@@ -701,7 +701,7 @@ MojErr MojDbKindEngine::removeShardIdsFromMasterKind (const MojString& kindId, c
         MojErrCheck(err);
         req.admin(oldAdminMode);
 
-        MojLogNotice(s_log, _T("End for Kind: %s"), kindId.data()); // TODO: remove
+        MojLogDebug(s_log, _T("End for Kind: %s"), kindId.data()); // TODO: remove
     } else {
         MojLogWarning(s_log, _T("Empty parameters for Kind: %s"), kindId.data());
     }

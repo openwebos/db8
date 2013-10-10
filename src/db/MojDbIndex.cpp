@@ -185,8 +185,8 @@ MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
 	MojSize size = 0;
 	MojErr err = m_index->stats(req.txn(), count, size);
 
-	MojLogInfo(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err); 
-	
+	MojLogDebug(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err);
+
 	MojErrCheck(err);
 	usageOut += size;
 
@@ -424,7 +424,7 @@ MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 	MojAssert(watcher);
 	MojLogTrace(s_log);
 
-	MojLogInfo(s_log, _T("Index_cancelWatch: index name = %s; domain = %s\n"),
+	MojLogDebug(s_log, _T("Index_cancelWatch: index name = %s; domain = %s\n"),
 				this->name().data(), watcher->domain().data());
 
 	MojThreadWriteGuard guard(m_lock);
@@ -443,7 +443,7 @@ MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 					bool found = false;
 					m_watcherMap.del(iter.key(), found);
 					MojAssert(found);
-					MojLogInfo(s_log, _T("Index_cancelwatch: Domain Del found = %d; index name = %s; domain = %s\n"),
+					MojLogDebug(s_log, _T("Index_cancelwatch: Domain Del found = %d; index name = %s; domain = %s\n"),
  						(int)found, this->name().data(), watcher->domain().data());
 				}
 			}
@@ -552,7 +552,7 @@ MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, Moj
 					req.domain().data(), iter.value(), m_kind->id().data(), m_name.data());
 		}
 	}
-	MojLogInfo(s_log, _T("DbIndex_addWatch - '%s' on index '%s - %s'"),
+	MojLogDebug(s_log, _T("DbIndex_addWatch - '%s' on index '%s - %s'"),
 					req.domain().data(),  m_kind->id().data(), m_name.data());
 	// drop lock before acquiring watcher mutex in init
 	guard.unlock();
@@ -584,7 +584,7 @@ MojErr MojDbIndex::notifyWatches(const MojDbKey& key, MojDbStorageTxn* txn)
 		const RangeVec& ranges = (*i)->ranges();
 		for (RangeVec::ConstIterator j = ranges.begin(); j != ranges.end(); ++j) {
 			if (j->contains(key)) {
-				MojLogInfo(s_log, _T("DbIndex_notifywatches adding to txn - kind: %s; index %s;\n"),
+				MojLogDebug(s_log, _T("DbIndex_notifywatches adding to txn - kind: %s; index %s;\n"),
 					((m_kind) ? m_kind->id().data() :NULL), ((m_name) ? m_name.data() : NULL));
 				MojErr err = txn->addWatcher(i->get(), key);
 				MojErrCheck(err);
@@ -620,7 +620,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		if (err == MojErrInternalIndexOnDel) {
 			m_delMisses++;
 #if defined(MOJ_DEBUG_LOGGING)
-            MojLogNotice(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
+            MojLogDebug(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 			if (forcedel)
 				err = MojErrNone;

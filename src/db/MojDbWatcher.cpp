@@ -67,7 +67,7 @@ MojErr MojDbWatcher::activate(const MojDbKey& limitKey)
 		m_limitKey = limitKey;
 	}
 
-	MojLogInfo(MojDb::s_log, _T("Watcher_activate: state= %d; fired = %d; inrange = %d; index name = %s; domain = %s\n"), (int)m_state, 
+	MojLogDebug(MojDb::s_log, _T("Watcher_activate: state= %d; fired = %d; inrange = %d; index name = %s; domain = %s\n"), (int)m_state,
 				(int)fired, (int)inRange, ((m_index) ? m_index->name().data(): NULL), ((m_domain) ? m_domain.data(): NULL));
 	return MojErrNone;
 }
@@ -82,7 +82,7 @@ MojErr MojDbWatcher::fire(const MojDbKey& key)
 			(m_desc && key >= m_limitKey) ||
 			(!m_desc && key <= m_limitKey);
 
-	MojLogInfo(MojDb::s_log, _T("Watcher_fire: state= %d; inrange = %d; limited = %d; index name = %s; domain = %s\n"), (int)m_state, 
+	MojLogDebug(MojDb::s_log, _T("Watcher_fire: state= %d; inrange = %d; limited = %d; index name = %s; domain = %s\n"), (int)m_state,
 				(int)inRange, (int)limited, ((m_index) ? m_index->name().data() : NULL), ((m_domain) ? m_domain.data() : NULL));
 	if (!inRange)
 		return MojErrNone;
@@ -105,7 +105,7 @@ MojErr MojDbWatcher::handleCancel()
 {
 	MojThreadGuard guard(m_mutex);
 
-	MojLogInfo(MojDb::s_log, _T("Watcher_handleCancel: state= %d; index name = %s; domain = %s\n"), (int)m_state, 
+	MojLogDebug(MojDb::s_log, _T("Watcher_handleCancel: state= %d; index name = %s; domain = %s\n"), (int)m_state,
 				((m_index) ? m_index->name().data() : NULL), ((m_domain) ? m_domain.data() : NULL));
 
 	if (m_index == NULL)
@@ -126,7 +126,7 @@ MojErr MojDbWatcher::fireImpl()
 	err = m_signal.fire();
 	MojErrCatchAll(err);
 	
-	MojLogInfo(MojDb::s_log, _T("Watcher_fired!!: err = %d; state= %d; index name = %s; domain = %s\n"), (int)err, (int)m_state, 
+	MojLogDebug(MojDb::s_log, _T("Watcher_fired!!: err = %d; state= %d; index name = %s; domain = %s\n"), (int)err, (int)m_state,
 				((m_index) ? m_index->name().data() : NULL), ((m_domain) ? m_domain.data() : NULL));
 	return MojErrNone;
 }
@@ -137,7 +137,7 @@ MojErr MojDbWatcher::invalidate()
 	MojAssert(m_index);
 	MojAssert(m_state == StateActive);
 
-	MojLogInfo(MojDb::s_log, _T("Watcher_invalidate: state= %d; index name = %s; domain = %s\n"), (int)m_state, 
+	MojLogDebug(MojDb::s_log, _T("Watcher_invalidate: state= %d; index name = %s; domain = %s\n"), (int)m_state,
 			((m_index) ? m_index->name().data() : NULL),((m_domain) ? m_domain.data() : NULL));
 	// index always drops its mutex before firing, so
 	// it's ok to hold our mutex while calling into index

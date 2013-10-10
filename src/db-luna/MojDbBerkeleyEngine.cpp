@@ -165,7 +165,7 @@ MojErr MojDbBerkeleyCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
 
 	MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
-	MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
+	MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
 	MojErrCheck(err);
 
 	return MojErrNone;
@@ -443,7 +443,7 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(key.data()) + (size1 - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbput: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbput: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     this->m_name.data(), size1, s, size2, err);
 #endif
 	MojBdbErrCheck(dbErr, _T("db->put"));
@@ -516,7 +516,7 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
 	MojErrCheck(err2);
 	if (size > 16)	// if the object-id is in key
 		strncat(s, (char *)(key.data()) + (size - 17), 16);
-    MojLogInfo(MojDbBerkeleyEngine::s_log, _T("bdbdel: %s; keylen: %zu, key= %s; err= %d \n"), this->m_name.data(), size, s, dbErr);
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbdel: %s; keylen: %zu, key= %s; err= %d \n"), this->m_name.data(), size, s, dbErr);
 #endif
 
 	if (dbErr != DB_NOTFOUND) {
@@ -1004,7 +1004,7 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int pre_compact_reclaimed_blocks = (int)(statAfterCompact.f_bfree - statAtBeginning.f_bfree);
 
-    MojLogNotice(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
+    MojLogDebug(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		pre_compact_reclaimed_blocks * blockSize,
 		DatabaseRoot, statAfterCompact.f_bfree * blockSize,
 		 statAfterCompact.f_blocks * blockSize,
@@ -1151,7 +1151,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				// not be fully compacting the pages which contain the keys.)
 
 
-				MojLogInfo(s_log, _T("Compacting %s (partial from ~record %d to %d). Stepped over %d/%d bytes of keys/values in %dms.\n"), (*i)->m_name.data(),
+				MojLogDebug(s_log, _T("Compacting %s (partial from ~record %d to %d). Stepped over %d/%d bytes of keys/values in %dms.\n"), (*i)->m_name.data(),
 					key1_count, key2_count,
 					key_total, value_total,
 					elapsedStepTimeMS);
@@ -1173,7 +1173,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				int elapsedCompactTimeMS = (int)(stopTime.tv_sec - startTime.tv_sec) * 1000 +
 						           (int)(stopTime.tv_usec - startTime.tv_usec) / 1000;
 
-		                MojLogInfo(s_log, _T("Compact stats of %s (partial from ~record %d to %d): time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n"),
+		                MojLogDebug(s_log, _T("Compact stats of %s (partial from ~record %d to %d): time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n"),
         		        	(*i)->m_name.data(),
         		        	key1_count, key2_count,
         		        	elapsedCompactTimeMS,
@@ -1225,7 +1225,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				if (reclaimed_blocks > max_reclaimed_blocks)
 					max_reclaimed_blocks = reclaimed_blocks;
 
-				MojLogInfo(s_log, _T("Compact of %s (partial from ~record %d to %d) generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n"),
+				MojLogDebug(s_log, _T("Compact of %s (partial from ~record %d to %d) generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n"),
 					(*i)->m_name.data(),
 					key1_count, key2_count,
 					log_generation_blocks * blockSize,
@@ -1269,7 +1269,7 @@ MojErr MojDbBerkeleyEngine::compact()
 		}
 
 		if ((stepSize <= 1) || (dbErr != 0)) {
-            MojLogNotice(s_log, "Compacting %s\n", (*i)->m_name.data());
+            MojLogDebug(s_log, "Compacting %s\n", (*i)->m_name.data());
 
 		        struct statvfs statBeforeCompact, statAfterCompact, statAfterCheckpoint;
 
@@ -1292,7 +1292,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			if (elapsedCompactTimeMS > max_compact_time)
 				max_compact_time = elapsedCompactTimeMS;
 
-       	        	MojLogInfo(s_log, "Compact stats of %s: time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n",
+       	        	MojLogDebug(s_log, "Compact stats of %s: time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n",
                 		(*i)->m_name.data(),
                 		elapsedCompactTimeMS,
                 		c_data.compact_deadlock, c_data.compact_pages_examine,
@@ -1329,7 +1329,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			if (reclaimed_blocks > max_reclaimed_blocks)
 				max_reclaimed_blocks = reclaimed_blocks;
 
-            MojLogNotice(s_log, "Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
+            MojLogDebug(s_log, "Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
 				(*i)->m_name.data(),
 				log_generation_blocks * blockSize,
 				reclaimed_blocks * blockSize);
@@ -1350,7 +1350,7 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int compact_freed_blocks = (int)(statAtEnd.f_bfree - statAtBeginning.f_bfree);
 
-    MojLogNotice(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
+    MojLogDebug(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
 			     "%d db pages truncated (max burst %d), "
 	                     "%d log bytes created by compacts (max burst %d), "
 	                     "%d bytes reclaimed by checkpoints (max burst %d), "
@@ -1368,7 +1368,7 @@ MojErr MojDbBerkeleyEngine::compact()
 	                     total_compact_time, max_step_time
 	                     );
 
-    MojLogNotice(s_log, _T("Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
+    MojLogDebug(s_log, _T("Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		elapsedTotalMS,
 		compact_freed_blocks * blockSize,
 		pre_compact_reclaimed_blocks * blockSize,

@@ -123,7 +123,7 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
 MojErr MojDbLunaServiceApp::open()
 {
 	MojLogTrace(s_log);
-	MojLogNotice(s_log, _T("mojodb starting..."));
+	MojLogDebug(s_log, _T("mojodb starting..."));
 
 	MojErr err = Base::open();
 	MojErrCheck(err);
@@ -182,7 +182,7 @@ MojErr MojDbLunaServiceApp::open()
 	err = m_internalHandler->configure(dbOpenFailed);
 	MojErrCheck(err);
 
-	MojLogNotice(s_log, _T("mojodb started"));
+	MojLogDebug(s_log, _T("mojodb started"));
 
 	return MojErrNone;
 }
@@ -190,7 +190,7 @@ MojErr MojDbLunaServiceApp::open()
 MojErr MojDbLunaServiceApp::close()
 {
 	MojLogTrace(s_log);
-	MojLogNotice(s_log, _T("mojodb stopping..."));
+	MojLogDebug(s_log, _T("mojodb stopping..."));
 
 	// stop dispatcher
 	MojErr err = MojErrNone;
@@ -215,7 +215,7 @@ MojErr MojDbLunaServiceApp::close()
 	errClose = Base::close();
 	MojErrAccumulate(err, errClose);
 
-	MojLogNotice(s_log, _T("mojodb stopped"));
+	MojLogDebug(s_log, _T("mojodb stopped"));
 
 	return err;
 }

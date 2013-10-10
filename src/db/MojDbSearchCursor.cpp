@@ -109,7 +109,7 @@ MojErr MojDbSearchCursor::setPagePosition()
                 MojString strOut;
                 err = nextId.toJson(strOut);
                 MojErrCheck(err);
-                MojLogInfo(MojDb::s_log, _T("nextId : %s \n"), strOut.data());
+                MojLogDebug(MojDb::s_log, _T("nextId : %s \n"), strOut.data());
             }
             break;
         }
@@ -338,7 +338,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 		}
 	}
 	if (warns > 0)
-        MojLogNotice(MojDb::s_log, _T("Search warnings: %d \n"), warns);
+        MojLogDebug(MojDb::s_log, _T("Search warnings: %d \n"), warns);
 	return MojErrNone;
 }
 

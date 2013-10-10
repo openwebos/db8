@@ -162,7 +162,7 @@ MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
     MojLogTrace(MojDbLevelEngine::s_log);
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
-    MojLogInfo(MojDbLevelEngine::s_log, _T("ldbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
+    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
     MojErrCheck(err);
 
     return MojErrNone;

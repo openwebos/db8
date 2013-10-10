@@ -80,7 +80,7 @@ MojErr MojDbCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 	m_storageQuery->verify(m_vmode);
 	MojErr err = m_storageQuery->get(itemOut, foundOut);
 	if (err == MojErrInternalIndexOnFind) {
-		MojLogInfo(MojDb::s_log, _T("dbcursor_get1: IndexFind Warning; code = %d\n"), (int)err);
+		MojLogDebug(MojDb::s_log, _T("dbcursor_get1: IndexFind Warning; code = %d\n"), (int)err);
 	} 
 	else
 		MojErrAccumulate(m_lastErr, err);
@@ -112,7 +112,7 @@ MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 	do {
 		MojErr err = visitObject(visitor, found);
 		if (err == MojErrInternalIndexOnFind) {
-			MojLogInfo(MojDb::s_log, _T("dbcursor_visit indexwarn: %s; Index: %s \n"), this->query().from().data(), 
+			MojLogDebug(MojDb::s_log, _T("dbcursor_visit indexwarn: %s; Index: %s \n"), this->query().from().data(),
 				((m_dbIndex) ? m_dbIndex->name().data() : NULL));
 			MojErrAccumulate(m_lastErr, MojErrNone); // we need to clear the error so it wont bubble up
 			found = true;  // to continue the loop

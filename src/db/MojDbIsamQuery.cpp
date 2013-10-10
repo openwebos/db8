@@ -126,7 +126,7 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-        MojLogNotice(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
+        MojLogDebug(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
 								 from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;
@@ -195,7 +195,7 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 				s2 = ((char *)m_keyData) + m_keySize - 17;
 			MojSize idIndex = m_plan->idIndex();
 			const MojChar * from = m_plan->query().from().data();
-			MojLogInfo(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"),
+			MojLogDebug(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"),
 								 from, idIndex, (int)group, m_keySize, s, (s2?s2:"NULL"));
 #endif
 		}
@@ -433,7 +433,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
             err = id.toJson(idJson);
             MojErrCheck( err );
 
-            MojLogNotice(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
+            MojLogDebug(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
 
             shardId = MojDbIdGenerator::MainShardId;
         }
@@ -469,7 +469,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
                 err = id.toJson(idJson);
                 MojErrCheck( err );
 
-                MojLogNotice(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
+                MojLogDebug(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
                 shardId = MojDbIdGenerator::MainShardId; // ignore it and use main shard
             }
         }

@@ -366,7 +366,7 @@ MojErr MojDbServiceHandler::handlePurge(MojServiceMessage* msg, MojObject& paylo
 
 	MojUInt32 count = 0;
 	MojErr err = m_db.purge(count, window, req);
-	MojLogInfo(s_log, _T("PurgeComplete: Count: %d \n"), count);
+	MojLogDebug(s_log, _T("PurgeComplete: Count: %d \n"), count);
 	MojErrCheck(err);
 	err = formatCount(msg, count);
 	MojErrCheck(err);
@@ -627,7 +627,7 @@ MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& paylo
 	err = m_db.watch(query, cursor, watcher->m_watchSlot, fired, req);
 	MojErrCheck(err);
 
-	MojLogInfo(s_log, _T("handleWatch: %s, err: (%d); sender= %s;\n fired=%d; \n"),
+	MojLogDebug(s_log, _T("handleWatch: %s, err: (%d); sender= %s;\n fired=%d; \n"),
 				msg->method(), (int)err, msg->senderName(), (int)fired);
 
 	if (!fired) {
@@ -1080,7 +1080,7 @@ MojErr MojDbServiceHandler::Watcher::handleWatch()
 	m_cancelSlot.cancel();
 	MojRefCountedPtr<MojServiceMessage> msg = m_msg;
 
-	MojLogInfo(s_log, _T("Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %zu;\n response= %s\n"), msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
+	MojLogDebug(s_log, _T("Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %zu;\n response= %s\n"), msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
 
 	m_msg.reset();
 

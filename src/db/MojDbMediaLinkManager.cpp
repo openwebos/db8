@@ -62,7 +62,7 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
     if (!m_baseDirCreated) {
         err = MojMkDir(m_dir, MOJ_S_IRWXU);
         MojErrCheck(err);
-        MojLogNotice (s_log, _T("Create base folder for mount symlinks: %s"), m_dir.data());
+        MojLogDebug(s_log, _T("Create base folder for mount symlinks: %s"), m_dir.data());
         m_baseDirCreated = true;
     }
 
@@ -75,7 +75,7 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
     err = MojSymlink(shardInfo.deviceUri, linkPath);
     if (err == MojErrNone) {
         shardInfo.mountPath = linkPath;
-        MojLogInfo(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
+        MojLogDebug(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
     } else {
         MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
     }

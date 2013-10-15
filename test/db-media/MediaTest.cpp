@@ -165,7 +165,7 @@ TEST_F(MediaSuite, mediaSubscribe)
 
     MojAutoPtr<MojLunaService> svc(new MojLunaService);
     ASSERT_TRUE(svc.get());
-    err = svc->open(_T("mojodbmedia-test"));
+    err = svc->open(_T("mojodbmedia-test1"));
     MojAssertNoErr(err);
     err = svc->attach(reactor->impl());
     MojAssertNoErr(err);
@@ -174,13 +174,13 @@ TEST_F(MediaSuite, mediaSubscribe)
     m_service = svc;
     m_mediaClient.reset(new MojPdmClientHandler(m_service.get()));
 
-    std::cerr << "Create request" << std::endl;
+    std::cout << _T("Create request") << std::endl;
     // send request
     MojRefCountedPtr<MojServiceRequest> req;
     err = m_service->createRequest(req);
     MojAssertNoErr(err);
 
-    std::cerr << "Send request" << std::endl;
+    std::cout << _T("Send request") << std::endl;
     MojObject payload;
     err = payload.fromJson("{\"subscribe\":true}");
 
@@ -188,8 +188,11 @@ TEST_F(MediaSuite, mediaSubscribe)
     err = req->send(m_mediaClient->m_slot, ServiceName, _T("listDevices"), payload);
     MojAssertNoErr(err);
 
-    std::cerr << "Wait" << std::endl;
+    std::cout << _T("Wait") << std::endl;
     m_mediaClient->wait(m_service.get());
 
-    std::cerr << "End of test" << std::endl;
+    std::cout << _T("End of test") << std::endl;
+
+    m_service.release();
+    m_mediaClient.release();
 }

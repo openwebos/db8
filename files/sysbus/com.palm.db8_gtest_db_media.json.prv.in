@@ -1,0 +1,15 @@
+{
+    "role": {
+        "exeName":"@WEBOS_INSTALL_LIBDIR@/@CMAKE_PROJECT_NAME@/tests/gtest_db_media",
+        "type": "regular",
+        "allowedNames": ["mojodbmedia-test"]
+    },
+    "permissions": [
+        {
+            "service":"mojodbmedia-test",
+            "inbound":[],
+            "outbound":["*"]
+        }
+    ]
+}
+

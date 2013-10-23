@@ -309,13 +309,15 @@ MojErr MojDbNewIdTest::addShardIdTest(MojDb& db)
         shardId.assign(MojNewIdTestShardIds3[i]);
 
         err = db.put(obj, MojDb::FlagNone, MojDbReq(), shardId);
+        MojTestErrCheck(err);
     }
 
     // get object with _id from db
     MojObject resultObj;
     bool foundOut;
     MojString idStr;
-    idStr.assign(_T("_kinds/NewIdTest:3"));
+    err= idStr.assign(_T("_kinds/NewIdTest:3"));
+    MojTestErrCheck(err);
     MojObject id(idStr);
     err = db.get(id, resultObj, foundOut);
     MojErrCheck(err);

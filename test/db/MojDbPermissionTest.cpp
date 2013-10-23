@@ -28,6 +28,9 @@ static const MojChar* const MojTestKind1 =
 static const MojChar* const MojTestKind2 =
 		_T("{\"id\":\"PermissionTest2:1\",")
 		_T("\"owner\":\"com.foo\"}");
+static const MojChar* const MojTestKind3 =
+        _T("{\"id\":\"PermissionTest3:1\",")
+        _T("\"owner\":\"com.admin\"}");
 static const MojChar* const MojTestPermission1 =
 		_T("{\"type\":\"db.kind\",\"object\":\"PermissionTest:1\",\"caller\":\"com.granted\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"allow\"}}");
 static const MojChar* const MojTestPermissionWildcard =
@@ -36,6 +39,12 @@ static const MojChar* const MojTestPermissionWildcard2 =
 		_T("{\"type\":\"db.kind\",\"object\":\"PermissionTest2:1\",\"caller\":\"*\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"allow\"}}");
 static const MojChar* const MojTestAdminPermission1 =
 		_T("{\"type\":\"db.role\",\"object\":\"admin\",\"caller\":\"com.admin\",\"operations\":{\"*\":\"allow\"}}");
+static const MojChar* const MojTestPermissionDeny1 =
+        _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.foo\",\"operations\":{\"create\":\"deny\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"allow\"}}");
+static const MojChar* const MojTestPermissionDeny2 =
+        _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.foo\",\"operations\":{\"create\":\"allow\",\"read\":\"deny\",\"update\":\"allow\",\"delete\":\"allow\"}}");
+static const MojChar* const MojTestPermissionDeny3 =
+        _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.foo\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"deny\"}}");
 static const MojChar* const MojTestInvalidPermission1 =
 		_T("{\"type\":\"db.role\",\"object\":\"admin\",\"caller\":\"\",\"operations\":{\"*\":\"allow\"}}");
 static const MojChar* const MojTestInvalidPermission2 =
@@ -69,6 +78,8 @@ MojErr MojDbPermissionTest::run()
 	err = testKindPermissions(db);
 	MojTestErrCheck(err);
 	err = testObjectPermissions(db);
+    MojTestErrCheck(err);
+    err = testDenyPermissions(db);
 	MojTestErrCheck(err);
 
 	err = db.close();
@@ -332,6 +343,63 @@ MojErr MojDbPermissionTest::checkInvalid(const MojChar* json, MojDb& db)
 	MojTestErrExpected(err, MojErrDbInvalidCaller);
 
 	return MojErrNone;
+}
+
+MojErr MojDbPermissionTest::testDenyPermissions(MojDb& db)
+{
+    MojObject kind;
+    MojErr err = kind.fromJson(MojTestKind3);
+    MojTestErrCheck(err);
+    MojDbReq adminReq(false);
+    err = adminReq.domain(_T("com.admin"));
+    MojTestErrCheck(err);
+    MojDbReq req(false);
+    err = req.domain(_T("com.foo"));
+    MojTestErrCheck(err);
+    err = db.putKind(kind, MojDb::FlagNone, adminReq);
+    MojTestErrCheck(err);
+    // create
+    MojObject permission;
+    err = permission.fromJson(MojTestPermissionDeny1);
+    MojTestErrCheck(err);
+    err = db.putPermissions(&permission, &permission + 1, adminReq);
+    MojTestErrCheck(err);
+    MojObject obj;
+    err = obj.putString(MojDb::KindKey, _T("PermissionTest3:1"));
+    MojTestErrCheck(err);
+    err = db.put(obj, MojDb::FlagNone, req);
+    MojTestErrExpected(err, MojErrDbPermissionDenied);
+    req.abort();
+
+    // read
+    err = permission.fromJson(MojTestPermissionDeny2);
+    MojTestErrCheck(err);
+    err = db.putPermissions(&permission, &permission + 1, adminReq);
+    MojTestErrCheck(err);
+    err = db.put(obj, MojDb::FlagNone, req);
+    MojTestErrCheck(err);
+    MojDbQuery query;
+    err = query.from(_T("PermissionTest3:1"));
+    MojTestErrCheck(err);
+    MojDbCursor cursor;
+    err = db.find(query, cursor, req);
+    MojTestErrExpected(err, MojErrDbPermissionDenied);
+    req.abort();
+
+    // delete
+    MojString id;
+    err = id.assign(_T("PermissionTest3:1"));
+    MojTestErrCheck(err);
+    err = permission.fromJson(MojTestPermissionDeny3);
+    MojTestErrCheck(err);
+    err = db.putPermissions(&permission, &permission + 1, adminReq);
+    MojTestErrCheck(err);
+    bool found = false;
+    err = db.delKind(id, found, MojDb::FlagNone, req);
+    MojTestErrExpected(err, MojErrDbPermissionDenied);
+    req.abort();
+
+    return MojErrNone;
 }
 
 void MojDbPermissionTest::cleanup()

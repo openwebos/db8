@@ -497,22 +497,17 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
         }
     }
 
-    bool oldAdminMode = req.m_req.admin();
-    req.m_req.admin(true); // invoke admin mode to fix permissions block on Kind:1
-
     err = beginReq(req);
 	MojErrCheck(err);
 
 	for (MojObject* i = begin; i != end; ++i) {
-        err = kindEngine()->addShardIdToMasterKind(shardId, *i, req);
-        MojErrCheck(err);
 		err = putImpl(*i, flags, req, true, shardId);
 		MojErrCheck(err);
+        err = kindEngine()->addShardIdToMasterKind(shardId, *i, req);
+        MojErrCheck(err);
 	}
 	err = req->end();
 	MojErrCheck(err);
-
-    req.m_req.admin(oldAdminMode);
 
 	return MojErrNone;
 }

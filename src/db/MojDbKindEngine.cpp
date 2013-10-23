@@ -533,6 +533,8 @@ MojErr MojDbKindEngine::formatKindId(const MojChar* id, MojString& dbIdOut)
  */
 MojErr MojDbKindEngine::addShardIdToMasterKind (MojString shardId, MojObject& obj, MojDbReq& req)
 {
+    // invoke admin mode to fix permissions block on Kind:1
+    MojDbAdminGuard guard(req, true);
     bool foundOut;
     MojString kindId;
     MojErr err = obj.get(MojDb::KindKey, kindId, foundOut);

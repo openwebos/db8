@@ -38,6 +38,7 @@ private:
 	MojErr putPermissions(MojDb& db);
 	MojErr checkPermissions(MojDb& db);
 	MojErr checkInvalid(const MojChar* json, MojDb& db);
+    MojErr testDenyPermissions(MojDb& db);
 };
 
 #endif /* MOJDBPERMISSIONTEST_H_ */

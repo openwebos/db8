@@ -136,7 +136,7 @@ MojSyslogAppender::~MojSyslogAppender()
 
 void MojSyslogAppender::open(const MojChar* name)
 {
-	openlog(name, LOG_CONS | LOG_PID, LOG_USER);
+	openlog(name, LOG_CONS, LOG_USER);
 }
 
 void MojSyslogAppender::close()

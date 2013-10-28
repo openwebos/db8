@@ -482,7 +482,7 @@ void MojLunaServiceTestRunner::runTests()
 }
 
 MojLunaServiceTest::MojLunaServiceTest()
-: MojTestCase(_T("com.palm.mojlstestc"))
+: MojTestCase(_T("test_db8_luna_service"))
 {
 }
 
@@ -503,7 +503,7 @@ MojErr MojLunaServiceTest::run()
 #endif
 
 	MojLunaTestClient clientService(service);
-	err = service.open(m_name);
+    err = service.open(_T("com.palm.mojlstest.client"));
 	MojTestErrCheck(err);
 	err = service.attach(reactor.impl());
 	MojErrCheck(err);

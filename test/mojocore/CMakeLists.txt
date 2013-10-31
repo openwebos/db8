@@ -19,6 +19,9 @@
 
 project(gtest_mojocore C CXX)
 
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "")
+
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 add_definitions(-Wall -std=c++0x -Wno-deprecated -pthread)

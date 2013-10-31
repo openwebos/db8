@@ -19,6 +19,9 @@
 
 project(gtest_leveldb C CXX)
 
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "")
+
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 add_definitions(-Wall -ansi -Wno-deprecated -pthread)

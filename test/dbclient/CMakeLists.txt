@@ -16,6 +16,9 @@
 #
 # LICENSE@@@
 
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "")
+
 set (DB_CLIENT_TEST_SOURCES
      MojDbClientTest.cpp
 )

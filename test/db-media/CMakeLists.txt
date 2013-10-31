@@ -19,6 +19,9 @@
 
 project(gtest_db_media C CXX)
 
+# the RPATH to be used when installing
+set(CMAKE_INSTALL_RPATH "")
+
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(../db)
 

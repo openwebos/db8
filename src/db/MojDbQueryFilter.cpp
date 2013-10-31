@@ -203,19 +203,24 @@ bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subS
         if(src.type() != MojObject::TypeString || subString.type() != MojObject::TypeString) {
             return false;
         }
-        // convert "src" to upper case.
         MojString srcStr;
         MojErr err;
         err = src.stringValue(srcStr);
         MojErrCheck(err);
+        MojString subStringStr;
+        err = subString.stringValue(subStringStr);
+        MojErrCheck(err);
+        // Filtering out in case of "" string. Because ICU does not support.
+        if (srcStr.empty() && subStringStr.empty())
+            return true;
+        else if (srcStr.empty() || subStringStr.empty())
+            return false;
+        // convert "src" to upper case.
         MojDbTextUtils::UnicodeVec srcOut;
         // locale info did not set for locale insesitivity.
         err = MojDbTextUtils::strToUpper(srcStr, _T(""), srcOut);
         MojErrCheck(err);
         // convert "subString" to upper case.
-        MojString subStringStr;
-        err = subString.stringValue(subStringStr);
-        MojErrCheck(err);
         MojDbTextUtils::UnicodeVec subStringOut;
         err = MojDbTextUtils::strToUpper(subStringStr, _T(""), subStringOut);
         MojErrCheck(err);

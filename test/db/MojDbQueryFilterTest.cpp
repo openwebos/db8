@@ -146,6 +146,18 @@ MojErr MojDbQueryFilterTest::run()
                 _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"CE DA\"}]"),
                 true);
     MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"name\":\"\"}}"),
+                _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"\"}]"),
+                true);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"name\":\"a b c\"}}"),
+                _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"\"}]"),
+                false);
+    MojTestErrCheck(err);
+    err = check(_T("{\"file\":{\"name\":\"\"}}"),
+                _T("[{\"prop\":\"file.name\",\"op\":\"%%\",\"val\":\"CE DA\"}]"),
+                false);
+    MojTestErrCheck(err);
 
 	return MojErrNone;
 }

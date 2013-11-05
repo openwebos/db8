@@ -165,7 +165,7 @@ TEST_F(MediaSuite, mediaSubscribe)
 
     MojAutoPtr<MojLunaService> svc(new MojLunaService);
     ASSERT_TRUE(svc.get());
-    err = svc->open(_T("mojodbmedia-test1"));
+    err = svc->open(_T("mojodbmedia-test"));
     MojAssertNoErr(err);
     err = svc->attach(reactor->impl());
     MojAssertNoErr(err);

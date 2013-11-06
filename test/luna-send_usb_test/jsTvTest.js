@@ -37,14 +37,14 @@ c.on('ready', function() {
   console.log('Connection :: connect');
   runCases([
     //1 PutKind
-    lunaCase("luna-send -n 1 -a com.palm.contacts luna://com.palm.db/putKind '{\"id\":\"com.palm.test:1\",\"owner\":\"com.palm.contacts\",\"indexes\":[{\"name\":\"foo\", \"props\":[{\"name\":\"foo\"}]},{\"name\":\"barfoo\",\"props\":[{\"name\":\"bar\"},{\"name\":\"foo\"}]}]}]}'", function(id, result, finalize) {
+    lunaCase("PutKind", "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/putKind '{\"id\":\"com.palm.test:1\",\"owner\":\"com.palm.contacts\",\"indexes\":[{\"name\":\"foo\", \"props\":[{\"name\":\"foo\"}]},{\"name\":\"barfoo\",\"props\":[{\"name\":\"bar\"},{\"name\":\"foo\"}]}]}]}'", function(id, result, finalize) {
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue)
       }
       finalize();
     }),
     //2 Put nonShard record
-    lunaCase("luna-send -n 1 -a com.palm.contacts luna://com.palm.db/put '{\"objects\":[{\"_kind\":\"com.palm.test:1\",\"foo\":1,\"bar\":1000}]}'", function(id, result, finalize){
+    lunaCase("Put nonShard record", "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/put '{\"objects\":[{\"_kind\":\"com.palm.test:1\",\"foo\":1,\"bar\":1000}]}'", function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
         console.log("Please insert USB Stick and press ENTER" )
@@ -59,7 +59,7 @@ c.on('ready', function() {
       }
     }),
     //3 ListActiveMedia
-    lunaCase("luna-send -n 1 luna://com.palm.db/listActiveMedia '{}'", function(id, result, finalize){
+    lunaCase("ListActiveMedia", "luna-send -n 1 luna://com.palm.db/listActiveMedia '{}'", function(id, result, finalize){
       if ( result.returnValue == true ) {
         console.log("Return Value: " + result.returnValue);
         shardId = result.media[0].shardId;
@@ -68,21 +68,21 @@ c.on('ready', function() {
       }
     }),
     //4 ShardInfo
-    lunaCase(function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
+    lunaCase("ShardInfo", function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //5 Put Shard Records
-    lunaCase(function() { return "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/put '{\"shardId\":\"" + shardId + "\",\"objects\":[{\"_kind\":\"com.palm.test:1\",\"foo\":2,\"bar\":2000}]}'"; }, function(id, result, finalize){
+    lunaCase("Put Shard Records", function() { return "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/put '{\"shardId\":\"" + shardId + "\",\"objects\":[{\"_kind\":\"com.palm.test:1\",\"foo\":2,\"bar\":2000}]}'"; }, function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //6 All Records
-    lunaCase("luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
+    lunaCase("All Records", "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
         console.log("Please remove USB Stick and press ENTER" )
@@ -96,35 +96,35 @@ c.on('ready', function() {
       }
     }),
     //7 ShardInfo
-    lunaCase(function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
+    lunaCase("ShardInfo", function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //8 AllRecords
-    lunaCase("luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
+    lunaCase("AllRecords", "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //9 Mark Shard as transient
-    lunaCase(function() { return "luna-send -f -n 1  luna://com.palm.db/setShardMode '{\"shardId\": \""+ shardId +"\", \"transient\":true}'"; }, function(id, result, finalize){
+    lunaCase("Mark Shard as transient", function() { return "luna-send -f -n 1  luna://com.palm.db/setShardMode '{\"shardId\": \""+ shardId +"\", \"transient\":true}'"; }, function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //10 Shard Info
-    lunaCase(function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
+    lunaCase("Shard Info", function() { return "luna-send -f -n 1  luna://com.palm.db/shardInfo '{\"shardId\": \""+ shardId + "\"}'"; }, function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //11 Purge Records
-    lunaCase("date 102012002013 &>/dev/null && luna-send -f -n 1  -a com.palm.spacecadet luna://com.palm.db/purge '{\"window\":2}'", function(id, result, finalize){
+    lunaCase("Purge Records", "date 102012002013 &>/dev/null && luna-send -f -n 1  -a com.palm.spacecadet luna://com.palm.db/purge '{\"window\":2}'", function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
         console.log("Please re-Insert USB Stick and press ENTER" )
@@ -138,21 +138,18 @@ c.on('ready', function() {
       }
     }),
     //12 All Records
-    lunaCase("date 112012002013 &>/dev/null && luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
+    lunaCase("All Records", "date 112012002013 &>/dev/null && luna-send -n 1 -a com.palm.contacts luna://com.palm.db/search '{\"query\":{\"from\":\"com.palm.test:1\"}}'", function(id, result, finalize){
       if (result.returnValue == true) {
         console.log("Return Value: " + result.returnValue);
       }
       finalize();
     }),
     //13 Delete kind
-    lunaCase("luna-send -n 1 -a com.palm.contacts luna://com.palm.db/delKind '{\"id\":\"com.palm.test:1\"}'", function (id, result, finalize){
-        if (result.returnValue == true) {
-        console.log("Return Value: " + result.returnValue);
-        }
+    lunaCase("Delete kind", "luna-send -n 1 -a com.palm.contacts luna://com.palm.db/delKind '{\"id\":\"com.palm.test:1\"}'", function (id, result, finalize){
         finalize();
     }),
-    //14 didnt revert to not transient.
-    lunaCase(function() { return "luna-send -f -n 1  luna://com.palm.db/setShardMode '{\"shardId\": \""+ shardId +"\", \"transient\":false}'"; }, function (id, result, finalize){
+    //14 revert to not transient.
+    lunaCase("revert to not transient.", function() { return "luna-send -f -n 1  luna://com.palm.db/setShardMode '{\"shardId\": \""+ shardId +"\", \"transient\":false}'"; }, function (id, result, finalize){
         finalize();
     })
       ]);
@@ -160,16 +157,14 @@ c.on('ready', function() {
 
   // command: string to execute
 // caseCallback: function that takes (id, jsonResult, finalizeCallback)
-function lunaCase(command, caseCallback) {
+function lunaCase(name, command, caseCallback) {
   return function(id, finalize) {
-    console.log("\nrunning case #" + id)
+    console.log("\nrunning case #" + id + ": " + name)
     if (typeof command === "function") {
         command = command();
     }
       console.log("executing: " + command);
       c.exec(command, function(err, stream) {
-        if (err) throw err; // XXX: who catches?
-
         var content = "";
 
         stream.on('data', function(block) {

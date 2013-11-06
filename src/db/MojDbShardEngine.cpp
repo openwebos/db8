@@ -487,7 +487,7 @@ MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
 }
 
 /**
- * handler
+ * handler for media 'inserted' or 'removed' events
  */
 MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
 {
@@ -507,6 +507,7 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
         databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
         databaseShardInfo.deviceName = pdmShardInfo.deviceName;
         databaseShardInfo.active = pdmShardInfo.active;
+        databaseShardInfo.transient = false; // if media previously was marked transient, but appear again
 
         if (databaseShardInfo.active) {  // inseted media
             m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);

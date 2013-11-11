@@ -181,12 +181,14 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	MojErrCheck(err);
 
 	// quota
+    MojLogDebug(s_log, _T("Open Quota engine"));
 	err = m_quotaEngine.open(m_conf, this, req);
 	MojErrCheck(err);
 
     // shard's
     MojLogDebug(s_log, _T("Init shard engine"));
-    (void)m_shardEngine.init(this, req);
+    err = m_shardEngine.init(m_conf, this, req);
+    MojErrCheck(err);
 
     // explicitly finish request
     err = req.end();

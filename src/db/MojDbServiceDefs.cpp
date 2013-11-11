@@ -130,3 +130,4 @@ const MojChar* const MojDbServiceDefs::TempServiceName = _T("com.palm.tempdb");
 const MojChar* const MojDbServiceDefs::MediaServiceName = _T("com.webos.mediadb");
 const MojChar* const MojDbServiceDefs::PDMServiceName = _T("com.webos.service.attachedstoragemanager");
 const MojChar* const MojDbServiceDefs::PDMClientName = _T("com.palm.mojodbclient");
+const MojChar* const MojDbServiceDefs::DefaultMediaLinkPath = _T("/var/run/db8/mountpoints");

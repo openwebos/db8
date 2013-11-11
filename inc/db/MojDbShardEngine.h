@@ -98,7 +98,7 @@ public:
     /**
      * initialize MojDbShardEngine
      */
-    MojErr init (MojDb* ip_db, MojDbReqRef req = MojDbReq());
+    MojErr init (const MojObject& conf, MojDb* ip_db, MojDbReqRef req = MojDbReq());
 
     /**
     * put a new shard description to db
@@ -178,6 +178,10 @@ public:
     MojErr purgeShardObjects (MojInt64 numDays, MojDbReqRef req = MojDbReq());
 
 private:
+    /**
+     * Configure shard engine after init
+     */
+    MojErr configure(const MojObject& conf);
 
     /**
      * compute a new shard id

@@ -32,6 +32,13 @@ pre-start script
 		mv @WEBOS_INSTALL_LOCALSTATEDIR@/dblog/* @WEBOS_INSTALL_LOCALSTATEDIR@/db
 		rmdir @WEBOS_INSTALL_LOCALSTATEDIR@/dblog
 	fi
+	if [ -d @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8 ]; then
+		rm -rf @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8
+	fi
+
+	mkdir @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8
+	mkdir @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8/mountpoints
+
 end script
 
 script

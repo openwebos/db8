@@ -24,16 +24,12 @@
 #include <unistd.h>
 #include <algorithm>
 
-const MojChar* const MediaLinkDirectory = _T("/media/mountpoint");
-
 MojLogger MojDbMediaLinkManager::s_log(_T("db.shardLinkManager"));
 
 
 MojDbMediaLinkManager::MojDbMediaLinkManager()
 {
     MojLogTrace(s_log);
-
-    m_dir.assign(MediaLinkDirectory);
 }
 
 MojErr MojDbMediaLinkManager::setLinkDirectory(const MojString& dir)
@@ -44,9 +40,16 @@ MojErr MojDbMediaLinkManager::setLinkDirectory(const MojString& dir)
 
 MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath)
 {
+    MojErr err;
+    if (m_dir.empty()) {
+        err = m_dir.assign(MojDbServiceDefs::DefaultMediaLinkPath);
+        MojErrCheck(err);
+    }
+
     std::stringstream sstream;
     sstream << std::hex << std::uppercase << shardId;
     std::string linkname = sstream.str();
+
     return linkPath.format("%s/%s", m_dir.data(), linkname.c_str());
 }
 

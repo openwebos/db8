@@ -66,7 +66,7 @@ MojDbShardEngine::~MojDbShardEngine(void)
  *
  * @return MojErr
  */
-MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReqRef req)
+MojErr MojDbShardEngine::init (const MojObject& conf, MojDb* ip_db, MojDbReqRef req)
 {
     MojLogTrace(s_log);
     MojAssert(ip_db);
@@ -75,6 +75,9 @@ MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReqRef req)
 
     mp_db = ip_db;
     m_mediaLinkManager.reset(new MojDbMediaLinkManager());
+
+    err = configure(conf);
+    MojErrCheck(err);
 
     // add type
     err = obj.fromJson(ShardInfoKind1Str);
@@ -87,6 +90,31 @@ MojErr MojDbShardEngine::init (MojDb* ip_db, MojDbReqRef req)
     MojErrCheck(err);
 
     err = initCache(req);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+MojErr MojDbShardEngine::configure(const MojObject& conf)
+{
+    MojLogTrace(s_log);
+    MojAssert(mp_db);
+    MojAssert(m_mediaLinkManager.get());
+
+    MojErr err;
+
+    MojObject mediaConf;
+    MojString mediaLinkDirectory;
+
+    if (conf.get(_T("mediaMountpointDirectory"), mediaConf)) {
+        err = mediaConf.stringValue(mediaLinkDirectory);
+        MojErrCheck(err);
+        MojLogDebug(s_log, "Use mediaMountpointDirectory as \"%s\"", mediaLinkDirectory.data());
+    } else {
+        MojLogDebug(s_log, "Configuration section \"mediaMountpointDirectory\" doesn't found, use default value for mediaMountpointDirectory");
+    }
+
+    err = m_mediaLinkManager->setLinkDirectory(mediaLinkDirectory);
     MojErrCheck(err);
 
     return MojErrNone;

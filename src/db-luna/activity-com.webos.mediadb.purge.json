@@ -1,12 +1,12 @@
 {
     "activity" : {
-        "name" : "mojodbspace",
-        "description" : "Scheduled mojodb space check activity",
+        "name" : "webosmediadbpurge",
+        "description" : "Scheduled webosmediadb purge activity",
         "schedule" : {
-            "interval" : "5m"
+            "interval" : "24h"
         },
         "callback" : {
-            "method" : "palm://com.palm.db/internal/scheduledSpaceCheck" 
+            "method" : "palm://com.webos.mediadb/internal/scheduledPurge"
         },
         "type" : {
             "foreground" : true,
@@ -17,3 +17,4 @@
     "replace" : true,
     "start" : true
 }
+

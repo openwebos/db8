@@ -83,6 +83,10 @@ MojErr MojDbLunaServiceApp::init()
 
     m_internalHandler.reset(new MojDbServiceHandlerInternal(m_mainService.db(), m_reactor, m_mainService.service()));
     MojAllocCheck(m_internalHandler.get());
+    m_tempInternalHandler.reset(new MojDbServiceHandlerInternal(m_tempService.db(), m_reactor, m_tempService.service()));
+    MojAllocCheck(m_tempInternalHandler.get());
+    m_mediaInternalHandler.reset(new MojDbServiceHandlerInternal(m_mediaService.db(), m_reactor, m_mediaService.service()));
+    MojAllocCheck(m_mediaInternalHandler.get());
 
     err = m_mainService.init(m_reactor);
     MojErrCheck(err);
@@ -181,6 +185,16 @@ MojErr MojDbLunaServiceApp::open()
 	MojErrCheck(err);
 	err = m_internalHandler->configure(dbOpenFailed);
 	MojErrCheck(err);
+    // tempdb and mediadb service also need internal category
+    // to use scheduled space check and scheduled purge method through activity manager.
+    err = m_tempInternalHandler->open();
+    MojErrCheck(err);
+    err = m_tempService.service().addCategory(MojDbServiceDefs::InternalCategory, m_tempInternalHandler.get());
+    MojErrCheck(err);
+    err = m_mediaInternalHandler->open();
+    MojErrCheck(err);
+    err = m_mediaService.service().addCategory(MojDbServiceDefs::InternalCategory, m_mediaInternalHandler.get());
+    MojErrCheck(err);
 
 	MojLogDebug(s_log, _T("mojodb started"));
 

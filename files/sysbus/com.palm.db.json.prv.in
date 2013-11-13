@@ -13,12 +13,12 @@
         {
             "service":"com.palm.tempdb",
             "inbound":["*"],
-            "outbound":[]
+            "outbound":["com.palm.activitymanager"]
         },
         {
             "service":"com.webos.mediadb",
             "inbound":["*"],
-            "outbound":[]
+            "outbound":["com.palm.activitymanager"]
         },
         {
             "service": "com.palm.mojodbclient",

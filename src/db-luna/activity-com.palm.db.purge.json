@@ -9,7 +9,7 @@
             "method" : "palm://com.palm.db/internal/scheduledPurge" 
         },
         "type" : {
-            "background" : true,
+            "foreground" : true,
             "persist" : true,
             "power" : true
         }

@@ -66,6 +66,8 @@ private:
     MojMessageDispatcher m_dispatcher;
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;
+    MojRefCountedPtr<MojDbServiceHandlerInternal> m_tempInternalHandler;
+    MojRefCountedPtr<MojDbServiceHandlerInternal> m_mediaInternalHandler;
 };
 
 #endif /* MOJDBLUNASERVICEAPP_H_ */

@@ -18,6 +18,7 @@
 
 #include <string>
 #include <unistd.h>
+#include <time.h>
 
 #include "MojDbTestRunner.h"
 #include "MojDbWhereTest.h"
@@ -56,7 +57,7 @@
 std::string getTestDir()
 {
     char buf[128];
-    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", getpid());
+    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", time(0));
     if (n < 0) return "/tmp/mojodb-test-dir"; // fallback
     else return std::string(buf, n);
 }

@@ -57,7 +57,7 @@ const MojUInt32 MojDb::AutoBatchSize = 1000;
 const MojUInt32 MojDb::AutoCompactSize = 5000;
 
 MojLogger MojDb::s_log(_T("db.mojodb"));
-
+static volatile bool DefaultLocaleAlreadyInited = false;
 
 MojDb::MojDb()
 : m_purgeWindow(PurgeNumDaysDefault),
@@ -66,8 +66,15 @@ MojDb::MojDb()
 {
 	MojLogTrace(s_log);
 
-    UErrorCode error;
-    uloc_setDefault("en_US", &error);
+    if (!DefaultLocaleAlreadyInited) {
+        UErrorCode error = U_ZERO_ERROR;
+        uloc_setDefault("en_US", &error);
+
+        if (U_FAILURE(error)) {
+            MojLogWarning(s_log, "Can't set default locale to en_US");
+        }
+        DefaultLocaleAlreadyInited = true;
+    }
 }
 
 MojDb::~MojDb()

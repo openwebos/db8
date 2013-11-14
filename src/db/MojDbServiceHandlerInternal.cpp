@@ -615,8 +615,12 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
 		err = m_db.updateLocale(str);
 		MojErrCheck(err);
 
-        UErrorCode errorU;
+        UErrorCode errorU = U_ZERO_ERROR;
         uloc_setDefault(str.data(), &errorU);
+
+        if (U_FAILURE(errorU)) {
+            MojLogWarning(s_log, "MojDbServiceHandlerInternal::LocaleHandler::handleResponse. Can't set locale to %s", str.data());
+        }
 	}
 	return MojErrNone;
 }

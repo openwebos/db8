@@ -16,8 +16,8 @@
  *
  * LICENSE@@@ */
 
-#ifndef MOJDBLUNASERVICEAPP_H
-#define MOJDBLUNASERVICEAPP_H
+#ifndef MOJDBLUNASERVICEDB_H
+#define MOJDBLUNASERVICEDB_H
 
 #include "db/MojDbDefs.h"
 #include "db/MojDbServiceHandlerInternal.h"

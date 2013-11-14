@@ -357,7 +357,7 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 		err = query.includeDeleted(true);
 		MojErrCheck(err);
 		MojUInt32 count;
-		req->fixmode(true); 
+		req->fixmode(true);
 		err = delImpl(query, count, req, flags | FlagPurge);
 		MojErrCheck(err);
 

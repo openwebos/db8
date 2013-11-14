@@ -296,7 +296,7 @@ MojErr MojDbServiceHandlerInternal::handleSpaceCheck(MojServiceMessage* msg, Moj
 	MojErrCheck(err);
 	err = response.putInt(_T("bytesAvailable"), bytesAvailable);
 	MojErrCheck(err);
-		
+
 	err = response.putBool("subscribed", subscribed);
 	MojErrCheck(err);
 	err = msg->reply(response);
@@ -339,7 +339,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
 		return err;
 
     // first display message if needed
-	if (alertLevel != m_spaceAlertLevel) {		
+	if (alertLevel != m_spaceAlertLevel) {
 		MojObject message;
 		MojErr err = message.putString(_T("severity"), SpaceAlertNames[alertLevel - NoSpaceAlert]);
 		MojErrCheck(err);
@@ -351,7 +351,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
 		for (MojSize i = 0; i < m_spaceCheckHandlers.size(); i++)
 			m_spaceCheckHandlers.at(i)->dispatchUpdate(message);
 	}
-    
+
     // if we are close to db full - let's do purge and compact
     // if alertLevel is AlertLevelLow - purge everything except last day
     // otherwise purge and compact everything
@@ -369,8 +369,8 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
              m_db.purge(count, 1, adminRequest); // save last day
           adminRequest.endBatch();
        }
-       
-       if(count > 0) 
+
+       if(count > 0)
        {
           MojDbReq compactRequest(false);
           compactRequest.beginBatch();
@@ -383,14 +383,14 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck()
        }
        m_compactRunning = false;
     }
-    
+
     m_spaceAlertLevel = alertLevel;
 
 	return err;
 }
 
 MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::AlertLevel& alertLevel,
-												 int& bytesUsed, int& bytesAvailable)	
+                                                 int& bytesUsed, int& bytesAvailable)
 {
 	MojLogTrace(s_log);
 
@@ -515,7 +515,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::init()
 	MojErrCheck(err);
 	err = m_subscription->send(m_adoptSlot, _T("com.palm.activitymanager"), _T("adopt"), payload, MojServiceRequest::Unlimited);
 	MojErrCheck(err);
- 
+
 	return MojErrNone;
 }
 
@@ -528,7 +528,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleAdopt(MojObject& payload
 	if (!m_handled) {
 		m_handled = true;
         MojErr err = MojErrNone;
-        if( m_doSpaceCheck ) 
+        if( m_doSpaceCheck )
         {
            err = m_serviceHandler->doSpaceCheck();
            MojErrCheck(err);
@@ -541,7 +541,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleAdopt(MojObject& payload
            err = m_serviceHandler->m_db.compact();
            MojErrCheck(err);
         }
-        
+
 		// complete the activity
 		MojObject requestPayload;
 		err = initPayload(requestPayload);
@@ -611,7 +611,7 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
         // check for Chineese
         if(str == "zh_CN")
            str.append("@collation=pinyin");
-        
+
 		err = m_db.updateLocale(str);
 		MojErrCheck(err);
 
@@ -720,6 +720,6 @@ MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::handleCancel(MojServiceMe
 
 	MojAssert(!isFound);
 	m_parent->m_spaceCheckHandlers.erase(index);
-	
+
 	return MojErrNone;
 }

@@ -20,8 +20,6 @@
 #include "db-luna/leveldb/MojDbLevelEngine.h"
 #include "db-luna/leveldb/MojDbLevelTxn.h"
 
-#include <iostream>
-
 namespace {
     inline bool operator<(const leveldb::Slice &a, const leveldb::Slice &b)
     { return a.compare(b) < 0; }

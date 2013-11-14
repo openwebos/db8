@@ -64,7 +64,16 @@ MojErr MojDbLevelDatabase::open(const MojChar* dbName, MojDbLevelEngine* eng, bo
     // create and open db
     leveldb::Options options;
     options.create_if_missing = true;
+    options.paranoid_checks = true;
     leveldb::Status status = leveldb::DB::Open(options, m_file.data(), &m_db);
+
+    if (status.IsCorruption()) {    // database corrupted
+        // try restore database
+        // AHTUNG! After restore database can lost some data!
+        status = leveldb::RepairDB(m_file.data(), options);
+        MojLdbErrCheck(status, _T("db corrupted"));
+        status = leveldb::DB::Open(options, m_file.data(), &m_db);  // database restored, re-open
+    }
 
     MojLdbErrCheck(status, _T("db_create"));
     MojAssert(m_db);

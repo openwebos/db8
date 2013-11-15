@@ -170,7 +170,7 @@ MojErr MojService::dispatchRequest(MojServiceMessage* msg)
 		(void) payload.toJson(payloadStr);
 		MojString errStr;
 		(void) MojErrToString(reqErr, errStr);
-		MojLogError(s_log, _T("%s (%d) - sender='%s' method='%s' payload='%s'"),
+        MojLogWarning(s_log, _T("%s (%d) - sender='%s' method='%s' payload='%s'"),
 				errStr.data(), (int) reqErr, msg->senderName(), msg->method(), payloadStr.data());
 
 		if (msg->numReplies() == 0) {

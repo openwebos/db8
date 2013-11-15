@@ -487,6 +487,8 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
 	MojAssert(begin || begin == end);
 	MojAssert(end >= begin);
 	MojLogTrace(s_log);
+    MojString kindId;
+    bool foundOut;
     MojErr err;
 
     if (!shardId.empty())
@@ -507,12 +509,14 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
     }
 
     err = beginReq(req);
-	MojErrCheck(err);
+    MojErrCheck(err);
 
 	for (MojObject* i = begin; i != end; ++i) {
 		err = putImpl(*i, flags, req, true, shardId);
 		MojErrCheck(err);
-        err = kindEngine()->addShardIdToMasterKind(shardId, *i, req);
+        err = (*i).get(MojDb::KindKey, kindId, foundOut);
+        MojErrCheck(err);
+        err = shardEngine()->linkShardAndKindId(shardId, kindId);
         MojErrCheck(err);
 	}
 	err = req->end();

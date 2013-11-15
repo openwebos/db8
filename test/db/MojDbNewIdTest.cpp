@@ -160,9 +160,11 @@ MojErr MojDbNewIdTest::run()
     err = duplicateTest(db);
     MojTestErrCheck(err);
 
+    // Test was disabled, because Kind:1 never hold shard id's anymore
+    // ---------------------------------------------------------------
     // 3rd Test : Check adding shardId into Kind:1
-    err = addShardIdTest(db);
-    MojTestErrCheck(err);
+    //err = addShardIdTest(db);
+    //MojTestErrCheck(err);
 
     err = db.close();
     MojTestErrCheck(err);
@@ -247,7 +249,7 @@ MojErr MojDbNewIdTest::putTest(MojDb& db)
         shardId.assign(MojNewIdTestShardIds1[i]);
 
         err = db.put(obj, MojDb::FlagNone, MojDbReq(), shardId);
-        bool result = (err == 0);
+        bool result = (err == MojErrNone);
 
         MojTestAssert(MojNewIdTestExpectResult1[i] == result);
     }

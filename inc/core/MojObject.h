@@ -56,6 +56,7 @@ public:
 	MojObject(bool val) { m_implementation = new BoolImpl(val); }
 	MojObject(MojInt64 val) { m_implementation = new IntImpl(val); }
 	MojObject(MojInt32 val) { m_implementation = new IntImpl(val); }
+	MojObject(MojUInt32 val) { m_implementation = new IntImpl(val); } //mapped to IntImpl
 	MojObject(const MojDecimal& val) { m_implementation = new DecimalImpl(val); }
 	MojObject(const MojString& val) { m_implementation = new StringImpl(val); }
 	explicit MojObject(Type type) { m_implementation = 0; init(type); }
@@ -306,7 +307,7 @@ private:
 		MojInt64 m_val;
 	};
 
-	MojObject(const MojChar*); // avoid coercion for illegal assignment
+    MojObject(const MojChar*); // avoid coercion for illegal assignment
 	void init(Type type);
 	void init(const MojObject& obj);
 	void release();

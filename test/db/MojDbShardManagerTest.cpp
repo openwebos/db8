@@ -250,6 +250,11 @@ MojErr MojDbShardManagerTest::testShardEngine (MojDbShardEngine* ip_eng)
     MojString str;
     bool found;
 
+    //get shard by wrong id
+    MojDbShardEngine::ShardInfo info;
+    ip_eng->get(0xFFFFFFFE, info, found);
+    MojTestAssert(!found);
+
     //store sample shard info
     MojDbShardEngine::ShardInfo shardInfo;
     generateItem(shardInfo);
@@ -613,7 +618,7 @@ MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, 
 MojErr MojDbShardManagerTest::verifyShardExistance (MojDb& db, const MojDbShardEngine::ShardInfo& shard)
 {
     bool found;
-    //information about shard must be kept even after shard objects remove
+
     MojErr err = db.shardEngine()->isIdExist(shard.id, found);
     MojTestErrCheck(err);
 

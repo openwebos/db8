@@ -165,16 +165,23 @@ public:
         }
     };
 
-    typedef MojSignal<ShardInfo> ShardInfoSignal;
+    class PDMSignalWatcher;
 
-    class Watcher : public MojSignalHandler
+    typedef MojSignal<ShardInfo> SignalPdm;
+    typedef SignalPdm::Slot<PDMSignalWatcher> SlotPdm;
+
+    class PDMSignalWatcher : public MojSignalHandler
     {
     public:
-        Watcher(MojDbShardEngine* shardEngine);
+        PDMSignalWatcher(MojDbShardEngine* shardEngine);
+        SlotPdm& getSlot() { return  m_pdmSlot; }
+    private:
         MojErr handleShardInfoSlot(ShardInfo pdmShardInfo);
+        MojErr processShard(ShardInfo& shardInfo);
+        void updateShard(const ShardInfo& from, ShardInfo& to);
 
         MojDbShardEngine* m_shardEngine;
-        ShardInfoSignal::Slot<Watcher> m_pdmSlot;
+        SlotPdm m_pdmSlot;
     };
 
 
@@ -276,6 +283,7 @@ public:
     MojErr unlinkShardAndKindId (const MojString& shardIdBase64, const MojString& kindId, MojDbReqRef req = MojDbReq());
     MojErr unlinkShardAndKindId (const MojUInt32 shardId, const MojString& kindId, MojDbReqRef req = MojDbReq());
 
+    inline MojErr connectPdmServiceSignal(SignalPdm& signal) { signal.connect(m_pdmWatcher.getSlot()); return MojErrNone; }
 
 private:
     /**
@@ -326,7 +334,7 @@ private:
     static MojLogger s_log;
 
 public:
-    Watcher m_pdmWatcher;
+    PDMSignalWatcher m_pdmWatcher;
 };
 
 #endif /* MOJDBSHARDENGINE_H_ */

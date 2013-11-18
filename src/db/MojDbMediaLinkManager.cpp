@@ -53,6 +53,14 @@ MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath
     return linkPath.format("%s/%s", m_dir.data(), linkname.c_str());
 }
 
+MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardEngine::ShardInfo& shardInfo)
+{
+    if (shardInfo.active)
+        return createLink(shardInfo);
+    else
+        return removeLink(shardInfo);
+}
+
 MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
 {
     MojLogTrace(s_log);

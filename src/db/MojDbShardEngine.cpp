@@ -508,16 +508,16 @@ MojErr MojDbShardEngine::computeId (const MojString& mediaUuid, MojUInt32& sharI
 /**
  * watcher
  */
-MojDbShardEngine::Watcher::Watcher(MojDbShardEngine* shardEngine)
+MojDbShardEngine::PDMSignalWatcher::PDMSignalWatcher(MojDbShardEngine* shardEngine)
     : m_shardEngine(shardEngine),
-    m_pdmSlot(this, &Watcher::handleShardInfoSlot)
+    m_pdmSlot(this, &PDMSignalWatcher::handleShardInfoSlot)
 {
 }
 
 /**
  * handler for media 'inserted' or 'removed' events
  */
-MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
+MojErr MojDbShardEngine::PDMSignalWatcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
 {
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Shard engine notified about new shard");
@@ -532,16 +532,12 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
     MojErrCheck(err);
 
     if (found) {    // shard already registered in database
-        databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
-        databaseShardInfo.deviceName = pdmShardInfo.deviceName;
-        databaseShardInfo.active = pdmShardInfo.active;
-        databaseShardInfo.transient = false; // if media previously was marked transient, but appear again
+        updateShard(pdmShardInfo, databaseShardInfo);
+        err = m_shardEngine->m_mediaLinkManager->processShardInfo(databaseShardInfo);
+        MojErrCheck(err);
 
-        if (databaseShardInfo.active) {  // inseted media
-            m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
-        } else {     // removed media
-            m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
-        }
+        err = processShard(databaseShardInfo);
+        MojErrCheck(err);
 
         err = m_shardEngine->update(databaseShardInfo);
         MojErrCheck(err);
@@ -550,42 +546,39 @@ MojErr MojDbShardEngine::Watcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
         MojErrCheck(err);
         MojLogDebug(s_log, _T("shardEngine for device %s generated shard id: %d"), databaseShardInfo.deviceId.data(), databaseShardInfo.id);
 
+        updateShard(pdmShardInfo, databaseShardInfo);
         databaseShardInfo.deviceId = pdmShardInfo.deviceId;
-        databaseShardInfo.deviceUri = pdmShardInfo.deviceUri;
-        databaseShardInfo.deviceName = pdmShardInfo.deviceName;
-        databaseShardInfo.active = pdmShardInfo.active;
         databaseShardInfo.transient = false;
 
-        if (databaseShardInfo.active) {  // inseted media
-            m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
-        } else {     // removed media
-            m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
-        }
+        err = m_shardEngine->m_mediaLinkManager->processShardInfo(databaseShardInfo);
+        MojErrCheck(err);
 
         err = m_shardEngine->put(databaseShardInfo);
         MojErrCheck(err);
     }
-    MojLogDebug(s_log, _T("updated shard info"));
+    return MojErrNone;
+}
 
-    MojLogDebug(s_log, _T("Run softlink logic"));
-    if (databaseShardInfo.active) {  // inseted media
-        m_shardEngine->m_mediaLinkManager->createLink(databaseShardInfo);
-    } else {     // removed media
-        m_shardEngine->m_mediaLinkManager->removeLink(databaseShardInfo);
+void MojDbShardEngine::PDMSignalWatcher::updateShard(const ShardInfo& from, ShardInfo& to)
+{
+    to.deviceUri = from.deviceUri;
+    to.deviceName = from.deviceName;
+    to.active = from.active;
+}
 
-        if (databaseShardInfo.transient)
-        {
-            bool found;
-            err = m_shardEngine->isIdExist(databaseShardInfo.id, found);
+MojErr MojDbShardEngine::PDMSignalWatcher::processShard(ShardInfo& shardInfo)
+{
+    MojErr err;
+    if (!shardInfo.active && shardInfo.transient) {
+        bool found;
+        err = m_shardEngine->isIdExist(shardInfo.id, found);
+        MojErrCheck(err);
+
+        if(found) {
+            err = m_shardEngine->removeShardObjects(shardInfo.id_base64);
             MojErrCheck(err);
-
-            if(found)
-            {
-                err = m_shardEngine->removeShardObjects(databaseShardInfo.id_base64);
-                MojErrCheck(err);
-                err = m_shardEngine->removeShardInfo(databaseShardInfo.id);
-                MojErrCheck(err);
-            }
+            err = m_shardEngine->removeShardInfo(shardInfo.id);
+            MojErrCheck(err);
         }
     }
 

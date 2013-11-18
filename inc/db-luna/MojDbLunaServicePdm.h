@@ -46,7 +46,7 @@ public:
 private:
     MojLunaService m_service;
     MojRefCountedPtr<MojDbLunaServicePdmHandler> m_handler;
-    MojDbShardEngine::ShardInfoSignal m_shardInfoSignal;
+    MojDbShardEngine::SignalPdm m_shardInfoSignal;
     bool m_isEnabled;
     static MojLogger s_log;
     static const MojChar* const ConfKey;

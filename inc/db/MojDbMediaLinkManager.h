@@ -27,6 +27,7 @@ public:
     MojDbMediaLinkManager();
     MojErr setLinkDirectory(const MojString& dir);
 
+    MojErr processShardInfo(MojDbShardEngine::ShardInfo& shardInfo);
     MojErr createLink(MojDbShardEngine::ShardInfo& shardInfo);
     MojErr removeLink(const MojDbShardEngine::ShardInfo& shardInfo);
 private:

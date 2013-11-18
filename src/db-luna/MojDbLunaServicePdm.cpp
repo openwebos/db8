@@ -108,6 +108,9 @@ MojErr MojDbLunaServicePdm::addShardEngine(MojDbShardEngine* shardEngine)
     MojLogTrace(s_log);
     MojLogDebug(s_log, "Add shard engine to luna service pdm");
 
-    m_shardInfoSignal.connect(shardEngine->m_pdmWatcher.m_pdmSlot);
+    MojErr err;
+    err = shardEngine->connectPdmServiceSignal(m_shardInfoSignal);
+    MojErrCheck(err);
+
     return MojErrNone;
 }

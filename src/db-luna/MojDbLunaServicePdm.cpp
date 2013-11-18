@@ -28,7 +28,7 @@ const MojChar* const MojDbLunaServicePdm::ConfKey = _T("pdm");
 
 MojDbLunaServicePdm::MojDbLunaServicePdm(MojMessageDispatcher& dispatcher)
 : m_service(true, &dispatcher),
- m_shardInfoSignal(this)
+  m_shardInfoSignal(0)
 {
     MojLogTrace(s_log);
 }
@@ -54,6 +54,10 @@ MojErr MojDbLunaServicePdm::configure(const MojObject& conf)
 
 MojErr MojDbLunaServicePdm::init(MojReactor& reactor)
 {
+    MojAssert(!m_shardInfoSignal.get());
+    m_shardInfoSignal.reset(new MojDbShardEngine::SignalPdm(this));
+    MojAllocCheck(m_shardInfoSignal.get());
+
     m_handler.reset(new MojDbLunaServicePdmHandler(this, reactor));
     MojAllocCheck(m_handler.get());
 
@@ -86,8 +90,11 @@ MojErr MojDbLunaServicePdm::open(MojGmainReactor& reactor, const MojChar* MojdbP
 MojErr MojDbLunaServicePdm::close()
 {
     MojLogTrace(s_log);
+    MojAssert(m_shardInfoSignal.get());
+
     MojErr err = MojErrNone;
 
+    m_shardInfoSignal.release();
     m_handler.reset();
     MojErr errClose = m_service.close();
     MojErrAccumulate(err, errClose);
@@ -98,18 +105,24 @@ MojErr MojDbLunaServicePdm::close()
 MojErr MojDbLunaServicePdm::notifyShardEngine(const MojDbShardEngine::ShardInfo& shardInfo)
 {
     MojLogTrace(s_log);
-    MojLogDebug(s_log, "Notify Shard Engine about new shard");
+    if (m_shardInfoSignal.get()) {
+        MojLogDebug(s_log, "Notify Shard Engine about new shard");
+        return m_shardInfoSignal->call(shardInfo);
+    } else {
+        MojLogDebug(s_log, "Can't notify shard engine. Shard engine died");
+    }
 
-    return m_shardInfoSignal.call(shardInfo);
+    return MojErrNone;
 }
 
 MojErr MojDbLunaServicePdm::addShardEngine(MojDbShardEngine* shardEngine)
 {
     MojLogTrace(s_log);
+    MojAssert(m_shardInfoSignal.get());
     MojLogDebug(s_log, "Add shard engine to luna service pdm");
 
     MojErr err;
-    err = shardEngine->connectPdmServiceSignal(m_shardInfoSignal);
+    err = shardEngine->connectPdmServiceSignal(m_shardInfoSignal.get());
     MojErrCheck(err);
 
     return MojErrNone;

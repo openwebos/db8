@@ -283,7 +283,7 @@ public:
     MojErr unlinkShardAndKindId (const MojString& shardIdBase64, const MojString& kindId, MojDbReqRef req = MojDbReq());
     MojErr unlinkShardAndKindId (const MojUInt32 shardId, const MojString& kindId, MojDbReqRef req = MojDbReq());
 
-    inline MojErr connectPdmServiceSignal(SignalPdm& signal) { signal.connect(m_pdmWatcher.getSlot()); return MojErrNone; }
+    MojErr connectPdmServiceSignal(SignalPdm* signal);
 
 private:
     /**

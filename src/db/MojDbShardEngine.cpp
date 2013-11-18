@@ -1191,3 +1191,10 @@ MojErr MojDbShardEngine::removeShardInfo (const MojUInt32 shardId)
 
     return MojErrNone;
 }
+
+MojErr MojDbShardEngine::connectPdmServiceSignal(SignalPdm* signal)
+{
+    MojAssert(signal);
+    signal->connect( m_pdmWatcher.getSlot() );
+    return MojErrNone;
+}

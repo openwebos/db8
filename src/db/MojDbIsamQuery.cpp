@@ -152,7 +152,8 @@ MojErr MojDbIsamQuery::distinct(MojDbStorageItem*& itemOut, bool& distinct)
     MojObject obj, destObj;
     MojErr err = itemOut->toObject(obj, m_plan->kindEngine());
     MojErrCheck(err);
-    obj.getRequired(m_distinct, destObj);
+    err = obj.getRequired(m_distinct, destObj);
+    MojErrCheck(err);
     distinct = false;
 
     //if there is kept last element, check whether current element is duplicated with it

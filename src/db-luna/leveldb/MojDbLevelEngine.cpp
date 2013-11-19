@@ -109,7 +109,8 @@ MojErr MojDbLevelEngine::open(const MojChar* path)
     MojErrCheck(err);
     err = open(path, env.get());
     MojErrCheck(err);
-    m_path.assign(path);
+    err = m_path.assign(path);
+    MojErrCheck(err);
 
     return MojErrNone;
 }

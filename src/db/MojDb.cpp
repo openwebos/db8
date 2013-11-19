@@ -1078,7 +1078,8 @@ MojErr MojDb::attachShardId(MojString shardId, MojObject& id)
                 err = shardId.base64Decode(byteVec);
                 MojErrCheck(err);
                 // attach shard ID in front of _id
-                byteVec.append(idByteVec.begin(), idByteVec.end());
+                err = byteVec.append(idByteVec.begin(), idByteVec.end());
+                MojErrCheck(err);
                 err = idStr.base64Encode(byteVec, false);
                 MojErrCheck(err);
                 // replace old _id with new one attached shard ID

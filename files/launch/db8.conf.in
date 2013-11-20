@@ -18,7 +18,7 @@
 
 description "@WEBOS_PROJECT_SUMMARY@"
 
-start on init-boot-done
+start on datastore-init-start
 stop on started start_update
 
 respawn
@@ -36,6 +36,10 @@ pre-start script
 	if [ "$BYTES_FREE" -le "$MINIMAL_BYTES_FREE" ]; then
 	        /usr/bin/luna-send -n 1 luna://com.webos.service.tv.systemproperty/doUserDefault '{}'
 		exit 1
+
+    # remove temp db
+	if [ -e @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp ]; then
+		rm -r @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp
 	fi
 
 	# move logs

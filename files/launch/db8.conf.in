@@ -18,7 +18,7 @@
 
 description "@WEBOS_PROJECT_SUMMARY@"
 
-start on init-boot-done
+start on datastore-init-start
 stop on started start_update
 
 respawn
@@ -58,5 +58,5 @@ script
 	then
 		. @WEBOS_INSTALL_SYSCONFDIR@/init.d/webos-nicer.sh
 	fi
-exec $WEBOS_NICE @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_DB8DATADIR@ @WEBOS_INSTALL_DB8MEDIADIR@
+	exec $WEBOS_NICE @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/mojodb.conf @WEBOS_INSTALL_DB8DATADIR@ @WEBOS_INSTALL_DB8MEDIADIR@
 end script

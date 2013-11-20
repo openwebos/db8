@@ -59,6 +59,7 @@ private:
     virtual MojErr displayUsage();
 
     MojString m_dbDir;
+    MojString m_mediaDbDir;
     MojDbLunaServiceDb m_mainService;
     MojDbLunaServiceDb m_mediaService;
     MojDbLunaServiceDb m_tempService;

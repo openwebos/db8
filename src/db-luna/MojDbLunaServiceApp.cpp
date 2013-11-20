@@ -35,8 +35,7 @@
 
 const MojChar* const MojDbLunaServiceApp::VersionString = MOJ_VERSION_STRING;
 const MojChar* const MojDbLunaServiceApp::MainDir = _T("main");
-const MojChar* const MojDbLunaServiceApp::MediaDir = _T("data/.db8");
-const MojChar* const MojDbLunaServiceApp::MediaBaseDir = _T("/media/cryptofs");
+const MojChar* const MojDbLunaServiceApp::MediaDir = _T("media");
 const MojChar* const MojDbLunaServiceApp::TempDir = _T("temp");
 const MojChar* const MojDbLunaServiceApp::TempStateDir = _T("/tmp/mojodb");
 const MojChar* const MojDbLunaServiceApp::TempInitStateFile = _T("/tmp/mojodb/tempdb_init");
@@ -148,7 +147,7 @@ MojErr MojDbLunaServiceApp::open()
 	MojErrCatchAll(err) {
 		dbOpenFailed = true;
 	}
-    err = m_mediaService.open(m_reactor, m_env.get(), MojDbServiceDefs::MediaServiceName, MediaBaseDir, MediaDir);
+	err = m_mediaService.open(m_reactor, m_env.get(), MojDbServiceDefs::MediaServiceName, m_mediaDbDir, MediaDir);
     MojErrCatchAll(err) {
         dbOpenFailed = true;
     }
@@ -258,16 +257,18 @@ MojErr MojDbLunaServiceApp::handleArgs(const StringVec& args)
 	MojErr err = Base::handleArgs(args);
 	MojErrCheck(err);
 
-	if (args.size() != 1)
+	if (args.size() != 2)
 		MojErrThrow(MojErrInvalidArg);
-	m_dbDir = args.front();
+
+    m_dbDir = args[0];
+    m_mediaDbDir = args[1];
 
 	return MojErrNone;
 }
 
 MojErr MojDbLunaServiceApp::displayUsage()
 {
-	MojErr err = displayMessage(_T("Usage: %s [OPTION]... db-dir\n"), name().data());
+	MojErr err = displayMessage(_T("Usage: %s [OPTION]... db-dir mediadb-dir\n"), name().data());
 	MojErrCheck(err);
 
 	return MojErrNone;

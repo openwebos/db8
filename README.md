@@ -85,7 +85,7 @@ This component of webOS can be built as a standalone piece that does not depend 
 
 Below are the tools and libraries (and their minimum versions) required to build this package:
 
-* openwebos/cmake-modules-webos 1.0.0 RC2
+* openwebos/cmake-modules-webos 1.0.0 RC7
 * cmake (version required by openwebos/cmake-modules-webos)
 * libdb-4.8-dev
 * libicu-dev

@@ -61,7 +61,6 @@ public:
     static const MojChar* const PermissionIdPrefix;
 	static const MojUInt32 AutoBatchSize;
 	static const MojUInt32 AutoCompactSize;
-	static MojLogger s_log;
 
 	MojDb();
 	virtual ~MojDb();

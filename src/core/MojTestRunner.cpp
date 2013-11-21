@@ -49,9 +49,6 @@ MojErr MojTestRunner::handleArgs(const StringVec& args)
 
 MojErr MojTestRunner::run()
 {
-	// turn off debug error logging
-	MojLogEngine::instance()->reset(MojLogger::LevelCritical);
-
 	runTests();
 	MojPrintF(_T("\n-----------------------------------\n")
 			  _T("Results:     %d succeeded, %d failed\n"),

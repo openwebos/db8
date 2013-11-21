@@ -22,7 +22,7 @@
 #include "db/MojDbServiceDefs.h"
 #include "core/MojApp.h"
 
-MojLogger MojDbLunaServiceDb::s_log(_T("db-luna.dbservice"));
+//db-luna.dbservice
 
 MojDbLunaServiceDb::MojDbLunaServiceDb(MojMessageDispatcher& dispatcher)
 : m_service(true, &dispatcher)
@@ -31,6 +31,8 @@ MojDbLunaServiceDb::MojDbLunaServiceDb(MojMessageDispatcher& dispatcher)
 
 MojErr MojDbLunaServiceDb::init(MojReactor& reactor)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     m_handler.reset(new MojDbServiceHandler(m_db, reactor));
     MojAllocCheck(m_handler.get());
 
@@ -40,8 +42,8 @@ MojErr MojDbLunaServiceDb::init(MojReactor& reactor)
 MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
                                             const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(serviceName && baseDir && subDir);
-    MojLogTrace(s_log);
 
     // open service
     MojErr err = m_service.open(serviceName);
@@ -58,7 +60,10 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     if (err != MojErrNone) {
         MojString msg;
         MojErrToString(err, msg);
-        MojLogError(s_log, _T("Error opening %s/%s - %s (%d)"), baseDir, subDir, msg.data(), (int) err);
+        LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 2,
+            PMLOGKS("baseDir", baseDir),
+            PMLOGKS("subDir", subDir),
+            "Error opening %s/%s - %s (%d)", baseDir, subDir, msg.data(), (int) err);
     }
     MojErrCheck(err);
 
@@ -67,6 +72,7 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
 
 MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(env && baseDir && subDir);
 
     // create engine with shared env
@@ -88,6 +94,7 @@ MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* baseDir, const M
 
 MojErr MojDbLunaServiceDb::close()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err = MojErrNone;
 
     m_handler.reset();

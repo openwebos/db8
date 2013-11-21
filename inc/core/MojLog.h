@@ -24,151 +24,56 @@
 #include <glib.h>
 #include "core/MojListEntry.h"
 
-#ifdef MOJ_HAVE_STDARG_H
-#	include <stdarg.h>
-#endif
+#include "PmLogLib.h"
 
-#if !defined(USE_PMLOG)
-#if defined(MOJ_DEBUG) || defined(MOJ_DEBUG_LOGGING)
-#	define MojLogDebug(LOGGER, ...)		(LOGGER).log(MojLogger::LevelDebug, __VA_ARGS__)
-#	define MojLogTrace(LOGGER)			MojLogTracer __MOJTRACER(LOGGER, _T(__PRETTY_FUNCTION__), _T(__FILE__), __LINE__)
-#else
-#	define MojLogDebug(LOGGER, ...)
-#	define MojLogTrace(LOGGER)
-#endif
+/* Logging ********
+ * The parameters needed are
+ * msgid - unique message id
+ * kvcount - count for key-value pairs
+ * ... - key-value pairs and free text. key-value pairs are formed using PMLOGKS or PMLOGKFV e.g.)
+ * LOG_CRITICAL(msgid, 2, PMLOGKS("key1", "value1"), PMLOGKFV("key2", "%d", value2), "free text message");
+ */
+#define LOG_CRITICAL(msgid, kvcount, ...) \
+PmLogCritical(getactivitymanagercontext(), msgid, kvcount, ##__VA_ARGS__)
 
-#define MojLogInfo(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelInfo, __VA_ARGS__)
-#define MojLogNotice(LOGGER, ...)		(LOGGER).log(MojLogger::LevelNotice, __VA_ARGS__)
-#define MojLogWarning(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelWarning, __VA_ARGS__)
-#define MojLogError(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelError, __VA_ARGS__)
-#define MojLogCritical(LOGGER, ...) 	(LOGGER).log(MojLogger::LevelCritical, __VA_ARGS__)
+#define LOG_ERROR(msgid, kvcount, ...) \
+PmLogError(getactivitymanagercontext(), msgid, kvcount,##__VA_ARGS__)
 
-#else  // USE_PMLOG
+#define LOG_WARNING(msgid, kvcount, ...) \
+PmLogWarning(getactivitymanagercontext(), msgid, kvcount, ##__VA_ARGS__)
 
-  #include "PmLogLib.h"
-  #define MOJLOG_MESSAGE_MAX 500
-  #define MOJLOG_UNIQUE_MAX 30
+#define LOG_INFO(msgid, kvcount, ...) \
+PmLogInfo(getactivitymanagercontext(), msgid, kvcount, ##__VA_ARGS__)
 
-  inline void mojLogFmtMsg(char *logMsg, char *fmt, ...)
-  {
-    va_list args;
-    va_start (args, fmt);
-    vsnprintf(logMsg, MOJLOG_MESSAGE_MAX, fmt, args);
-    va_end (args);
-  }
+#define LOG_DEBUG(...) \
+PmLogDebug(getactivitymanagercontext(), ##__VA_ARGS__)
 
-  #if defined(MOJ_DEBUG) || defined(MOJ_DEBUG_LOGGING)
-    #define MojLogDebug(LOGGER, ...)        { if (G_UNLIKELY((LOGGER).level() <= (LOGGER).LevelDebug)) { \
-        char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogDebug((LOGGER).getContext(), "%s", logMsg);}}
+#define LOG_TRACE(...) \
+PMLOG_TRACE(__VA_ARGS__);
 
-    #define MojLogTrace(LOGGER)            MojLogTracer __MOJTRACER(LOGGER, _T(__PRETTY_FUNCTION__), _T(__FILE__), __LINE__)
-  #else
-    #define MojLogDebug(LOGGER, ...)
-    #define MojLogTrace(LOGGER)
-  #endif
+#define MSGID_ERROR_CALL               "ERROR_CALL"
+#define MSGID_MESSAGE_CALL             "MESSAGE_CALL"
+#define MSGID_LUNA_SERVICE_DB_OPEN     "LUNA_SERVICE_DB_OPEN"
+#define MSGID_LUNA_ERROR_RESPONSE      "LUNA_ERROR_RESPONSE"
+#define MSGID_LEVEL_DB_ENGINE_ERROR    "LEVEL_DB_ENGINE_ERROR"
+#define MSGID_DB_ADMIN_ERROR           "DB_ADMIN_ERROR"
+#define MSGID_DB_KIND_ENGINE_ERROR     "DB_KIND_ENGINE_ERROR"
+#define MSGID_DB_SERVICE_ERROR         "DB_SERVICE_ERROR"
+#define MSGID_DB_ERROR                 "DB_ERROR"
+#define MSGID_MOJ_SERVICE_WARNING      "MOJ_SERVICE_WARNING"
+#define MSGID_DB_BERKLEY_TXN_WARNING   "DB_BERKLEY_TXN_WARNING"
+#define MSGID_LUNA_SERVICE_WARNING     "LUNA_SERVICE_WARNING"
+#define MSGID_LEVEL_DB_WARNING         "LEVEL_DB_WARNING"
+#define MSGID_MOJ_DB_WARNING           "MOJ_DB_WARNING"
+#define MOJ_DB_KIND_WARNING            "DB_KIND_WARNING"
+#define MSGID_MOJ_DB_CURSOR_WARNING    "MOJ_DB_CURSOR_WARNING"
+#define MSGID_MOJ_DB_ADMIN_WARNING     "MOJ_DB_ADMIN_WARNING"
+#define MSGID_MOJ_DB_INDEX_WARNING     "MOJ_DB_INDEX_WARNING"
+#define MSGID_MOJ_DB_KIND_WARNING      "MOJ_DB_KIND_WARNING"
+#define MSGID_MOJ_DB_MEDIALINK_WARNING "MOJ_DB_MEDIALINK_WARNING"
+#define MSGID_MOJ_DB_SERVICE_WARNING   "MOJ_DB_SERVICE_WARNING"
+#define MSGID_DB_SHARDENGINE_WARNING   "DB_SHARDENGINE_WARNING"
 
-  #define MojLogInfo(LOGGER, ...)    { if (G_UNLIKELY((LOGGER).level() <= (LOGGER).LevelInfo)) {\
-        char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogInfo((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \
-            1, PMLOGKS("FUNC", __func__), "%s", logMsg);}}
-
-  #define MojLogNotice(LOGGER, ...)   { if ((LOGGER).level() <= (LOGGER).LevelNotice) {\
-        char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogInfo((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \
-            1, PMLOGKS("FUNC", __func__), "%s", logMsg);}}
-
-  #define MojLogWarning(LOGGER, ...) { if ((LOGGER).level() <= (LOGGER).LevelWarning) {\
-        char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogWarning((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \
-            1, PMLOGKS("FUNC", __func__), "%s", logMsg);}}
-
-  #define MojLogError(LOGGER, ...)    { \
-        char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogError((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \
-            1, PMLOGKS("FUNC", __func__), "%s", logMsg);}
-
-  #define MojLogCritical(LOGGER, ...) { \
-        char msgId[MOJLOG_UNIQUE_MAX+1]; char logMsg[MOJLOG_MESSAGE_MAX+1]; \
-        mojLogFmtMsg(logMsg, __VA_ARGS__); \
-        PmLogCritical((LOGGER).getContext(), (LOGGER).fmtUnique(msgId, __FILE__, __LINE__), \
-            1, PMLOGKS("FUNC", __func__), "%s", logMsg);}
-
-
-#endif // USE_PMLOG
-
-class MojLogger : private MojNoCopy
-{
-public:
-	enum Level {
-		LevelTrace,
-		LevelDebug,
-		LevelInfo,
-		LevelNotice,
-		LevelWarning,
-		LevelError,
-		LevelCritical,
-		LevelNone,
-		LevelDefault = LevelNotice,
-		LevelMax = LevelNone
-	};
-
-	MojLogger(const MojChar* name, MojLogEngine* engine = NULL);
-	~MojLogger();
-
-	Level level() const { return m_level; }
-	const MojChar* name() const { return m_name; }
-
-	void level(Level level) { m_level = level; }
-	void log(Level level, const MojChar* format, ...) MOJ_FORMAT_ATTR((printf, 3, 4));
-	void vlog(Level level, const MojChar* format, va_list args) MOJ_FORMAT_ATTR((printf, 3, 0));
-
-	static const MojChar* stringFromLevel(Level level);
-	static MojErr levelFromString(const MojChar* str, Level& levelOut);
-
-	void *data() const { return m_data; }
-	void setData(void *data) { m_data = data; }
-#if defined(USE_PMLOG)
-    PmLogContext getContext()
-    {
-        return m_context;
-    }
-    char * fmtUnique(char *dest, const char *pFile, int32_t lineNbr);
-#endif // USE_PMLOG
-
-private:
-	friend class MojLogEngine;
-
-#if defined(USE_PMLOG)
-	PmLogContext m_context;
-#endif // USE_PMLOG
-	MojListEntry m_entry;
-	MojLogEngine* m_engine;
-	const MojChar* m_name;
-	Level m_level;
-	void *m_data;
-
-	static const MojChar* const s_levelNames[];
-};
-
-class MojLogTracer : public MojNoCopy
-{
-public:
-	MojLogTracer(MojLogger& logger, const MojChar* function, const MojChar* file, int line);
-	~MojLogTracer();
-
-private:
-	static const int IndentSpaces = 2;
-	int indentLevel(int inc);
-
-	MojLogger& m_logger;
-	const MojChar* m_function;
-	int m_level;
-};
+extern PmLogContext getactivitymanagercontext();
 
 #endif /* MOJLOG_H_ */

@@ -42,6 +42,8 @@ MojDbPropExtractor::MojDbPropExtractor()
 
 MojErr MojDbExtractor::fromObject(const MojObject& obj, const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// name
 	MojErr err = obj.getRequired(NameKey, m_name);
 	MojErrCheck(err);
@@ -64,6 +66,8 @@ MojErr MojDbExtractor::fromObject(const MojObject& obj, const MojChar* locale)
 
 MojErr MojDbPropExtractor::prop(const MojString& name)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// split prop name into components
 	MojErr err = name.split(PropComponentSeparator, m_prop);
 	MojErrCheck(err);
@@ -73,6 +77,8 @@ MojErr MojDbPropExtractor::prop(const MojString& name)
 
 MojErr MojDbPropExtractor::fromObject(const MojObject& obj, const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojDbPropExtractor defaultConfig;
 	MojErr err = fromObjectImpl(obj, defaultConfig, locale);
 	MojErrCheck(err);
@@ -82,6 +88,8 @@ MojErr MojDbPropExtractor::fromObject(const MojObject& obj, const MojChar* local
 
 MojErr MojDbPropExtractor::updateLocale(const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (m_collation != MojDbCollationInvalid) {
        if(m_tokenizer.get()) 
        {
@@ -101,6 +109,8 @@ MojErr MojDbPropExtractor::updateLocale(const MojChar* locale)
 
 MojErr MojDbPropExtractor::fromObjectImpl(const MojObject& obj, const MojDbPropExtractor& defaultConfig, const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// super
 	MojErr err = MojDbExtractor::fromObject(obj, locale);
 	MojErrCheck(err);
@@ -160,6 +170,8 @@ MojErr MojDbPropExtractor::fromObjectImpl(const MojObject& obj, const MojDbPropE
 
 MojErr MojDbPropExtractor::valsImpl(const MojObject& obj, KeySet& valsOut, MojSize idx) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(!m_prop.empty() && idx < m_prop.size());
 
 	MojErr err = MojErrNone;
@@ -196,6 +208,8 @@ MojErr MojDbPropExtractor::valsImpl(const MojObject& obj, KeySet& valsOut, MojSi
 
 MojErr MojDbPropExtractor::handleVal(const MojObject& val, KeySet& valsOut, MojSize idx) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(idx < m_prop.size());
 
 	MojErr err = MojErrNone;
@@ -226,6 +240,8 @@ MojErr MojDbPropExtractor::handleVal(const MojObject& val, KeySet& valsOut, MojS
 
 MojErr MojDbMultiExtractor::fromObject(const MojObject& obj, const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = MojDbExtractor::fromObject(obj, locale);
 	MojErrCheck(err);
 
@@ -255,6 +271,8 @@ MojErr MojDbMultiExtractor::fromObject(const MojObject& obj, const MojChar* loca
 
 MojErr MojDbMultiExtractor::updateLocale(const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	for (ExtractorVec::ConstIterator i = m_extractors.begin(); i != m_extractors.end(); ++i) {
 		MojErr err = (*i)->updateLocale(locale);
 		MojErrCheck(err);
@@ -264,6 +282,8 @@ MojErr MojDbMultiExtractor::updateLocale(const MojChar* locale)
 
 MojErr MojDbMultiExtractor::vals(const MojObject& obj, KeySet& valsOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// extract property values
 	for (ExtractorVec::ConstIterator i = m_extractors.begin(); i != m_extractors.end(); ++i) {
 		MojErr err = (*i)->vals(obj, valsOut);

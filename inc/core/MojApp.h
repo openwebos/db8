@@ -53,15 +53,11 @@ protected:
 	virtual MojErr displayMessage(const MojChar* format, ...) MOJ_FORMAT_ATTR((printf, 2, 3));
 	virtual MojErr displayErr(const MojChar* prefix, const MojChar* errToDisplay);
 	virtual MojErr displayErr(MojErr errToDisplay, const MojChar* message);
-	virtual MojErr displayLoggers();
 	virtual MojErr displayUsage();
 	virtual MojErr displayOptions();
 	virtual MojErr displayVersion();
 	virtual MojErr handleCommandLine(int argc, MojChar** argv);
 	virtual MojErr handleArgs(const StringVec& args);
-
-protected:
-	static MojLogger s_log;
 
 private:
 	enum RunMode {

@@ -62,17 +62,15 @@ MojDbLunaServiceApp::MojDbLunaServiceApp()
 #else
   #error "Database not set"
 #endif
-   MojLogTrace(s_log);
 }
 
 MojDbLunaServiceApp::~MojDbLunaServiceApp()
 {
-	MojLogTrace(s_log);
 }
 
 MojErr MojDbLunaServiceApp::init()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = Base::init();
 	MojErrCheck(err);
@@ -101,7 +99,7 @@ MojErr MojDbLunaServiceApp::init()
 
 MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = Base::configure(conf);
 	MojErrCheck(err);
@@ -125,8 +123,8 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
 
 MojErr MojDbLunaServiceApp::open()
 {
-	MojLogTrace(s_log);
-	MojLogDebug(s_log, _T("mojodb starting..."));
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    LOG_DEBUG("[mojodb] starting...");
 
 	MojErr err = Base::open();
 	MojErrCheck(err);
@@ -195,15 +193,15 @@ MojErr MojDbLunaServiceApp::open()
     err = m_mediaService.service().addCategory(MojDbServiceDefs::InternalCategory, m_mediaInternalHandler.get());
     MojErrCheck(err);
 
-	MojLogDebug(s_log, _T("mojodb started"));
+    LOG_DEBUG("[mojodb] started");
 
 	return MojErrNone;
 }
 
 MojErr MojDbLunaServiceApp::close()
 {
-	MojLogTrace(s_log);
-	MojLogDebug(s_log, _T("mojodb stopping..."));
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    LOG_DEBUG("[mojodb] stopping...");
 
 	// stop dispatcher
 	MojErr err = MojErrNone;
@@ -228,13 +226,15 @@ MojErr MojDbLunaServiceApp::close()
 	errClose = Base::close();
 	MojErrAccumulate(err, errClose);
 
-	MojLogDebug(s_log, _T("mojodb stopped"));
+    LOG_DEBUG("[mojodb] stopped");
 
 	return err;
 }
 
 MojErr MojDbLunaServiceApp::dropTemp()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojStatT stat;
 	MojErr err = MojStat(TempInitStateFile, &stat);
 	MojErrCatch(err, MojErrNotFound) {
@@ -254,6 +254,8 @@ MojErr MojDbLunaServiceApp::dropTemp()
 
 MojErr MojDbLunaServiceApp::handleArgs(const StringVec& args)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = Base::handleArgs(args);
 	MojErrCheck(err);
 
@@ -268,8 +270,10 @@ MojErr MojDbLunaServiceApp::handleArgs(const StringVec& args)
 
 MojErr MojDbLunaServiceApp::displayUsage()
 {
-	MojErr err = displayMessage(_T("Usage: %s [OPTION]... db-dir mediadb-dir\n"), name().data());
-	MojErrCheck(err);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    MojErr err = displayMessage(_T("Usage: %s [OPTION]... db-dir mediadb-dir\n"), name().data());
+    MojErrCheck(err);
 
 	return MojErrNone;
 }

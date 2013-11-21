@@ -62,8 +62,6 @@ private:
 
 	TypeMap m_types;
 	bool m_enabled;
-
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBPERMISSIONENGINE_H_ */

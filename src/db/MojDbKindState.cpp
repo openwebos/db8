@@ -36,6 +36,8 @@ MojDbKindState::MojDbKindState(const MojString& kindId, MojDbKindEngine* kindEng
 
 MojErr MojDbKindState::init(const StringSet& strings, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(m_kindEngine);
 	MojThreadGuard guard(m_lock);
 
@@ -51,6 +53,7 @@ MojErr MojDbKindState::init(const StringSet& strings, MojDbReq& req)
 
 MojErr MojDbKindState::indexId(const MojChar* indexName, MojDbReq& req, MojObject& idOut, bool& createdOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(indexName);
 
 	MojThreadGuard guard(m_lock);
@@ -63,6 +66,7 @@ MojErr MojDbKindState::indexId(const MojChar* indexName, MojDbReq& req, MojObjec
 
 MojErr MojDbKindState::delIndex(const MojChar* indexName, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(indexName);
 	MojThreadGuard guard(m_lock);
 
@@ -82,6 +86,7 @@ MojErr MojDbKindState::delIndex(const MojChar* indexName, MojDbReq& req)
 
 MojErr MojDbKindState::tokenSet(TokenVec& vecOut, MojObject& tokensObjOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojThreadGuard guard (m_lock);
 
 	vecOut = m_tokenVec;
@@ -92,6 +97,7 @@ MojErr MojDbKindState::tokenSet(TokenVec& vecOut, MojObject& tokensObjOut) const
 
 MojErr MojDbKindState::addToken(const MojChar* propName, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(propName);
 
 	MojThreadGuard guard(m_lock);
@@ -104,6 +110,7 @@ MojErr MojDbKindState::addToken(const MojChar* propName, MojUInt8& tokenOut, Tok
 
 MojErr MojDbKindState::addPropImpl(const MojChar* propName, bool write, MojUInt8& tokenOut, TokenVec& vecOut, MojObject& tokenObjOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(propName);
 	MojAssertMutexLocked(m_lock);
 
@@ -148,6 +155,7 @@ MojErr MojDbKindState::addPropImpl(const MojChar* propName, bool write, MojUInt8
 
 MojErr MojDbKindState::initKindToken(MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertMutexLocked(m_lock);
 
 	// load tokens
@@ -163,6 +171,7 @@ MojErr MojDbKindState::initKindToken(MojDbReq& req)
 
 MojErr MojDbKindState::initTokens(MojDbReq& req, const StringSet& strings)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	// TODO: bug inside this function. (latest strace step)
 	MojAssertMutexLocked(m_lock);
 
@@ -213,6 +222,7 @@ MojErr MojDbKindState::initTokens(MojDbReq& req, const StringSet& strings)
 
 MojErr MojDbKindState::id(const MojChar* name, const MojChar* objKey, MojDbReq& req, MojObject& idOut, bool& createdOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name && objKey);
 	MojAssertMutexLocked(m_lock);
 
@@ -245,6 +255,7 @@ MojErr MojDbKindState::id(const MojChar* name, const MojChar* objKey, MojDbReq& 
 
 MojErr MojDbKindState::readIds(const MojChar* key, MojDbReq& req, MojObject& objOut, MojRefCountedPtr<MojDbStorageItem>& itemOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojErr err = readObj(key, objOut, m_kindEngine->indexIdDb(), req.txn(), itemOut);
 	MojErrCheck(err);
 
@@ -253,6 +264,7 @@ MojErr MojDbKindState::readIds(const MojChar* key, MojDbReq& req, MojObject& obj
 
 MojErr MojDbKindState::writeIds(const MojChar* key, const MojObject& obj, MojDbReq& req, MojRefCountedPtr<MojDbStorageItem>& oldItem)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojErr err = writeObj(key, obj, m_kindEngine->indexIdDb(), req.txn(), oldItem);
 	MojErrCheck(err);
 
@@ -261,6 +273,7 @@ MojErr MojDbKindState::writeIds(const MojChar* key, const MojObject& obj, MojDbR
 
 MojErr MojDbKindState::writeTokens(const MojObject& tokensObj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_kindEngine);
 	MojAssertMutexLocked(m_lock);
 
@@ -280,6 +293,7 @@ MojErr MojDbKindState::writeTokens(const MojObject& tokensObj)
 MojErr MojDbKindState::writeObj(const MojChar* key, const MojObject& val, MojDbStorageDatabase* db,
 		MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageItem>& oldItem)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(key && db && txn);
 	MojAssertMutexLocked(m_lock);
 
@@ -317,6 +331,7 @@ MojErr MojDbKindState::writeObj(const MojChar* key, const MojObject& val, MojDbS
 MojErr MojDbKindState::readObj(const MojChar* key, MojObject& val, MojDbStorageDatabase* db,
 		MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageItem>& oldItem)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(key && db);
 
 	MojErr err = db->get(m_kindId, txn, false, oldItem);

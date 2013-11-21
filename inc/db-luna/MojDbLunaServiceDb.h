@@ -45,8 +45,6 @@ private:
     MojDb m_db;
     MojLunaService m_service;
     MojRefCountedPtr<MojDbServiceHandler> m_handler;
-
-    static MojLogger s_log;
 };
 
 #endif

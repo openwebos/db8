@@ -40,7 +40,7 @@
 
 
 //const MojChar* const MojDbLevelEnv::LockFileName = _T("_lock");
-MojLogger MojDbLevelEngine::s_log(_T("db.ldb"));
+//db.ldb
 static const MojChar* const MojEnvIndexDbName = _T("indexes.ldb");
 static const MojChar* const MojEnvSeqDbName = _T("seq.ldb");
 
@@ -50,21 +50,18 @@ static const MojChar* const MojEnvSeqDbName = _T("seq.ldb");
 MojDbLevelEngine::MojDbLevelEngine()
 : m_isOpen(false)
 {
-    MojLogTrace(s_log);
 }
 
 
 MojDbLevelEngine::~MojDbLevelEngine()
 {
-    MojLogTrace(s_log);
-
     MojErr err =  close();
     MojErrCatchAll(err);
 }
 
 MojErr MojDbLevelEngine::configure(const MojObject& conf)
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     return MojErrNone;
 }
@@ -73,7 +70,7 @@ MojErr MojDbLevelEngine::configure(const MojObject& conf)
 // provide interface to add/drop multiple DB
 MojErr MojDbLevelEngine::drop(const MojChar* path, MojDbStorageTxn* txn)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_isOpen);
 
     MojThreadGuard guard(m_dbMutex);
@@ -98,9 +95,9 @@ MojErr MojDbLevelEngine::drop(const MojChar* path, MojDbStorageTxn* txn)
 }
 MojErr MojDbLevelEngine::open(const MojChar* path)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(path);
     MojAssert(!m_env.get() && !m_isOpen);
-    MojLogTrace(s_log);
 
     // this is more like a placeholder
     MojRefCountedPtr<MojDbLevelEnv> env(new MojDbLevelEnv);
@@ -117,10 +114,10 @@ MojErr MojDbLevelEngine::open(const MojChar* path)
 
 MojErr MojDbLevelEngine::open(const MojChar* path, MojDbEnv* env)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojDbLevelEnv* bEnv = static_cast<MojDbLevelEnv *> (env);
     MojAssert(bEnv);
     MojAssert(!m_env.get() && !m_isOpen);
-    MojLogTrace(s_log);
 
     m_env.reset(bEnv);
     if (path) {
@@ -150,7 +147,7 @@ MojErr MojDbLevelEngine::open(const MojChar* path, MojDbEnv* env)
 
 MojErr MojDbLevelEngine::close()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err = MojErrNone;
     MojErr errClose = MojErrNone;
 
@@ -176,8 +173,8 @@ MojErr MojDbLevelEngine::close()
 
 MojErr MojDbLevelEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!txnOut.get());
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojRefCountedPtr<MojDbLevelEnvTxn> txn(new MojDbLevelEnvTxn());
     MojAllocCheck(txn.get());
@@ -190,8 +187,8 @@ MojErr MojDbLevelEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 
 MojErr MojDbLevelEngine::openDatabase(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageDatabase>& dbOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(name && !dbOut.get());
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojRefCountedPtr<MojDbLevelDatabase> db(new MojDbLevelDatabase());
     MojAllocCheck(db.get());
@@ -213,9 +210,9 @@ MojErr MojDbLevelEngine::openDatabase(const MojChar* name, MojDbStorageTxn* txn,
 
 MojErr MojDbLevelEngine::openSequence(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageSeq>& seqOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(name && !seqOut.get());
     MojAssert(m_seqDb.get());
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojRefCountedPtr<MojDbLevelSeq> seq(new MojDbLevelSeq());
     MojAllocCheck(seq.get());
@@ -237,12 +234,12 @@ MojErr MojDbLevelEngine::compact()
 }
 MojErr MojDbLevelEngine::addDatabase(MojDbLevelDatabase* db)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db);
-    MojLogTrace(MojDbLevelEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
     if (m_dbs.find(db) != MojInvalidIndex) {
-        MojLogError(MojDbLevelEngine::s_log, _T("Database already in database pool"));
+        LOG_ERROR(MSGID_LEVEL_DB_ENGINE_ERROR, 0, "Database already in database pool");
         return MojErrDbFatal;
     }
 
@@ -251,8 +248,8 @@ MojErr MojDbLevelEngine::addDatabase(MojDbLevelDatabase* db)
 
 MojErr MojDbLevelEngine::removeDatabase(MojDbLevelDatabase* db)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db);
-    MojLogTrace(MojDbLevelEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
     MojSize idx;
@@ -269,8 +266,9 @@ MojErr MojDbLevelEngine::removeDatabase(MojDbLevelDatabase* db)
 
 MojErr MojDbLevelEngine::addSeq(MojDbLevelSeq* seq)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(seq);
-    MojLogTrace(MojDbLevelEngine::s_log);
+
     MojThreadGuard guard(m_dbMutex);
 
     return m_seqs.push(seq);
@@ -278,8 +276,8 @@ MojErr MojDbLevelEngine::addSeq(MojDbLevelSeq* seq)
 
 MojErr MojDbLevelEngine::removeSeq(MojDbLevelSeq* seq)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(seq);
-    MojLogTrace(MojDbLevelEngine::s_log);
     MojThreadGuard guard(m_dbMutex);
 
     MojSize idx;

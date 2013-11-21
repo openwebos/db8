@@ -38,7 +38,7 @@ MojServiceApp::~MojServiceApp()
 
 MojErr MojServiceApp::open()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = MojApp::open();
 	MojErrCheck(err);
@@ -62,7 +62,7 @@ MojErr MojServiceApp::open()
 
 void MojServiceApp::shutdown()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	m_shutdown = true;
 }

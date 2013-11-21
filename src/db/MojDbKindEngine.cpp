@@ -61,26 +61,24 @@ const MojChar* const MojDbKindEngine::QuotaIdPrefix = _T("Quota:");
 const MojChar* const MojDbKindEngine::QuotaJson =
 	_T("{\"id\":\"Quota:1\",\"owner\":\"com.palm.admin\"}");
 
-MojLogger MojDbKindEngine::s_log(_T("db.kindEngine"));
+//db.kindEngine
 
 MojDbKindEngine::MojDbKindEngine()
 : m_db(NULL)
 {
-	MojLogTrace(s_log);
 }
 
 MojDbKindEngine::~MojDbKindEngine()
 {
-	MojLogTrace(s_log);
-
 	(void) close();
 }
 
 MojErr MojDbKindEngine::open(MojDb* db, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(db);
 	MojAssertWriteLocked(db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	// open kind db and index seq
 	m_db = db;
@@ -121,7 +119,8 @@ MojErr MojDbKindEngine::open(MojDb* db, MojDbReq& req)
 
 MojErr MojDbKindEngine::close()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = MojErrNone;
 
 	if (isOpen()) {
@@ -150,7 +149,7 @@ MojErr MojDbKindEngine::close()
 
 MojErr MojDbKindEngine::stats(MojObject& objOut, MojDbReq& req, bool verify, MojString *pKind)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 
 
@@ -171,10 +170,10 @@ MojErr MojDbKindEngine::stats(MojObject& objOut, MojDbReq& req, bool verify, Moj
 
 MojErr MojDbKindEngine::updateLocale(const MojChar* locale, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(locale);
 	MojAssert(isOpen());
 	MojAssertWriteLocked(m_db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	MojErr err = m_locale.assign(locale);
 	MojErrCheck(err);
@@ -187,9 +186,9 @@ MojErr MojDbKindEngine::updateLocale(const MojChar* locale, MojDbReq& req)
 
 MojErr MojDbKindEngine::update(MojObject* newObj, const MojObject* oldObj, MojDbReq& req, MojDbOp op, MojTokenSet& tokenSetOut, bool checkSchema)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(newObj || oldObj);
-	MojLogTrace(s_log);
 
 	MojDbKind* oldKind = NULL;
 	MojErr err = MojErrNone;
@@ -220,8 +219,8 @@ MojErr MojDbKindEngine::update(MojObject* newObj, const MojObject* oldObj, MojDb
 
 MojErr MojDbKindEngine::find(const MojDbQuery& query, MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req, MojDbOp op)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
-	MojLogTrace(s_log);
 
 	MojErr err = query.validate();
 	MojErrCheck(err);
@@ -243,8 +242,8 @@ MojErr MojDbKindEngine::find(const MojDbQuery& query, MojDbCursor& cursor, MojDb
 
 MojErr MojDbKindEngine::checkPermission(const MojString& id, MojDbOp op, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
-	MojLogTrace(s_log);
 
 	MojDbKind* kind = NULL;
 	MojErr err = getKind(id.data(), kind);
@@ -257,8 +256,8 @@ MojErr MojDbKindEngine::checkPermission(const MojString& id, MojDbOp op, MojDbRe
 
 MojErr MojDbKindEngine::checkOwnerPermission(const MojString& id, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
-	MojLogTrace(s_log);
 
 	MojDbKind* kind = NULL;
 	MojErr err = getKind(id.data(), kind);
@@ -271,7 +270,7 @@ MojErr MojDbKindEngine::checkOwnerPermission(const MojString& id, MojDbReq& req)
 
 MojErr MojDbKindEngine::getKinds(MojVector<MojObject>& kindsOut)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojDbKind* rootKind = NULL;
 	MojErr err = getKind(RootKindId, rootKind);
@@ -285,9 +284,9 @@ MojErr MojDbKindEngine::getKinds(MojVector<MojObject>& kindsOut)
 
 MojErr MojDbKindEngine::putKind(const MojObject& obj, MojDbReq& req, bool builtin)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssertWriteLocked(m_db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	// parse out id
 	MojString id;
@@ -301,7 +300,7 @@ MojErr MojDbKindEngine::putKind(const MojObject& obj, MojDbReq& req, bool builti
 		MojErrCheck(err);
 	} else {
 		// existing kind
-        MojLogDebug(s_log, _T("UpdatingKind: %s \n"), id.data());
+        LOG_DEBUG("[db_kindEngine] UpdatingKind: %s \n", id.data());
 		err = (*i)->configure(obj, m_kinds, m_locale, req);
 		MojErrCheck(err);
 	}
@@ -310,9 +309,9 @@ MojErr MojDbKindEngine::putKind(const MojObject& obj, MojDbReq& req, bool builti
 
 MojErr MojDbKindEngine::delKind(const MojString& id, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssertWriteLocked(m_db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	KindMap::ConstIterator i = m_kinds.find(id);
 	if (i != m_kinds.end()) {
@@ -330,9 +329,9 @@ MojErr MojDbKindEngine::delKind(const MojString& id, MojDbReq& req)
 
 MojErr MojDbKindEngine::reloadKind(const MojString& id, const MojObject& kindObj, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssertWriteLocked(m_db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	// delete old one
 	bool found = false;
@@ -347,16 +346,19 @@ MojErr MojDbKindEngine::reloadKind(const MojString& id, const MojObject& kindObj
 
 MojDbPermissionEngine* MojDbKindEngine::permissionEngine()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	return m_db->permissionEngine();
 }
 
 MojDbQuotaEngine* MojDbKindEngine::quotaEngine()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	return m_db->quotaEngine();
 }
 
 MojErr MojDbKindEngine::tokenFromId(const MojChar* id, MojInt64& tokOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(id);
 
 	MojDbKind* kind;
@@ -369,6 +371,8 @@ MojErr MojDbKindEngine::tokenFromId(const MojChar* id, MojInt64& tokOut)
 
 MojErr MojDbKindEngine::idFromToken(MojInt64 tok, MojString& idOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	TokMap::ConstIterator i = m_tokens.find(tok);
 	if (i == m_tokens.end())
 		MojErrThrow(MojErrDbInvalidKindToken);
@@ -379,8 +383,8 @@ MojErr MojDbKindEngine::idFromToken(MojInt64 tok, MojString& idOut)
 
 MojErr MojDbKindEngine::tokenSet(const MojChar* kindName, MojTokenSet& tokenSetOut)
 {
-	MojLogTrace(s_log);
-	
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(kindName);
 	MojDbKind* kind = NULL;
 	MojErr err = getKind(kindName, kind);
@@ -394,7 +398,7 @@ MojErr MojDbKindEngine::tokenSet(const MojChar* kindName, MojTokenSet& tokenSetO
 
 MojErr MojDbKindEngine::setupRootKind()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertWriteLocked(m_db->m_schemaLock);
 
 	MojDbKind* kind = NULL;
@@ -406,7 +410,7 @@ MojErr MojDbKindEngine::setupRootKind()
 
 MojErr MojDbKindEngine::addBuiltin(const MojChar* json, MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertWriteLocked(m_db->m_schemaLock);
 
 	MojObject obj;
@@ -420,6 +424,8 @@ MojErr MojDbKindEngine::addBuiltin(const MojChar* json, MojDbReq& req)
 
 MojErr MojDbKindEngine::createKind(const MojString& id, const MojObject& obj, MojDbReq& req, bool builtin)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojDbKind> kind(new MojDbKind(m_db->storageDatabase(), this, builtin));
 	MojAllocCheck(kind.get());
 	MojErr err = kind->init(id);
@@ -437,9 +443,9 @@ MojErr MojDbKindEngine::createKind(const MojString& id, const MojObject& obj, Mo
 
 MojErr MojDbKindEngine::loadKinds(MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssertWriteLocked(m_db->m_schemaLock);
-	MojLogTrace(s_log);
 
 	MojDbQuery query;
 	MojErr err = query.from(KindKindId);
@@ -464,7 +470,7 @@ MojErr MojDbKindEngine::loadKinds(MojDbReq& req)
 			MojErrCheck(err);
 			MojString errStr;
 			MojErrToString(loadErr, errStr);
-			MojLogError(s_log, _T("error loading kind '%s' - %s"), id.data(), errStr.data());
+            LOG_ERROR(MSGID_DB_KIND_ENGINE_ERROR, 0, "error loading kind '%s' - %s", id.data(), errStr.data());
 		}
 	}
 	err = cursor.close();
@@ -475,7 +481,7 @@ MojErr MojDbKindEngine::loadKinds(MojDbReq& req)
 
 MojErr MojDbKindEngine::getKind(const MojObject& obj, MojDbKind*& kind)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojString kindName;
 	bool found = false;
@@ -491,7 +497,7 @@ MojErr MojDbKindEngine::getKind(const MojObject& obj, MojDbKind*& kind)
 
 MojErr MojDbKindEngine::getKind(const MojChar* kindName, MojDbKind*& kind)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	KindMap::ConstIterator iter = m_kinds.find(kindName);
 	if (iter == m_kinds.end())
@@ -503,6 +509,8 @@ MojErr MojDbKindEngine::getKind(const MojChar* kindName, MojDbKind*& kind)
 
 MojErr MojDbKindEngine::formatKindId(const MojChar* id, MojString& dbIdOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     MojErr err = dbIdOut.format(_T("_kinds/%s"), id);
     MojErrCheck(err);
 

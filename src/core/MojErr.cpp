@@ -184,7 +184,6 @@ MojErr MojErrThrown(MojErr errToSet, const MojChar* format, ...)
 	MojErrMessageValue* val = NULL;
 	MojErr err = MojErrGetLocal(val);
 	MojErrCheckNoLog(err);
-	MojAssertNoLog(val);
 
 	// update it
 	if (format) {
@@ -203,12 +202,6 @@ MojErr MojErrThrown(MojErr errToSet, const MojChar* format, ...)
 
 MojErr MojErrLogDebug(const MojChar* function, const MojChar* file, int line, const MojChar* action, MojErr errToLog, const MojChar* format, ...)
 {
-	MojAssertNoLog(function && file);
-	MojAssertNoLog(errToLog != MojErrNone);
-
-	MojLogger* logger = MojLogEngine::instance()->errorLogger();
-	MojAssertNoLog(logger);
-
 	MojString msg;
 	MojErr err = msg.format(_T("%s: %s:%d - %s() - "), action, MojFileNameFromPath(file), line, function);
 	MojErrCheckNoLog(err);
@@ -232,18 +225,14 @@ MojErr MojErrLogDebug(const MojChar* function, const MojChar* file, int line, co
 	}
 	err = msg.appendFormat(_T("(%d)"), (int) errToLog);
 	MojErrCheckNoLog(err);
-	logger->log(MojLogger::LevelError, _T("%s"), msg.data());
+    LOG_ERROR(MSGID_ERROR_CALL, 0, "%s", msg.data());
 
 	return MojErrNone;
 }
 
 void MojAssertLogDebug(const MojChar* function, const MojChar* file, int line, const MojChar* cond)
 {
-	MojAssertNoLog(function && file);
-
-	MojLogger* logger = MojLogEngine::instance()->errorLogger();
-	logger->log(MojLogger::LevelCritical,
-				_T("ASSERT FAILED: %s (%s:%d) '%s'"), function, MojFileNameFromPath(file), line, cond);
+    LOG_DEBUG(MSGID_MESSAGE_CALL, "ASSERT FAILED: %s (%s:%d) '%s'", function, MojFileNameFromPath(file), line, cond);
 	MojAbort();
 }
 

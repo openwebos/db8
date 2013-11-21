@@ -148,8 +148,6 @@ protected:
 	RequestMap m_requests;
 	MojString m_name;
 	MojMessageDispatcher* m_dispatcher;
-
-	static MojLogger s_log;
 };
 
 #endif /* MOJSERVICE_H_ */

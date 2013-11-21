@@ -73,7 +73,7 @@ MojDbServiceHandler::MojDbServiceHandler(MojDb& db, MojReactor& reactor)
 
 MojErr MojDbServiceHandler::open()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = addMethods(s_pubMethods, true);
 	MojErrCheck(err);
@@ -92,15 +92,15 @@ MojErr MojDbServiceHandler::open()
 
 MojErr MojDbServiceHandler::close()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	return MojErrNone;
 }
 
 MojErr MojDbServiceHandler::handleBatch(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject operations;
 	MojErr err = payload.getRequired(MojDbServiceDefs::OperationsKey, operations);
@@ -150,8 +150,8 @@ MojErr MojDbServiceHandler::handleBatch(MojServiceMessage* msg, MojObject& paylo
 
 MojErr MojDbServiceHandler::handleCompact(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojErr err = m_db.compact();
 	MojErrCheck(err);
@@ -163,8 +163,8 @@ MojErr MojDbServiceHandler::handleCompact(MojServiceMessage* msg, MojObject& pay
 
 MojErr MojDbServiceHandler::handleDel(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
 	MojUInt32 count = 0;
@@ -201,8 +201,8 @@ MojErr MojDbServiceHandler::handleDel(MojServiceMessage* msg, MojObject& payload
 
 MojErr MojDbServiceHandler::handleDelKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject id;
 	MojErr err = payload.getRequired(MojDbServiceDefs::IdKey, id);
@@ -222,8 +222,8 @@ MojErr MojDbServiceHandler::handleDelKind(MojServiceMessage* msg, MojObject& pay
 
 MojErr MojDbServiceHandler::handleDump(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojString path;
 	MojErr err = payload.getRequired(MojDbServiceDefs::PathKey, path);
@@ -244,8 +244,8 @@ MojErr MojDbServiceHandler::handleDump(MojServiceMessage* msg, MojObject& payloa
 
 MojErr MojDbServiceHandler::handleFind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	bool doCount = false;
 	payload.get(MojDbServiceDefs::CountKey, doCount);
@@ -259,8 +259,8 @@ MojErr MojDbServiceHandler::handleFind(MojServiceMessage* msg, MojObject& payloa
 
 MojErr MojDbServiceHandler::handleGet(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject ids;
 	MojErr err = payload.getRequired(MojDbServiceDefs::IdsKey, ids);
@@ -287,8 +287,8 @@ MojErr MojDbServiceHandler::handleGet(MojServiceMessage* msg, MojObject& payload
 
 MojErr MojDbServiceHandler::handleLoad(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojString path;
 	MojErr err = payload.getRequired(MojDbServiceDefs::PathKey, path);
@@ -306,8 +306,8 @@ MojErr MojDbServiceHandler::handleLoad(MojServiceMessage* msg, MojObject& payloa
 
 MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
 	MojUInt32 count = 0;
@@ -358,15 +358,15 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 
 MojErr MojDbServiceHandler::handlePurge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojInt64 window = -1;
 	payload.get(MojDbServiceDefs::WindowKey, window);
 
 	MojUInt32 count = 0;
 	MojErr err = m_db.purge(count, window, req);
-	MojLogDebug(s_log, _T("PurgeComplete: Count: %d \n"), count);
+    LOG_DEBUG("[db_mojodb] PurgeComplete: Count: %d \n", count);
 	MojErrCheck(err);
 	err = formatCount(msg, count);
 	MojErrCheck(err);
@@ -376,8 +376,8 @@ MojErr MojDbServiceHandler::handlePurge(MojServiceMessage* msg, MojObject& paylo
 
 MojErr MojDbServiceHandler::handlePurgeStatus(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject revNum;
 	MojErr err = m_db.purgeStatus(revNum);
@@ -396,8 +396,8 @@ MojErr MojDbServiceHandler::handlePurgeStatus(MojServiceMessage* msg, MojObject&
 
 MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
@@ -427,8 +427,8 @@ MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload
 
 MojErr MojDbServiceHandler::handlePutKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
@@ -445,8 +445,8 @@ MojErr MojDbServiceHandler::handlePutKind(MojServiceMessage* msg, MojObject& pay
 
 MojErr MojDbServiceHandler::handlePutPermissions(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
@@ -469,8 +469,8 @@ MojErr MojDbServiceHandler::handlePutPermissions(MojServiceMessage* msg, MojObje
 
 MojErr MojDbServiceHandler::handlePutQuotas(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
@@ -493,8 +493,8 @@ MojErr MojDbServiceHandler::handlePutQuotas(MojServiceMessage* msg, MojObject& p
 
 MojErr MojDbServiceHandler::handleQuotaStats(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject results(MojObject::TypeObject);
 	MojErr err = m_db.quotaStats(results, req);
@@ -515,8 +515,8 @@ MojErr MojDbServiceHandler::handleQuotaStats(MojServiceMessage* msg, MojObject& 
 
 MojErr MojDbServiceHandler::handleReserveIds(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     // check space level
     if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
@@ -557,8 +557,8 @@ MojErr MojDbServiceHandler::handleReserveIds(MojServiceMessage* msg, MojObject& 
 
 MojErr MojDbServiceHandler::handleSearch(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
     MojString localeStr;
     MojErr err = m_db.getLocale(localeStr, req);
@@ -573,9 +573,8 @@ MojErr MojDbServiceHandler::handleSearch(MojServiceMessage* msg, MojObject& payl
 
 MojErr MojDbServiceHandler::handleStats(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
-
 
 	MojString forKind;
 
@@ -588,7 +587,6 @@ MojErr MojDbServiceHandler::handleStats(MojServiceMessage* msg, MojObject& paylo
 	MojErrCheck(err);
 	if (found)
 		pKind = &forKind;
-
 
 	MojObject results;
 	err = m_db.stats(results, req, verify, pKind);
@@ -609,8 +607,8 @@ MojErr MojDbServiceHandler::handleStats(MojServiceMessage* msg, MojObject& paylo
 
 MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject queryObj;
 	MojErr err = payload.getRequired(MojDbServiceDefs::QueryKey, queryObj);
@@ -627,8 +625,8 @@ MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& paylo
 	err = m_db.watch(query, cursor, watcher->m_watchSlot, fired, req);
 	MojErrCheck(err);
 
-	MojLogDebug(s_log, _T("handleWatch: %s, err: (%d); sender= %s;\n fired=%d; \n"),
-				msg->method(), (int)err, msg->senderName(), (int)fired);
+    LOG_DEBUG("[db_mojodb] handleWatch: %s, err: (%d); sender= %s;\n fired=%d; \n",
+        msg->method(), (int)err, msg->senderName(), (int)fired);
 
 	if (!fired) {
 		err = msg->replySuccess();
@@ -652,8 +650,8 @@ MojErr MojDbServiceHandler::handleWatch(MojServiceMessage* msg, MojObject& paylo
  ***********************************************************************/
 MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(msg);
-    MojLogTrace(s_log);
     MojErr err;
 
     bool retval = true;
@@ -725,8 +723,8 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
  ***********************************************************************/
 MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(msg);
-    MojLogTrace(s_log);
     MojErr err;
 
     // get shard ID
@@ -818,8 +816,8 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
  ***********************************************************************/
 MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(msg);
-    MojLogTrace(s_log);
     MojErr err;
 
     // get shard ID
@@ -912,8 +910,8 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
  ***********************************************************************/
 MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(msg);
-    MojLogTrace(s_log);
     MojErr err;
 
     // get shard ID
@@ -980,8 +978,8 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
 
 MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload, MojDbReq& req, MojDbCursor& cursor, bool doCount)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
-	MojLogTrace(s_log);
 
 	MojObject queryObj;
 	MojErr err = payload.getRequired(MojDbServiceDefs::QueryKey, queryObj);
@@ -1067,20 +1065,22 @@ MojDbServiceHandler::Watcher::Watcher(MojServiceMessage* msg)
   m_watchSlot(this, &Watcher::handleWatch),
   m_cancelSlot(this, &Watcher::handleCancel)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	msg->notifyCancel(m_cancelSlot);
 }
 
 MojErr MojDbServiceHandler::Watcher::handleWatch()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_msg.get());
-	MojLogTrace(s_log);
 
 	// release all references before doing anything that can fail
 	m_cancelSlot.cancel();
 	MojRefCountedPtr<MojServiceMessage> msg = m_msg;
 
-	MojLogDebug(s_log, _T("Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %zu;\n response= %s\n"), msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
+    LOG_DEBUG("[db_mojodb] Watcher_handleWatch: %s, - sender= %s; appId= %s; subscribed= %d; replies= %zu;\n response= %s\n",
+        msg->method(), msg->senderName(), msg->appId(), (int)msg->subscribed(), msg->numReplies(), ((MojJsonWriter&)(msg->writer())).json().data());
 
 	m_msg.reset();
 
@@ -1103,8 +1103,8 @@ MojErr MojDbServiceHandler::Watcher::handleWatch()
 
 MojErr MojDbServiceHandler::Watcher::handleCancel(MojServiceMessage* msg)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg == m_msg.get());
-	MojLogTrace(s_log);
 
 	m_watchSlot.cancel();
 	m_msg.reset();

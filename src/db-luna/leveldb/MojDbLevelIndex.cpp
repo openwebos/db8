@@ -26,21 +26,18 @@
 MojDbLevelIndex::MojDbLevelIndex()
 : m_primaryDb(NULL)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
 }
 
 MojDbLevelIndex::~MojDbLevelIndex()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
-
     MojErr err =  close();
     MojErrCatchAll(err);
 }
 
 MojErr MojDbLevelIndex::open(const MojObject& id, MojDbLevelDatabase* db, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db && db->engine());
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     m_id = id;
 
@@ -56,7 +53,7 @@ MojErr MojDbLevelIndex::open(const MojObject& id, MojDbLevelDatabase* db, MojDbS
 
 MojErr MojDbLevelIndex::close()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     m_db.reset();
     m_primaryDb.reset();
@@ -66,7 +63,7 @@ MojErr MojDbLevelIndex::close()
 
 MojErr MojDbLevelIndex::drop(MojDbStorageTxn* txn)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     MojDbLevelCursor cursor;
     MojErr err = cursor.open(m_db.get(), txn, 0);
@@ -84,7 +81,7 @@ MojErr MojDbLevelIndex::drop(MojDbStorageTxn* txn)
 
 MojErr MojDbLevelIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     MojDbLevelCursor cursor;
     MojErr err = cursor.open(m_db.get(), txn, 0);
@@ -102,8 +99,8 @@ MojErr MojDbLevelIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& 
 
 MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(txn);
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem keyItem;
     keyItem.fromBytesNoCopy(key.data(), key.size());
@@ -117,8 +114,8 @@ MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
-                    m_db->m_name.data(), size1, s, size2, err);
+    LOG_DEBUG("[db_ldb] ldbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n",
+        m_db->m_name.data(), size1, s, size2, err);
 #endif
     MojErrCheck(err);
 
@@ -127,9 +124,9 @@ MojErr MojDbLevelIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 
 MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(txn);
     MojAssert(isOpen());
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem keyItem;
     keyItem.fromBytesNoCopy(key.data(), key.size());
@@ -144,9 +141,11 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
     MojErrCheck(err2);
     if (size1 > 16) // if the object-id is in key
         strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
+    LOG_DEBUG("[db_ldb] ldbindexdel: %s; keylen: %zu, key: %s ; err = %d\n", m_db->m_name.data(), size1, s, err);
     if (!found)
-        MojLogWarning(MojDbLevelEngine::s_log, _T("ldbindexdel_warn: not found: %s \n"), s);
+        LOG_WARNING(MSGID_LEVEL_DB_WARNING, 1,
+            PMLOGKS("index", s),
+            "ldbindexdel_warn: not found: %s \n", s);
 #endif
 
     MojErrCheck(err);
@@ -159,9 +158,9 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 
 MojErr MojDbLevelIndex::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(isOpen());
     MojAssert(plan.get() && txn);
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojRefCountedPtr<MojDbLevelQuery> storageQuery(new MojDbLevelQuery());
     MojAllocCheck(storageQuery.get());
@@ -174,7 +173,7 @@ MojErr MojDbLevelIndex::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* t
 
 MojErr MojDbLevelIndex::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     return m_primaryDb->beginTxn(txnOut);
 }

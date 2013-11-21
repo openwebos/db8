@@ -44,7 +44,7 @@ const MojChar* const MojDbKind::VerifyDelCountKey = _T("_vdelcount");
 const MojChar* const MojDbKind::WarnKey = _T("warn");
 const MojChar MojDbKind::VersionSeparator = _T(':');
 
-MojLogger MojDbKind::s_log(_T("db.kind"));
+//db.kind
 
 MojDbKind::MojDbKind(MojDbStorageDatabase* db, MojDbKindEngine* kindEngine, bool builtIn)
 : m_version(0),
@@ -53,12 +53,11 @@ MojDbKind::MojDbKind(MojDbStorageDatabase* db, MojDbKindEngine* kindEngine, bool
   m_backup(false),
   m_builtin(builtIn)
 {
-	MojLogTrace(s_log);
 }
 
 MojDbKind::~MojDbKind()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = close();
 	MojErrCatchAll(err);
@@ -69,7 +68,7 @@ MojDbKind::~MojDbKind()
 
 bool MojDbKind::extends(const MojString& id) const
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	if (m_id == id)
 		return true;
@@ -82,18 +81,18 @@ bool MojDbKind::extends(const MojString& id) const
 
 MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, bool verify)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 #if defined(TESTDBKIND)
-	MojLogDebug(s_log, _T("Subkinds for - %s ; count = %d\n"), m_id.data(), m_subs.size());
+    LOG_DEBUG("[db_mojodb] Subkinds for - %s ; count = %d\n", m_id.data(), m_subs.size());
 	int n = 0;
 	for (KindVec::ConstIterator i = m_subs.begin(); i != m_subs.end(); ++i) {
-		MojLogDebug(s_log, _T("SubKind %d: %s"), n++, (*i)->id().data());
+        LOG_DEBUG("[db_mojodb] SubKind %d: %s", n++, (*i)->id().data());
 	}
-	MojLogDebug(s_log, _T("Supers for - %s ; count = %d\n"), m_id.data(), m_supers.size());
+    LOG_DEBUG("[db_mojodb] Supers for - %s ; count = %d\n", m_id.data(), m_supers.size());
 	n = 0;
 	for (KindVec::ConstIterator i = m_supers.begin(); i != m_supers.end(); ++i) {
-		MojLogDebug(s_log, _T("Super %d: %s"), n++, (*i)->id().data());
+        LOG_DEBUG("[db_mojodb] Super %d: %s", n++, (*i)->id().data());
 	}
 #endif
 	// analyze objects
@@ -104,8 +103,8 @@ MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, boo
 	MojErrCheck(err);
 	MojDbCursor cursor;
 	err = m_kindEngine->find(query, cursor, NULL, req, OpRead);
-	MojLogDebug(s_log, _T("KindStats start: %s ; Indexes = %zu; Using Index: %s; \n"),
-				m_id.data(), m_indexes.size(), cursor.m_dbIndex->name().data());
+    LOG_DEBUG("[db_mojodb] KindStats start: %s ; Indexes = %zu; Using Index: %s; \n",
+        m_id.data(), m_indexes.size(), cursor.m_dbIndex->name().data());
 
 	MojErrCheck(err);
 	MojSize count = 0;
@@ -140,7 +139,7 @@ MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, boo
 		}
 	}
 
-    MojLogDebug(s_log, _T("KindStats Summary: %s : Count: %zu; delCount: %zu; warnings: %zu \n"), m_id.data(), count, delCount, warnings);
+    LOG_DEBUG("[db_mojodb] KindStats Summary: %s : Count: %zu; delCount: %zu; warnings: %zu \n", m_id.data(), count, delCount, warnings);
 
 	usageOut += size + delSize;
 	MojObject info;
@@ -186,6 +185,8 @@ MojErr MojDbKind::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req, boo
 
 MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// Goes throudh each index entry and verifies that it points to a valid object
 	// For debugging purposes as stats for indexes does not access the target objects
 	// Index->stats function does not have enough context to find the object
@@ -200,8 +201,8 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 	query.m_forceIndex = pIndex;		// Important: Otherwise, it will pick the default index
 	cursor.verifymode(true);		// to get the errors
 	err = m_kindEngine->find(query, cursor, NULL, req, OpRead);
-	MojLogDebug(s_log, _T("Kind_verifyIndex: Kind: %s; Index: %s; idIndex: %zX; size: %zu; CursorIndex: %s \n"), m_name.data(),
-					pIndex->name().data(), pIndex->idIndex(), pIndex->size(), cursor.m_dbIndex->name().data());
+    LOG_DEBUG("[db_mojodb] Kind_verifyIndex: Kind: %s; Index: %s; idIndex: %zX; size: %zu; CursorIndex: %s \n", m_name.data(),
+        pIndex->name().data(), pIndex->idIndex(), pIndex->size(), cursor.m_dbIndex->name().data());
 	MojErrCheck(err);
 	MojSize count = 0;
 	MojSize delCount = 0;
@@ -217,8 +218,8 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 			MojErr err2 =  MojByteArrayToHex(iquery->m_keyData, iquery->m_keySize, s);
 			MojErrCheck(err2);
 			MojChar *ids = (iquery->m_keySize > 18) ? (MojChar *)(iquery->m_keyData + iquery->m_keySize - 17) : NULL;
-            MojLogDebug(s_log, _T("VerifyIndex Warning: %s; KeySize: %zu; %s ;id: %s \n"),
-					cursor.m_dbIndex->name().data(), iquery->m_keySize, s, ids);
+            LOG_DEBUG("[db_mojodb] VerifyIndex Warning: %s; KeySize: %zu; %s ;id: %s \n",
+                cursor.m_dbIndex->name().data(), iquery->m_keySize, s, ids);
 			continue;
 		}
 		MojErrCheck(err);
@@ -235,8 +236,8 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 		}
 	}
 
-    MojLogDebug(s_log, _T("Kind_verifyIndex Counts: Kind: %s; Index: %s; count: %zu; delcount: %zu; warnings: %zu \n"), m_name.data(),
-					pIndex->name().data(), count, delCount, warnCount);
+    LOG_DEBUG("[db_mojodb] Kind_verifyIndex Counts: Kind: %s; Index: %s; count: %zu; delcount: %zu; warnings: %zu \n", m_name.data(),
+        pIndex->name().data(), count, delCount, warnCount);
 
 	err = iinfo.put(VerifyCountKey, (MojInt64)count);
 	MojErrCheck(err);
@@ -250,7 +251,7 @@ MojErr MojDbKind::verifyIndex(MojDbIndex *pIndex, MojObject &iinfo, MojDbReq& re
 
 MojErr MojDbKind::init(const MojString& id)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// parse name and version out of id
 	if (id.length() > KindIdLenMax)
@@ -275,7 +276,7 @@ MojErr MojDbKind::init(const MojString& id)
 
 MojErr MojDbKind::configure(const MojObject& obj, const KindMap& map, const MojString& locale, MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// get owner before checking permissions
 	MojString owner;
@@ -341,7 +342,7 @@ MojErr MojDbKind::configure(const MojObject& obj, const KindMap& map, const MojS
 
 MojErr MojDbKind::addIndex(const MojRefCountedPtr<MojDbIndex>& index)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = m_indexes.push(index);
 	MojErrCheck(err);
@@ -351,7 +352,7 @@ MojErr MojDbKind::addIndex(const MojRefCountedPtr<MojDbIndex>& index)
 
 MojErr MojDbKind::drop(MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = checkPermission(OpKindUpdate, req);
 	MojErrCheck(err);
@@ -376,7 +377,7 @@ MojErr MojDbKind::drop(MojDbReq& req)
 
 MojErr MojDbKind::close()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = MojErrNone;
 	MojErr errClose = clearSupers();
@@ -399,7 +400,7 @@ MojErr MojDbKind::close()
 
 MojErr MojDbKind::updateLocale(const MojChar* locale, MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(locale);
 
 	MojErr err = req.curKind(this);
@@ -413,7 +414,7 @@ MojErr MojDbKind::updateLocale(const MojChar* locale, MojDbReq& req)
 
 MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op, MojDbReq& req, bool checkSchema)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = checkPermission(op, req);
 	MojErrCheck(err);
@@ -426,11 +427,11 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 
 	if (oldObj) {
 		e2 = oldObj->toJson(s);
-		MojLogDebug(s_log, _T("Kind_Update_OldObj: %s ;\n"), s.data());
+        LOG_DEBUG("[db_mojodb] Kind_Update_OldObj: %s ;\n", s.data());
 	}
 	if (newObj) {
 		e2 = newObj->toJson(s);
-		MojLogDebug(s_log, _T("Kind_Update_NewObj: %s ;\n"), s.data());
+        LOG_DEBUG("[db_mojodb] Kind_Update_NewObj: %s ;\n", s.data());
 	}
 #endif
 	if (newObj) {
@@ -450,9 +451,13 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 		   MojErrCheck(err);
 		   if (!res.valid())
 		   {
-              MojLogWarning(s_log, _T("schema validation failed for kind '%s': %s \n"), m_id.data(), res.msg().data());
-		      MojErrThrowMsg(MojErrSchemaValidation, _T("schema validation failed for kind '%s': %s"),
-		                     m_id.data(), res.msg().data());
+                LOG_WARNING(MSGID_MOJ_DB_KIND_WARNING, 2,
+                    PMLOGKS("kind", m_id.data()),
+                    PMLOGKS("msg", res.msg().data()),
+                    "schema validation failed for kind '%s': %s \n", m_id.data(), res.msg().data());
+
+                MojErrThrowMsg(MojErrSchemaValidation, _T("schema validation failed for kind '%s': %s"),
+		            m_id.data(), res.msg().data());
 		   }
 		}
 
@@ -465,8 +470,8 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 	MojVector<MojDbKind*> kindVec;
 	MojInt32 idxcount = 0;
 	err = updateIndexes(newObj, oldObj, req, op, kindVec, idxcount);
-    MojLogDebug(s_log, _T("Kind_UpdateIndexes_End: %s; supers = %zu; indexcount = %zu; updated = %d \n"), this->id().data(),
-				m_supers.size(), m_indexes.size(), idxcount);
+    LOG_DEBUG("[db_mojodb] Kind_UpdateIndexes_End: %s; supers = %zu; indexcount = %zu; updated = %d \n",
+              this->id().data(), m_supers.size(), m_indexes.size(), idxcount);
 
 	MojErrCheck(err);
 
@@ -475,7 +480,7 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
 
 MojErr MojDbKind::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req, MojDbOp op)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = checkPermission(op, req);
 	MojErrCheck(err);
@@ -485,8 +490,8 @@ MojErr MojDbKind::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req
 		MojErrThrow(MojErrDbNoIndexForQuery);
 
 	cursor.m_dbIndex = index;
-    MojLogDebug(s_log, _T("Dbkind_find: Kind: %s, UsingIndex: %s, order: %s, limit: %d \n"), m_id.data(), index->name().data(),
-				query.order().data(), (int)query.limit());
+    LOG_DEBUG("[db_mojodb] Dbkind_find: Kind: %s, UsingIndex: %s, order: %s, limit: %d \n", m_id.data(), index->name().data(),
+        query.order().data(), (int)query.limit());
 	err = index->find(cursor, watcher, req);
 	MojErrCheck(err);
 
@@ -495,6 +500,8 @@ MojErr MojDbKind::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req
 
 MojErr MojDbKind::subKinds(MojVector<MojObject>& kindsOut, const MojDbKind* parent)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (!m_supers.empty() && parent != m_supers[0])
 		return MojErrNone;
 
@@ -511,6 +518,8 @@ MojErr MojDbKind::subKinds(MojVector<MojObject>& kindsOut, const MojDbKind* pare
 
 MojErr MojDbKind::tokenSet(MojTokenSet& tokenSetOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = tokenSetOut.init(m_state.get());
 	MojErrCheck(err);
 
@@ -519,6 +528,8 @@ MojErr MojDbKind::tokenSet(MojTokenSet& tokenSetOut)
 
 MojErr MojDbKind::checkPermission(MojDbOp op, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// if this request has admin privileges, skip the permissions check
 	if (hasOwnerPermission(req))
 		return MojErrNone;
@@ -540,6 +551,8 @@ MojErr MojDbKind::checkPermission(MojDbOp op, MojDbReq& req)
 
 MojErr MojDbKind::checkOwnerPermission(MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (!hasOwnerPermission(req)) {
 		MojErr err = deny(req);
 		MojErrCheck(err);
@@ -549,13 +562,15 @@ MojErr MojDbKind::checkOwnerPermission(MojDbReq& req)
 
 bool MojDbKind::hasOwnerPermission(MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	return (req.admin() || req.domain() == m_owner);
 }
 
 MojErr MojDbKind::addSuper(MojDbKind* kind)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(kind);
-	MojLogTrace(s_log);
 
 	// we may have temporary cycles, so ignore them
 	if (kind->extends(m_id))
@@ -578,6 +593,8 @@ MojErr MojDbKind::addSuper(MojDbKind* kind)
 
 MojDbPermissionEngine::Value MojDbKind::objectPermission(const MojChar* op, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojDbPermissionEngine::Value val = m_kindEngine->permissionEngine()->
 			check(PermissionType, m_id, req.domain(), op);
 	if (val == MojDbPermissionEngine::ValueUndefined && !m_supers.empty()) {
@@ -588,7 +605,13 @@ MojDbPermissionEngine::Value MojDbKind::objectPermission(const MojChar* op, MojD
 
 MojErr MojDbKind::deny(MojDbReq& req)
 {
-	MojLogWarning(s_log, _T("db: permission denied for caller '%s' on kind '%s'"), req.domain().data(), m_id.data());
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    LOG_WARNING(MOJ_DB_KIND_WARNING, 2,
+        PMLOGKS("caller", req.domain().data()),
+        PMLOGKS("kind", m_id.data()),
+        "db: permission denied for caller '%s' on kind '%s'", req.domain().data(), m_id.data());
+
 	if (m_kindEngine->permissionEngine()->enabled()) {
 		// don't leak any information in an error message
 		MojErrThrow(MojErrDbPermissionDenied);
@@ -598,6 +621,8 @@ MojErr MojDbKind::deny(MojDbReq& req)
 
 MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojDbOp op, MojVector<MojDbKind*>& kindVec, MojInt32& idxcount)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = kindVec.push(this);
 	MojErrCheck(err);
 
@@ -617,6 +642,7 @@ MojErr MojDbKind::updateIndexes(const MojObject* newObj, const MojObject* oldObj
 
 MojErr MojDbKind::updateOwnIndexes(const MojObject* newObj, const MojObject* oldObj, const MojDbReq& req, MojInt32& idxcount)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojInt32 count = 0;
 
@@ -626,7 +652,7 @@ MojErr MojDbKind::updateOwnIndexes(const MojObject* newObj, const MojObject* old
 		MojErr err = (*i)->update(newObj, oldObj, req.txn(), req.fixmode());
 		MojErrCheck(err);
 	}
-	MojLogDebug(s_log, _T("Kind_UpdateOwnIndexes: %s; count: %d \n"), this->id().data(), count);
+    LOG_DEBUG("[db_mojodb] Kind_UpdateOwnIndexes: %s; count: %d \n", this->id().data(), count);
 
 	idxcount += count;
 	return MojErrNone;
@@ -634,6 +660,8 @@ MojErr MojDbKind::updateOwnIndexes(const MojObject* newObj, const MojObject* old
 
 MojErr MojDbKind::preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// update supers
 	for (KindVec::ConstIterator i = m_supers.begin();
 		 i != m_supers.end(); ++i) {
@@ -654,7 +682,10 @@ MojErr MojDbKind::preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq
 		MojErrCheck(err);
 		if (!res.valid()) {
 			//MojErrThrowMsg(MojErrSchemaValidation, _T("schema validation failed for kind '%s': %s"), m_id.data(), res.msg().data());
-			MojLogWarning(s_log, _T("schema validation failed for kind '%s': %s"), m_id.data(), res.msg().data());
+			LOG_WARNING(MOJ_DB_KIND_WARNING, 2,
+                PMLOGKS("kind", m_id.data()),
+                PMLOGKS("msg", res.msg().data()),
+                "schema validation failed for kind '%s': %s", m_id.data(), res.msg().data());
 		}
 	}
 	return MojErrNone;
@@ -662,7 +693,7 @@ MojErr MojDbKind::preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq
 
 MojErr MojDbKind::configureIndexes(const MojObject& obj, const MojString& locale, MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// make sure indexes changes count against our usage
 	MojErr err = req.curKind(this);
@@ -749,7 +780,7 @@ MojErr MojDbKind::configureIndexes(const MojObject& obj, const MojString& locale
 
 MojErr MojDbKind::configureRevSets(const MojObject& obj)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	m_revSets.clear();
 	MojSet<MojString> setNames;
@@ -776,7 +807,7 @@ MojErr MojDbKind::configureRevSets(const MojObject& obj)
 
 MojDbIndex* MojDbKind::indexForQuery(const MojDbQuery& query) const
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	if (query.m_forceIndex)
 		return query.m_forceIndex;			// for stats verify
@@ -793,7 +824,8 @@ MojDbIndex* MojDbKind::indexForQuery(const MojDbQuery& query) const
 
 MojErr MojDbKind::updateSupers(const KindMap& map, const StringVec& superIds, bool updating, MojDbReq& req)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojInt32 indexes = 0;
 	if (updating) {
 		KindVec addedSupers;
@@ -883,7 +915,7 @@ MojErr MojDbKind::diffSupers(const KindMap& map, const StringVec& vec1, const St
 
 MojErr MojDbKind::clearSupers()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// remove old supers
 	MojErr err = MojErrNone;
@@ -904,9 +936,9 @@ MojErr MojDbKind::clearSupers()
 
 MojErr MojDbKind::openIndex(MojDbIndex* index, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(index);
 	MojAssert(m_db);
-	MojLogTrace(s_log);
 
 	// construct storage index name
 	MojString name;
@@ -929,7 +961,7 @@ MojErr MojDbKind::openIndex(MojDbIndex* index, MojDbReq& req)
 
 MojErr MojDbKind::dropIndex(MojDbIndex* index, MojDbReq& req)
 {
-	MojAssert(index);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = m_state->delIndex(index->name(), req);
 	MojErrCheck(err);
@@ -941,8 +973,8 @@ MojErr MojDbKind::dropIndex(MojDbIndex* index, MojDbReq& req)
 
 MojErr MojDbKind::removeKind(KindVec& vec, MojDbKind* kind)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(kind);
-	MojLogTrace(s_log);
 
 	MojSize idx = vec.find(kind);
 	MojAssert(idx != MojInvalidIndex);
@@ -954,6 +986,8 @@ MojErr MojDbKind::removeKind(KindVec& vec, MojDbKind* kind)
 
 const MojChar* MojDbKind::stringFromOperation(MojDbOp op)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	switch (op) {
 	case OpNone:
 		return _T("none");

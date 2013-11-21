@@ -80,8 +80,6 @@ MojDbStressTest::MojDbStressTest()
 
 MojErr MojDbStressTest::run()
 {
-	MojLogEngine::instance()->reset(MojLogger::LevelError);
-
 	MojErr err = init();
 	MojTestErrCheck(err);
 	err = runTests();
@@ -96,7 +94,7 @@ MojErr MojDbStressTest::run()
 
 MojErr MojDbStressTest::runTests()
 {
-        m_prevTests = m_tests;
+    m_prevTests = m_tests;
 	m_tests.clear();
 
 	for (MojUInt32 i = 0; i < NumKindTests; ++i) {

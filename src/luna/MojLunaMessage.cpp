@@ -117,7 +117,7 @@ MojErr MojLunaMessage::replyImpl()
 	MojAssert(hasData());
 
 	const MojChar* json = m_writer.json();
-    MojLogDebug(MojLunaService::s_log, _T("response sent: %s"), json);
+    LOG_DEBUG("[db_lunaService] response sent: %s", json);
 
 	MojLunaErr lserr;
 	bool retVal = LSMessageRespond(m_msg, json, lserr);

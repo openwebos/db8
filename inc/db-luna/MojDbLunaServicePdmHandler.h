@@ -60,8 +60,6 @@ private:
     MojReactor& m_reactor;
     MojServiceRequest::ReplySignal::Slot<MojDbLunaServicePdmHandler> m_slot;
     ShardInfoListType m_shardCache;
-
-    static MojLogger s_log;
 };
 
 #endif

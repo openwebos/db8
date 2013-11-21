@@ -29,6 +29,7 @@ MojDbLevelItem::MojDbLevelItem()
 
 MojErr MojDbLevelItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err = m_header.read(kindEngine);
     MojErrCheck(err);
 
@@ -39,6 +40,7 @@ MojErr MojDbLevelItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine)
 
 MojErr MojDbLevelItem::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err = MojErrNone;
     MojTokenSet tokenSet;
     if (headerExpected) {
@@ -60,6 +62,7 @@ MojErr MojDbLevelItem::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEng
 
 void MojDbLevelItem::id(const MojObject& id)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     m_header.reset();
     m_header.id(id);
     m_header.reader().data(data(), size());
@@ -67,18 +70,21 @@ void MojDbLevelItem::id(const MojObject& id)
 
 void MojDbLevelItem::clear()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     freeData();
     m_slice.clear();
 }
 
 bool MojDbLevelItem::hasPrefix(const MojDbKey& prefix) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     return (size() >= prefix.size() &&
             MojMemCmp(data(), prefix.data(), prefix.size()) == 0);
 }
 
 MojErr MojDbLevelItem::toArray(MojObject& arrayOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojObjectBuilder builder;
     MojErr err = builder.beginArray();
     MojErrCheck(err);
@@ -93,6 +99,7 @@ MojErr MojDbLevelItem::toArray(MojObject& arrayOut) const
 
 MojErr MojDbLevelItem::toObject(MojObject& objOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojObjectBuilder builder;
     MojErr err = MojObjectReader::read(builder, data(), size());
     MojErrCheck(err);
@@ -103,6 +110,7 @@ MojErr MojDbLevelItem::toObject(MojObject& objOut) const
 
 void MojDbLevelItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(bytes || size == 0);
     MojAssert(size <= MojUInt32Max);
 
@@ -111,6 +119,7 @@ void MojDbLevelItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
 
 MojErr MojDbLevelItem::fromBuffer(MojBuffer& buf)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     clear();
     if (!buf.empty()) {
         MojAutoPtr<MojBuffer::Chunk> chunk;
@@ -125,6 +134,7 @@ MojErr MojDbLevelItem::fromBuffer(MojBuffer& buf)
 
 MojErr MojDbLevelItem::fromBytes(const MojByte* bytes, MojSize size)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert (bytes || size == 0);
 
     if (size == 0) {
@@ -140,6 +150,7 @@ MojErr MojDbLevelItem::fromBytes(const MojByte* bytes, MojSize size)
 
 MojErr MojDbLevelItem::fromObject(const MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojObjectWriter writer;
     MojErr err = obj.visit(writer);
     MojErrCheck(err);
@@ -151,6 +162,7 @@ MojErr MojDbLevelItem::fromObject(const MojObject& obj)
 
 MojErr MojDbLevelItem::fromObjectVector(const MojVector<MojObject>& vec)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!vec.empty());
 
     MojObjectWriter writer;
@@ -167,6 +179,7 @@ MojErr MojDbLevelItem::fromObjectVector(const MojVector<MojObject>& vec)
 
 void MojDbLevelItem::freeData()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     // make sure slice points to something weird rather than to unallocated
     // memory
     m_slice = leveldb::Slice("(uninitialized)");
@@ -188,6 +201,7 @@ void MojDbLevelItem::freeData()
 
 void MojDbLevelItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(bytes);
     freeData();
     m_data = bytes;

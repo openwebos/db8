@@ -53,8 +53,6 @@ protected:
 	const MojChar* m_kindId;
 	const MojChar* m_confProp;
 	MojDb* m_db;
-
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBPUTHANDLER_H_ */

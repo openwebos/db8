@@ -41,6 +41,7 @@ public:
 
 private:
     std::map<MojUInt32,MojObject> m_map;
+    static MojLogger s_log;
 };
 
 #endif /* MOJDBSHARDIDCACHE_H_ */

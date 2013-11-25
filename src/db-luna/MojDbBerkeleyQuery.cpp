@@ -41,7 +41,6 @@ MojDbBerkeleyQuery::~MojDbBerkeleyQuery()
 MojErr MojDbBerkeleyQuery::open(MojDbBerkeleyDatabase* db, MojDbBerkeleyDatabase* joinDb,
 		MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!m_isOpen);
 	MojAssert(db && db->impl() && plan.get());
 
@@ -57,7 +56,6 @@ MojErr MojDbBerkeleyQuery::open(MojDbBerkeleyDatabase* db, MojDbBerkeleyDatabase
 
 MojErr MojDbBerkeleyQuery::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojErr err = MojErrNone;
 
 	if (m_isOpen) {
@@ -72,8 +70,6 @@ MojErr MojDbBerkeleyQuery::close()
 
 MojErr MojDbBerkeleyQuery::getById(const MojObject& id, MojDbStorageItem*& itemOut, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	itemOut = NULL;
 	foundOut = false;
 	MojDbBerkeleyItem* item = NULL;
@@ -89,10 +85,9 @@ MojErr MojDbBerkeleyQuery::getById(const MojObject& id, MojDbStorageItem*& itemO
 		if (!foundOut) {
 			char s[1024];
 			int size = (int)primaryKey.size();
-			(void) MojByteArrayToHex(primaryKey.data(), size, s);
-
-            LOG_DEBUG("[db.bdb] bdbq_byId_warnindex: KeySize: %d; %s ;id: %s \n",
-                size, s, primaryKey.data()+1);
+			(void) MojByteArrayToHex(primaryKey.data(), size, s); 
+			MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbq_byId_warnindex: KeySize: %d; %s ;id: %s \n"),
+								 size, s, primaryKey.data()+1);
 		
 			//MojErrThrow(MojErrDbInconsistentIndex);
 			MojErrThrow(MojErrInternalIndexOnFind);
@@ -116,8 +111,6 @@ MojErr MojDbBerkeleyQuery::getById(const MojObject& id, MojDbStorageItem*& itemO
 
 MojErr MojDbBerkeleyQuery::seekImpl(const ByteVec& key, bool desc, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (key.empty()) {
 		// if key is empty, seek to beginning (or end if desc)
 		MojErr err = getKey(foundOut, SeekEmptyFlags[desc]);
@@ -139,7 +132,6 @@ MojErr MojDbBerkeleyQuery::seekImpl(const ByteVec& key, bool desc, bool& foundOu
 
 MojErr MojDbBerkeleyQuery::next(bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_state == StateNext);
 
 	MojErr err = getKey(foundOut, NextFlags[m_plan->desc()]);
@@ -150,8 +142,6 @@ MojErr MojDbBerkeleyQuery::next(bool& foundOut)
 
 MojErr MojDbBerkeleyQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObject id;
 	MojErr err = parseId(id);
 	MojErrCheck(err);
@@ -163,8 +153,6 @@ MojErr MojDbBerkeleyQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
 
 MojErr MojDbBerkeleyQuery::getKey(bool& foundOut, MojUInt32 flags)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_cursor.get(m_key, m_val, foundOut, flags);
 	MojErrCheck(err);
 	m_keyData = m_key.data();

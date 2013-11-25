@@ -30,6 +30,8 @@ class MojDbLevelSeq;
 class MojDbLevelEngine : public MojDbStorageEngine
 {
 public:
+    static MojLogger s_log;
+
     MojDbLevelEngine();
     ~MojDbLevelEngine();
 

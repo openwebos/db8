@@ -22,8 +22,6 @@
 
 MojErr MojDbBerkeleyFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engineOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	engineOut.reset(new MojDbBerkeleyEngine());
 	MojAllocCheck(engineOut.get());
 
@@ -31,8 +29,6 @@ MojErr MojDbBerkeleyFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engine
 }
 MojErr MojDbBerkeleyFactory::createEnv(MojRefCountedPtr<MojDbEnv>& envOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	envOut.reset(new MojDbBerkeleyEnv());
 	MojAllocCheck(envOut.get());
 

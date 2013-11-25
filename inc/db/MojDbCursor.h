@@ -45,6 +45,7 @@ public:
 	void verifymode(bool bval) { m_vmode = bval;}
 	bool verifymode() const{ return m_vmode;}
     void setIndex(MojDbIndex * ind) { m_dbIndex = ind; }
+    
 
 protected:
 	friend class MojDbIndex;

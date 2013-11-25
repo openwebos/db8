@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <glib.h>
 #include "core/MojListEntry.h"
-#include "MojLogPmLogLib.h"
 
 #ifdef MOJ_HAVE_STDARG_H
 #	include <stdarg.h>

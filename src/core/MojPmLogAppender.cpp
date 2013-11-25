@@ -23,6 +23,57 @@
 #include "core/MojServiceApp.h"
 #include "PmLogLib.h"
 
+MojPmLogAppender::MojPmLogAppender()
+{
+}
+
+MojPmLogAppender::~MojPmLogAppender()
+{
+}
+
+MojErr MojPmLogAppender::append(MojLogger::Level level, MojLogger* logger, const MojChar* format, va_list args)
+{
+	MojAssertNoLog(format);
+
+	static const int s_pmlogLevels[] = {
+		kPmLogLevel_Debug,
+		kPmLogLevel_Debug,
+		kPmLogLevel_Info,
+		kPmLogLevel_Notice,
+		kPmLogLevel_Warning,
+		kPmLogLevel_Error,
+		kPmLogLevel_Critical
+	};
+	MojAssertNoLog(sizeof(s_pmlogLevels) / sizeof(int) == MojLogger::LevelMax);
+
+	int pmlogLevel = kPmLogLevel_Debug;
+	if (level >= 0 && level < MojLogger::LevelMax)
+		pmlogLevel = s_pmlogLevels[level];
+
+	PmLogContext context = kPmLogGlobalContext;
+	if (logger) {
+		context = (PmLogContext) logger->data();
+		if (!context) {
+			PmLogErr err = PmLogGetContext(logger->name(), &context);
+			if (err == kPmLogErr_None) {
+				logger->setData((void *)context);
+			}
+		}
+	}
+
+	PmLogVPrint(context, pmlogLevel, format, args);
+
+	return MojErrNone;
+}
+
+MojErr MojServiceApp::initPmLog()
+{
+	MojAutoPtr<MojLogAppender> appender(new MojPmLogAppender);
+	MojAllocCheck(appender.get());
+	MojLogEngine::instance()->appender(appender);
+
+	return MojErrNone;
+}
 
 #endif // MOJ_USE_PMLOG
 

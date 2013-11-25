@@ -29,21 +29,23 @@ const MojChar* const MojDbPermissionEngine::PermissionsKey = _T("permissions");
 const MojChar* const MojDbPermissionEngine::PermissionsEnabledKey = _T("permissionsEnabled");
 const MojChar* const MojDbPermissionEngine::WildcardOperation = _T("*");
 
-//db.permissionEngine
+MojLogger MojDbPermissionEngine::s_log(_T("db.permissionEngine"));
 
 MojDbPermissionEngine::MojDbPermissionEngine()
 : MojDbPutHandler(MojDbKindEngine::PermissionId, PermissionsKey),
   m_enabled(true)
 {
+	MojLogTrace(s_log);
 }
 
 MojDbPermissionEngine::~MojDbPermissionEngine()
 {
+	MojLogTrace(s_log);
 }
 
 MojErr MojDbPermissionEngine::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
 	MojErr errClose = MojDbPutHandler::close();
@@ -55,7 +57,7 @@ MojErr MojDbPermissionEngine::close()
 
 MojErr MojDbPermissionEngine::put(MojObject& perm, MojDbReq& req, bool putObj)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	// pull params out of object
@@ -139,7 +141,7 @@ MojErr MojDbPermissionEngine::put(MojObject& perm, MojDbReq& req, bool putObj)
 MojDbPermissionEngine::Value MojDbPermissionEngine::check(const MojChar* type,
 		const MojChar* object, const MojChar* caller, const MojChar* op) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 	MojAssert(type && object && caller && op);
 
 	TypeMap::ConstIterator typeIter = m_types.find(type);
@@ -170,7 +172,7 @@ MojDbPermissionEngine::Value MojDbPermissionEngine::check(const MojChar* type,
 
 MojErr MojDbPermissionEngine::configure(const MojObject& conf, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	// enabled
@@ -184,8 +186,6 @@ MojErr MojDbPermissionEngine::configure(const MojObject& conf, MojDbReq& req)
 
 MojErr MojDbPermissionEngine::valueFromString(const MojString& str, Value& valOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	valOut = ValueUndefined;
 	if (str == AllowKey) {
 		valOut = ValueAllow;

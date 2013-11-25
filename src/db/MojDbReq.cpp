@@ -42,8 +42,6 @@ MojDbReq::~MojDbReq()
 
 MojErr MojDbReq::domain(const MojChar* val)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_domain.assign(val);
 	MojErrCheck(err);
 	MojSize pos = m_domain.find(_T(' '));
@@ -56,8 +54,6 @@ MojErr MojDbReq::domain(const MojChar* val)
 
 MojErr MojDbReq::abort()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	unlock();
 	m_beginCount = 0;
 	m_batch = false;
@@ -71,14 +67,11 @@ MojErr MojDbReq::abort()
 
 MojErr MojDbReq::curKind(const MojDbKind* kind)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return m_db->quotaEngine()->curKind(kind, m_txn.get());
 }
 
 MojErr MojDbReq::begin(MojDb* db, bool lockSchema)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db);
 
 	if (m_beginCount++ == 0) {
@@ -97,7 +90,6 @@ MojErr MojDbReq::begin(MojDb* db, bool lockSchema)
 
 MojErr MojDbReq::startanother(MojDb* db)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db);
 
 	MojErr err = commit();
@@ -114,8 +106,6 @@ MojErr MojDbReq::startanother(MojDb* db)
 
 MojErr MojDbReq::end(bool commitNow)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (--m_beginCount == 0 && !m_batch) {
 		if (commitNow) {
 			MojErr err = commit();
@@ -130,8 +120,6 @@ MojErr MojDbReq::end(bool commitNow)
 
 void MojDbReq::beginBatch()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_batch = true;
 	m_beginCount = 0;
 	m_txn.reset();
@@ -139,8 +127,6 @@ void MojDbReq::beginBatch()
 
 MojErr MojDbReq::endBatch()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_batch = false;
 	MojErr err = commit();
 	MojErrCheck(err);
@@ -150,7 +136,6 @@ MojErr MojDbReq::endBatch()
 
 void MojDbReq::lock(MojDb* db, bool lockSchema)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_db == NULL || m_db == db);
 
 	if (m_db == NULL) {
@@ -169,8 +154,6 @@ void MojDbReq::lock(MojDb* db, bool lockSchema)
 
 void MojDbReq::unlock()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (m_db) {
 		m_db->unlock();
 		m_db = NULL;
@@ -180,8 +163,6 @@ void MojDbReq::unlock()
 
 MojErr MojDbReq::commit()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	if (m_txn.get()) {
 		MojErr errAcc = m_txn->commit();

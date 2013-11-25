@@ -26,7 +26,7 @@
 #include "core/MojTime.h"
 
 const MojChar* const MojService::DefaultCategory = _T("/");
-//core.messageService
+MojLogger MojService::s_log(_T("core.messageService"));
 
 MojService::MojService(MojMessageDispatcher* queue)
 : m_dispatcher(queue)
@@ -41,7 +41,7 @@ MojService::~MojService()
 
 MojErr MojService::open(const MojChar* serviceName)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	if (serviceName) {
 		MojErr err = m_name.assign(serviceName);
@@ -52,7 +52,7 @@ MojErr MojService::open(const MojChar* serviceName)
 
 MojErr MojService::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	// cancel all pending subscriptions
 	MojErr err = MojErrNone;
@@ -69,8 +69,8 @@ MojErr MojService::close()
 
 MojErr MojService::addCategory(const MojChar* categoryName, CategoryHandler* handler)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(categoryName && handler);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	MojAssert(!m_categories.contains(categoryName));
@@ -88,9 +88,9 @@ MojErr MojService::addCategory(const MojChar* categoryName, CategoryHandler* han
 
 MojErr MojService::send(MojServiceRequest* req, const MojChar* service, const MojChar* method, Token& tokenOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req && service && method);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	// NOV-130089: sendImpl and addReqest must be atomic
 	MojThreadGuard guard(m_mutex);
@@ -105,9 +105,9 @@ MojErr MojService::send(MojServiceRequest* req, const MojChar* service, const Mo
 
 MojErr MojService::cancel(MojServiceRequest* req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	bool found = false;
 	MojErr err = removeRequest(req, found);
@@ -121,9 +121,9 @@ MojErr MojService::cancel(MojServiceRequest* req)
 
 MojErr MojService::enableSubscription(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojErr err = addSubscription(msg);
 	MojErrCheck(err);
@@ -148,9 +148,9 @@ MojErr MojService::handleMessage(DispatchMethod method, MojServiceMessage* msg)
 
 MojErr MojService::dispatchRequest(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	// get payload
 	MojObject payload;
@@ -170,11 +170,8 @@ MojErr MojService::dispatchRequest(MojServiceMessage* msg)
 		(void) payload.toJson(payloadStr);
 		MojString errStr;
 		(void) MojErrToString(reqErr, errStr);
-        LOG_WARNING(MSGID_MOJ_SERVICE_WARNING, 3,
-                    PMLOGKS("sender", msg->senderName()),
-                    PMLOGKS("method", msg->method()),
-                    PMLOGKS("payload", payloadStr.data()),
-                    "%s (%d)", errStr.data(), (int) reqErr);
+        MojLogWarning(s_log, _T("%s (%d) - sender='%s' method='%s' payload='%s'"),
+				errStr.data(), (int) reqErr, msg->senderName(), msg->method(), payloadStr.data());
 
 		if (msg->numReplies() == 0) {
 			return msg->replyError(reqErr);
@@ -188,9 +185,9 @@ MojErr MojService::dispatchRequest(MojServiceMessage* msg)
 
 MojErr MojService::dispatchReply(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	// parse payload
 	MojObjectBuilder builder;
@@ -222,8 +219,8 @@ MojErr MojService::dispatchReply(MojServiceMessage* msg)
 
 MojErr MojService::dispatchCancel(const SubscriptionKey& key)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	SubscriptionMap::ConstIterator i = m_subscriptions.find(key);
@@ -239,9 +236,9 @@ MojErr MojService::dispatchCancel(const SubscriptionKey& key)
 
 MojErr MojService::dispatchCancel(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	SubscriptionKey key;
 	MojErr err = key.init(msg);
@@ -254,9 +251,9 @@ MojErr MojService::dispatchCancel(MojServiceMessage* msg)
 
 MojErr MojService::addRequest(MojServiceRequest* req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req);
 	MojAssertMutexLocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojErr err = m_requests.put(req->token(), req);
 	MojErrCheck(err);
@@ -266,9 +263,9 @@ MojErr MojService::addRequest(MojServiceRequest* req)
 
 MojErr MojService::getRequest(MojServiceMessage* msg, MojRefCountedPtr<MojServiceRequest>& reqOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	if (!m_requests.get(msg->token(), reqOut)) {
@@ -279,9 +276,9 @@ MojErr MojService::getRequest(MojServiceMessage* msg, MojRefCountedPtr<MojServic
 
 MojErr MojService::removeRequest(MojServiceRequest* req, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	MojErr err = m_requests.del(req->token(), foundOut);
@@ -292,9 +289,9 @@ MojErr MojService::removeRequest(MojServiceRequest* req, bool& foundOut)
 
 MojErr MojService::addSubscription(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	SubscriptionKey key;
 	MojErr err = key.init(msg);
@@ -310,9 +307,9 @@ MojErr MojService::addSubscription(MojServiceMessage* msg)
 
 MojErr MojService::removeSubscription(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	SubscriptionKey key;
 	MojErr err = key.init(msg);
@@ -331,9 +328,9 @@ MojErr MojService::removeSubscription(MojServiceMessage* msg)
 
 MojErr MojService::getCategory(const MojChar* name, MojRefCountedPtr<Category>& catOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	if (!m_categories.get(name, catOut)) {
@@ -344,7 +341,6 @@ MojErr MojService::getCategory(const MojChar* name, MojRefCountedPtr<Category>& 
 
 MojErr MojService::CategoryHandler::addMethod(const MojChar* methodName, Callback callback, bool pub, const MojChar* schemaJson)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(methodName && callback);
 
 	MojString str;
@@ -381,7 +377,6 @@ MojErr MojService::CategoryHandler::addMethod(const MojChar* methodName, Callbac
 
 MojErr MojService::CategoryHandler::addMethods(const Method* methods, bool pub)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(methods);
 
 	for (const Method* method = methods; method->m_name != NULL; method++) {
@@ -393,7 +388,6 @@ MojErr MojService::CategoryHandler::addMethods(const Method* methods, bool pub)
 
 MojErr MojService::CategoryHandler::addMethods(const SchemaMethod* methods, bool pub)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(methods);
 
 	for (const SchemaMethod* method = methods; method->m_name != NULL; method++) {
@@ -405,8 +399,8 @@ MojErr MojService::CategoryHandler::addMethods(const SchemaMethod* methods, bool
 
 MojErr MojService::CategoryHandler::invoke(const MojChar* method, MojServiceMessage* msg, MojObject& payload)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(method && msg);
+	MojLogTrace(s_log);
 
 	MojTime startTime;
 	MojErr err = MojGetCurrentTime(startTime);
@@ -434,7 +428,7 @@ MojErr MojService::CategoryHandler::invoke(const MojChar* method, MojServiceMess
 	MojTime endTime;
 	err = MojGetCurrentTime(endTime);
 	MojErrCheck(err);
-	LOG_DEBUG("[core_messageService] %s invoked: %.3fms"), method, ((double) (endTime.microsecs() - startTime.microsecs()) / 1000);
+	MojLogDebug(s_log, _T("%s invoked: %.3fms"), method, (double) (endTime.microsecs() - startTime.microsecs()) / 1000);
 
 	return MojErrNone;
 }
@@ -449,7 +443,6 @@ MojErr MojService::CategoryHandler::invoke(Callback method, MojServiceMessage* m
 
 MojErr MojService::SubscriptionKey::init(const MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 
 	MojErr err = push((MojInt64) msg->token());
@@ -462,7 +455,6 @@ MojErr MojService::SubscriptionKey::init(const MojServiceMessage* msg)
 
 MojErr MojService::SubscriptionKey::init(const MojChar* sender)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojErr err = pushString(sender);
 	MojErrCheck(err);
 
@@ -471,7 +463,6 @@ MojErr MojService::SubscriptionKey::init(const MojChar* sender)
 
 MojErr MojService::SubscriptionKey::sender(MojString& senderOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	bool valid = false;
 	MojErr err = at(0, senderOut, valid);
 	MojErrCheck(err);
@@ -483,7 +474,6 @@ MojErr MojService::SubscriptionKey::sender(MojString& senderOut) const
 
 MojService::Token MojService::SubscriptionKey::token() const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojInt64 tok;
 	bool valid = at(1, tok);
 	MojAssert(valid);

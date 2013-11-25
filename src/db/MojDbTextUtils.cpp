@@ -23,8 +23,6 @@
 
 MojErr MojDbTextUtils::strToUnicode(const MojString& src, UnicodeVec& destOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = destOut.resize(src.length() * 2);
 	MojErrCheck(err);
 	MojInt32 destCapacity = 0;
@@ -47,7 +45,6 @@ MojErr MojDbTextUtils::strToUnicode(const MojString& src, UnicodeVec& destOut)
 
 MojErr MojDbTextUtils::unicodeToStr(const UChar* src, MojSize len, MojString& destOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(src || len == 0);
 
 	MojErr err = destOut.resize(len * 2);
@@ -77,8 +74,6 @@ MojErr MojDbTextUtils::unicodeToStr(const UChar* src, MojSize len, MojString& de
  ***********************************************************************/
 MojErr MojDbTextUtils::strToUpper(const MojString& src, const MojChar* locale, UnicodeVec& destOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojDbTextUtils::UnicodeVec chars;
     MojErr err = MojDbTextUtils::strToUnicode(src, chars);
     MojErrCheck(err);

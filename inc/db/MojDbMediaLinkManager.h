@@ -34,6 +34,8 @@ private:
     MojErr getLinkPath(MojUInt32 shardId, MojString& linkPath);
 
     MojString m_dir;
+
+    static MojLogger s_log;
 };
 
 #endif

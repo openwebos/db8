@@ -36,8 +36,6 @@ MojDbSearchCursor::~MojDbSearchCursor()
 
 MojErr MojDbSearchCursor::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	MojErr errClose = MojDbCursor::close();
 	MojErrAccumulate(err, errClose);
@@ -52,8 +50,6 @@ MojErr MojDbSearchCursor::close()
 
 MojErr MojDbSearchCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	foundOut = false;
 	MojErr err = begin();
 	MojErrCheck(err);
@@ -68,8 +64,6 @@ MojErr MojDbSearchCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 
 MojErr MojDbSearchCursor::count(MojUInt32& countOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	countOut = 0;
 	MojErr err = begin();
 	MojErrCheck(err);
@@ -87,8 +81,6 @@ MojErr MojDbSearchCursor::count(MojUInt32& countOut)
  ***********************************************************************/
 MojErr MojDbSearchCursor::setPagePosition()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojErr err;
     MojDbStorageItem* item;
     m_pos = m_items.begin();
@@ -117,7 +109,7 @@ MojErr MojDbSearchCursor::setPagePosition()
                 MojString strOut;
                 err = nextId.toJson(strOut);
                 MojErrCheck(err);
-                LOG_DEBUG("[db_mojodb] nextId : %s \n", strOut.data());
+                MojLogDebug(MojDb::s_log, _T("nextId : %s \n"), strOut.data());
             }
             break;
         }
@@ -134,8 +126,6 @@ MojErr MojDbSearchCursor::setPagePosition()
  ***********************************************************************/
 MojErr MojDbSearchCursor::nextPage(MojDbQuery::Page& pageOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     pageOut = m_page;
 
     return MojErrNone;
@@ -143,7 +133,6 @@ MojErr MojDbSearchCursor::nextPage(MojDbQuery::Page& pageOut)
 
 MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojErr err = initImpl(query);
 	MojErrCheck(err);
 
@@ -180,8 +169,6 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
 
 MojErr MojDbSearchCursor::retrieveCollation(const MojDbQuery& query)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     m_collation = MojDbCollationInvalid;
 
     const MojChar* orderName = query.order().data();
@@ -208,8 +195,6 @@ MojErr MojDbSearchCursor::retrieveCollation(const MojDbQuery& query)
 
 MojErr MojDbSearchCursor::begin()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (!loaded()) {
 		MojErr err = load();
 		MojErrCheck(err);
@@ -219,8 +204,6 @@ MojErr MojDbSearchCursor::begin()
 
 MojErr MojDbSearchCursor::load()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// pull unique ids from index
 	ObjectSet ids;
 	MojErr err = loadIds(ids);
@@ -268,8 +251,6 @@ MojErr MojDbSearchCursor::load()
 
 MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojUInt32 groupNum = 0;
 	bool found = false;
 	MojSharedPtr<ObjectSet> group;
@@ -328,8 +309,6 @@ MojErr MojDbSearchCursor::loadIds(ObjectSet& idsOut)
 
 MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojInt32 warns = 0;
 	for (ObjectSet::ConstIterator i = ids.begin(); i != ids.end(); ++i) {
 		// get item by id
@@ -359,13 +338,12 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 		}
 	}
 	if (warns > 0)
-        LOG_DEBUG("[db_mojodb] Search warnings: %d \n", warns);
+        MojLogDebug(MojDb::s_log, _T("Search warnings: %d \n"), warns);
 	return MojErrNone;
 }
 
 MojErr MojDbSearchCursor::sort()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!m_orderProp.empty());
 
 	// TODO: instead of parsing all objects, find the serialized field in the object and compare it directly
@@ -416,7 +394,6 @@ MojErr MojDbSearchCursor::sort()
 
 MojErr MojDbSearchCursor::distinct()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!m_items.empty());
 
 	ItemComp itemComp;

@@ -34,8 +34,6 @@ MojDbIdGenerator::MojDbIdGenerator()
 
 MojErr MojDbIdGenerator::init()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojThreadGuard guard(m_mutex);
 
 	MojTime time;
@@ -50,8 +48,6 @@ MojErr MojDbIdGenerator::init()
 
 MojErr MojDbIdGenerator::id(MojObject& idOut, MojString shardId)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     // if shard ID exists, add shard ID in front of _id
     if (G_UNLIKELY(!shardId.empty())) {
         MojErr err;
@@ -73,8 +69,6 @@ MojErr MojDbIdGenerator::id(MojObject& idOut, MojString shardId)
 
 MojErr MojDbIdGenerator::id(MojObject& idOut, MojUInt32 shardId)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// an id consists of  a timestamp (in microsecs) concatenated with a 32-bit random number.
 	// The goal is to have a very low likelihood of id collision among multiple devices owned
 	// by the same user (so they can can share an id-space) while still keeping them sequential
@@ -122,8 +116,6 @@ MojErr MojDbIdGenerator::id(MojObject& idOut, MojUInt32 shardId)
 
 MojErr MojDbIdGenerator::extractShard(const MojObject &id, MojUInt32 &shardIdOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojAssert( id.type() == MojObject::TypeString );
 
     MojErr err;

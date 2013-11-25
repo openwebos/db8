@@ -20,7 +20,7 @@
 #include "db/MojDbPutHandler.h"
 #include "db/MojDb.h"
 
-//db.putHandler
+MojLogger MojDbPutHandler::s_log(_T("db.putHandler"));
 
 MojDbPutHandler::MojDbPutHandler(const MojChar* kindId, const MojChar* confProp)
 : m_kindId(kindId),
@@ -35,7 +35,7 @@ MojDbPutHandler::~MojDbPutHandler()
 
 MojErr MojDbPutHandler::open(const MojObject& conf, MojDb* db, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 	MojAssertWriteLocked(db->schemaLock());
 
 	m_db = db;
@@ -64,7 +64,7 @@ MojErr MojDbPutHandler::open(const MojObject& conf, MojDb* db, MojDbReq& req)
 
 MojErr MojDbPutHandler::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	m_db = NULL;
 
@@ -73,7 +73,7 @@ MojErr MojDbPutHandler::close()
 
 MojErr MojDbPutHandler::configure(const MojObject& conf, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	// built-in permissions
@@ -92,8 +92,6 @@ MojErr MojDbPutHandler::configure(const MojObject& conf, MojDbReq& req)
 
 MojErr MojDbPutHandler::validateWildcard(const MojString& val, MojErr errToThrow)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (val.empty())
 		MojErrThrow(errToThrow);
 	MojSize wildcardPos = val.find(_T('*'));
@@ -108,8 +106,6 @@ MojErr MojDbPutHandler::validateWildcard(const MojString& val, MojErr errToThrow
 
 bool MojDbPutHandler::matchWildcard(const MojString& expr, const MojChar* val, MojSize len)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (expr.last() == _T('*') &&
 		len >= (expr.length() - 1) &&
 		MojStrNCmp(expr, val, expr.length() - 1) == 0) {

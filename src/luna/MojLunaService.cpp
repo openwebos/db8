@@ -32,17 +32,20 @@ MojLunaService::MojLunaService(bool allowPublicMethods, MojMessageDispatcher* qu
   m_handle(NULL),
   m_loop(NULL)
 {
+	MojLogTrace(s_log);
 }
 
 MojLunaService::~MojLunaService()
 {
+	MojLogTrace(s_log);
+
 	MojErr err = close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojLunaService::open(const MojChar* serviceName)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err =  MojService::open(serviceName);
 	MojErrCheck(err);
@@ -73,7 +76,7 @@ MojErr MojLunaService::open(const MojChar* serviceName)
 
 MojErr MojLunaService::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = MojErrNone;
 	MojErr errClose = MojService::close();
@@ -99,8 +102,8 @@ MojErr MojLunaService::close()
 // It will not deliver cancel callbacks if clients drop off the bus.
 MojErr MojLunaService::dispatch()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojAssert(m_loop);
 	GMainContext* context = g_main_loop_get_context(m_loop);
@@ -111,9 +114,9 @@ MojErr MojLunaService::dispatch()
 
 MojErr MojLunaService::addCategory(const MojChar* name, CategoryHandler* handler)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name && handler);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 	MojThreadGuard guard(m_mutex);
 
 	// create array of LSMethods
@@ -165,7 +168,7 @@ MojErr MojLunaService::addCategory(const MojChar* name, CategoryHandler* handler
 
 MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	reqOut.reset(new MojLunaRequest(this));
 	MojAllocCheck(reqOut.get());
@@ -175,7 +178,7 @@ MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut
 
 MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut, bool onPublic)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	reqOut.reset(new MojLunaRequest(this, onPublic));
 	MojAllocCheck(reqOut.get());
@@ -185,7 +188,7 @@ MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut
 
 MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut, bool onPublic, const MojString& proxyRequester)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	reqOut.reset(new MojLunaRequest(this, onPublic, proxyRequester));
 	MojAllocCheck(reqOut.get());
@@ -195,7 +198,7 @@ MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut
 
 MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut, bool onPublic, const char *proxyRequester)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojString proxyRequesterString;
 	MojErr err = proxyRequesterString.assign(proxyRequester);
@@ -210,7 +213,7 @@ MojErr MojLunaService::createRequest(MojRefCountedPtr<MojServiceRequest>& reqOut
 MojErr MojLunaService::attach(GMainLoop* loop)
 {
 	MojAssert(loop);
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojLunaErr lserr;
 	bool retVal;
@@ -249,14 +252,14 @@ LSHandle* MojLunaService::getHandle(bool onPublic)
 
 MojErr MojLunaService::sendImpl(MojServiceRequest* req, const MojChar* service, const MojChar* method, Token& tokenOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req && service && method);
 	MojAssert(m_service || m_handle);
 	MojAssertMutexLocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojLunaRequest* lunaReq = static_cast<MojLunaRequest*>(req);
 	const MojChar* json = lunaReq->payload();
-    LOG_DEBUG("[db_lunaService] request sent: %s", json);
+    MojLogDebug(s_log, _T("request sent: %s"), json);
 
 	MojString uri;
 	MojErr err = uri.format(_T("%s://%s/%s"), UriScheme, service, method);
@@ -289,10 +292,10 @@ MojErr MojLunaService::sendImpl(MojServiceRequest* req, const MojChar* service, 
 
 MojErr MojLunaService::cancelImpl(MojServiceRequest* req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req);
 	MojAssert(m_service || m_handle);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojLunaRequest* lunaReq = static_cast<MojLunaRequest*>(req);
 	if (req->numRepliesExpected() > 1 && !lunaReq->cancelled()) {
@@ -309,9 +312,9 @@ MojErr MojLunaService::cancelImpl(MojServiceRequest* req)
 
 MojErr MojLunaService::dispatchReplyImpl(MojServiceRequest* req, MojServiceMessage *msg, MojObject& payload, MojErr errCode)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(req);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	// don't automatically cancel a subscription if the payload has "subscribed":true
 	bool subscribed = false;
@@ -339,9 +342,9 @@ MojErr MojLunaService::dispatchReplyImpl(MojServiceRequest* req, MojServiceMessa
 
 MojErr MojLunaService::enableSubscriptionImpl(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexUnlocked(m_mutex);
+	MojLogTrace(s_log);
 
 	MojString token;
 	MojErr err = token.format(_T("%d"), msg->token());
@@ -358,9 +361,9 @@ MojErr MojLunaService::enableSubscriptionImpl(MojServiceMessage* msg)
 
 MojErr MojLunaService::removeSubscriptionImpl(MojServiceMessage* msg)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 	MojAssertMutexLocked(m_mutex);
+	MojLogTrace(s_log);
 
 	/*MojString token;
 	MojErr err = token.format(_T("%d"), msg->token());
@@ -386,13 +389,13 @@ MojErr MojLunaService::removeSubscriptionImpl(MojServiceMessage* msg)
 
 bool MojLunaService::handleCancel(LSHandle* sh, LSMessage* msg, void* ctx)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(sh && msg && ctx);
+	MojLogTrace(s_log);
 	MojLunaService* service = static_cast<MojLunaService*>(ctx);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg));
 	MojAllocCheck(request.get());
-    LOG_DEBUG("[db_lunaService] cancel received: %s", request->payload());
+	MojLogDebug(s_log, _T("cancel received: %s"), request->payload());
 	MojErr err = service->MojService::handleCancel(request.get());
 	MojErrCatchAll(err);
 
@@ -401,14 +404,14 @@ bool MojLunaService::handleCancel(LSHandle* sh, LSMessage* msg, void* ctx)
 
 bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(sh && msg && ctx);
+	MojLogTrace(s_log);
 	MojLunaService::Category* category = static_cast<Category*>(ctx);
 	MojLunaService* service = static_cast<MojLunaService*>(category->m_service);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, category));
 	MojAllocCheck(request.get());
-    LOG_DEBUG("[db_lunaService] request received: %s", request->payload());
+    MojLogDebug(s_log, _T("request received: %s"), request->payload());
 
 	MojErr reqErr;
 	MojErr err = reqErr = request->processSubscriptions();
@@ -425,13 +428,13 @@ bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
 
 bool MojLunaService::handleResponse(LSHandle* sh, LSMessage* msg, void* ctx)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(sh && msg && ctx);
+	MojLogTrace(s_log);
 	MojLunaService* service = static_cast<MojLunaService*>(ctx);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, NULL, true));
 	MojAllocCheck(request.get());
-    LOG_DEBUG("[db_lunaService] response received: %s", request->payload());
+    MojLogDebug(s_log, _T("response received: %s"), request->payload());
 	MojErr err = service->handleReply(request.get());
 	MojErrCatchAll(err);
 

@@ -26,7 +26,5 @@ MojDbQueryParser::MojDbQueryParser()
 
 MojErr MojDbQueryParser::parse(const MojChar* str, MojSize len)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return MojErrNone;
 }

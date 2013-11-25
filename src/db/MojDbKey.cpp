@@ -23,8 +23,6 @@
 
 MojErr MojDbKey::assign(const MojObject& obj, MojDbTextCollator* coll)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (coll && obj.type() == MojObject::TypeString) {
 		MojString text;
 		MojErr err = obj.stringValue(text);
@@ -40,8 +38,6 @@ MojErr MojDbKey::assign(const MojObject& obj, MojDbTextCollator* coll)
 
 MojErr MojDbKey::increment()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	ByteVec::Iterator iter;
 	MojErr err = m_vec.end(iter);
 	MojErrCheck(err);
@@ -57,8 +53,6 @@ MojErr MojDbKey::increment()
 
 MojErr MojDbKey::prepend(const MojDbKey& key)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_vec.insert(0, key.m_vec.begin(), key.m_vec.end());
 	MojErrCheck(err);
 
@@ -67,15 +61,11 @@ MojErr MojDbKey::prepend(const MojDbKey& key)
 
 bool MojDbKey::prefixOf(const MojDbKey& key) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return (key.size() >= size() && MojMemCmp(data(), key.data(), size()) == 0);
 }
 
 bool MojDbKey::stringPrefixOf(const MojDbKey& key) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojAssert(size() > 0);
 	return (key.size() >= size() && MojMemCmp(data(), key.data(), size() - 1) == 0);
 }
@@ -89,8 +79,6 @@ MojDbKeyRange::MojDbKeyRange(const MojDbKey& lowerKey, const MojDbKey& upperKey,
 
 bool MojDbKeyRange::contains(const MojDbKey& key) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const MojDbKey& lk = lowerKey();
 	const MojDbKey& uk = upperKey();
 	if ((lk.empty() || key >= lk) && (uk.empty() || key < uk)) {
@@ -101,8 +89,6 @@ bool MojDbKeyRange::contains(const MojDbKey& key) const
 
 bool MojDbKeyRange::contains(const MojDbKeyRange& range) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const MojDbKey& uk = upperKey();
 	if (contains(range.lowerKey()) &&
 		(uk.empty() || range.upperKey() <= uk))
@@ -112,8 +98,6 @@ bool MojDbKeyRange::contains(const MojDbKeyRange& range) const
 
 MojErr MojDbKeyRange::prepend(const MojDbKey& key)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = lowerKey().prepend(key);
 	MojErrCheck(err);
 	err = upperKey().prepend(key);
@@ -124,8 +108,6 @@ MojErr MojDbKeyRange::prepend(const MojDbKey& key)
 
 MojErr MojDbKeyBuilder::push(const KeySet& vals)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_stack.push(PropRec(vals));
 	MojErrCheck(err);
 
@@ -134,8 +116,6 @@ MojErr MojDbKeyBuilder::push(const KeySet& vals)
 
 MojErr MojDbKeyBuilder::keys(KeySet& keysOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	keysOut.clear();
 	if (m_stack.empty())
 		return MojErrNone;

@@ -31,8 +31,6 @@ MojDbQueryFilter::~MojDbQueryFilter()
 
 MojErr MojDbQueryFilter::init(const MojDbQuery& query)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_clauses = query.filter();
 
 	return MojErrNone;
@@ -52,8 +50,6 @@ MojErr MojDbQueryFilter::init(const MojDbQuery& query)
  ***********************************************************************/
 bool MojDbQueryFilter::test(const MojObject& obj) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     for (MojDbQuery::WhereMap::ConstIterator filterIter = m_clauses.begin(); filterIter != m_clauses.end(); ++filterIter) {
         // if name of filter condition is object format as "file.name", split with '.' delimiter.
         MojString keyStr;
@@ -89,8 +85,6 @@ bool MojDbQueryFilter::test(const MojObject& obj) const
  ***********************************************************************/
 bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojObject childObj = obj;
     for (const MojString* key = begin; key != end; ++key) {
         if(childObj.type() == MojObject::TypeArray) {
@@ -128,8 +122,6 @@ bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, co
 
 bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const MojObject& val)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const MojObject& lowerVal = clause.lowerVal();
 	switch (clause.lowerOp()) {
 	case MojDbQuery::OpNone:
@@ -169,8 +161,6 @@ bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const Mo
 
 bool MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const MojObject& upperVal = clause.upperVal();
 	switch (clause.upperOp()) {
 	case MojDbQuery::OpNone:
@@ -200,8 +190,6 @@ bool MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const Mo
  ***********************************************************************/
 bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subString)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     if (subString.type() == MojObject::TypeArray) {
         // If "subString" type is array, take out each items for recursive process
         MojObject::ConstArrayIterator end = subString.arrayEnd();

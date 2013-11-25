@@ -27,6 +27,8 @@
 class MojDbLevelEnv : public MojDbEnv
 {
 public:
+    static MojLogger s_log;
+
     MojDbLevelEnv();
     ~MojDbLevelEnv();
 

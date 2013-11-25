@@ -26,7 +26,7 @@
 
 MojErr MojDb::stats(MojObject& objOut, MojDbReqRef req, bool verify, MojString *pKind)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
@@ -40,7 +40,7 @@ MojErr MojDb::stats(MojObject& objOut, MojDbReqRef req, bool verify, MojString *
 
 MojErr MojDb::quotaStats(MojObject& objOut, MojDbReqRef req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
@@ -54,9 +54,8 @@ MojErr MojDb::quotaStats(MojObject& objOut, MojDbReqRef req)
 
 MojErr MojDb::updateLocale(const MojChar* locale, MojDbReqRef req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojAssert(locale);
+	MojLogTrace(s_log);
 
 	MojErr err = beginReq(req, true);
 	MojErrCheck(err);
@@ -86,24 +85,24 @@ MojErr MojDb::updateLocale(const MojChar* locale, MojDbReqRef req)
 
 MojErr MojDb::compact()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = requireOpen();
 	MojErrCheck(err);
 
-    LOG_DEBUG("[db_mojodb] compacting...");
+	MojLogDebug(s_log, _T("compacting..."));
 
 	err = m_storageEngine->compact();
 	MojErrCheck(err);
 
-    LOG_DEBUG("[db_mojodb] compaction complete");
+	MojLogDebug(s_log, _T("compaction complete"));
 
 	return MojErrNone;
 }
 
 MojErr MojDb::purgeStatus(MojObject& revOut, MojDbReqRef req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	revOut = -1;
 	MojErr err = beginReq(req);
@@ -118,7 +117,7 @@ MojErr MojDb::purgeStatus(MojObject& revOut, MojDbReqRef req)
 
 MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	countOut = 0;
 	if (numDays <= -1) {
@@ -131,7 +130,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
 
-    LOG_DEBUG("[db_mojodb] purging objects deleted more than %lld days ago...", numDays);
+	MojLogDebug(s_log, _T("purging objects deleted more than %lld days ago..."), numDays);
 
 	MojTime time;
 	err = MojGetCurrentTime(time);
@@ -183,8 +182,8 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 		batchCount = 0;
 		req->fixmode(true);		// purge even if index mis-matches
 		err = purgeImpl(obj, batchCount, req);
-		LOG_DEBUG("[db_mojodb] purge batch processed: batch: %d; total: %d; err = %d\n",
-            batchCount, (totalCount + batchCount), err);
+		MojLogDebug(s_log, _T("purge batch processed: batch: %d; total: %d; err = %d\n"),
+					batchCount, (totalCount + batchCount), err);
 		MojErrCheck(err);
 		totalCount += batchCount;
 		countOut = totalCount;
@@ -199,22 +198,23 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	err = req->end();
 	MojErrCheck(err);
 
-    LOG_DEBUG("[db_mojodb] purged %d objects", countOut);
+	MojLogDebug(s_log, _T("purged %d objects"), countOut);
 
+	
 	return MojErrNone;
 }
 
 MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbReqRef req, bool backup,
 		MojUInt32 maxBytes, const MojObject* incrementalKey, MojObject* backupResponse)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(path);
+	MojLogTrace(s_log);
 
 	MojErr err = beginReq(req);
 	MojErrCheck(err);
 
 	if (!req->admin()) {
-        LOG_ERROR(MSGID_DB_ADMIN_ERROR, 0, "access denied: '%s' cannot dump db to path: '%s'", req->domain().data(), path);
+		MojLogError(s_log, _T("access denied: '%s' cannot dump db to path: '%s'"), req->domain().data(), path);
 		MojErrThrow(MojErrDbAccessDenied);
 	}
 
@@ -322,8 +322,8 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 
 MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, MojDbReqRef req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(path);
+	MojLogTrace(s_log);
 
 	MojErr err = beginReq(req, true);
 	MojErrCheck(err);
@@ -340,8 +340,8 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	int total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize;
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-    LOG_DEBUG("[db_mojodb] Starting load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
-		path,	total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
+	MojLogDebug(s_log, _T("Starting load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+						path,	total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 
 	int orig_mutexes_used = mutexes_used;
 	
@@ -377,8 +377,8 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 					// For debugging mutex consumption during load operations, we periodically retrieve the mutex stats.
 					m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-					LOG_DEBUG("[db_mojodb] Loading %s record %d, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
-						path, total, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
+					MojLogDebug(s_log, _T("Loading %s record %d, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+							path, total, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 				}
 				
 				// If a loadStepSize is configured, then break up the load into separate transactions.
@@ -388,7 +388,8 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 				
 				if ((m_loadStepSize > 0) && ((total % m_loadStepSize) == 0)) {
 					// Close and reopen transaction, to prevent a very large transaction from building up.
-					LOG_DEBUG("[db_mojodb] Loading %s record %d, closing and reopening transaction.\n", path, total);
+					MojLogDebug(s_log, _T("Loading %s record %d, closing and reopening transaction.\n"),
+							path, total);
 
 					struct timeval transactionStartTime = {0,0}, transactionStopTime = {0,0};
 
@@ -434,22 +435,20 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 	gettimeofday(&stopTime, NULL);
 	long int elapsedTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 +
 				(stopTime.tv_usec - startTime.tv_usec) / 1000;
-
+	
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
 				
-	LOG_DEBUG("[db_mojodb] Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
-		path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
-
-    LOG_DEBUG("[db_mojodb] Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n",
+	MojLogDebug(s_log, _T("Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n"),
+						path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
+	
+    MojLogDebug(s_log, _T("Loaded %s with %d records in %ldms (%dms of that for %d extra transactions), consuming %d mutexes, afterwards %d are available out of %d\n"),
 		path, total, elapsedTimeMS, total_transaction_time, transactions, mutexes_used - orig_mutexes_used, mutexes_free, total_mutexes);
-
+	
 	return MojErrNone;
 }
 
 MojErr MojDb::updateLocaleImpl(const MojString& oldLocale, const MojString& newLocale, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (oldLocale != newLocale) {
 		MojErr err = m_kindEngine.updateLocale(newLocale, req);
 		MojErrCheck(err);
@@ -465,8 +464,6 @@ MojErr MojDb::updateLocaleImpl(const MojString& oldLocale, const MojString& newL
 MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject& revParam, const MojObject& delRevParam, bool skipKinds, MojUInt32& countOut, MojDbReq& req,
 		MojObject* response, const MojChar* keyName, MojSize& bytesWritten, MojSize& warns, MojUInt32 maxBytes)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// query for objects, adding the backup key and rev key if necessary
 	MojDbQuery query;
 	MojErr err = query.from(MojDbKindEngine::RootKindId);
@@ -540,11 +537,9 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 	MojErrCheck(err);
 
     if (warns > 0) {
-        LOG_WARNING(MSGID_MOJ_DB_ADMIN_WARNING, 1,
-            PMLOGKS("warn", warns),
-            "Finished Backup with %d warnings \n", (int)warns);
+        MojLogWarning(s_log, _T("Finished Backup with %d warnings \n"), (int)warns);
     } else {
-        LOG_DEBUG("[db_mojodb] Finished Backup with no warnings \n");
+        MojLogDebug(s_log, _T("Finished Backup with no warnings \n"));
     }
 	
 	// construct the next incremental key
@@ -557,8 +552,6 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 
 MojErr MojDb::dumpObj(MojFile& file, MojObject obj, MojSize& bytesWrittenOut, MojUInt32 maxBytes)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// remove the rev key before dumping the object
 	bool found = false;
 	MojErr err = obj.del(RevKey, found);
@@ -582,8 +575,6 @@ MojErr MojDb::dumpObj(MojFile& file, MojObject obj, MojSize& bytesWrittenOut, Mo
 
 MojErr MojDb::handleBackupFull(const MojObject& revParam, const MojObject& delRevParam, MojObject& response, const MojChar* keyName)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// if we filled up the allocated space for our backup, we need to construct the appropriate
 	// response with incremental key so that we are called back to continue where we left off
 	MojString keyStr;
@@ -609,8 +600,6 @@ MojErr MojDb::handleBackupFull(const MojObject& revParam, const MojObject& delRe
 
 MojErr MojDb::insertIncrementalKey(MojObject& response, const MojChar* keyName, const MojObject& curRev)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// get the incremental key if it already exists
 	MojObject incremental;
 	response.get(MojDbServiceDefs::IncrementalKey, incremental);
@@ -625,8 +614,6 @@ MojErr MojDb::insertIncrementalKey(MojObject& response, const MojChar* keyName, 
 
 MojErr MojDb::loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	bool found = false;
 	MojString kindName;
 	MojErr err = obj.get(MojDb::KindKey, kindName, found);
@@ -669,7 +656,7 @@ MojErr MojDb::loadImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req)
 
 MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojObject val;
 	MojErr err = obj.getRequired(RevNumKey, val);

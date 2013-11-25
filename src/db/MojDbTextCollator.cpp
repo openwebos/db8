@@ -36,7 +36,6 @@ MojDbTextCollator::~MojDbTextCollator()
 
 MojErr MojDbTextCollator::init(const MojChar* locale, MojDbCollationStrength level)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(locale);
 	MojAssert(!m_ucol);
 
@@ -79,8 +78,6 @@ MojErr MojDbTextCollator::init(const MojChar* locale, MojDbCollationStrength lev
 
 MojErr MojDbTextCollator::sortKey(const MojString& str, MojDbKey& keyOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// convert to UChar from utf8
 	MojDbTextUtils::UnicodeVec chars;
 	MojErr err = MojDbTextUtils::strToUnicode(str, chars);
@@ -93,8 +90,6 @@ MojErr MojDbTextCollator::sortKey(const MojString& str, MojDbKey& keyOut) const
 
 MojErr MojDbTextCollator::sortKey(const UChar* chars, MojSize size, MojDbKey& keyOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	MojObjectWriter writer;
 

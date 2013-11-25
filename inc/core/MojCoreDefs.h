@@ -125,6 +125,7 @@ class MojJsonParser;
 class MojJsonWriter;
 class MojLogAppender;
 class MojLogEngine;
+class MojLogger;
 class MojMessage;
 class MojMessageDispatcher;
 class MojObject;

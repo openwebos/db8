@@ -36,8 +36,6 @@ static MojDbCollationStrInfo s_collStrings[] = {
 
 const MojChar* MojDbUtils::collationToString(MojDbCollationStrength coll)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const MojChar* str = NULL;
 	MojDbCollationStrInfo* info = s_collStrings;
 	do {
@@ -50,8 +48,6 @@ const MojChar* MojDbUtils::collationToString(MojDbCollationStrength coll)
 
 MojErr MojDbUtils::collationFromString(const MojString& str, MojDbCollationStrength& collOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	collOut = MojDbCollationInvalid;
 	MojDbCollationStrInfo* info = s_collStrings;
 	do {

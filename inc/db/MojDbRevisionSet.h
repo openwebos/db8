@@ -46,6 +46,7 @@ private:
 
 	MojString m_name;
 	PropVec m_props;
+	static MojLogger s_log;
 };
 
 #endif /* MOJDBREVISIONSET_H_ */

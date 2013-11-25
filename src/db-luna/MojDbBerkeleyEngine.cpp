@@ -63,27 +63,29 @@ static const MojUInt32 MojTxnBeginFlags = DB_READ_COMMITTED;
 static const MojUInt32 MojTxnMax = 100; // need up to one per cache page for mvcc
 
 const MojChar* const MojDbBerkeleyEnv::LockFileName = _T("_lock");
-//db.bdb
+MojLogger MojDbBerkeleyEngine::s_log(_T("db.bdb"));
 
 MojDbBerkeleyCursor::MojDbBerkeleyCursor()
 : m_dbc(NULL),
   m_txn(NULL),
   m_recSize(0)
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 }
 
 MojDbBerkeleyCursor::~MojDbBerkeleyCursor()
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	MojErr err =  close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojDbBerkeleyCursor::open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojAssert(db && txn);
 	MojAssert(!m_dbc);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	DB* bdb = db->impl();
 	DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
@@ -100,7 +102,7 @@ MojErr MojDbBerkeleyCursor::open(MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn
 
 MojErr MojDbBerkeleyCursor::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojErr err = MojErrNone;
 	if (m_dbc) {
@@ -114,8 +116,8 @@ MojErr MojDbBerkeleyCursor::close()
 
 MojErr MojDbBerkeleyCursor::del()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_dbc);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	int dbErr = m_dbc->del(m_dbc, 0);
 	MojBdbErrCheck(dbErr, _T("dbc->del"));
@@ -127,8 +129,6 @@ MojErr MojDbBerkeleyCursor::del()
 
 MojErr MojDbBerkeleyCursor::delPrefix(const MojDbKey& prefix)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojDbBerkeleyItem val;
 	MojDbBerkeleyItem key;
 	MojErr err = key.fromBytes(prefix.data(), prefix.size());
@@ -148,8 +148,8 @@ MojErr MojDbBerkeleyCursor::delPrefix(const MojDbKey& prefix)
 
 MojErr MojDbBerkeleyCursor::get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, bool& foundOut, MojUInt32 flags)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_dbc);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	foundOut = false;
 	int dbErr = m_dbc->get(m_dbc, key.impl(), val.impl(), flags);
@@ -163,10 +163,9 @@ MojErr MojDbBerkeleyCursor::get(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, 
 
 MojErr MojDbBerkeleyCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
-    LOG_DEBUG("[db.bdb] bdbcursor_stats: count: %d, size: %d, err: %d", (int)countOut, (int)sizeOut, (int)err);
+	MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
 	MojErrCheck(err);
 
 	return MojErrNone;
@@ -174,8 +173,6 @@ MojErr MojDbBerkeleyCursor::stats(MojSize& countOut, MojSize& sizeOut)
 
 MojErr MojDbBerkeleyCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	countOut = 0;
 	sizeOut = 0;
 	m_warnCount = 0;	// debug
@@ -205,18 +202,21 @@ MojErr MojDbBerkeleyCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOu
 MojDbBerkeleyDatabase::MojDbBerkeleyDatabase()
 : m_db(NULL)
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 }
 
 MojDbBerkeleyDatabase::~MojDbBerkeleyDatabase()
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	MojErr err =  close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojDbBerkeleyDatabase::open(const MojChar* dbName, MojDbBerkeleyEngine* eng, bool& createdOut, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(dbName && eng);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	// save eng, name and file
 	createdOut = false;
@@ -268,7 +268,7 @@ MojErr MojDbBerkeleyDatabase::open(const MojChar* dbName, MojDbBerkeleyEngine* e
 
 MojErr MojDbBerkeleyDatabase::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojErr err = MojErrNone;
 	if (m_db) {
@@ -282,8 +282,8 @@ MojErr MojDbBerkeleyDatabase::close()
 
 MojErr MojDbBerkeleyDatabase::drop(MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_engine && !m_db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	DB_ENV* env = m_engine->env()->impl();
 	DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
@@ -298,8 +298,8 @@ MojErr MojDbBerkeleyDatabase::drop(MojDbStorageTxn* txn)
 MojErr MojDbBerkeleyDatabase::mutexStats(int * total_mutexes, int * mutexes_free, int * mutexes_used,
 	 int * mutexes_used_highwater, int * mutexes_regionsize)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_engine);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	DB_ENV* env = m_engine->env()->impl();
 	DB_MUTEX_STAT * statp = NULL;
@@ -325,7 +325,7 @@ MojErr MojDbBerkeleyDatabase::mutexStats(int * total_mutexes, int * mutexes_free
 
 MojErr MojDbBerkeleyDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyCursor cursor;
 	MojErr err = cursor.open(this, txn, 0);
@@ -340,7 +340,6 @@ MojErr MojDbBerkeleyDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, Moj
 
 MojErr MojDbBerkeleyDatabase::insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 
 	MojErr err = put(id, val, txn, true);
@@ -351,7 +350,6 @@ MojErr MojDbBerkeleyDatabase::insert(const MojObject& id, MojBuffer& val, MojDbS
 
 MojErr MojDbBerkeleyDatabase::update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(oldVal && txn);
 
     MojErr err = txn->offsetQuota(-(MojInt64) oldVal->size());
@@ -364,7 +362,7 @@ MojErr MojDbBerkeleyDatabase::update(const MojObject& id, MojBuffer& val, MojDbS
 
 MojErr MojDbBerkeleyDatabase::del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyItem idItem;
 	MojErr err = idItem.fromObject(id);
@@ -377,7 +375,7 @@ MojErr MojDbBerkeleyDatabase::del(const MojObject& id, MojDbStorageTxn* txn, boo
 
 MojErr MojDbBerkeleyDatabase::get(const MojObject& id, MojDbStorageTxn* txn, bool forUpdate, MojRefCountedPtr<MojDbStorageItem>& itemOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	itemOut.reset();
 	MojDbBerkeleyItem idItem;
@@ -397,8 +395,8 @@ MojErr MojDbBerkeleyDatabase::get(const MojObject& id, MojDbStorageTxn* txn, boo
 
 MojErr MojDbBerkeleyDatabase::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyQuery> storageQuery(new MojDbBerkeleyQuery);
 	MojAllocCheck(storageQuery.get());
@@ -411,7 +409,7 @@ MojErr MojDbBerkeleyDatabase::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorage
 
 MojErr MojDbBerkeleyDatabase::put(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn, bool updateIdQuota)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyItem idItem;
 	MojErr err = idItem.fromObject(id);
@@ -427,8 +425,8 @@ MojErr MojDbBerkeleyDatabase::put(const MojObject& id, MojBuffer& val, MojDbStor
 
 MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val, MojDbStorageTxn* txn, bool updateIdQuota)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_db && txn);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojInt64 quotaOffset = val.size();
 	if (updateIdQuota)
@@ -445,7 +443,7 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(key.data()) + (size1 - 17), 16);
-    LOG_DEBUG("[db.bdb] bdbput: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n",
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbput: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
                     this->m_name.data(), size1, s, size2, err);
 #endif
 	MojBdbErrCheck(dbErr, _T("db->put"));
@@ -457,8 +455,8 @@ MojErr MojDbBerkeleyDatabase::put(MojDbBerkeleyItem& key, MojDbBerkeleyItem& val
 MojErr MojDbBerkeleyDatabase::get(MojDbBerkeleyItem& key, MojDbStorageTxn* txn, bool forUpdate,
 								  MojDbBerkeleyItem& valOut, bool& foundOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	foundOut = false;
 	// acquire a write lock if we are going to do an update
@@ -476,8 +474,8 @@ MojErr MojDbBerkeleyDatabase::get(MojDbBerkeleyItem& key, MojDbStorageTxn* txn, 
 
 MojErr MojDbBerkeleyDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!txnOut.get());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojErr err = m_engine->beginTxn(txnOut);
 	MojErrCheck(err);
@@ -487,8 +485,8 @@ MojErr MojDbBerkeleyDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut
 
 MojErr MojDbBerkeleyDatabase::openIndex(const MojObject& id, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageIndex>& indexOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!indexOut.get());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyIndex> index(new MojDbBerkeleyIndex());
 	MojAllocCheck(index.get());
@@ -501,8 +499,9 @@ MojErr MojDbBerkeleyDatabase::openIndex(const MojObject& id, MojDbStorageTxn* tx
 
 MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(m_db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	foundOut = false;
     MojErr err = txn->offsetQuota(-(MojInt64) key.size());
@@ -517,7 +516,7 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
 	MojErrCheck(err2);
 	if (size > 16)	// if the object-id is in key
 		strncat(s, (char *)(key.data()) + (size - 17), 16);
-    LOG_DEBUG("[db.bdb] bdbdel: %s; keylen: %zu, key= %s; err= %d \n", this->m_name.data(), size, s, dbErr);
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbdel: %s; keylen: %zu, key= %s; err= %d \n"), this->m_name.data(), size, s, dbErr);
 #endif
 
 	if (dbErr != DB_NOTFOUND) {
@@ -531,8 +530,6 @@ MojErr MojDbBerkeleyDatabase::del(MojDbBerkeleyItem& key, bool& foundOut, MojDbS
 
 MojErr MojDbBerkeleyDatabase::verify()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	DB* db = NULL;
 	int dbErr = db_create(&db, m_engine->env()->impl(), 0);
 	MojBdbErrCheck(dbErr, _T("db_create"));
@@ -546,8 +543,6 @@ MojErr MojDbBerkeleyDatabase::verify()
 
 MojErr MojDbBerkeleyDatabase::closeImpl()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	int dbErr = m_db->close(m_db, 0);
 	m_db = NULL;
 	MojBdbErrCheck(dbErr, _T("db->close"));
@@ -557,8 +552,6 @@ MojErr MojDbBerkeleyDatabase::closeImpl()
 
 void MojDbBerkeleyDatabase::postUpdate(MojDbStorageTxn* txn, MojSize size)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (txn) {
 		static_cast<MojDbBerkeleyTxn*>(txn)->didUpdate(size);
 	}
@@ -576,19 +569,23 @@ MojDbBerkeleyEnv::MojDbBerkeleyEnv()
   m_checkpointMinKb(MojEnvDefaultCheckpointMinKb),
   m_compactStepSize(MojEnvDefaultCompactStepSize)
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	MojFlagSet(m_flags, DB_PRIVATE, MojEnvDefaultPrivate);
 	MojFlagSet(m_logFlags, DB_LOG_AUTO_REMOVE, MojEnvDefaultLogAutoRemove);
 }
 
 MojDbBerkeleyEnv::~MojDbBerkeleyEnv()
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	MojErr err =  close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojDbBerkeleyEnv::configure(const MojObject& conf)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	bool dbPrivate = false;
 	if (!conf.get(_T("private"), dbPrivate))
@@ -651,9 +648,9 @@ MojErr MojDbBerkeleyEnv::configure(const MojObject& conf)
 
 MojErr MojDbBerkeleyEnv::open(const MojChar* dir)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(dir);
 	MojAssert(!m_env);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	// lock env
 	MojErr err = lockDir(dir);
@@ -712,7 +709,7 @@ MojErr MojDbBerkeleyEnv::open(const MojChar* dir)
 
 MojErr MojDbBerkeleyEnv::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojErr err = MojErrNone;
 	MojErr errClose = MojErrNone;
 
@@ -732,7 +729,7 @@ MojErr MojDbBerkeleyEnv::close()
 
 MojErr MojDbBerkeleyEnv::postCommit(MojSize updateSize)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	// every N updates, check to see if we have enough log data
 	// to justify a checkpoint
@@ -745,8 +742,8 @@ MojErr MojDbBerkeleyEnv::postCommit(MojSize updateSize)
 
 MojErr MojDbBerkeleyEnv::checkpoint(MojUInt32 minKB)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_env);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojThreadGuard guard(m_checkpointMutex);
 	MojErr err = checkpointImpl(minKB);
@@ -757,8 +754,8 @@ MojErr MojDbBerkeleyEnv::checkpoint(MojUInt32 minKB)
 
 MojErr MojDbBerkeleyEnv::tryCheckpoint(MojUInt32 minKB)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_env);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojThreadGuard guard(m_checkpointMutex, false);
 	if (guard.tryLock()) {
@@ -770,9 +767,9 @@ MojErr MojDbBerkeleyEnv::tryCheckpoint(MojUInt32 minKB)
 
 MojErr MojDbBerkeleyEnv::checkpointImpl(MojUInt32 minKB)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_env);
 	MojAssertMutexLocked(m_checkpointMutex);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	int dbErr = m_env->txn_checkpoint(m_env, minKB, 0, 0);
 	MojBdbErrCheck(dbErr, _T("dbenv->txn_checkpoint"));
@@ -787,7 +784,7 @@ MojErr MojDbBerkeleyEnv::checkpointImpl(MojUInt32 minKB)
 
 MojErr MojDbBerkeleyEnv::purgeLogs()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	// get list of archivable logs
 	char** logs = NULL;
@@ -807,7 +804,6 @@ MojErr MojDbBerkeleyEnv::purgeLogs()
 
 MojErr MojDbBerkeleyEnv::lockDir(const MojChar* path)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(path);
 
 	MojErr err = MojCreateDirIfNotPresent(path);
@@ -828,8 +824,6 @@ MojErr MojDbBerkeleyEnv::lockDir(const MojChar* path)
 
 MojErr MojDbBerkeleyEnv::unlockDir()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	if (m_lockFile.open()) {
 		// unlink before we close to ensure that we hold
@@ -844,8 +838,6 @@ MojErr MojDbBerkeleyEnv::unlockDir()
 
 MojErr MojDbBerkeleyEnv::translateErr(int dbErr)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	switch (dbErr) {
 	case DB_LOCK_DEADLOCK:
 		return MojErrDbDeadlock;
@@ -861,35 +853,38 @@ MojErr MojDbBerkeleyEnv::translateErr(int dbErr)
 
 void MojDbBerkeleyEnv::errcall(const DB_ENV *dbenv, const char *errpfx, const char *msg)
 {
-    LOG_ERROR(MSGID_ERROR_CALL, 1, PMLOGKS("bdb", msg), "");
+	MojLogError(MojDbBerkeleyEngine::s_log, "bdb: %s\n", msg);
 }
 
 void MojDbBerkeleyEnv::msgcall(const DB_ENV *dbenv, const char *msg)
 {
-    LOG_ERROR(MSGID_MESSAGE_CALL, 1, PMLOGKS("bdb", msg), "");
+	MojLogError(MojDbBerkeleyEngine::s_log, "bdb: %s\n", msg);
 }
 
 MojDbBerkeleyEngine::MojDbBerkeleyEngine()
 : m_isOpen(false)
 {
+	MojLogTrace(s_log);
 }
 
 MojDbBerkeleyEngine::~MojDbBerkeleyEngine()
 {
+	MojLogTrace(s_log);
+
 	MojErr err =  close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojDbBerkeleyEngine::configure(const MojObject& conf)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	return MojErrNone;
 }
 
 MojErr MojDbBerkeleyEngine::drop(const MojChar* path, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojAssert(m_isOpen);
 
 	MojThreadGuard guard(m_dbMutex);
@@ -914,9 +909,9 @@ MojErr MojDbBerkeleyEngine::drop(const MojChar* path, MojDbStorageTxn* txn)
 
 MojErr MojDbBerkeleyEngine::open(const MojChar* path)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(path);
 	MojAssert(!m_env.get() && !m_isOpen);
+	MojLogTrace(s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyEnv> env(new MojDbBerkeleyEnv);
 	MojAllocCheck(env.get());
@@ -930,11 +925,10 @@ MojErr MojDbBerkeleyEngine::open(const MojChar* path)
 
 MojErr MojDbBerkeleyEngine::open(const MojChar* path, MojDbEnv* env)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojDbBerkeleyEnv* bEnv = static_cast<MojDbBerkeleyEnv *> (env);
     MojAssert(bEnv);
 	MojAssert(!m_env.get() && !m_isOpen);
+	MojLogTrace(s_log);
 
 
 	m_env.reset(bEnv);
@@ -963,7 +957,7 @@ MojErr MojDbBerkeleyEngine::open(const MojChar* path, MojDbEnv* env)
 
 MojErr MojDbBerkeleyEngine::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojErr err = MojErrNone;
 	MojErr errClose = MojErrNone;
 
@@ -986,8 +980,6 @@ MojErr MojDbBerkeleyEngine::close()
 
 MojErr MojDbBerkeleyEngine::compact()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	const char * DatabaseRoot = "/var/db"; // FIXME: Should not be hard-coded, but so is the disk space monitor!
 
 	struct statvfs statAtBeginning, statAfterCompact, statAtEnd;
@@ -1012,7 +1004,7 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int pre_compact_reclaimed_blocks = (int)(statAfterCompact.f_bfree - statAtBeginning.f_bfree);
 
-    LOG_DEBUG("[db.bdb] Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n",
+    MojLogDebug(s_log, _T("Starting compact: Checkpoint freed %d bytes. Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		pre_compact_reclaimed_blocks * blockSize,
 		DatabaseRoot, statAfterCompact.f_bfree * blockSize,
 		 statAfterCompact.f_blocks * blockSize,
@@ -1158,7 +1150,8 @@ MojErr MojDbBerkeleyEngine::compact()
 				// know exactly what that means regarding inclusivity, so this procedure may
 				// not be fully compacting the pages which contain the keys.)
 
-				LOG_DEBUG("[db.bdb] Compacting %s (partial from ~record %d to %d). Stepped over %d/%d bytes of keys/values in %dms.\n", (*i)->m_name.data(),
+
+				MojLogDebug(s_log, _T("Compacting %s (partial from ~record %d to %d). Stepped over %d/%d bytes of keys/values in %dms.\n"), (*i)->m_name.data(),
 					key1_count, key2_count,
 					key_total, value_total,
 					elapsedStepTimeMS);
@@ -1180,12 +1173,12 @@ MojErr MojDbBerkeleyEngine::compact()
 				int elapsedCompactTimeMS = (int)(stopTime.tv_sec - startTime.tv_sec) * 1000 +
 						           (int)(stopTime.tv_usec - startTime.tv_usec) / 1000;
 
-		        LOG_DEBUG("[db.bdb] Compact stats of %s (partial from ~record %d to %d): time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n",
-                    (*i)->m_name.data(),
-                    key1_count, key2_count,
-                    elapsedCompactTimeMS,
-                    c_data.compact_deadlock, c_data.compact_pages_examine,
-                    c_data.compact_pages_free, c_data.compact_levels, c_data.compact_pages_truncated);
+		                MojLogDebug(s_log, _T("Compact stats of %s (partial from ~record %d to %d): time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n"),
+        		        	(*i)->m_name.data(),
+        		        	key1_count, key2_count,
+        		        	elapsedCompactTimeMS,
+                			c_data.compact_deadlock, c_data.compact_pages_examine,
+               			 	c_data.compact_pages_free, c_data.compact_levels, c_data.compact_pages_truncated);
 
 				total_compact_time += elapsedCompactTimeMS;
 				if (elapsedCompactTimeMS > max_compact_time)
@@ -1232,7 +1225,7 @@ MojErr MojDbBerkeleyEngine::compact()
 				if (reclaimed_blocks > max_reclaimed_blocks)
 					max_reclaimed_blocks = reclaimed_blocks;
 
-				LOG_DEBUG("[db.bdb] Compact of %s (partial from ~record %d to %d) generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
+				MojLogDebug(s_log, _T("Compact of %s (partial from ~record %d to %d) generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n"),
 					(*i)->m_name.data(),
 					key1_count, key2_count,
 					log_generation_blocks * blockSize,
@@ -1276,7 +1269,7 @@ MojErr MojDbBerkeleyEngine::compact()
 		}
 
 		if ((stepSize <= 1) || (dbErr != 0)) {
-            LOG_DEBUG("[db.bdb] Compacting %s\n", (*i)->m_name.data());
+            MojLogDebug(s_log, "Compacting %s\n", (*i)->m_name.data());
 
 		        struct statvfs statBeforeCompact, statAfterCompact, statAfterCheckpoint;
 
@@ -1299,11 +1292,11 @@ MojErr MojDbBerkeleyEngine::compact()
 			if (elapsedCompactTimeMS > max_compact_time)
 				max_compact_time = elapsedCompactTimeMS;
 
-            LOG_DEBUG("[db.bdb] Compact stats of %s: time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n",
-                (*i)->m_name.data(),
-                elapsedCompactTimeMS,
-                c_data.compact_deadlock, c_data.compact_pages_examine,
-                c_data.compact_pages_free, c_data.compact_levels, c_data.compact_pages_truncated);
+       	        	MojLogDebug(s_log, "Compact stats of %s: time %dms, compact_deadlock=%d, compact_pages_examine=%d, compact_pages_free=%d, compact_levels=%d, compact_pages_truncated=%d\n",
+                		(*i)->m_name.data(),
+                		elapsedCompactTimeMS,
+                		c_data.compact_deadlock, c_data.compact_pages_examine,
+                		c_data.compact_pages_free, c_data.compact_levels, c_data.compact_pages_truncated);
 
 			total_pages_examined += c_data.compact_pages_examine;
 			if ((int)c_data.compact_pages_examine > max_pages_examined)
@@ -1336,7 +1329,7 @@ MojErr MojDbBerkeleyEngine::compact()
 			if (reclaimed_blocks > max_reclaimed_blocks)
 				max_reclaimed_blocks = reclaimed_blocks;
 
-            LOG_DEBUG("[db.bdb] Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
+            MojLogDebug(s_log, "Compact of %s generated %d bytes of log data, ultimately reclaiming %d bytes after checkpoint.\n",
 				(*i)->m_name.data(),
 				log_generation_blocks * blockSize,
 				reclaimed_blocks * blockSize);
@@ -1357,14 +1350,14 @@ MojErr MojDbBerkeleyEngine::compact()
 
 	int compact_freed_blocks = (int)(statAtEnd.f_bfree - statAtBeginning.f_bfree);
 
-    LOG_DEBUG("[db.bdb] During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
+    MojLogDebug(s_log, _T("During compact: %d db pages examined (max burst %d), %d db pages freed (max burst %d), "
 			     "%d db pages truncated (max burst %d), "
 	                     "%d log bytes created by compacts (max burst %d), "
 	                     "%d bytes reclaimed by checkpoints (max burst %d), "
 	                     "%d bytes of keys stepped over (max burst %d), "
 	                     "%d bytes of values stepped over (max burst %d), "
 	                     "%dms spent in stepping (max burst %dms), "
-	                     "%dms spent in compact (max burst %dms)\n",
+	                     "%dms spent in compact (max burst %dms)\n"),
 	                     total_pages_examined, max_pages_examined, total_pages_freed, max_pages_freed,
 	                     total_pages_truncated, max_pages_truncated,
 	                     total_log_generation_blocks * blockSize, max_log_generation_blocks * blockSize,
@@ -1375,7 +1368,7 @@ MojErr MojDbBerkeleyEngine::compact()
 	                     total_compact_time, max_step_time
 	                     );
 
-    LOG_DEBUG("[db.bdb] Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n",
+    MojLogDebug(s_log, _T("Compact complete: took %dms, freed %d bytes (including pre-checkpoint of %d bytes). Volume %s has %lu bytes free out of %lu bytes (%.1f full)\n"),
 		elapsedTotalMS,
 		compact_freed_blocks * blockSize,
 		pre_compact_reclaimed_blocks * blockSize,
@@ -1389,8 +1382,8 @@ MojErr MojDbBerkeleyEngine::compact()
 
 MojErr MojDbBerkeleyEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!txnOut.get());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyTxn> txn(new MojDbBerkeleyTxn());
 	MojAllocCheck(txn.get());
@@ -1403,8 +1396,8 @@ MojErr MojDbBerkeleyEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 
 MojErr MojDbBerkeleyEngine::openDatabase(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageDatabase>& dbOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name && !dbOut.get());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyDatabase> db(new MojDbBerkeleyDatabase());
 	MojAllocCheck(db.get());
@@ -1418,8 +1411,8 @@ MojErr MojDbBerkeleyEngine::openDatabase(const MojChar* name, MojDbStorageTxn* t
 
 MojErr MojDbBerkeleyEngine::openSequence(const MojChar* name, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageSeq>& seqOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name && !seqOut.get());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleySeq> seq(new MojDbBerkeleySeq());
 	MojAllocCheck(seq.get());
@@ -1432,8 +1425,8 @@ MojErr MojDbBerkeleyEngine::openSequence(const MojChar* name, MojDbStorageTxn* t
 
 MojErr MojDbBerkeleyEngine::addDatabase(MojDbBerkeleyDatabase* db)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojThreadGuard guard(m_dbMutex);
 
 	return m_dbs.push(db);
@@ -1441,8 +1434,8 @@ MojErr MojDbBerkeleyEngine::addDatabase(MojDbBerkeleyDatabase* db)
 
 MojErr MojDbBerkeleyEngine::removeDatabase(MojDbBerkeleyDatabase* db)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojThreadGuard guard(m_dbMutex);
 
 	MojSize idx;
@@ -1459,8 +1452,8 @@ MojErr MojDbBerkeleyEngine::removeDatabase(MojDbBerkeleyDatabase* db)
 
 MojErr MojDbBerkeleyEngine::addSeq(MojDbBerkeleySeq* seq)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(seq);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojThreadGuard guard(m_dbMutex);
 
 	return m_seqs.push(seq);
@@ -1468,8 +1461,8 @@ MojErr MojDbBerkeleyEngine::addSeq(MojDbBerkeleySeq* seq)
 
 MojErr MojDbBerkeleyEngine::removeSeq(MojDbBerkeleySeq* seq)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(seq);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 	MojThreadGuard guard(m_dbMutex);
 
 	MojSize idx;
@@ -1487,18 +1480,21 @@ MojErr MojDbBerkeleyEngine::removeSeq(MojDbBerkeleySeq* seq)
 MojDbBerkeleyIndex::MojDbBerkeleyIndex()
 : m_primaryDb(NULL)
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 }
 
 MojDbBerkeleyIndex::~MojDbBerkeleyIndex()
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	MojErr err =  close();
 	MojErrCatchAll(err);
 }
 
 MojErr MojDbBerkeleyIndex::open(const MojObject& id, MojDbBerkeleyDatabase* db, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db && db->engine());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	m_id = id;
 	m_db.reset(db->engine()->indexDb());
@@ -1509,7 +1505,7 @@ MojErr MojDbBerkeleyIndex::open(const MojObject& id, MojDbBerkeleyDatabase* db, 
 
 MojErr MojDbBerkeleyIndex::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	m_db.reset();
 	m_primaryDb.reset();
@@ -1519,7 +1515,7 @@ MojErr MojDbBerkeleyIndex::close()
 
 MojErr MojDbBerkeleyIndex::drop(MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyCursor cursor;
 	MojErr err = cursor.open(m_db.get(), txn, 0);
@@ -1537,7 +1533,7 @@ MojErr MojDbBerkeleyIndex::drop(MojDbStorageTxn* txn)
 
 MojErr MojDbBerkeleyIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyCursor cursor;
 	MojErr err = cursor.open(m_db.get(), txn, 0);
@@ -1555,8 +1551,8 @@ MojErr MojDbBerkeleyIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSiz
 
 MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyItem keyItem;
 	keyItem.fromBytesNoCopy(key.data(), key.size());
@@ -1570,8 +1566,8 @@ MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    LOG_DEBUG("[db.bdb] bdbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n",
-        m_db->m_name.data(), size1, s, size2, err);
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbindexinsert: %s; keylen: %zu, key: %s ; vallen = %zu; err = %d\n"),
+                    m_db->m_name.data(), size1, s, size2, err);
 #endif
 	MojErrCheck(err);
 
@@ -1580,9 +1576,9 @@ MojErr MojDbBerkeleyIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)
 
 MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 	MojAssert(isOpen());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojDbBerkeleyItem keyItem;
 	keyItem.fromBytesNoCopy(key.data(), key.size());
@@ -1597,10 +1593,9 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 	MojErrCheck(err2);
 	if (size1 > 16)	// if the object-id is in key
 		strncat(s, (char *)(keyItem.data()) + (size1 - 17), 16);
-    LOG_DEBUG("[db.bdb] bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n", m_db->m_name.data(), size1, s, err);
-
+    MojLogDebug(MojDbBerkeleyEngine::s_log, _T("bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n"), m_db->m_name.data(), size1, s, err);
 	if (!found)
-        LOG_WARNING(MSGID_DB_BERKLEY_TXN_WARNING, 0, "bdbindexdel_warn: not found: %s \n", s);
+		MojLogWarning(MojDbBerkeleyEngine::s_log, _T("bdbindexdel_warn: not found: %s \n"), s);
 #endif
 
 	MojErrCheck(err);
@@ -1613,9 +1608,9 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
 
 MojErr MojDbBerkeleyIndex::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(plan.get() && txn);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojRefCountedPtr<MojDbBerkeleyQuery> storageQuery(new MojDbBerkeleyQuery());
 	MojAllocCheck(storageQuery.get());
@@ -1628,7 +1623,7 @@ MojErr MojDbBerkeleyIndex::find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn
 
 MojErr MojDbBerkeleyIndex::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	return m_primaryDb->beginTxn(txnOut);
 }
@@ -1642,8 +1637,6 @@ MojDbBerkeleyItem::MojDbBerkeleyItem()
 
 MojErr MojDbBerkeleyItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_header.read(kindEngine);
 	MojErrCheck(err);
 
@@ -1654,8 +1647,6 @@ MojErr MojDbBerkeleyItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngi
 
 MojErr MojDbBerkeleyItem::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	MojTokenSet tokenSet;
 	if (headerExpected) {
@@ -1698,8 +1689,6 @@ bool MojDbBerkeleyItem::hasPrefix(const MojDbKey& prefix) const
 
 MojErr MojDbBerkeleyItem::toArray(MojObject& arrayOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObjectBuilder builder;
 	MojErr err = builder.beginArray();
 	MojErrCheck(err);
@@ -1714,8 +1703,6 @@ MojErr MojDbBerkeleyItem::toArray(MojObject& arrayOut) const
 
 MojErr MojDbBerkeleyItem::toObject(MojObject& objOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObjectBuilder builder;
 	MojErr err = MojObjectReader::read(builder, data(), size());
 	MojErrCheck(err);
@@ -1726,8 +1713,6 @@ MojErr MojDbBerkeleyItem::toObject(MojObject& objOut) const
 
 void MojDbBerkeleyItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojAssert(bytes || size == 0);
 	MojAssert(size <= MojUInt32Max);
 
@@ -1736,8 +1721,6 @@ void MojDbBerkeleyItem::fromBytesNoCopy(const MojByte* bytes, MojSize size)
 
 MojErr MojDbBerkeleyItem::fromBuffer(MojBuffer& buf)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	clear();
 	if (!buf.empty()) {
 		MojErr err = buf.release(m_chunk);
@@ -1750,7 +1733,6 @@ MojErr MojDbBerkeleyItem::fromBuffer(MojBuffer& buf)
 
 MojErr MojDbBerkeleyItem::fromBytes(const MojByte* bytes, MojSize size)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert (bytes || size == 0);
 
 	if (size == 0) {
@@ -1766,8 +1748,6 @@ MojErr MojDbBerkeleyItem::fromBytes(const MojByte* bytes, MojSize size)
 
 MojErr MojDbBerkeleyItem::fromObject(const MojObject& obj)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObjectWriter writer;
 	MojErr err = obj.visit(writer);
 	MojErrCheck(err);
@@ -1779,7 +1759,6 @@ MojErr MojDbBerkeleyItem::fromObject(const MojObject& obj)
 
 MojErr MojDbBerkeleyItem::fromObjectVector(const MojVector<MojObject>& vec)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!vec.empty());
 
 	MojObjectWriter writer;
@@ -1796,15 +1775,12 @@ MojErr MojDbBerkeleyItem::fromObjectVector(const MojVector<MojObject>& vec)
 
 void MojDbBerkeleyItem::freeData()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (m_free)
 		m_free(m_dbt.data);
 }
 
 void MojDbBerkeleyItem::setData(MojByte* bytes, MojSize size, void (*free)(void*))
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(bytes);
 	freeData();
 	m_free = free;
@@ -1816,7 +1792,7 @@ void MojDbBerkeleyItem::setData(MojByte* bytes, MojSize size, void (*free)(void*
 
 MojDbBerkeleySeq::~MojDbBerkeleySeq()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojErr err = close();
 	MojErrCatchAll(err);
@@ -1824,8 +1800,8 @@ MojDbBerkeleySeq::~MojDbBerkeleySeq()
 
 MojErr MojDbBerkeleySeq::open(const MojChar* name, MojDbBerkeleyDatabase* db)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!m_seq);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	m_db = db;
 	MojString strName;
@@ -1853,7 +1829,7 @@ MojErr MojDbBerkeleySeq::open(const MojChar* name, MojDbBerkeleyDatabase* db)
 
 MojErr MojDbBerkeleySeq::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	MojErr err = MojErrNone;
 	if (m_seq) {
@@ -1867,7 +1843,7 @@ MojErr MojDbBerkeleySeq::close()
 
 MojErr MojDbBerkeleySeq::closeImpl()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	int dbErr = m_seq->close(m_seq, 0);
 	m_seq = NULL;
@@ -1878,7 +1854,7 @@ MojErr MojDbBerkeleySeq::closeImpl()
 
 MojErr MojDbBerkeleySeq::get(MojInt64& valOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	db_seq_t id = 0;
 	int dbErr = m_seq->get(m_seq, NULL, 1, &id, MojSeqGetFlags);
@@ -1893,10 +1869,13 @@ MojDbBerkeleyTxn::MojDbBerkeleyTxn()
   m_txn(NULL),
   m_updateSize(0)
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 }
 
 MojDbBerkeleyTxn::~MojDbBerkeleyTxn()
 {
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+
 	if (m_txn) {
 		abort();
 	}
@@ -1904,8 +1883,8 @@ MojDbBerkeleyTxn::~MojDbBerkeleyTxn()
 
 MojErr MojDbBerkeleyTxn::begin(MojDbBerkeleyEngine* eng)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!m_txn && eng && eng->env());
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	DB_ENV* dbEnv = eng->env()->impl();
 	DB_TXN* txn = NULL;
@@ -1920,8 +1899,8 @@ MojErr MojDbBerkeleyTxn::begin(MojDbBerkeleyEngine* eng)
 
 MojErr MojDbBerkeleyTxn::commitImpl()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_txn);
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	int dbErr = m_txn->commit(m_txn, 0);
 	m_txn = NULL;
@@ -1941,9 +1920,9 @@ bool MojDbBerkeleyTxn::isValid()
 
 MojErr MojDbBerkeleyTxn::abort()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_txn);
-    LOG_WARNING(MSGID_DB_BERKLEY_TXN_WARNING, 0, "bdb: transaction aborted");
+	MojLogTrace(MojDbBerkeleyEngine::s_log);
+	MojLogWarning(MojDbBerkeleyEngine::s_log, _T("bdb: transaction aborted"));
 
 	int dbErr = m_txn->abort(m_txn);
 	m_txn = NULL;

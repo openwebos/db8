@@ -24,22 +24,22 @@
 #include <unistd.h>
 #include <algorithm>
 
-//db.shardLinkManager
+MojLogger MojDbMediaLinkManager::s_log(_T("db.shardLinkManager"));
+
 
 MojDbMediaLinkManager::MojDbMediaLinkManager()
 {
+    MojLogTrace(s_log);
 }
 
 MojErr MojDbMediaLinkManager::setLinkDirectory(const MojString& dir)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
     m_dir = dir;
     return MojErrNone;
 }
 
 MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err;
     if (m_dir.empty()) {
         err = m_dir.assign(MojDbServiceDefs::DefaultMediaLinkPath);
@@ -55,7 +55,6 @@ MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath
 
 MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardEngine::ShardInfo& shardInfo)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
     if (shardInfo.active)
         return createLink(shardInfo);
     else
@@ -64,7 +63,7 @@ MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardEngine::ShardInfo& shar
 
 MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojLogTrace(s_log);
 
     MojErr err;
     MojString linkPath;
@@ -74,13 +73,13 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
 
     if ( access(linkPath.data(), F_OK) != 0)
     {
-         LOG_DEBUG("[db_shardLinkManager] create link %s", linkPath.data());
+         MojLogDebug(s_log, _T("create link %s"), linkPath.data());
          err = MojSymlink(shardInfo.deviceUri, linkPath);
 
          if (err == MojErrNone) {
-             LOG_DEBUG("[db_shardLinkManager] Created symlink %s for %s", linkPath.data(), shardInfo.deviceUri.data());
+             MojLogDebug(s_log, _T("Created symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
          } else {
-             LOG_DEBUG("[db_shardLinkManager] Can't create symlink %s for %s", linkPath.data(), shardInfo.deviceUri.data());
+             MojLogWarning(s_log, _T("Can't create symlink %s for %s"), linkPath.data(), shardInfo.deviceUri.data());
              return MojErrAccessDenied;
          }
     }
@@ -92,12 +91,12 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
 
 MojErr MojDbMediaLinkManager::removeLink(const MojDbShardEngine::ShardInfo& shardInfo)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojLogTrace(s_log);
     MojErr err;
 
     err = MojUnlink(shardInfo.mountPath);
     if (err != MojErrNone) {
-        LOG_DEBUG("[db_shardLinkManager] Can't remove symlink %s", shardInfo.mountPath.data());
+        MojLogWarning(s_log, _T("Can't remove symlink %s"), shardInfo.mountPath.data());
     }
 
     return err;

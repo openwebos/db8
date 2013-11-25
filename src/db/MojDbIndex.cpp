@@ -36,7 +36,7 @@ const MojChar* const MojDbIndex::SizeKey = _T("size");
 const MojChar* const MojDbIndex::TypeKey = _T("type");
 const MojChar* const MojDbIndex::WatchesKey = _T("watches");
 
-//db.index
+MojLogger MojDbIndex::s_log(_T("db.index"));
 
 MojDbIndex::MojDbIndex(MojDbKind* kind, MojDbKindEngine* kindEngine)
 : m_preCommitSlot(this, &MojDbIndex::handlePreCommit),
@@ -49,15 +49,17 @@ MojDbIndex::MojDbIndex(MojDbKind* kind, MojDbKindEngine* kindEngine)
   m_ready(false),
   m_delMisses(0)
 {
+	MojLogTrace(s_log);
 }
 
 MojDbIndex::~MojDbIndex()
 {
+	MojLogTrace(s_log);
 }
 
 MojErr MojDbIndex::fromObject(const MojObject& obj, const MojString& locale) 
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	// check name
 	MojString name;
@@ -69,7 +71,7 @@ MojErr MojDbIndex::fromObject(const MojObject& obj, const MojString& locale)
 	m_locale = locale;
     if(m_locale == _T("en_CN"))
        m_locale = locale;
-
+       
 	// get deleted flag
 	bool includeDel = false;
 	if (obj.get(IncludeDeletedKey, includeDel)) {
@@ -95,8 +97,8 @@ MojErr MojDbIndex::fromObject(const MojObject& obj, const MojString& locale)
 
 MojErr MojDbIndex::addProp(const MojObject& propObj, bool pushFront)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!isOpen());
+	MojLogTrace(s_log);
 
 	// create extractor
 	MojRefCountedPtr<MojDbExtractor> extractor;
@@ -126,9 +128,9 @@ MojErr MojDbIndex::addProp(const MojObject& propObj, bool pushFront)
 
 MojErr MojDbIndex::open(MojDbStorageIndex* index, const MojObject& id, MojDbReq& req, bool created)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!isOpen() && !m_props.empty());
 	MojAssert(index);
+	MojLogTrace(s_log);
 
 	// we don't want to take built-in props into account when sorting indexes,
 	m_sortKey = m_propNames;
@@ -160,7 +162,7 @@ MojErr MojDbIndex::open(MojDbStorageIndex* index, const MojObject& id, MojDbReq&
 
 MojErr MojDbIndex::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	if (isOpen()) {
 		if (m_index.get()) {
@@ -176,15 +178,14 @@ MojErr MojDbIndex::close()
 
 MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
+	MojLogTrace(s_log);
 	
 	MojSize count = 0;
 	MojSize size = 0;
 	MojErr err = m_index->stats(req.txn(), count, size);
 
-    LOG_DEBUG("[db_mojodb] IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n",
-        m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err);
+	MojLogDebug(s_log, _T("IndexStats: Kind: %s;Index: %s; Id: %zX; count= %zu; size= %zu; delMisses = %d, err= %d \n"), m_kind->name().data(), m_name.data(), idIndex(), count, size, m_delMisses, err);
 
 	MojErrCheck(err);
 	usageOut += size;
@@ -211,8 +212,8 @@ MojErr MojDbIndex::stats(MojObject& objOut, MojSize& usageOut, MojDbReq& req)
 
 MojErr MojDbIndex::drop(MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
+	MojLogTrace(s_log);
 
 	MojErr err = m_index->drop(req.txn());
 	MojErrCheck(err);
@@ -222,9 +223,9 @@ MojErr MojDbIndex::drop(MojDbReq& req)
 
 MojErr MojDbIndex::updateLocale(const MojChar* locale, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(locale);
+	MojLogTrace(s_log);
 
 	bool haveCollate = false;
 	for (PropVec::ConstIterator i = m_props.begin(); i != m_props.end(); ++i) {
@@ -248,9 +249,9 @@ MojErr MojDbIndex::updateLocale(const MojChar* locale, MojDbReq& req)
 
 MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojDbStorageTxn* txn, bool forcedel)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(newObj || oldObj);
+	MojLogTrace(s_log);
 
 	// figure out which versions we include
 	bool includeOld = includeObj(oldObj);
@@ -266,7 +267,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(newKeys, txn);
 		MojErrCheck(err);
-        LOG_DEBUG("[db_mojodb] IndexAdd: %s; Keys= %zu \n", this->m_name.data(), newKeys.size());
+        MojLogDebug(s_log, _T("IndexAdd: %s; Keys= %zu \n"), this->m_name.data(), newKeys.size());
 	} else if (includeOld && !includeNew) {
 		// we include the old but not the new objects, so del all the old keys
 		MojAssert(oldObj);
@@ -277,7 +278,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = notifyWatches(oldKeys, txn);
 		MojErrCheck(err);
-        LOG_DEBUG("[db_mojodb] IndexDel: %s; Keys= %zu \n", this->name().data(), oldKeys.size());
+        MojLogDebug(s_log, _T("IndexDel: %s; Keys= %zu \n"), this->name().data(), oldKeys.size());
 	} else if (includeNew && includeOld) {
 		// we include old and new objects
 		MojAssert(newObj && oldObj);
@@ -299,7 +300,7 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		MojErrCheck(err);
 		err = delKeys(keysToDel, txn, forcedel);
 		
-        LOG_DEBUG("[db_mojodb] IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n",
+        MojLogDebug(s_log, _T("IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n"),
 			this->name().data(), oldKeys.size(), newKeys.size(), keysToDel.size(), keysToPut.size(), (int)err);
 
 		MojErrCheck(err);
@@ -315,8 +316,8 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 
 MojErr MojDbIndex::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
+	MojLogTrace(s_log);
 
 	MojAutoPtr<MojDbQueryPlan> plan(new MojDbQueryPlan(*m_kindEngine));
 	MojAllocCheck(plan.get());
@@ -351,9 +352,9 @@ MojErr MojDbIndex::find(MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& re
 
 bool MojDbIndex::canAnswer(const MojDbQuery& query) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(!m_propNames.empty());
+	MojLogTrace(s_log);
 
 	// if this index is not ready yet, return false
 	if (!m_ready)
@@ -419,12 +420,12 @@ bool MojDbIndex::canAnswer(const MojDbQuery& query) const
 
 MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(watcher);
+	MojLogTrace(s_log);
 
-    LOG_DEBUG("[db_mojodb] Index_cancelWatch: index name = %s; domain = %s\n",
-		this->name().data(), watcher->domain().data());
+	MojLogDebug(s_log, _T("Index_cancelWatch: index name = %s; domain = %s\n"),
+				this->name().data(), watcher->domain().data());
 
 	MojThreadWriteGuard guard(m_lock);
 	MojSize idx;
@@ -442,7 +443,7 @@ MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 					bool found = false;
 					m_watcherMap.del(iter.key(), found);
 					MojAssert(found);
-					LOG_DEBUG("[db_mojodb] Index_cancelwatch: Domain Del found = %d; index name = %s; domain = %s\n",
+					MojLogDebug(s_log, _T("Index_cancelwatch: Domain Del found = %d; index name = %s; domain = %s\n"),
  						(int)found, this->name().data(), watcher->domain().data());
 				}
 			}
@@ -457,8 +458,8 @@ MojErr MojDbIndex::cancelWatch(MojDbWatcher* watcher)
 
 MojErr MojDbIndex::createExtractor(const MojObject& propObj, MojRefCountedPtr<MojDbExtractor>& extractorOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!isOpen());
+	MojLogTrace(s_log);
 
 	// type
 	MojString type;
@@ -480,7 +481,7 @@ MojErr MojDbIndex::createExtractor(const MojObject& propObj, MojRefCountedPtr<Mo
 
 MojErr MojDbIndex::addBuiltinProps()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojString idStr;
 	MojErr err = idStr.assign(MojDb::IdKey);
@@ -511,8 +512,6 @@ MojErr MojDbIndex::addBuiltinProps()
 
 bool MojDbIndex::includeObj(const MojObject* obj) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (!obj)
 		return false;
 	if (m_includeDeleted)
@@ -525,16 +524,14 @@ bool MojDbIndex::includeObj(const MojObject* obj) const
 
 bool MojDbIndex::isIdIndex() const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return (m_propNames.size() == 1 && m_propNames.front() == MojDb::IdKey) ||
 			(m_propNames.size() == 2 && m_propNames.front() == MojDb::DelKey && m_propNames.back() == MojDb::IdKey);
 }
 
 MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, MojDbWatcher* watcher, MojDbReq& req)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(watcher);
+	MojLogTrace(s_log);
 
 	// TODO: use interval tree instead of vector for watches
 	MojThreadWriteGuard guard(m_lock);
@@ -551,11 +548,12 @@ MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, Moj
 	} else {
 		iter.value() += 1;
 		if (iter.value() > WatchWarningThreshold) {
-            LOG_WARNING(MSGID_MOJ_DB_INDEX_WARNING, 0, "db:'%s' has %zd watches open on index '%s - %s'", req.domain().data(), iter.value(), m_kind->id().data(), m_name.data());
+			MojLogWarning(s_log, _T("db:'%s' has %zd watches open on index '%s - %s'"),
+					req.domain().data(), iter.value(), m_kind->id().data(), m_name.data());
 		}
 	}
-	LOG_DEBUG("[db_mojodb] DbIndex_addWatch - '%s' on index '%s - %s'",
-		req.domain().data(),  m_kind->id().data(), m_name.data());
+	MojLogDebug(s_log, _T("DbIndex_addWatch - '%s' on index '%s - %s'"),
+					req.domain().data(),  m_kind->id().data(), m_name.data());
 	// drop lock before acquiring watcher mutex in init
 	guard.unlock();
 	watcher->init(this, plan.ranges(), plan.desc(), false);
@@ -565,8 +563,8 @@ MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, Moj
 
 MojErr MojDbIndex::notifyWatches(const KeySet& keys, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
+	MojLogTrace(s_log);
 
 	MojThreadReadGuard guard(m_lock);
 	for (KeySet::ConstIterator i = keys.begin(); i != keys.end(); ++i) {
@@ -578,15 +576,15 @@ MojErr MojDbIndex::notifyWatches(const KeySet& keys, MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::notifyWatches(const MojDbKey& key, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
+	MojLogTrace(s_log);
 
 	// TODO: this will be much more efficient with an interval tree
 	for (WatcherVec::ConstIterator i = m_watcherVec.begin(); i != m_watcherVec.end(); ++i) {
 		const RangeVec& ranges = (*i)->ranges();
 		for (RangeVec::ConstIterator j = ranges.begin(); j != ranges.end(); ++j) {
 			if (j->contains(key)) {
-				LOG_DEBUG("[db_mojodb] DbIndex_notifywatches adding to txn - kind: %s; index %s;\n",
+				MojLogDebug(s_log, _T("DbIndex_notifywatches adding to txn - kind: %s; index %s;\n"),
 					((m_kind) ? m_kind->id().data() :NULL), ((m_name) ? m_name.data() : NULL));
 				MojErr err = txn->addWatcher(i->get(), key);
 				MojErrCheck(err);
@@ -599,7 +597,7 @@ MojErr MojDbIndex::notifyWatches(const MojDbKey& key, MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forcedel)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	int count = 0;
 	for (KeySet::ConstIterator i = keys.begin(); i != keys.end(); ++i) {
@@ -615,14 +613,14 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 		MojErrCheck(err2); 
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
-        LOG_DEBUG("[db_mojodb] delKey %d for: %s - %s; key= %s ; err= %d\n", count+1, s2, this->m_name.data(), s, err);
+        MojLogDebug(s_log, _T("delKey %d for: %s - %s; key= %s ; err= %d\n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 
 		// This has some potential risk
 		if (err == MojErrInternalIndexOnDel) {
 			m_delMisses++;
 #if defined(MOJ_DEBUG_LOGGING)
-            LOG_DEBUG("[db_mojodb] delKey %d for: %s - %s; key= %s; err = %d \n", count+1, s2, this->m_name.data(), s, err);
+            MojLogDebug(s_log, _T("delKey %d for: %s - %s; key= %s; err = %d \n"), count+1, s2, this->m_name.data(), s, err);
 #endif
 			if (forcedel)
 				err = MojErrNone;
@@ -636,7 +634,7 @@ MojErr MojDbIndex::delKeys(const KeySet& keys, MojDbStorageTxn* txn, bool forced
 
 MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	int count = 0;
 	for (KeySet::ConstIterator i = keys.begin(); i != keys.end(); ++i) {
@@ -649,7 +647,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 		MojErrCheck(err2);
 		if (size > 16)	// if the object-id is in key
 			strncat(s, (char *)((*i).data()) + (size - 17), 16);
-        LOG_DEBUG("[db_mojodb] insertKey %d for: %s; key= %s ; err= %d\n", count+1, this->m_name.data(), s, err);
+        MojLogDebug(s_log, _T("insertKey %d for: %s; key= %s ; err= %d\n"), count+1, this->m_name.data(), s, err);
 #endif
 		MojErrCheck(err);
 		count ++;
@@ -660,7 +658,7 @@ MojErr MojDbIndex::insertKeys(const KeySet& keys, MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::getKeys(const MojObject& obj, KeySet& keysOut) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	// build the set of unique keys from object
 	MojDbKeyBuilder builder;
@@ -684,7 +682,7 @@ MojErr MojDbIndex::getKeys(const MojObject& obj, KeySet& keysOut) const
 
 MojErr MojDbIndex::handlePreCommit(MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	MojErr err = m_kind->kindEngine()->db()->quotaEngine()->curKind(m_kind, txn);
 	MojErrCheck(err);
@@ -696,7 +694,7 @@ MojErr MojDbIndex::handlePreCommit(MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::handlePostCommit(MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+	MojLogTrace(s_log);
 
 	m_ready = true;
 	return MojErrNone;
@@ -704,10 +702,10 @@ MojErr MojDbIndex::handlePostCommit(MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::build(MojDbStorageTxn* txn)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(isOpen());
 	MojAssert(m_kind && m_kindEngine);
 	MojAssert(m_props.size() > 1);
+	MojLogTrace(s_log);
 
 	// query for all existing objects of this type and add them to the index.
 	MojDbQuery query;
@@ -743,8 +741,6 @@ MojErr MojDbIndex::build(MojDbStorageTxn* txn)
 
 MojErr MojDbIndex::validateName(const MojString& name)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (name.length() > MaxIndexNameLen) {
 		MojErrThrowMsg(MojErrDbInvalidIndexName, _T("db: index name '%s' invalid: length is %zd chars, max is %zd"), name.data(), name.length(), MaxIndexNameLen);
 	}

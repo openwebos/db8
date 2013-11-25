@@ -25,8 +25,6 @@ MojRefCountedPtr<MojDbStorageEngineFactory> MojDbStorageEngine::m_factory;
 
 MojErr MojDbStorageItem::toObject(MojObject& objOut, MojDbKindEngine& kindEngine, bool headerExpected) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObjectBuilder builder;
 	MojErr err = visit(builder, kindEngine, headerExpected);
 	MojErrCheck(err);
@@ -36,8 +34,6 @@ MojErr MojDbStorageItem::toObject(MojObject& objOut, MojDbKindEngine& kindEngine
 
 MojErr MojDbStorageItem::toJson(MojString& strOut, MojDbKindEngine& kindEngine) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojJsonWriter writer;
 	MojErr err = visit(writer, kindEngine);
 	MojErrCheck(err);
@@ -47,8 +43,6 @@ MojErr MojDbStorageItem::toJson(MojString& strOut, MojDbKindEngine& kindEngine) 
 
 MojErr MojDbStorageEngine::createDefaultEngine(MojRefCountedPtr<MojDbStorageEngine>& engineOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
    if(m_factory.get() == 0)
       MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine is not set"));
    MojErr err = m_factory->create(engineOut);
@@ -58,7 +52,6 @@ MojErr MojDbStorageEngine::createDefaultEngine(MojRefCountedPtr<MojDbStorageEngi
 
 MojErr MojDbStorageEngine::createEngine(const MojChar* name, MojRefCountedPtr<MojDbStorageEngine>& engineOut)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name);
 
 	if (MojStrCmp(name, m_factory->name()) == 0) {
@@ -90,8 +83,6 @@ MojDbStorageTxn::MojDbStorageTxn()
 
 MojErr MojDbStorageTxn::addWatcher(MojDbWatcher* watcher, const MojDbKey& key)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	WatcherVec::Iterator i;
 	MojErr err = m_watchers.begin(i);
 	MojErrCheck(err);
@@ -113,8 +104,6 @@ MojErr MojDbStorageTxn::addWatcher(MojDbWatcher* watcher, const MojDbKey& key)
 
 MojErr MojDbStorageTxn::offsetQuota(MojInt64 offset)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	if (m_curQuotaOffset.get() && m_quotaEnabled) {
 		MojErr err = m_curQuotaOffset->apply(offset);
 		MojErrCheck(err);
@@ -124,22 +113,16 @@ MojErr MojDbStorageTxn::offsetQuota(MojInt64 offset)
 
 void MojDbStorageTxn::notifyPreCommit(CommitSignal::SlotRef slot)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_preCommit.connect(slot);
 }
 
 void MojDbStorageTxn::notifyPostCommit(CommitSignal::SlotRef slot)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_postCommit.connect(slot);
 }
 
 MojErr MojDbStorageTxn::commit()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_preCommit.fire(this);
 	MojErrCheck(err);
 	if (m_quotaEngine) {

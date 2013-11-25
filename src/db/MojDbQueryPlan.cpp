@@ -36,8 +36,6 @@ MojDbQueryPlan::~MojDbQueryPlan()
 
 MojErr MojDbQueryPlan::init(const MojDbQuery& query, const MojDbIndex& index)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	m_query = query;
 	m_locale = index.locale();
 	m_idPropIndex = index.idIndex();
@@ -61,7 +59,6 @@ MojErr MojDbQueryPlan::init(const MojDbQuery& query, const MojDbIndex& index)
 
 MojErr MojDbQueryPlan::buildRanges(const MojDbIndex& index)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!index.props().empty());
 
 	MojErr err = MojErrNone;
@@ -147,7 +144,6 @@ MojErr MojDbQueryPlan::buildRanges(const MojDbIndex& index)
 MojErr MojDbQueryPlan::rangesFromKeySets(const KeySet& lowerKeys, const KeySet& upperKeys, const KeySet& prefixKeys,
 		const MojDbQuery::WhereClause* clause)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(lowerKeys.size() == upperKeys.size() && lowerKeys.size() == prefixKeys.size());
 
 	MojUInt32 index = 0;
@@ -168,8 +164,6 @@ MojErr MojDbQueryPlan::rangesFromKeySets(const KeySet& lowerKeys, const KeySet& 
 MojErr MojDbQueryPlan::rangesFromKeys(MojDbKey lowerKey, MojDbKey upperKey, MojDbKey prefix, MojUInt32 index,
 		const MojDbQuery::WhereClause* clause)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	MojUInt32 group = 0;
 	MojDbQuery::CompOp lowerOp = MojDbQuery::OpEq;
@@ -261,8 +255,6 @@ MojErr MojDbQueryPlan::rangesFromKeys(MojDbKey lowerKey, MojDbKey upperKey, MojD
 
 MojErr MojDbQueryPlan::addRange(const MojDbKey& lowerKey, const MojDbKey& upperKey, MojUInt32 group)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojDbKeyRange range(lowerKey, upperKey, group);
 	// tweak range according to page
 	const MojDbKey& pageKey = m_query.page().key();
@@ -295,8 +287,6 @@ MojErr MojDbQueryPlan::addRange(const MojDbKey& lowerKey, const MojDbKey& upperK
 MojErr MojDbQueryPlan::pushSearch(MojDbKeyBuilder& lowerBuilder, MojDbKeyBuilder& upperBuilder,
 		const MojObject& val, MojDbTextCollator* collator)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	// get text
 	MojString text;
 	MojErr err = val.stringValue(text);
@@ -339,8 +329,6 @@ MojErr MojDbQueryPlan::pushSearch(MojDbKeyBuilder& lowerBuilder, MojDbKeyBuilder
 
 MojErr MojDbQueryPlan::pushVal(MojDbKeyBuilder& builder, const MojObject& val, MojDbTextCollator* collator)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = MojErrNone;
 	MojDbKey key;
 	MojDbKeyBuilder::KeySet keys;

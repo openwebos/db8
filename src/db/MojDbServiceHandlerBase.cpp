@@ -23,7 +23,7 @@
 #include "core/MojTime.h"
 #include "core/MojJson.h"
 
-//db.serviceHandler
+MojLogger MojDbServiceHandlerBase::s_log(_T("db.serviceHandler"));
 
 MojDbServiceHandlerBase::MojDbServiceHandlerBase(MojDb& db, MojReactor& reactor)
 : m_db(db),
@@ -33,24 +33,23 @@ MojDbServiceHandlerBase::MojDbServiceHandlerBase(MojDb& db, MojReactor& reactor)
 
 MojErr MojDbServiceHandlerBase::invoke(Callback method, MojServiceMessage* msg, MojObject& payload)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(method && msg);
+	MojLogTrace(s_log);
 
 	MojUInt32 retries = 0;
 	for (;;) {
 		MojErr err = invokeImpl(method, msg, payload);
 		MojErrCatch(err, MojErrDbFatal) {
-			LOG_CRITICAL(MSGID_DB_SERVICE_ERROR, 0, "db: fatal error; shutting down");
+			MojLogCritical(s_log, _T("db: fatal error; shutting down"));
 			m_reactor.stop();
 			MojErrThrow(MojErrDbFatal);
 		}
 		MojErrCatch(err, MojErrDbDeadlock) {
 			if (++retries >= MaxDeadlockRetries) {
-                LOG_ERROR(MSGID_DB_SERVICE_ERROR, 0, "db: deadlock detected; max retries exceeded");
+				MojLogError(s_log, _T("db: deadlock detected; max retries exceeded"));
 				MojErrThrow(MojErrDbMaxRetriesExceeded);
 			}
-
-			LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 0, "db: deadlock detected; attempting retry %d", retries);
+			MojLogWarning(s_log, _T("db: deadlock detected; attempting retry %d"), retries);
 			err = msg->writer().reset();
 			MojErrCheck(err);
 			err = MojSleep(DeadlockSleepMillis * 1000);
@@ -59,11 +58,10 @@ MojErr MojDbServiceHandlerBase::invoke(Callback method, MojServiceMessage* msg, 
 		}
 		MojErrCatch(err, MojErrInternalIndexOnDel) {
 			if (++retries >= MaxIndexlockRetries) {
-                LOG_ERROR(MSGID_DB_SERVICE_ERROR, 0, "db: indexlock_warning max retries exceeded");
+				MojLogError(s_log, _T("db: indexlock_warning max retries exceeded"));
 				MojErrThrow(MojErrDbInconsistentIndex);
 			}
-
-			LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 0, "db: indexlock_conflict; attempting retry %d", retries);
+			MojLogWarning(s_log, _T("db: indexlock_conflict; attempting retry %d"), retries);
 			err = msg->writer().reset();
 			MojErrCheck(err);
 			err = MojSleep(DeadlockSleepMillis * 1000);
@@ -78,8 +76,6 @@ MojErr MojDbServiceHandlerBase::invoke(Callback method, MojServiceMessage* msg, 
 
 MojErr MojDbServiceHandlerBase::invokeImpl(Callback method, MojServiceMessage* msg, MojObject& payload)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojDbReq req(false);
 	MojString errStr;
 	MojString payloadstr;
@@ -91,8 +87,8 @@ MojErr MojDbServiceHandlerBase::invokeImpl(Callback method, MojServiceMessage* m
 	err = (this->*((DbCallback) method))(msg, payload, req);
 	(void) MojErrToString(err, errStr);
 	(void) payload.toJson(payloadstr);
-    LOG_DEBUG("[db_mojodb] db_method: %s, err: (%d) - %s; sender= %s;\n payload=%s; \n response= %s\n",
-        msg->method(), (int)err, errStr.data(), msg->senderName(), payloadstr.data(), ((MojJsonWriter&)(msg->writer())).json().data());
+	MojLogDebug(s_log, _T("db_method: %s, err: (%d) - %s; sender= %s;\n payload=%s; \n response= %s\n"),
+				msg->method(), (int)err, errStr.data(), msg->senderName(), payloadstr.data(), ((MojJsonWriter&)(msg->writer())).json().data());
 
 	MojErrCheck(err);
 	err = req.endBatch();
@@ -103,7 +99,6 @@ MojErr MojDbServiceHandlerBase::invokeImpl(Callback method, MojServiceMessage* m
 
 MojErr MojDbServiceHandlerBase::formatCount(MojServiceMessage* msg, MojUInt32 count)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 
 	MojObjectVisitor& writer = msg->writer();
@@ -121,7 +116,6 @@ MojErr MojDbServiceHandlerBase::formatCount(MojServiceMessage* msg, MojUInt32 co
 
 MojErr MojDbServiceHandlerBase::formatPut(MojServiceMessage* msg, const MojObject* begin, const MojObject* end)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 
 	MojObjectVisitor& writer = msg->writer();
@@ -151,8 +145,6 @@ MojErr MojDbServiceHandlerBase::formatPut(MojServiceMessage* msg, const MojObjec
 
 MojErr MojDbServiceHandlerBase::formatPutAppend(MojObjectVisitor& writer, const MojObject& result)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObject id;
 	MojErr err = result.getRequired(MojDb::IdKey, id);
 	MojErrCheck(err);

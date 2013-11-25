@@ -25,7 +25,7 @@
 #include "db-luna/MojDbLunaServicePdm.h"
 #include "db/MojDbShardEngine.h"
 
-//db-luna.shard
+MojLogger MojDbLunaServicePdmHandler::s_log(_T("db-luna.shard"));
 
 MojDbLunaServicePdmHandler::MojDbLunaServicePdmHandler(MojDbLunaServicePdm* parent, MojReactor& reactor)
 : m_mojDbLunaServicePdm(parent),
@@ -34,13 +34,14 @@ m_callbackInvoked (false),
 m_reactor(reactor),
 m_slot(this, &MojDbLunaServicePdmHandler::handleResult)
 {
-    LOG_DEBUG("[db-luna_shard] MojDbLunaServicePdmHandler::MojDbLunaServicePdmHandler");
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, _T("MojDbLunaServicePdmHandler::MojDbLunaServicePdmHandler"));
 }
 
 MojErr MojDbLunaServicePdmHandler::open(MojLunaService* service, const MojChar* pdmServiceName)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-    LOG_DEBUG("[db-luna_shard] Create subscribe request to PDM service");
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, "Create subscribe request to PDM service");
     MojErr err;
 
     // send request
@@ -52,7 +53,7 @@ MojErr MojDbLunaServicePdmHandler::open(MojLunaService* service, const MojChar* 
     err = payload.fromJson("{\"subscribe\":true}");
     MojErrCheck(err);
 
-    LOG_DEBUG("[db-luna_shard] Send subscribe request to PDM service");
+    MojLogDebug(s_log, "Send subscribe request to PDM service");
     err = req->send(m_slot, pdmServiceName, _T("listDevices"), payload, 777);   // @TODO: FIX THIS MAGIC NUMBER!!!!!!!
     MojErrCheck(err);
 
@@ -65,7 +66,8 @@ MojErr MojDbLunaServicePdmHandler::open(MojLunaService* service, const MojChar* 
 
 MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCode)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, _T("MojDbLunaServicePdmHandler::handleResult"));
 
     m_callbackInvoked = true;
     m_result = result;
@@ -74,15 +76,14 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         bool found = false;
         MojErr err = result.get(MojServiceMessage::ErrorTextKey, m_errTxt, found);
 
-        LOG_ERROR(MSGID_LUNA_ERROR_RESPONSE, 1,
-                  PMLOGKS("error", m_errTxt.data()), "Luna error response");
+        MojLogError(s_log, _T("Luna error response: %s"), m_errTxt.data());
         MojAssert(found);
     } else {
 #ifdef MOJ_DEBUG
         MojString resStr;
         result.toJson(resStr);
 
-        LOG_DEBUG("[db-luna_shard] Device list: %s", resStr.data());
+        MojLogDebug(s_log, _T("Device list: %s"), resStr.data());
 #endif
         MojObject deviceList;
         MojErr err = result.getRequired("devices", deviceList);
@@ -97,10 +98,10 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
 
             err = i->getRequired("deviceType", deviceType);
             MojErrCheck(err);
-            LOG_DEBUG("[db-luna_shard] Device type is: %s", deviceType.data());
+            MojLogDebug(s_log, _T("Device type is: %s"), deviceType.data());
 
             if (deviceType != "usb") {
-                LOG_DEBUG("[db-luna_shard] Got from PDM device, but device not usb media. Ignore it");
+                MojLogDebug(s_log, "Got from PDM device, but device not usb media. Ignore it");
                 // not usb media. PDM returns ALL list of media, like USB, Internal storage and other.
                 // db8 intresting only in usb sticks
                 continue;
@@ -115,7 +116,7 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
                 MojErrCheck(err);
 
                 if (shardInfo.deviceId.empty()) {
-                    LOG_WARNING(MSGID_LUNA_SERVICE_WARNING, 0, "Device id is empty, ignore it");
+                    MojLogWarning(s_log, "Device id is empty, ignore it");
                     continue;
                 }
 
@@ -124,13 +125,13 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
                 notProcessedIds.erase(shardInfo.deviceId);  // mark it as processed
 
                 if (!existInCache(shardInfo.deviceId)) {
-                    LOG_DEBUG("[db-luna_shard] Found new device %s. Add to device cache and send notification to shard engine", shardInfo.deviceId.data());
+                    MojLogDebug(s_log, _T("Found new device %s. Add to device cache and send notification to shard engine"), shardInfo.deviceId.data());
 
                     m_shardCache[shardInfo.deviceId] = shardInfo;
                     err = m_mojDbLunaServicePdm->notifyShardEngine(shardInfo);
                     MojErrCheck(err);
                 } else {
-                    LOG_DEBUG("[db-luna_shard] Device uuid cached, it looks like it doesn't changed");
+                    MojLogDebug(s_log, _T("Device uuid cached, it looks like it doesn't changed"));
                 }
             } // end subDevices loop
         }   // end main list of devices loop
@@ -139,7 +140,7 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
         for (std::set<MojString>::const_iterator i = notProcessedIds.begin(); i != notProcessedIds.end(); ++i) {
             ShardInfoListType::iterator shardCacheIterator = m_shardCache.find(*i);
             if (shardCacheIterator != m_shardCache.end()) {
-                LOG_DEBUG("[db-luna_shard] Device %s not found in cache. Notify shard engine that shard not active", shardCacheIterator->second.deviceId.data());
+                MojLogDebug(s_log, "Device %s not found in cache. Notify shard engine that shard not active", shardCacheIterator->second.deviceId.data());
 
                 shardCacheIterator->second.active = false;
                 err = m_mojDbLunaServicePdm->notifyShardEngine(shardCacheIterator->second);
@@ -152,7 +153,8 @@ MojErr MojDbLunaServicePdmHandler::handleResult(MojObject& result, MojErr errCod
 
 void MojDbLunaServicePdmHandler::reset()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, _T("MojDbLunaServicePdmHandler::reset"));
 
     m_dbErr = MojErrNone;
     m_callbackInvoked = false;
@@ -162,7 +164,8 @@ void MojDbLunaServicePdmHandler::reset()
 
 MojErr MojDbLunaServicePdmHandler::wait(MojService* service)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojLogTrace(s_log);
+    MojLogDebug(s_log, _T("MojDbLunaServicePdmHandler::wait"));
 
     while (!m_callbackInvoked) {
         MojErr err = service->dispatch();
@@ -173,36 +176,30 @@ MojErr MojDbLunaServicePdmHandler::wait(MojService* service)
 
 MojErr MojDbLunaServicePdmHandler::processLunaResponse(const MojObject* response, MojDbShardEngine::ShardInfo* result)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     MojErr err;
     err = response->getRequired("deviceId", result->deviceId);
     MojErrCheck(err);
-    LOG_DEBUG("[db-luna_shard] device id is: %s", result->deviceId.data());
+    MojLogDebug(s_log, _T("device id is: %s"), result->deviceId.data());
 
     err = response->getRequired("deviceName", result->deviceName);
     MojErrCheck(err);
-    LOG_DEBUG("[db-luna_shard] device name is: %s", result->deviceName.data());
+    MojLogDebug(s_log, _T("device name is: %s"), result->deviceName.data());
 
     err = response->getRequired("deviceUri", result->deviceUri);
     MojErrCheck(err);
-    LOG_DEBUG("[db-luna_shard] device uri is: %s", result->deviceUri.data());
+    MojLogDebug(s_log, _T("device uri is: %s"), result->deviceUri.data());
 
     return MojErrNone;
 }
 
 bool MojDbLunaServicePdmHandler::existInCache(const MojString& id)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     ShardInfoListType::iterator shardCacheIterator = m_shardCache.find(id);
     return (shardCacheIterator != m_shardCache.end());
 }
 
 void MojDbLunaServicePdmHandler::copyShardCache(std::set<MojString>* shardIdSet)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
     for (ShardInfoListType::const_iterator shardInfoIterator = m_shardCache.begin(); shardInfoIterator != m_shardCache.end(); ++shardInfoIterator) {
         shardIdSet->insert(shardInfoIterator->first);
     }

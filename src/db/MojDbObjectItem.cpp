@@ -27,15 +27,11 @@ MojDbObjectItem::MojDbObjectItem(const MojObject& obj)
 
 MojErr MojDbObjectItem::close()
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return MojErrNone;
 }
 
 MojErr MojDbObjectItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine)
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_obj.getRequired(MojDb::KindKey, kindIdOut);
 	MojErrCheck(err);
 
@@ -44,8 +40,6 @@ MojErr MojDbObjectItem::kindId(MojString& kindIdOut, MojDbKindEngine& kindEngine
 
 MojErr MojDbObjectItem::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine, bool headerExpected) const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojErr err = m_obj.visit(visitor);
 	MojErrCheck(err);
 
@@ -54,8 +48,6 @@ MojErr MojDbObjectItem::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEn
 
 const MojObject& MojDbObjectItem::id() const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	MojObject::ConstIterator iter = m_obj.find(MojDb::IdKey);
 	if (iter == m_obj.end()) {
 		return MojObject::Undefined;
@@ -66,7 +58,5 @@ const MojObject& MojDbObjectItem::id() const
 
 MojSize MojDbObjectItem::size() const
 {
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
 	return m_obj.size();
 }

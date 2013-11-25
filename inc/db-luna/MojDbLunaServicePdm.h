@@ -48,6 +48,7 @@ private:
     MojRefCountedPtr<MojDbLunaServicePdmHandler> m_handler;
     std::auto_ptr<MojDbShardEngine::SignalPdm> m_shardInfoSignal;
     bool m_isEnabled;
+    static MojLogger s_log;
     static const MojChar* const ConfKey;
 };
 

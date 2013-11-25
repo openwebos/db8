@@ -400,7 +400,7 @@ MojErr MojDbServiceHandler::handlePut(MojServiceMessage* msg, MojObject& payload
 	MojAssert(msg);
 
     // check space level
-    if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
+    if( m_db.getSpaceAlert().spaceAlertLevel() == MojDbSpaceAlert::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
 	MojObject obj;
@@ -431,7 +431,7 @@ MojErr MojDbServiceHandler::handlePutKind(MojServiceMessage* msg, MojObject& pay
 	MojAssert(msg);
 
     // check space level
-    if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
+    if( m_db.getSpaceAlert().spaceAlertLevel() == MojDbSpaceAlert::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
     // check alert level
@@ -449,7 +449,7 @@ MojErr MojDbServiceHandler::handlePutPermissions(MojServiceMessage* msg, MojObje
 	MojAssert(msg);
 
     // check space level
-    if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
+    if( m_db.getSpaceAlert().spaceAlertLevel() == MojDbSpaceAlert::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
 	MojObject permissionsArr;
@@ -473,7 +473,7 @@ MojErr MojDbServiceHandler::handlePutQuotas(MojServiceMessage* msg, MojObject& p
 	MojAssert(msg);
 
     // check space level
-    if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
+    if( m_db.getSpaceAlert().spaceAlertLevel() == MojDbSpaceAlert::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
 	MojObject quotas;
@@ -519,7 +519,7 @@ MojErr MojDbServiceHandler::handleReserveIds(MojServiceMessage* msg, MojObject& 
 	MojAssert(msg);
 
     // check space level
-    if( MojDbServiceHandlerInternal::spaceAlertLevel() == MojDbServiceHandlerInternal::AlertLevelHigh)
+    if( m_db.getSpaceAlert().spaceAlertLevel() == MojDbSpaceAlert::AlertLevelHigh)
        return MojErrDbQuotaExceeded;
 
 	MojInt64 count;

@@ -22,6 +22,7 @@
 
 #include "db/MojDbDefs.h"
 #include "db/MojDb.h"
+#include "db/MojDbSpaceAlert.h"
 #include "db/MojDbServiceHandlerBase.h"
 #include "core/MojService.h"
 #include "core/MojServiceMessage.h"
@@ -41,11 +42,7 @@ public:
 	static const MojChar* const SpaceCheckMethod;
 	static const MojChar* const ScheduledSpaceCheckMethod;
 
-	typedef enum { NeverSentSpaceAlert = -2, NoSpaceAlert = -1, AlertLevelLow, AlertLevelMedium,
-		AlertLevelHigh } AlertLevel;
-
 	MojDbServiceHandlerInternal(MojDb& db, MojReactor& reactor, MojService& service);
-    static AlertLevel spaceAlertLevel();
     
     virtual MojErr open();  
 	virtual MojErr close();
@@ -99,21 +96,6 @@ private:
 		MojObject m_payload;
 	};
 
-	class SpaceCheckHandler : public MojSignalHandler
-	{
-	public:
-		SpaceCheckHandler(MojDbServiceHandlerInternal* parent, MojServiceMessage* msg);
-		~SpaceCheckHandler();
-
-		MojErr dispatchUpdate(const MojObject& message);
-		MojErr handleCancel(MojServiceMessage* msg);
-
-		MojDbServiceHandlerInternal* m_parent;
-		MojRefCountedPtr<MojServiceMessage> m_msg;
-		MojServiceMessage::CancelSignal::Slot<SpaceCheckHandler> m_cancelSlot;
-	};
-	
-
 	MojErr handlePostBackup(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handlePostRestore(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handlePreBackup(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
@@ -123,28 +105,14 @@ private:
 	MojErr handleScheduledSpaceCheck(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 
 	MojErr requestLocale();
-	MojErr doSpaceCheck();
-    static MojErr doSpaceCheck(AlertLevel& level, int& bytesUsed, int& bytesAvailable);
-	static gboolean periodicSpaceCheck(gpointer data);
-	MojErr generateSpaceAlert(AlertLevel level, MojInt64 bytesUsed, MojInt64 bytesAvailable);
+	MojErr generateSpaceAlert(MojDbSpaceAlert::AlertLevel level, MojInt64 bytesUsed, MojInt64 bytesAvailable);
 	MojErr generateFatalAlert();
 	MojErr generateAlert(const MojChar* event, const MojObject& msg);
-
-	GSource* m_spaceCheckTimer;
-	MojVector<MojRefCountedPtr<SpaceCheckHandler> > m_spaceCheckHandlers;
-	static AlertLevel m_spaceAlertLevel;
-	static bool m_compactRunning;
 
 	MojService& m_service;
 	MojRefCountedPtr<LocaleHandler> m_localeChangeHandler;
 	static const Method s_privMethods[];
 
-	// Some of these need to be changed to configuration items
-	static const MojInt32 SpaceCheckInterval;
-	static const MojChar* const DatabaseRoot;
-	static const MojDouble SpaceAlertLevels[];
-	static const MojChar* const SpaceAlertNames[];
-	static const MojInt32 NumSpaceAlertLevels;
 };
 
 #endif /* MOJDBSERVICEHANDLERINTERNAL_H_ */

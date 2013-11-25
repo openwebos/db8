@@ -47,20 +47,8 @@ const MojChar* const MojDbServiceHandlerInternal::ScheduledPurgeMethod = _T("int
 const MojChar* const MojDbServiceHandlerInternal::SpaceCheckMethod = _T("internal/spaceCheck");
 const MojChar* const MojDbServiceHandlerInternal::ScheduledSpaceCheckMethod = _T("internal/scheduledSpaceCheck");
 
-const MojInt32 MojDbServiceHandlerInternal::SpaceCheckInterval = 60;
-const MojChar* const MojDbServiceHandlerInternal::DatabaseRoot = "/var/db";
-const MojDouble MojDbServiceHandlerInternal::SpaceAlertLevels[] = { 85.0, 90.0, 95.0 };
-const MojChar* const MojDbServiceHandlerInternal::SpaceAlertNames[] = {"none",  "low", "medium", "high" };
-const MojInt32 MojDbServiceHandlerInternal::NumSpaceAlertLevels =
-	sizeof(MojDbServiceHandlerInternal::SpaceAlertLevels) / sizeof(MojDouble);
-
-MojDbServiceHandlerInternal::AlertLevel MojDbServiceHandlerInternal::m_spaceAlertLevel = NeverSentSpaceAlert;
-bool MojDbServiceHandlerInternal::m_compactRunning = false;
-
-
 MojDbServiceHandlerInternal::MojDbServiceHandlerInternal(MojDb& db, MojReactor& reactor, MojService& service)
 : MojDbServiceHandlerBase(db, reactor),
-  m_spaceCheckTimer(NULL),
   m_service(service)
 {
 }
@@ -80,21 +68,6 @@ MojErr MojDbServiceHandlerInternal::close()
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	return MojErrNone;
-}
-
-MojDbServiceHandlerInternal::AlertLevel MojDbServiceHandlerInternal::spaceAlertLevel()
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-   if(m_compactRunning) // do the real space check - we have no idea how long it'll take to clean up everything
-   {
-      int bytesUsed = 0;
-      int bytesAvailable = 0;
-      AlertLevel alertLevel = AlertLevelHigh;
-      doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
-      return alertLevel;
-   }
-   return MojDbServiceHandlerInternal::m_spaceAlertLevel;
 }
 
 MojErr MojDbServiceHandlerInternal::configure(bool fatalError)
@@ -281,21 +254,22 @@ MojErr MojDbServiceHandlerInternal::handleSpaceCheck(MojServiceMessage* msg, Moj
 	MojAssert(msg);
 
 	MojErr err = MojErrNone;
+    MojDbSpaceAlert& spaceAlert = m_db.getSpaceAlert();
+
 	MojObject response;
-	AlertLevel alertLevel;
+    MojDbSpaceAlert::AlertLevel alertLevel;
 	int bytesUsed;
 	int bytesAvailable;
 	bool subscribed = msg->subscribed();
 
 	if (subscribed) {
-		MojRefCountedPtr<SpaceCheckHandler> handler = new SpaceCheckHandler(this, msg);
-		m_spaceCheckHandlers.push(handler);
+        spaceAlert.subscribe(msg);
 	}
 
-	err = doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
+	err = spaceAlert.doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
 	MojErrCheck(err);
 
-	err = response.putString(_T("severity"), SpaceAlertNames[alertLevel - NoSpaceAlert]);
+    err = response.putString(_T("severity"), spaceAlert.getAlertName(alertLevel));
 	MojErrCheck(err);
 	err = response.putInt(_T("bytesUsed"), bytesUsed);
 	MojErrCheck(err);
@@ -334,141 +308,6 @@ MojErr MojDbServiceHandlerInternal::requestLocale()
 	MojErrCheck(err);
 
 	return MojErrNone;
-}
-
-MojErr MojDbServiceHandlerInternal::doSpaceCheck()
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-	AlertLevel alertLevel;
-	int bytesUsed;
-	int bytesAvailable;
-	MojErr err = doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
-	if (err != MojErrNone)
-		return err;
-
-    // first display message if needed
-	if (alertLevel != m_spaceAlertLevel) {
-		MojObject message;
-		MojErr err = message.putString(_T("severity"), SpaceAlertNames[alertLevel - NoSpaceAlert]);
-		MojErrCheck(err);
-		err = message.putInt(_T("bytesUsed"), bytesUsed);
-		MojErrCheck(err);
-		err = message.putInt(_T("bytesAvailable"), bytesAvailable);
-		MojErrCheck(err);
-
-		for (MojSize i = 0; i < m_spaceCheckHandlers.size(); i++)
-			m_spaceCheckHandlers.at(i)->dispatchUpdate(message);
-	}
-
-    // if we are close to db full - let's do purge and compact
-    // if alertLevel is AlertLevelLow - purge everything except last day
-    // otherwise purge and compact everything
-    // we do the purge/compact procedure ONLY once per each alertLevel change
-    {
-       MojUInt32 count = 0;
-       m_compactRunning = true;
-       if( (alertLevel >= AlertLevelLow) && (alertLevel != m_spaceAlertLevel) )
-       {
-          MojDbReq adminRequest(true);
-          adminRequest.beginBatch();
-          if(alertLevel > AlertLevelLow)
-             m_db.purge(count, 0, adminRequest); // purge everything
-          else
-             m_db.purge(count, 1, adminRequest); // save last day
-          adminRequest.endBatch();
-       }
-
-       if(count > 0)
-       {
-          MojDbReq compactRequest(false);
-          compactRequest.beginBatch();
-          MojErr err = m_db.compact();
-          MojErrCheck(err);
-          compactRequest.endBatch();
-
-          // check again
-          doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
-       }
-       m_compactRunning = false;
-    }
-
-    m_spaceAlertLevel = alertLevel;
-
-	return err;
-}
-
-MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::AlertLevel& alertLevel,
-                                                 int& bytesUsed, int& bytesAvailable)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-	alertLevel = NoSpaceAlert;
-	bytesUsed = 0;
-	bytesAvailable = 0;
-
-	struct statvfs dbFsStat;
-
-	int ret = ::statvfs(DatabaseRoot, &dbFsStat);
-	if (ret != 0) {
-        LOG_ERROR(MSGID_DB_SERVICE_ERROR, 2,
-            PMLOGKFV("error", "%d", ret),
-            PMLOGKS("db_root", DatabaseRoot),
-            "Error 'error' attempting to stat database filesystem mounted at 'db_root'");
-		return MojErrInternal;
-	}
-
-	fsblkcnt_t blocksUsed = dbFsStat.f_blocks - dbFsStat.f_bfree;
-
-    MojInt64 bigBytesUsed = (MojInt64)blocksUsed * dbFsStat.f_frsize;
-    MojInt64 bigBytesAvailable = (MojInt64)dbFsStat.f_blocks * dbFsStat.f_frsize;
-
-	MojDouble percentUsed =
-		((MojDouble)blocksUsed / (MojDouble)dbFsStat.f_blocks) * 100.0;
-
-    LOG_DEBUG("[db_mojodb] Database volume %.1f full", percentUsed);
-
-    if (MASSIVE_AVAILABLE_SPACE > bigBytesAvailable) { // regardless of percent used, if available space is massive, don't set space alert
-        int level;
-        for (level = AlertLevelHigh; level > NoSpaceAlert; --level) {
-            if (percentUsed >= SpaceAlertLevels[level])
-                break;
-        }
-        alertLevel = (AlertLevel) level;
-    }
-
-
-	if ((AlertLevel)alertLevel > NoSpaceAlert) {
-        LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 2,
-            PMLOGKFV("volume", "%.1f", percentUsed),
-            PMLOGKS("severity", SpaceAlertNames[alertLevel - NoSpaceAlert]),
-            "Database volume usage 'volume', generating warning, severity");
-	} else {
-		if ((AlertLevel)alertLevel != m_spaceAlertLevel) {
-			// Generate 'ok' message only if there has been a transition.
-            LOG_DEBUG("[db_mojodb] Database volume usage %1.f, space ok, no warning needed.\n", percentUsed);
-		}
-	}
-
-    // On embedded devices, available/used space normally well below 2GB, but on desktop environments cap to 2GB
-    bytesUsed = (int)(bigBytesUsed > MojInt32Max ? MojInt32Max : bigBytesUsed);
-    bytesAvailable = (int)(bigBytesAvailable > MojInt32Max ? MojInt32Max : bigBytesAvailable);
-
-	return MojErrNone;
-}
-
-gboolean MojDbServiceHandlerInternal::periodicSpaceCheck(gpointer data)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-	MojDbServiceHandlerInternal* base;
-
-	base = static_cast<MojDbServiceHandlerInternal *>(data);
-
-	base->doSpaceCheck();
-
-	/* Keep repeating at the given interval */
-	return true;
 }
 
 MojErr MojDbServiceHandlerInternal::generateFatalAlert()
@@ -544,7 +383,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleAdopt(MojObject& payload
         MojErr err = MojErrNone;
         if( m_doSpaceCheck )
         {
-           err = m_serviceHandler->doSpaceCheck();
+           err = m_serviceHandler->m_db.getSpaceAlert().doSpaceCheck();
            MojErrCheck(err);
         }
         else
@@ -703,52 +542,5 @@ MojErr MojDbServiceHandlerInternal::AlertHandler::handleAlertResponse(MojObject&
             "error attempting to display alert: 'error'");
 		MojErrThrow(errCode);
 	}
-	return MojErrNone;
-}
-
-MojDbServiceHandlerInternal::SpaceCheckHandler::SpaceCheckHandler(MojDbServiceHandlerInternal* parent, MojServiceMessage* msg)
-	: m_parent(parent)
-	, m_msg(msg)
-	, m_cancelSlot(this, &SpaceCheckHandler::handleCancel)
-{
-	MojAssert(msg);
-	msg->notifyCancel(m_cancelSlot);
-}
-
-MojDbServiceHandlerInternal::SpaceCheckHandler::~SpaceCheckHandler()
-{
-}
-
-MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::dispatchUpdate(const MojObject& message)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-	MojErr err = MojErrNone;
-	err = m_msg->reply(message);
-	MojErrCheck(err);
-
-	return err;
-}
-
-MojErr MojDbServiceHandlerInternal::SpaceCheckHandler::handleCancel(MojServiceMessage* msg)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-	MojAssert(msg == m_msg.get());
-
-	m_msg.reset();
-
-	MojSize index = 0;
-        bool isFound = false;
-	for (MojSize i = 0; i < m_parent->m_spaceCheckHandlers.size(); i++) {
-		if (m_parent->m_spaceCheckHandlers.at(i).get() == this) {
-			index = i;
-                        isFound = true;
-			break;
-		}
-	}
-
-	MojAssert(!isFound);
-	m_parent->m_spaceCheckHandlers.erase(index);
-
 	return MojErrNone;
 }

@@ -26,6 +26,7 @@
 #include "db/MojDbKindEngine.h"
 #include "db/MojDbPermissionEngine.h"
 #include "db/MojDbQuotaEngine.h"
+#include "db/MojDbSpaceAlert.h"
 #include "db/MojDbStorageEngine.h"
 #include "db/MojDbShardIdCache.h"
 #include "db/MojDbShardEngine.h"
@@ -115,6 +116,7 @@ public:
     //successful, if records for the _kind have been written to this shard
     bool isSupported (MojString& i_shardId, MojString& i_kindStr);
 
+    MojDbSpaceAlert& getSpaceAlert() { return m_spaceAlert; }
 private:
 	friend class MojDbKindEngine;
 	friend class MojDbReq;
@@ -175,6 +177,7 @@ private:
 	MojErr reloadKind(const MojString& id);
 	MojErr assignIds(MojObject& objOut);
 
+    MojDbSpaceAlert m_spaceAlert;
 	MojRefCountedPtr<MojDbStorageEngine> m_storageEngine;
 	MojRefCountedPtr<MojDbStorageDatabase> m_objDb;
 	MojRefCountedPtr<MojDbStorageSeq> m_idSeq;

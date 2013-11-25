@@ -60,7 +60,8 @@ const MojUInt32 MojDb::AutoCompactSize = 5000;
 static volatile bool DefaultLocaleAlreadyInited = false;
 
 MojDb::MojDb()
-: m_purgeWindow(PurgeNumDaysDefault),
+: m_spaceAlert(*this),
+  m_purgeWindow(PurgeNumDaysDefault),
   m_loadStepSize(LoadStepSizeDefault),
   m_isOpen(false)
 {
@@ -144,6 +145,13 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	// check the database version number and bail if there's a mismatch
 	err = checkDbVersion(path);
 	MojErrCheck(err);
+
+    MojString pathAsString;
+    err = pathAsString.assign(path);
+    MojErrCheck(err);
+    err = m_spaceAlert.configure(pathAsString);
+    MojErrCheck(err);
+
 	// engine
 	if (engine == NULL) {
 		err = createEngine();

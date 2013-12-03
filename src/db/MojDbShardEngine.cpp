@@ -819,45 +819,6 @@ MojErr MojDbShardEngine::purgeShardObjects (MojInt64 numDays, MojDbReqRef req)
 
     MojErrCheck(cursor.close());
 
-    //collect transient shards
-    //------------------------
-    bool transient = true;
-    err = query2.from(_T("ShardInfo1:1"));
-    MojErrCheck(err);
-    err = query2.where(_T("transient"), MojDbQuery::OpLessThanEq, transient);
-    MojErrCheck(err);
-    query2.setIgnoreInactiveShards(false);
-
-    err = mp_db->find(query2, cursor, req);
-    MojErrCheck(err);
-
-    while (true)
-    {
-        err = cursor.get(dbObj, found);
-        MojErrCheck(err);
-        if(!found)
-            break;
-
-        err = dbObj.getRequired(_T("shardId"), value_id);
-        MojErrCheck(err);
-        err = MojDbShardEngine::convertId(value_id, shardIdStr);
-        MojErrCheck(err);
-        err = dbObj.getRequired(_T("active"), value_active);
-        MojErrCheck(err);
-
-        if(!value_active)
-        {
-            err = arrShardIds.pushUnique(value_id);
-            MojErrCheck(err);
-            MojLogDebug(s_log, _T("Need to purge records for transient shard: [%s]"), shardIdStr.data());
-        } else { // TODO: Remove
-            MojLogDebug(s_log, _T("Ignore active transient shard: [%s]"), shardIdStr.data());
-
-        }
-    }
-
-    MojErrCheck(cursor.close());
-
     removeShardObjects(arrShardIds, req);
     MojLogDebug(s_log, _T("Ended"));
 
@@ -909,6 +870,7 @@ MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShar
     ShardInfo info;
     bool foundOut;
     MojErr err;
+    MojDbKind* pKind;
 
     if (arrShardIds.size() > 0)
     {
@@ -925,6 +887,13 @@ MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShar
                     //iterate over kindIds array
                     for (std::list<MojString>::iterator itKindId = info.kindIds.begin(); itKindId != info.kindIds.end(); ++itKindId)
                     {
+                        //verify kind for 'built-in' flag
+                        err = mp_db->kindEngine()->getKind((*itKindId).data(), pKind);
+                        MojErrCheck(err);
+
+                        if(pKind->isBuiltin())
+                            continue;
+
                         MojLogDebug(s_log, _T("Get next shard for %s"), (*itKindId).data()); // TODO: to debug
                         err = removeShardKindObjects(*itShardId, *itKindId, req);
                         MojErrCheck(err);

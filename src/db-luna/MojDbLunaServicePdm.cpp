@@ -23,19 +23,18 @@
 #include "core/MojApp.h"
 #include <algorithm>
 
-MojLogger MojDbLunaServicePdm::s_log(_T("db-luna.shard"));
+//db-luna.shard
 const MojChar* const MojDbLunaServicePdm::ConfKey = _T("pdm");
 
 MojDbLunaServicePdm::MojDbLunaServicePdm(MojMessageDispatcher& dispatcher)
 : m_service(true, &dispatcher),
   m_shardInfoSignal(0)
 {
-    MojLogTrace(s_log);
 }
 
 MojErr MojDbLunaServicePdm::configure(const MojObject& conf)
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     MojErr err;
     MojObject pdmConf;
@@ -54,6 +53,7 @@ MojErr MojDbLunaServicePdm::configure(const MojObject& conf)
 
 MojErr MojDbLunaServicePdm::init(MojReactor& reactor)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!m_shardInfoSignal.get());
     m_shardInfoSignal.reset(new MojDbShardEngine::SignalPdm(this));
     MojAllocCheck(m_shardInfoSignal.get());
@@ -66,10 +66,11 @@ MojErr MojDbLunaServicePdm::init(MojReactor& reactor)
 
 MojErr MojDbLunaServicePdm::open(MojGmainReactor& reactor, const MojChar* MojdbPDMClientName, const MojChar* pdmServiceName)
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     MojAssert(MojdbPDMClientName);
     MojAssert(pdmServiceName);
-    MojLogDebug(s_log, "Open connectoin to PDM");
+    LOG_DEBUG("[db-luna_shard] Open connectoin to PDM");
 
     // open service
     MojErr err = m_service.open(MojdbPDMClientName);
@@ -77,7 +78,7 @@ MojErr MojDbLunaServicePdm::open(MojGmainReactor& reactor, const MojChar* MojdbP
     err = m_service.attach(reactor.impl());
     MojErrCheck(err);
 
-    MojLogDebug(s_log, "Open PDM handler");
+    LOG_DEBUG("[db-luna_shard] Open PDM handler");
     // open handler
     err = m_handler->open(&m_service, pdmServiceName);
     MojErrCheck(err);
@@ -89,7 +90,7 @@ MojErr MojDbLunaServicePdm::open(MojGmainReactor& reactor, const MojChar* MojdbP
 
 MojErr MojDbLunaServicePdm::close()
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_shardInfoSignal.get());
 
     MojErr err = MojErrNone;
@@ -104,12 +105,13 @@ MojErr MojDbLunaServicePdm::close()
 
 MojErr MojDbLunaServicePdm::notifyShardEngine(const MojDbShardEngine::ShardInfo& shardInfo)
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     if (m_shardInfoSignal.get()) {
-        MojLogDebug(s_log, "Notify Shard Engine about new shard");
+        LOG_DEBUG("[db-luna_shard] Notify Shard Engine about new shard");
         return m_shardInfoSignal->call(shardInfo);
     } else {
-        MojLogDebug(s_log, "Can't notify shard engine. Shard engine died");
+        LOG_DEBUG("[db-luna_shard] Can't notify shard engine. Shard engine died");
     }
 
     return MojErrNone;
@@ -117,9 +119,9 @@ MojErr MojDbLunaServicePdm::notifyShardEngine(const MojDbShardEngine::ShardInfo&
 
 MojErr MojDbLunaServicePdm::addShardEngine(MojDbShardEngine* shardEngine)
 {
-    MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_shardInfoSignal.get());
-    MojLogDebug(s_log, "Add shard engine to luna service pdm");
+    LOG_DEBUG("[db-luna_shard] Add shard engine to luna service pdm");
 
     MojErr err;
     err = shardEngine->connectPdmServiceSignal(m_shardInfoSignal.get());

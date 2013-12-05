@@ -111,7 +111,6 @@ private:
 	KindMap m_kinds;
 	TokMap m_tokens;
 	MojString m_locale;
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBKINDENGINE_H_ */

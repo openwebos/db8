@@ -34,6 +34,7 @@ MojDbTextTokenizer::~MojDbTextTokenizer()
 
 MojErr MojDbTextTokenizer::init(const MojChar* locale)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(locale);
 
 	UErrorCode status = U_ZERO_ERROR;
@@ -46,6 +47,7 @@ MojErr MojDbTextTokenizer::init(const MojChar* locale)
 
 MojErr MojDbTextTokenizer::tokenize(const MojString& text, MojDbTextCollator* collator, KeySet& keysOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_ubrk.get());
 
 	// convert to UChar from str

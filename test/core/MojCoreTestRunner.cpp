@@ -73,7 +73,6 @@ void MojCoreTestRunner::runTests()
 	test(MojHashMapTest());
 	test(MojJsonTest());
 	test(MojListTest());
-	test(MojLogTest());
 	test(MojMapTest());
 	test(MojMessageDispatcherTest());
 	test(MojObjectTest());

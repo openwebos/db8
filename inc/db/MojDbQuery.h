@@ -175,7 +175,6 @@ private:
 	bool m_desc;
     bool m_ignoreInactiveShards;
 
-	static MojLogger s_log;
 	MojDbIndex *m_forceIndex;		// for debugging in stats
 };
 

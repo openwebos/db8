@@ -28,12 +28,5 @@
 
 #include "MojCoreTestRunner.h"
 
-class MojLogTest : public MojTestCase
-{
-public:
-	MojLogTest();
-
-	virtual MojErr run();
-};
 
 #endif /* MOJLOGTEST_H_ */

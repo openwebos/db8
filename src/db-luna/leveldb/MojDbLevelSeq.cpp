@@ -23,8 +23,6 @@
 // at this point it's just a placeholder
 MojDbLevelSeq::~MojDbLevelSeq()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
-
     if (m_db) {
         MojErr err = close();
         MojErrCatchAll(err);
@@ -33,8 +31,8 @@ MojDbLevelSeq::~MojDbLevelSeq()
 
 MojErr MojDbLevelSeq::open(const MojChar* name, MojDbLevelDatabase* db)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db);
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     //MojAssert(!m_seq);
     MojErr err;
@@ -67,7 +65,7 @@ MojErr MojDbLevelSeq::open(const MojChar* name, MojDbLevelDatabase* db)
 
 MojErr MojDbLevelSeq::close()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     if (m_db) {
         MojErr err = store(m_next);
@@ -79,7 +77,7 @@ MojErr MojDbLevelSeq::close()
 
 MojErr MojDbLevelSeq::get(MojInt64& valOut)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     if (m_next == m_allocated)
     {
@@ -99,6 +97,7 @@ MojErr MojDbLevelSeq::allocateMore()
 
 MojErr MojDbLevelSeq::store(MojInt64 next)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( next >= m_next );
     MojErr err;
     MojDbLevelItem val;

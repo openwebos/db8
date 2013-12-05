@@ -52,7 +52,6 @@ protected:
 
 	MojDb& m_db;
 	MojReactor& m_reactor;
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBSERVICEHANDLERBASE_H_ */

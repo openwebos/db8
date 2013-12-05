@@ -38,6 +38,8 @@ MojDbCursor::~MojDbCursor()
 
 MojErr MojDbCursor::close()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = MojErrNone;
 	MojErr errClose = MojErrNone;
 	if (m_storageQuery.get()) {
@@ -54,7 +56,9 @@ MojErr MojDbCursor::close()
 			MojErrAccumulate(err, errClose);
 		} else {
 			if (m_lastErr == MojErrInternalIndexOnFind)
-				MojLogWarning(MojDb::s_log, _T("dbcursor_close: IndexFind Warning - abort tran; code = %d\n"), (int)m_lastErr);
+                LOG_WARNING(MSGID_MOJ_DB_CURSOR_WARNING, 1,
+                    PMLOGKS("code", (int)m_lastErr),
+                    "dbcursor_close: IndexFind Warning - abort tran; code = %d\n", (int)m_lastErr);
 			errClose = m_txn->abort();
 			MojErrAccumulate(err, errClose);
 		}
@@ -68,29 +72,33 @@ MojErr MojDbCursor::close()
 	m_watcher.reset();
 	m_query.clear();
     m_dbIndex = NULL;
-    
+
 	return err;
 }
 
 MojErr MojDbCursor::get(MojDbStorageItem*& itemOut, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	foundOut = false;
 	if (!m_storageQuery.get())
 		MojErrThrow(MojErrNotOpen);
 	m_storageQuery->verify(m_vmode);
 	MojErr err = m_storageQuery->get(itemOut, foundOut);
 	if (err == MojErrInternalIndexOnFind) {
-		MojLogDebug(MojDb::s_log, _T("dbcursor_get1: IndexFind Warning; code = %d\n"), (int)err);
+		LOG_DEBUG("[db_mojodb] dbcursor_get1: IndexFind Warning; code = %d\n", (int)err);
 	} 
 	else
 		MojErrAccumulate(m_lastErr, err);
 	MojErrCheck(err);
-    MojLogDebug(MojDb::s_log, _T("dbcursor_get_item: found: %d\n"), (int)foundOut);
+    LOG_DEBUG("[db_mojodb] dbcursor_get_item: found: %d\n", (int)foundOut);
 	return MojErrNone;
 }
 
 MojErr MojDbCursor::get(MojObject& objOut, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	foundOut = false;
 	if (!m_storageQuery.get())
 		MojErrThrow(MojErrNotOpen);
@@ -99,12 +107,14 @@ MojErr MojDbCursor::get(MojObject& objOut, bool& foundOut)
 	MojErr err = visitObject(builder, foundOut);
 	MojErrCheck(err);
 	objOut = builder.object();
-    MojLogDebug(MojDb::s_log, _T("dbcursor_get_obj: found: %d\n"), (int)foundOut);
+    LOG_DEBUG("[db_mojodb] dbcursor_get_obj: found: %d\n", (int)foundOut);
 	return MojErrNone;
 }
 
 MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (!m_storageQuery.get())
 		MojErrThrow(MojErrNotOpen);
 	int i = 0;
@@ -112,7 +122,7 @@ MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 	do {
 		MojErr err = visitObject(visitor, found);
 		if (err == MojErrInternalIndexOnFind) {
-			MojLogDebug(MojDb::s_log, _T("dbcursor_visit indexwarn: %s; Index: %s \n"), this->query().from().data(),
+			LOG_DEBUG("[db_mojodb] dbcursor_visit indexwarn: %s; Index: %s \n", this->query().from().data(),
 				((m_dbIndex) ? m_dbIndex->name().data() : NULL));
 			MojErrAccumulate(m_lastErr, MojErrNone); // we need to clear the error so it wont bubble up
 			found = true;  // to continue the loop
@@ -121,12 +131,14 @@ MojErr MojDbCursor::visit(MojObjectVisitor& visitor)
 		MojErrCheck(err);
 		i++;
 	} while (found);
-    MojLogDebug(MojDb::s_log, _T("dbcursor_visit: count: %d\n"), (int)i);
+    LOG_DEBUG("[db_mojodb] dbcursor_visit: count: %d\n", (int)i);
 	return MojErrNone;
 }
 
 MojErr MojDbCursor::count(MojUInt32& countOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	countOut = 0;
 	if (!m_storageQuery.get())
 		MojErrThrow(MojErrNotOpen);
@@ -140,6 +152,8 @@ MojErr MojDbCursor::count(MojUInt32& countOut)
 
 MojErr MojDbCursor::nextPage(MojDbQuery::Page& pageOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (!m_storageQuery.get())
 		MojErrThrow(MojErrNotOpen);
 
@@ -152,6 +166,8 @@ MojErr MojDbCursor::nextPage(MojDbQuery::Page& pageOut)
 
 MojErr MojDbCursor::init(const MojDbQuery& query)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = query.validateFind();
 	MojErrCheck(err);
 	err = initImpl(query);
@@ -162,6 +178,8 @@ MojErr MojDbCursor::init(const MojDbQuery& query)
 
 MojErr MojDbCursor::initImpl(const MojDbQuery& query)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (!query.select().empty()) {
 		m_objectFilter.reset(new MojObjectFilter);
 		MojAllocCheck(m_objectFilter.get());
@@ -181,6 +199,8 @@ MojErr MojDbCursor::initImpl(const MojDbQuery& query)
 
 MojErr MojDbCursor::visitObject(MojObjectVisitor& visitor, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojDbStorageItem* item = NULL;
 	MojErr err = get(item, foundOut);
 	MojErrAccumulate(m_lastErr, err);
@@ -199,12 +219,14 @@ MojErr MojDbCursor::visitObject(MojObjectVisitor& visitor, bool& foundOut)
 		}
 	}
 
-    MojLogDebug(MojDb::s_log, _T("dbcursor_visitObject: found: %d\n"), (int)foundOut);
+    LOG_DEBUG("[db_mojodb] dbcursor_visitObject: found: %d\n", (int)foundOut);
 	return MojErrNone;
 }
 
 void MojDbCursor::txn(MojDbStorageTxn* txn, bool ownTxn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(!m_txn.get() && txn);
 	m_txn = txn;
 	m_ownTxn = ownTxn;
@@ -212,6 +234,8 @@ void MojDbCursor::txn(MojDbStorageTxn* txn, bool ownTxn)
 
 void MojDbCursor::excludeKinds(const MojSet<MojString>& toExclude)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(isOpen());
 	m_storageQuery->excludeKinds(toExclude);
 }

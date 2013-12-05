@@ -20,7 +20,7 @@
 template<class REACTOR>
 MojErr MojReactorApp<REACTOR>::init()
 {
-	MojLogTrace(s_log);
+	LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = MojServiceApp::init();
 	MojErrCheck(err);
@@ -33,7 +33,7 @@ MojErr MojReactorApp<REACTOR>::init()
 template<class REACTOR>
 MojErr MojReactorApp<REACTOR>::run()
 {
-	MojLogTrace(s_log);
+	LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = m_reactor.run();
 	MojErrCheck(err);
@@ -44,7 +44,7 @@ MojErr MojReactorApp<REACTOR>::run()
 template<class REACTOR>
 void MojReactorApp<REACTOR>::shutdown()
 {
-	MojLogTrace(s_log);
+	LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = m_reactor.stop();
 	MojErrCatchAll(err);

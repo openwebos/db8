@@ -33,7 +33,7 @@ enum DATA_TYPE {
     dataTypeObject,
 };
 
-static MojLogger s_log(_T("DBGen"));
+//DBGen
 
 MojErr genDbImage(const MojChar* dirPath, MojDb& db, DATA_TYPE type)
 {
@@ -106,7 +106,7 @@ int main(int argc, char**argv)
     MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
 #endif
     if (argc < 3) {
-        MojLogError(s_log, _T("Invalid arg, This program need two args(input and output path)"));
+        LOG_ERROR(MSGID_DB_ERROR, 0, "Invalid arg, This program need two args(input and output path)");
         return -1;
     }
 
@@ -134,7 +134,7 @@ int main(int argc, char**argv)
         if (err != MojErrNone) {
             MojString str;
             MojErrToString(err, str);
-            MojLogError(s_log, _T("(%s) error occured during generating DB image"), str.data());
+            LOG_ERROR(MSGID_DB_ERROR, 0, "(%s) error occured during generating DB image", str.data());
             db.drop(argv[2]);
             break;
         }

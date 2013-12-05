@@ -123,8 +123,6 @@ private:
 	bool m_includeDeleted;
 	bool m_ready;
 	MojUInt32 m_delMisses;
-
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBINDEX_H_ */

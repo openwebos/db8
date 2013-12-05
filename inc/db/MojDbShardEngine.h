@@ -331,7 +331,6 @@ private:
     std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;
     MojDbShardIdCache m_cache;
-    static MojLogger s_log;
 
 public:
     PDMSignalWatcher m_pdmWatcher;

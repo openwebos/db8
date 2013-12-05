@@ -30,21 +30,17 @@ MojDbLevelCursor::MojDbLevelCursor() :
     m_ttxn(0),
     m_txnIt(0)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
 }
 
 MojDbLevelCursor::~MojDbLevelCursor()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
-
     MojErr err = close();
     MojErrCatchAll(err);
 }
 
 MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojUInt32 flags)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
-    MojAssert( !m_txnIt.get() );
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db && txn);
     MojAssert(db->impl());
     MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
@@ -64,7 +60,7 @@ MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojU
 
 MojErr MojDbLevelCursor::close()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     m_txn = 0;
     m_ttxn = 0;
@@ -76,7 +72,7 @@ MojErr MojDbLevelCursor::close()
 
 MojErr MojDbLevelCursor::del()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txn && m_ttxn );
     MojAssert( m_txnIt.get() );
 
@@ -93,8 +89,8 @@ MojErr MojDbLevelCursor::del()
 
 MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txnIt.get() );
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojDbLevelItem key;
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
@@ -117,8 +113,8 @@ MojErr MojDbLevelCursor::delPrefix(const MojDbKey& prefix)
 
 MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& foundOut, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txnIt.get() );
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     const std::string& lkey = key.impl()->ToString();
 
@@ -158,11 +154,11 @@ MojErr MojDbLevelCursor::get(MojDbLevelItem& key, MojDbLevelItem& val, bool& fou
 
 MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txnIt.get() );
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     MojErr err = statsPrefix(MojDbKey(), countOut, sizeOut);
-    MojLogDebug(MojDbLevelEngine::s_log, _T("ldbcursor_stats: count: %d, size: %d, err: %d"), (int)countOut, (int)sizeOut, (int)err);
+    LOG_DEBUG("[db_ldb] ldbcursor_stats: count: %d, size: %d, err: %d", (int)countOut, (int)sizeOut, (int)err);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -170,8 +166,8 @@ MojErr MojDbLevelCursor::stats(MojSize& countOut, MojSize& sizeOut)
 
 MojErr MojDbLevelCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOut, MojSize& sizeOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txnIt.get() );
-    MojLogTrace(MojDbLevelEngine::s_log);
 
     countOut = 0;
     sizeOut = 0;

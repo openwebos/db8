@@ -23,7 +23,7 @@
 const MojChar* const MojDbRevisionSet::PropsKey = _T("props");
 const MojChar* const MojDbRevisionSet::NameKey = _T("name");
 
-MojLogger MojDbRevisionSet::s_log(_T("db.revset"));
+//db.revset
 
 MojDbRevisionSet::MojDbRevisionSet()
 {
@@ -31,7 +31,7 @@ MojDbRevisionSet::MojDbRevisionSet()
 
 MojErr MojDbRevisionSet::fromObject(const MojObject& obj)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// get name
 	MojErr err = obj.getRequired(NameKey, m_name);
@@ -55,7 +55,7 @@ MojErr MojDbRevisionSet::fromObject(const MojObject& obj)
 
 MojErr MojDbRevisionSet::addProp(const MojObject& propObj)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	// and create extractor
 	MojRefCountedPtr<MojDbPropExtractor> extractor(new MojDbPropExtractor);
@@ -70,6 +70,7 @@ MojErr MojDbRevisionSet::addProp(const MojObject& propObj)
 
 MojErr MojDbRevisionSet::update(MojObject* newObj, const MojObject* oldObj) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(newObj);
 
 	if (!oldObj) {
@@ -84,6 +85,8 @@ MojErr MojDbRevisionSet::update(MojObject* newObj, const MojObject* oldObj) cons
 
 MojErr MojDbRevisionSet::diff(MojObject& newObj, const MojObject& oldObj) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	KeySet newVals;
 	KeySet oldVals;
 	for (PropVec::ConstIterator i = m_props.begin(); i != m_props.end(); ++i) {
@@ -107,6 +110,8 @@ MojErr MojDbRevisionSet::diff(MojObject& newObj, const MojObject& oldObj) const
 
 MojErr MojDbRevisionSet::updateRev(MojObject& obj) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObject rev;
 	MojErr err = obj.getRequired(MojDb::RevKey, rev);
 	MojErrCheck(err);

@@ -32,6 +32,8 @@ MojDbServiceClient::MojDbServiceClient(MojService* service, const MojChar* servi
 
 MojErr MojDbServiceClient::putKind(Signal::SlotRef handler, const MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -43,6 +45,8 @@ MojErr MojDbServiceClient::putKind(Signal::SlotRef handler, const MojObject& obj
 
 MojErr MojDbServiceClient::delKind(Signal::SlotRef handler, const MojChar* id)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -63,6 +67,8 @@ MojErr MojDbServiceClient::delKind(Signal::SlotRef handler, const MojChar* id)
 
 MojErr MojDbServiceClient::putPermissions(Signal::SlotRef handler, const MojObject* begin,const MojObject* end)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::PutPermissionsMethod, MojDbServiceDefs::PermissionsKey, begin, end);
 	MojErrCheck(err);
 
@@ -71,6 +77,7 @@ MojErr MojDbServiceClient::putPermissions(Signal::SlotRef handler, const MojObje
 
 MojErr MojDbServiceClient::getPermissions(Signal::SlotRef handler, const MojChar* type, const MojChar* object)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(type && object);
 
 	MojRefCountedPtr<MojServiceRequest> req;
@@ -99,6 +106,8 @@ MojErr MojDbServiceClient::getPermissions(Signal::SlotRef handler, const MojChar
 MojErr MojDbServiceClient::put(Signal::SlotRef handler, const MojObject* begin,
 							   const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::PutMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
 
@@ -107,6 +116,8 @@ MojErr MojDbServiceClient::put(Signal::SlotRef handler, const MojObject* begin,
 
 MojErr MojDbServiceClient::get(Signal::SlotRef handler, const MojObject* idsBegin, const MojObject* idsEnd)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::GetMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd);
 	MojErrCheck(err);
 
@@ -116,6 +127,8 @@ MojErr MojDbServiceClient::get(Signal::SlotRef handler, const MojObject* idsBegi
 MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojObject* idsBegin,
 							   const MojObject* idsEnd, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::DelMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd, flags);
 	MojErrCheck(err);
 
@@ -124,6 +137,8 @@ MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojObject* idsBegi
 
 MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojDbQuery& query, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(handler, MojDbServiceDefs::DelMethod, query, flags);
 	MojErrCheck(err);
 
@@ -133,6 +148,8 @@ MojErr MojDbServiceClient::del(Signal::SlotRef handler, const MojDbQuery& query,
 MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojObject* begin,
 								 const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(handler, MojDbServiceDefs::MergeMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
 
@@ -142,6 +159,8 @@ MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojObject* begin
 MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojDbQuery& query,
 								 const MojObject& props, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -167,6 +186,8 @@ MojErr MojDbServiceClient::merge(Signal::SlotRef handler, const MojDbQuery& quer
 MojErr MojDbServiceClient::find(Signal::SlotRef handler, const MojDbQuery& query,
 								bool watch, bool count)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(handler, MojDbServiceDefs::FindMethod, query, MojDb::FlagNone, watch, count, watch + 1);
 	MojErrCheck(err);
 
@@ -176,6 +197,8 @@ MojErr MojDbServiceClient::find(Signal::SlotRef handler, const MojDbQuery& query
 MojErr MojDbServiceClient::search(Signal::SlotRef handler, const MojDbQuery& query,
 								  bool watch, bool count)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(handler, MojDbServiceDefs::SearchMethod, query, MojDb::FlagNone, watch, count, watch + 1);
 	MojErrCheck(err);
 
@@ -184,6 +207,8 @@ MojErr MojDbServiceClient::search(Signal::SlotRef handler, const MojDbQuery& que
 
 MojErr MojDbServiceClient::watch(Signal::SlotRef handler, const MojDbQuery& query)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(handler, MojDbServiceDefs::WatchMethod, query, MojDb::FlagNone, false, false, 2);
 	MojErrCheck(err);
 
@@ -192,6 +217,8 @@ MojErr MojDbServiceClient::watch(Signal::SlotRef handler, const MojDbQuery& quer
 
 MojErr MojDbServiceClient::createBatch(MojAutoPtr<MojDbBatch>& batchOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -212,6 +239,8 @@ MojErr MojDbServiceClient::createBatch(MojAutoPtr<MojDbBatch>& batchOut)
 
 MojErr MojDbServiceClient::compact(Signal::SlotRef handler)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = emptyRequest(handler, MojDbServiceDefs::CompactMethod);
 	MojErrCheck(err);
 
@@ -220,6 +249,8 @@ MojErr MojDbServiceClient::compact(Signal::SlotRef handler)
 
 MojErr MojDbServiceClient::purge(Signal::SlotRef handler, MojUInt32 window)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = intRequest(handler, MojDbServiceDefs::PurgeMethod, MojDbServiceDefs::WindowKey, window);
 	MojErrCheck(err);
 
@@ -228,6 +259,8 @@ MojErr MojDbServiceClient::purge(Signal::SlotRef handler, MojUInt32 window)
 
 MojErr MojDbServiceClient::purgeStatus(Signal::SlotRef handler)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = emptyRequest(handler, MojDbServiceDefs::PurgeStatusMethod);
 	MojErrCheck(err);
 
@@ -236,6 +269,8 @@ MojErr MojDbServiceClient::purgeStatus(Signal::SlotRef handler)
 
 MojErr MojDbServiceClient::reserveIds(Signal::SlotRef handler, MojUInt32 count)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = intRequest(handler, MojDbServiceDefs::ReserveIdsMethod, MojDbServiceDefs::CountKey, count);
 	MojErrCheck(err);
 
@@ -244,6 +279,8 @@ MojErr MojDbServiceClient::reserveIds(Signal::SlotRef handler, MojUInt32 count)
 
 MojErr MojDbServiceClient::emptyRequest(Signal::SlotRef handler, const MojChar* method)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -256,6 +293,8 @@ MojErr MojDbServiceClient::emptyRequest(Signal::SlotRef handler, const MojChar* 
 
 MojErr MojDbServiceClient::intRequest(Signal::SlotRef handler, const MojChar* method, const MojChar* prop, MojInt64 val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -272,6 +311,8 @@ MojErr MojDbServiceClient::intRequest(Signal::SlotRef handler, const MojChar* me
 MojErr MojDbServiceClient::arrayRequest(Signal::SlotRef handler, const MojChar* method, const MojChar* prop,
 										const MojObject* begin, const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -290,6 +331,8 @@ MojErr MojDbServiceClient::arrayRequest(Signal::SlotRef handler, const MojChar* 
 MojErr MojDbServiceClient::queryRequest(Signal::SlotRef handler, const MojChar* method,
 										const MojDbQuery& query, MojUInt32 flags, bool watch, bool count, MojUInt32 numReplies)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojRefCountedPtr<MojServiceRequest> req;
 	MojErr err = m_service->createRequest(req);
 	MojErrCheck(err);
@@ -308,6 +351,8 @@ MojErr MojDbServiceClient::queryRequest(Signal::SlotRef handler, const MojChar* 
 MojErr MojDbServiceClient::formatArrayParams(MojObjectVisitor& writer, const MojChar* prop,
 											const MojObject* begin, const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
 	err = formatFlags(writer, flags);
@@ -330,6 +375,8 @@ MojErr MojDbServiceClient::formatArrayParams(MojObjectVisitor& writer, const Moj
 
 MojErr MojDbServiceClient::formatIntParams(MojObjectVisitor& writer, const MojChar* prop, MojInt64 val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
 	err = writer.intProp(prop, val);
@@ -342,6 +389,8 @@ MojErr MojDbServiceClient::formatIntParams(MojObjectVisitor& writer, const MojCh
 
 MojErr MojDbServiceClient::formatEmptyParams(MojObjectVisitor& writer)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
 	err = writer.endObject();
@@ -352,6 +401,8 @@ MojErr MojDbServiceClient::formatEmptyParams(MojObjectVisitor& writer)
 
 MojErr MojDbServiceClient::formatQueryParams(MojObjectVisitor& writer, const MojDbQuery& query, MojUInt32 flags, bool watch, bool count)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
 	err = formatFlags(writer, flags);
@@ -376,6 +427,8 @@ MojErr MojDbServiceClient::formatQueryParams(MojObjectVisitor& writer, const Moj
 
 MojErr MojDbServiceClient::formatFlags(MojObjectVisitor& writer, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (MojFlagGet(flags, MojDb::FlagPurge)) {
 		MojErr err = writer.boolProp(MojDbServiceDefs::PurgeKey, true);
 		MojErrCheck(err);
@@ -391,6 +444,8 @@ MojDbServiceClientBatch::MojDbServiceClientBatch(MojServiceRequest* req, MojDbSe
 
 MojErr MojDbServiceClientBatch::execute(Signal::SlotRef handler)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 	MojErr err = writer.endArray();
 	MojErrCheck(err);
@@ -405,6 +460,8 @@ MojErr MojDbServiceClientBatch::execute(Signal::SlotRef handler)
 
 MojErr MojDbServiceClientBatch::put(const MojObject* begin, const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(MojDbServiceDefs::PutMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
 
@@ -413,6 +470,8 @@ MojErr MojDbServiceClientBatch::put(const MojObject* begin, const MojObject* end
 
 MojErr MojDbServiceClientBatch::get(const MojObject* idsBegin, const MojObject* idsEnd)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(MojDbServiceDefs::GetMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd);
 	MojErrCheck(err);
 
@@ -421,6 +480,8 @@ MojErr MojDbServiceClientBatch::get(const MojObject* idsBegin, const MojObject* 
 
 MojErr MojDbServiceClientBatch::del(const MojObject* idsBegin, const MojObject* idsEnd, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(MojDbServiceDefs::DelMethod, MojDbServiceDefs::IdsKey, idsBegin, idsEnd, flags);
 	MojErrCheck(err);
 
@@ -429,6 +490,8 @@ MojErr MojDbServiceClientBatch::del(const MojObject* idsBegin, const MojObject* 
 
 MojErr MojDbServiceClientBatch::del(const MojDbQuery& query, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(MojDbServiceDefs::DelMethod, query, flags);
 	MojErrCheck(err);
 
@@ -437,6 +500,8 @@ MojErr MojDbServiceClientBatch::del(const MojDbQuery& query, MojUInt32 flags)
 
 MojErr MojDbServiceClientBatch::merge(const MojObject* begin, const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = arrayRequest(MojDbServiceDefs::MergeMethod, MojDbServiceDefs::ObjectsKey, begin, end, flags);
 	MojErrCheck(err);
 
@@ -445,6 +510,8 @@ MojErr MojDbServiceClientBatch::merge(const MojObject* begin, const MojObject* e
 
 MojErr MojDbServiceClientBatch::merge(const MojDbQuery& query, const MojObject& props, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 
 	MojErr err = writer.beginObject();
@@ -463,6 +530,8 @@ MojErr MojDbServiceClientBatch::merge(const MojDbQuery& query, const MojObject& 
 
 MojErr MojDbServiceClientBatch::find(const MojDbQuery& query, bool returnCount)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(MojDbServiceDefs::FindMethod, query, MojDb::FlagNone, returnCount);
 	MojErrCheck(err);
 
@@ -471,6 +540,8 @@ MojErr MojDbServiceClientBatch::find(const MojDbQuery& query, bool returnCount)
 
 MojErr MojDbServiceClientBatch::search(const MojDbQuery& query, bool returnCount)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = queryRequest(MojDbServiceDefs::SearchMethod, query, MojDb::FlagNone, returnCount);
 	MojErrCheck(err);
 
@@ -479,6 +550,8 @@ MojErr MojDbServiceClientBatch::search(const MojDbQuery& query, bool returnCount
 
 MojErr MojDbServiceClientBatch::startRequest(MojObjectVisitor& writer, const MojChar* method)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = writer.beginObject();
 	MojErrCheck(err);
 	err = writer.stringProp(MojDbServiceDefs::MethodKey, method);
@@ -491,6 +564,8 @@ MojErr MojDbServiceClientBatch::startRequest(MojObjectVisitor& writer, const Moj
 
 MojErr MojDbServiceClientBatch::emptyRequest(const MojChar* method)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 
 	MojErr err = startRequest(writer, method);
@@ -505,6 +580,8 @@ MojErr MojDbServiceClientBatch::emptyRequest(const MojChar* method)
 
 MojErr MojDbServiceClientBatch::intRequest(const MojChar* method, const MojChar* prop, MojInt64 val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 
 	MojErr err = startRequest(writer, method);
@@ -519,6 +596,8 @@ MojErr MojDbServiceClientBatch::intRequest(const MojChar* method, const MojChar*
 
 MojErr MojDbServiceClientBatch::arrayRequest(const MojChar* method, const MojChar* prop, const MojObject* begin, const MojObject* end, MojUInt32 flags)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 
 	MojErr err = startRequest(writer, method);
@@ -533,6 +612,8 @@ MojErr MojDbServiceClientBatch::arrayRequest(const MojChar* method, const MojCha
 
 MojErr MojDbServiceClientBatch::queryRequest(const MojChar* method, const MojDbQuery& query, MojUInt32 flags, bool count)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectVisitor& writer = m_req->writer();
 
 	MojErr err = startRequest(writer, method);

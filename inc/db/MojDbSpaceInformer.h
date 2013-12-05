@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2013 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,10 +17,25 @@
 * LICENSE@@@ */
 
 
-#ifdef MOJ_USE_PMLOG
+#ifndef MOJDBSPACEINFORMER_H_
+#define MOJDBSPACEINFORMER_H_
 
-#include "core/MojPmLogAppender.h"
+#include "core/MojCoreDefs.h"
+#include "core/MojErr.h"
+#include "db/MojDbReq.h"
 
+class MojDbSpaceInformer : private MojNoCopy
+{
+public:
+    MojDbSpaceInformer();
+    virtual ~MojDbSpaceInformer();
 
-#endif // MOJ_USE_PMLOG
+    /**
+     * initialize MojDbSpaceInformer
+     */
+    MojErr init (const MojObject& conf, MojDb* ip_db, MojDbReqRef req = MojDbReq());
 
+private:
+};
+
+#endif /* MOJDBSPACEINFORMER_H_ */

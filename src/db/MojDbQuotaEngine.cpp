@@ -49,9 +49,8 @@ MojDbQuotaEngine::~MojDbQuotaEngine()
 
 MojErr MojDbQuotaEngine::open(const MojObject& conf, MojDb* db, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(db);
-	MojLogTrace(s_log);
-
 
 	MojErr err = db->storageEngine()->openDatabase(_T("UsageDbName"), req.txn(), m_usageDb);
 	MojErrCheck(err);
@@ -74,7 +73,7 @@ MojErr MojDbQuotaEngine::open(const MojObject& conf, MojDb* db, MojDbReq& req)
 
 MojErr MojDbQuotaEngine::close()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = MojErrNone;
 	MojErr errClose = MojDbPutHandler::close();
@@ -92,7 +91,7 @@ MojErr MojDbQuotaEngine::close()
 
 MojErr MojDbQuotaEngine::put(MojObject& obj, MojDbReq& req, bool putObj)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	// check for admin permission
@@ -138,7 +137,7 @@ MojErr MojDbQuotaEngine::put(MojObject& obj, MojDbReq& req, bool putObj)
 
 MojErr MojDbQuotaEngine::curKind(const MojDbKind* kind, MojDbStorageTxn* txn)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(kind && txn);
 
 	txn->m_quotaEngine = this;
@@ -162,7 +161,7 @@ MojErr MojDbQuotaEngine::curKind(const MojDbKind* kind, MojDbStorageTxn* txn)
 
 MojErr MojDbQuotaEngine::applyUsage(MojDbStorageTxn* txn)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	for (OffsetMap::ConstIterator i = txn->m_offsetMap.begin();
 		 i != txn->m_offsetMap.end(); ++i) {
@@ -174,7 +173,7 @@ MojErr MojDbQuotaEngine::applyUsage(MojDbStorageTxn* txn)
 
 MojErr MojDbQuotaEngine::applyQuota(MojDbStorageTxn* txn)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	for (OffsetMap::ConstIterator i = txn->m_offsetMap.begin();
 		 i != txn->m_offsetMap.end(); ++i) {
@@ -187,7 +186,7 @@ MojErr MojDbQuotaEngine::applyQuota(MojDbStorageTxn* txn)
 
 MojErr MojDbQuotaEngine::kindUsage(const MojChar* kindId, MojInt64& usageOut, MojDbStorageTxn* txn)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojString kindStr;
 	MojErr err = kindStr.assign(kindId);
@@ -201,6 +200,8 @@ MojErr MojDbQuotaEngine::kindUsage(const MojChar* kindId, MojInt64& usageOut, Mo
 
 MojErr MojDbQuotaEngine::quotaUsage(const MojChar* owner, MojInt64& sizeOut, MojInt64& usageOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	sizeOut = 0;
 	usageOut = 0;
 	QuotaMap::ConstIterator iter = m_quotas.find(owner);
@@ -215,7 +216,7 @@ MojErr MojDbQuotaEngine::quotaUsage(const MojChar* owner, MojInt64& sizeOut, Moj
 
 MojErr MojDbQuotaEngine::refresh()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	MojRefCountedPtr<MojDbStorageTxn> txn;
@@ -231,6 +232,8 @@ MojErr MojDbQuotaEngine::refresh()
 
 MojErr MojDbQuotaEngine::stats(MojObject& objOut, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// check for admin permission
 	if (!req.admin()) {
 		MojErrThrow(MojErrDbPermissionDenied);
@@ -249,7 +252,7 @@ MojErr MojDbQuotaEngine::stats(MojObject& objOut, MojDbReq& req)
 
 MojErr MojDbQuotaEngine::refreshImpl(MojDbStorageTxn* txn)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 	MojAssertWriteLocked(m_db->schemaLock());
 
@@ -276,6 +279,8 @@ MojErr MojDbQuotaEngine::refreshImpl(MojDbStorageTxn* txn)
 
 MojErr MojDbQuotaEngine::quotaForKind(const MojDbKind* kind, MojRefCountedPtr<Quota>& quotaOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// prefer to use super's quota
 	const MojDbKind::KindVec& supers = kind->supers();
 	for (MojDbKind::KindVec::ConstIterator i = supers.begin(); i != supers.end(); ++i) {
@@ -304,6 +309,7 @@ MojErr MojDbQuotaEngine::quotaForKind(const MojDbKind* kind, MojRefCountedPtr<Qu
 
 MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, MojInt64 offset, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 
 	// get old value
@@ -333,6 +339,7 @@ MojErr MojDbQuotaEngine::applyOffset(const MojString& kindId, MojInt64 offset, M
 
 MojErr MojDbQuotaEngine::getUsage(const MojString& kindId, MojDbStorageTxn* txn, bool forUpdate, MojInt64& usageOut, MojRefCountedPtr<MojDbStorageItem>& itemOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 
 	usageOut = 0;
@@ -349,6 +356,7 @@ MojErr MojDbQuotaEngine::getUsage(const MojString& kindId, MojDbStorageTxn* txn,
 
 MojErr MojDbQuotaEngine::initUsage(MojDbKind* kind, MojDbReq& req)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(kind);
 
 	MojRefCountedPtr<MojDbStorageItem> item;
@@ -367,6 +375,7 @@ MojErr MojDbQuotaEngine::initUsage(MojDbKind* kind, MojDbReq& req)
 
 MojErr MojDbQuotaEngine::insertUsage(const MojString& kindId, MojInt64 usage, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(txn);
 	MojAssert(usage >= 0);
 
@@ -386,7 +395,7 @@ MojErr MojDbQuotaEngine::insertUsage(const MojString& kindId, MojInt64 usage, Mo
 
 MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, MojInt64 size)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssertWriteLocked(m_db->schemaLock());
 
 	// get or create quota object
@@ -411,6 +420,8 @@ MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, MojInt64 size)
 
 MojInt64 MojDbQuotaEngine::Quota::size() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	MojInt64 size = m_size;
 	return size;
@@ -418,6 +429,8 @@ MojInt64 MojDbQuotaEngine::Quota::size() const
 
 MojInt64 MojDbQuotaEngine::Quota::available() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	MojInt64 available = m_size - m_usage;
 	return available;
@@ -425,6 +438,8 @@ MojInt64 MojDbQuotaEngine::Quota::available() const
 
 MojInt64 MojDbQuotaEngine::Quota::usage() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	MojInt64 usage = m_usage;
 	return usage;
@@ -432,18 +447,24 @@ MojInt64 MojDbQuotaEngine::Quota::usage() const
 
 void MojDbQuotaEngine::Quota::size(MojInt64 val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	m_size = val;
 }
 
 void MojDbQuotaEngine::Quota::usage(MojInt64 val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	m_usage = val;
 }
 
 void MojDbQuotaEngine::Quota::offset(MojInt64 off)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojThreadGuard guard(m_mutex);
 	m_usage += off;
 }
@@ -452,10 +473,13 @@ MojDbQuotaEngine::Offset::Offset(const MojString& kindId)
 : m_kindId(kindId),
   m_offset(0)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 }
 
 MojErr MojDbQuotaEngine::Offset::apply(MojInt64 offset)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojInt64 newOffset = m_offset + offset;
 	if (m_quota.get() && newOffset > m_quota->available())
 		MojErrThrow(MojErrDbQuotaExceeded);
@@ -475,6 +499,8 @@ MojDbQuotaCommitHandler::MojDbQuotaCommitHandler(MojDbQuotaEngine* engine, MojSt
 
 MojErr MojDbQuotaCommitHandler::handleCommit(MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = m_engine->commitQuota(m_owner, m_size);
 	MojErrCheck(err);
 

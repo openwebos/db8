@@ -37,6 +37,8 @@ MojDbIsamQuery::~MojDbIsamQuery()
 
 MojErr MojDbIsamQuery::open(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojAssert(!m_isOpen);
 	MojAssert(plan.get() && txn);
 
@@ -54,6 +56,8 @@ MojErr MojDbIsamQuery::open(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* tx
 
 MojErr MojDbIsamQuery::close()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = MojErrNone;
 
 	if (m_isOpen) {
@@ -67,6 +71,7 @@ MojErr MojDbIsamQuery::close()
 
 MojErr MojDbIsamQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_isOpen);
 
 	itemOut = NULL;
@@ -84,12 +89,14 @@ MojErr MojDbIsamQuery::get(MojDbStorageItem*& itemOut, bool& foundOut)
 		}
 		MojErrCheck(err);
 	} while (itemOut == NULL && foundOut);
-    MojLogDebug(MojDb::s_log, _T("isamquery_get: found: %d; count1= %d; count2= %d\n"), (int)foundOut, i1, i2);
+    LOG_DEBUG("[db_mojodb] isamquery_get: found: %d; count1= %d; count2= %d\n", (int)foundOut, i1, i2);
 	return MojErrNone;
 }
 
 MojErr MojDbIsamQuery::getId(MojObject& idOut, MojUInt32& groupOut, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = getKey(groupOut, foundOut);
 	MojErrCheck(err);
 	if (foundOut) {
@@ -101,6 +108,7 @@ MojErr MojDbIsamQuery::getId(MojObject& idOut, MojUInt32& groupOut, bool& foundO
 
 MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_isOpen);
 
 	countOut = 0;
@@ -126,14 +134,16 @@ MojErr MojDbIsamQuery::count(MojUInt32& countOut)
 	countOut = m_count;
 	if (warns > 0) {
 		const MojChar * from = m_plan->query().from().data();
-        MojLogDebug(MojDb::s_log, _T("isamquery_count: from: %s; indexid: %zu; warnings: %d \n"),
-								 from, m_plan->idIndex(), warns);
+        LOG_DEBUG("[db_mojodb] isamquery_count: from: %s; indexid: %zu; warnings: %d \n",
+            from, m_plan->idIndex(), warns);
 	}
 	return MojErrNone;
 }
 
 MojErr MojDbIsamQuery::nextPage(MojDbQuery::Page& pageOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (limitEnforced()) {
 		pageOut.key() = m_endKey;
 	} else {
@@ -144,11 +154,15 @@ MojErr MojDbIsamQuery::nextPage(MojDbQuery::Page& pageOut)
 
 MojUInt32 MojDbIsamQuery::groupCount() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	return m_plan->groupCount();
 }
 
 MojErr MojDbIsamQuery::distinct(MojDbStorageItem*& itemOut, bool& distinct)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     MojObject obj, destObj;
     MojErr err = itemOut->toObject(obj, m_plan->kindEngine());
     MojErrCheck(err);
@@ -180,6 +194,8 @@ MojErr MojDbIsamQuery::distinct(MojDbStorageItem*& itemOut, bool& distinct)
 
 MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool getItem)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	itemOut = NULL;
 	MojUInt32 group = 0;
 	MojErr err = getKey(group, foundOut);
@@ -196,8 +212,8 @@ MojErr MojDbIsamQuery::getImpl(MojDbStorageItem*& itemOut, bool& foundOut, bool 
 				s2 = ((char *)m_keyData) + m_keySize - 17;
 			MojSize idIndex = m_plan->idIndex();
 			const MojChar * from = m_plan->query().from().data();
-			MojLogDebug(MojDb::s_log, _T("isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n"),
-								 from, idIndex, (int)group, m_keySize, s, (s2?s2:"NULL"));
+			LOG_DEBUG("[db_mojodb] isamquery_warnindex: from: %s; indexid: %zu; group: %d; KeySize: %zu; %s ;id: %s \n",
+				from, idIndex, (int)group, m_keySize, s, (s2?s2:"NULL"));
 #endif
 		}
 		MojErrCheck(err);
@@ -236,6 +252,8 @@ void MojDbIsamQuery::init()
 
 bool MojDbIsamQuery::match()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// compare against lower key when descending, upper otherwise
 	bool desc = m_plan->desc();
 	const ByteVec& key = m_iter->key(!desc).byteVec();
@@ -248,11 +266,15 @@ bool MojDbIsamQuery::match()
 
 int MojDbIsamQuery::compareKey(const ByteVec& key)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	return MojLexicalCompare(m_keyData, m_keySize, key.begin(), key.size());
 }
 
 MojErr MojDbIsamQuery::incrementCount()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	++m_count;
 	// if we hit the limit, keep the end key
 	// so we can adjust our watchers to respect the limit
@@ -265,6 +287,7 @@ MojErr MojDbIsamQuery::incrementCount()
 
 MojErr MojDbIsamQuery::seek(bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_state == StateSeek);
 
 	// if descending, seek to upper bound, lower otherwise
@@ -288,15 +311,14 @@ MojErr MojDbIsamQuery::seek(bool& foundOut)
 
 MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(m_isOpen);
 
 	foundOut = false;
 	MojErr err = MojErrNone;
 	RangeVec::ConstIterator end = m_plan->ranges().end();
-#if defined (MOJ_DEBUG)
     uint32_t countFound = 0;
     uint32_t countIgnored = 0;
-#endif
 
 	// Note, we consider the limit enforced when the count equals the limit.
 	// The count is incremented outside of getKey, depending on
@@ -347,12 +369,14 @@ MojErr MojDbIsamQuery::getKey(MojUInt32& groupOut, bool& foundOut)
 		m_state = StateSeek;
 		++m_iter;
 	}
-    MojLogDebug (MojDb::s_log, "Matching records found: %d, ignore: %d", countFound, countIgnored);
+    LOG_DEBUG("[db_mojodb] Matching records found: %d, ignore: %d", countFound, countIgnored);
 	return MojErrNone;
 }
 
 MojErr MojDbIsamQuery::saveEndKey()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = m_endKey.assign(m_keyData, m_keySize);
 	MojErrCheck(err);
 	// if we're going in ascending order, the end is one past
@@ -365,6 +389,8 @@ MojErr MojDbIsamQuery::saveEndKey()
 
 MojErr MojDbIsamQuery::parseId(MojObject& idOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// parse id out of key
 	MojObjectEater eater;
 	MojObjectReader reader(m_keyData, m_keySize);
@@ -382,6 +408,8 @@ MojErr MojDbIsamQuery::parseId(MojObject& idOut)
 
 MojErr MojDbIsamQuery::checkExclude(MojDbStorageItem* item, bool& excludeOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	excludeOut = false;
 	if (!m_excludeKinds.empty()) {
 		MojString kindId;
@@ -396,6 +424,8 @@ MojErr MojDbIsamQuery::checkExclude(MojDbStorageItem* item, bool& excludeOut)
 
 MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     excludeOut = false;
 
     MojDb *db = m_plan->kindEngine().db();
@@ -412,7 +442,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
         MojString idJson;
         err = id.toJson(idJson);
         MojErrCheck( err );
-        MojLogDebug(MojDb::s_log, _T("id = %.*s\n"), idJson.length(), idJson.begin());
+        LOG_DEBUG("[db_mojodb] id = %.*s\n", idJson.length(), idJson.begin());
     }
 #endif
 
@@ -434,7 +464,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
             err = id.toJson(idJson);
             MojErrCheck( err );
 
-            MojLogDebug(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
+            LOG_DEBUG("[db_mojodb] Found id (%.*s) with a non-existing shardId (%08x)\n", idJson.length(), idJson.begin(), shardId);
 
             shardId = MojDbIdGenerator::MainShardId;
         }
@@ -470,7 +500,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
                 err = id.toJson(idJson);
                 MojErrCheck( err );
 
-                MojLogDebug(MojDb::s_log, _T("Found id (%.*s) with a non-existing shardId (%08x)\n"), idJson.length(), idJson.begin(), shardId);
+                LOG_DEBUG("[db_mojodb] Found id (%.*s) with a non-existing shardId (%08x)\n", idJson.length(), idJson.begin(), shardId);
                 shardId = MojDbIdGenerator::MainShardId; // ignore it and use main shard
             }
         }

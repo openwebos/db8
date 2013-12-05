@@ -20,8 +20,6 @@
 #include "core/MojApp.h"
 #include "core/MojLogEngine.h"
 
-MojLogger MojApp::s_log(_T("core.app"));
-
 MojApp::MojApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* versionString)
 : m_runMode(ModeDefault),
   m_errDisplayed(false),
@@ -29,17 +27,15 @@ MojApp::MojApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* ve
   m_minorVersion(minorVersion),
   m_versionString(versionString)
 {
-	MojLogTrace(s_log);
 }
 
 MojApp::~MojApp()
 {
-	MojLogTrace(s_log);
 }
 
 int MojApp::main(int argc, MojChar** argv)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = init();
 	if (err != MojErrNone) {
@@ -81,8 +77,6 @@ int MojApp::main(int argc, MojChar** argv)
 		break;
 	}
 	case ModeLoggers: {
-		err = displayLoggers();
-		MojErrCheck(err);
 		break;
 	}
 	case ModeVersion: {
@@ -98,17 +92,17 @@ int MojApp::main(int argc, MojChar** argv)
 
 MojErr MojApp::configure(const MojObject& conf)
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
-	MojErr err = MojLogEngine::instance()->configure(conf, m_name);
-	MojErrCheck(err);
+	//MojErr err = MojLogEngine::instance()->configure(conf, m_name);
+	//MojErrCheck(err);
 
 	return MojErrNone;
 }
 
 MojErr MojApp::init()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	MojErr err = registerOption(&MojApp::handleConfig, _T("-c"), _T("Path to config file or configuration literal."), true);
 	MojErrCheck(err);
@@ -124,27 +118,28 @@ MojErr MojApp::init()
 
 MojErr MojApp::open()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	return MojErrNone;
 }
 
 MojErr MojApp::close()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	return MojErrNone;
 }
 
 MojErr MojApp::run()
 {
-	MojLogTrace(s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	return MojErrNone;
 }
 
 MojErr MojApp::registerOption(OptionHandler handler, const MojChar* opt, const MojChar* help, bool argRequired)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(handler && opt && help);
 
 	MojString optStr;
@@ -187,25 +182,6 @@ MojErr MojApp::displayErr(MojErr errDisplay, const MojChar* message)
 	MojErr err = MojErrToString(errDisplay, errStr);
 	MojErrCheck(err);
 	err = displayErr(message, errStr);
-	MojErrCheck(err);
-
-	return MojErrNone;
-}
-
-MojErr MojApp::displayLoggers()
-{
-	MojString msg;
-	MojErr err = msg.assign(_T("Registered loggers:\n"));
-	MojErrCheck(err);
-	MojLogEngine::StringSet loggers;
-	err = MojLogEngine::instance()->loggerNames(loggers);
-	MojErrCheck(err);
-	for (MojLogEngine::StringSet::ConstIterator i = loggers.begin();
-	     i != loggers.end(); ++i) {
-		MojErr err = msg.appendFormat(_T("  %s\n"), i->data());
-		MojErrCheck(err);
-	}
-	err = displayMessage(_T("%s"), msg.data());
 	MojErrCheck(err);
 
 	return MojErrNone;
@@ -334,6 +310,7 @@ MojErr MojApp::handleVersion(const MojString& opt, const MojString& val)
 
 MojErr MojApp::loadConfig(const MojChar* arg)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(arg);
 
 	if (arg[0] == '{') {

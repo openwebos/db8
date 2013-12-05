@@ -38,6 +38,8 @@ MojDbObjectHeader::MojDbObjectHeader(const MojObject& id)
 
 MojErr MojDbObjectHeader::addTo(MojObject& obj) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = obj.put(MojDb::IdKey, m_id);
 	MojErrCheck(err);
 	err = obj.put(MojDb::RevKey, m_rev);
@@ -53,6 +55,7 @@ MojErr MojDbObjectHeader::addTo(MojObject& obj) const
 
 MojErr MojDbObjectHeader::extractFrom(MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	// id
 	bool found;
 	MojErr err = obj.del(MojDb::IdKey, found);
@@ -80,6 +83,8 @@ MojErr MojDbObjectHeader::extractFrom(MojObject& obj)
 
 MojErr MojDbObjectHeader::read(MojDbKindEngine& kindEngine)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (m_read)
 		return MojErrNone;
 
@@ -124,6 +129,8 @@ MojErr MojDbObjectHeader::read(MojDbKindEngine& kindEngine)
 
 MojErr MojDbObjectHeader::write(MojBuffer& buf, MojDbKindEngine& kindEngine)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojDataWriter dataWriter(buf);
 	MojObjectWriter objectWriter(buf, NULL);
 	// version
@@ -152,6 +159,8 @@ MojErr MojDbObjectHeader::write(MojBuffer& buf, MojDbKindEngine& kindEngine)
 
 MojErr MojDbObjectHeader::visit(MojObjectVisitor& visitor, MojDbKindEngine& kindEngine)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = read(kindEngine);
 	MojErrCheck(err);
 
@@ -177,6 +186,8 @@ MojErr MojDbObjectHeader::visit(MojObjectVisitor& visitor, MojDbKindEngine& kind
 
 void MojDbObjectHeader::reset()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	m_id.clear();
 	m_kindId.clear();
 	m_rev = 0;

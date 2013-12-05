@@ -29,6 +29,7 @@
 #include "db/MojDbStorageEngine.h"
 #include "db/MojDbShardIdCache.h"
 #include "db/MojDbShardEngine.h"
+#include "MojDbSpaceInformer.h"
 #include "db/MojDbWatcher.h"
 #include "db/MojDbReq.h"
 #include "core/MojHashMap.h"
@@ -61,7 +62,6 @@ public:
     static const MojChar* const PermissionIdPrefix;
 	static const MojUInt32 AutoBatchSize;
 	static const MojUInt32 AutoCompactSize;
-	static MojLogger s_log;
 
 	MojDb();
 	virtual ~MojDb();
@@ -184,6 +184,7 @@ private:
 	MojDbPermissionEngine m_permissionEngine;
     MojDbQuotaEngine m_quotaEngine;
 	MojDbShardEngine m_shardEngine;
+    MojDbSpaceInformer m_spaceInformer;
 	MojThreadRwLock m_schemaLock;
 	MojString m_engineName;
 	MojObject m_conf;

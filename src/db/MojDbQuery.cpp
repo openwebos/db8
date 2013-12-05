@@ -37,7 +37,7 @@ const MojChar* const MojDbQuery::ValKey = _T("val");
 const MojChar* const MojDbQuery::CollateKey = _T("collate");
 const MojChar* const MojDbQuery::DelKey = _T("_del");
 
-MojLogger MojDbQuery::s_log(_T("db.query"));
+//db.query
 
 MojDbQuery::WhereClause::WhereClause()
 : m_lowerOp(OpNone),
@@ -48,6 +48,8 @@ MojDbQuery::WhereClause::WhereClause()
 
 MojErr MojDbQuery::WhereClause::setLower(CompOp op, const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (m_lowerOp != OpNone)
 		MojErrThrow(MojErrDbInvalidQueryOpCombo);
 
@@ -62,6 +64,8 @@ MojErr MojDbQuery::WhereClause::setLower(CompOp op, const MojObject& val, MojDbC
 
 MojErr MojDbQuery::WhereClause::setUpper(CompOp op, const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (m_upperOp != OpNone)
 		MojErrThrow(MojErrDbInvalidQueryOpCombo);
 
@@ -76,6 +80,8 @@ MojErr MojDbQuery::WhereClause::setUpper(CompOp op, const MojObject& val, MojDbC
 
 MojErr MojDbQuery::WhereClause::collation(MojDbCollationStrength collation)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (m_collation != MojDbCollationInvalid && collation != m_collation)
 		MojErrThrow(MojErrDbInvalidQueryCollationMismatch);
 	m_collation = collation;
@@ -85,6 +91,8 @@ MojErr MojDbQuery::WhereClause::collation(MojDbCollationStrength collation)
 
 bool MojDbQuery::WhereClause::operator==(const WhereClause& rhs) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	return (m_lowerOp == rhs.m_lowerOp &&
 			m_upperOp == rhs.m_upperOp &&
 			m_lowerVal == rhs.m_lowerVal &&
@@ -93,6 +101,8 @@ bool MojDbQuery::WhereClause::operator==(const WhereClause& rhs) const
 
 MojErr MojDbQuery::Page::fromObject(const MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojString str;
 	MojErr err = obj.stringValue(str);
 	MojErrCheck(err);
@@ -104,6 +114,8 @@ MojErr MojDbQuery::Page::fromObject(const MojObject& obj)
 
 MojErr MojDbQuery::Page::toObject(MojObject& objOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojString str;
 	MojErr err = str.base64Encode(m_key.byteVec(), false);
 	MojErrCheck(err);
@@ -123,6 +135,8 @@ MojDbQuery::~MojDbQuery()
 
 MojErr MojDbQuery::toObject(MojObject& objOut) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObjectBuilder builder;
 	MojErr err = toObject(builder);
 	MojErrCheck(err);
@@ -132,6 +146,8 @@ MojErr MojDbQuery::toObject(MojObject& objOut) const
 
 MojErr MojDbQuery::toObject(MojObjectVisitor& visitor) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = visitor.beginObject();
 	MojErrCheck(err);
 
@@ -197,6 +213,8 @@ MojErr MojDbQuery::toObject(MojObjectVisitor& visitor) const
 
 MojErr MojDbQuery::fromObject(const MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// TODO: validate against query schema
 
 	bool found;
@@ -288,6 +306,8 @@ MojErr MojDbQuery::fromObject(const MojObject& obj)
 
 void MojDbQuery::clear()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__)
+
 	init();
 	m_fromType.clear();
 	m_selectProps.clear();
@@ -298,6 +318,8 @@ void MojDbQuery::clear()
 
 MojErr MojDbQuery::select(const MojChar* propName)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojString str;
 	MojErr err = str.assign(propName);
 	MojErrCheck(err);
@@ -317,6 +339,8 @@ MojErr MojDbQuery::from(const MojChar* type)
 
 MojErr MojDbQuery::where(const MojChar* propName, CompOp op, const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = addClause(m_whereClauses, propName, op, val, coll);
 	MojErrCheck(err);
 
@@ -325,6 +349,8 @@ MojErr MojDbQuery::where(const MojChar* propName, CompOp op, const MojObject& va
 
 MojErr MojDbQuery::filter(const MojChar* propName, CompOp op, const MojObject& val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = addClause(m_filterClauses, propName, op, val, MojDbCollationInvalid);
 	MojErrCheck(err);
 
@@ -333,6 +359,8 @@ MojErr MojDbQuery::filter(const MojChar* propName, CompOp op, const MojObject& v
 
 MojErr MojDbQuery::order(const MojChar* propName)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = m_orderProp.assign(propName);
 	MojErrCheck(err);
 
@@ -341,6 +369,8 @@ MojErr MojDbQuery::order(const MojChar* propName)
 
 MojErr MojDbQuery::distinct(const MojChar* distinct)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = m_distinct.assign(distinct);
 	MojErrCheck(err);
 
@@ -349,6 +379,8 @@ MojErr MojDbQuery::distinct(const MojChar* distinct)
 
 MojErr MojDbQuery::includeDeleted(bool val)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	if (val) {
 		MojObject array;
 		MojErr err = array.push(false);
@@ -364,6 +396,8 @@ MojErr MojDbQuery::includeDeleted(bool val)
 
 MojErr MojDbQuery::validate() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	bool hasInequalityOp = false;
 	bool hasArrayVal = false;
 	for (WhereMap::ConstIterator i = m_whereClauses.begin(); i != m_whereClauses.end(); ++i) {
@@ -394,6 +428,8 @@ MojErr MojDbQuery::validate() const
 
 MojErr MojDbQuery::validateFind() const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	for (WhereMap::ConstIterator i = m_whereClauses.begin(); i != m_whereClauses.end(); ++i) {
 		// if clause is order-defining, verify that it matches the order specified
 		if (i->definesOrder() && !(m_orderProp.empty() || m_orderProp == i.key()))
@@ -426,6 +462,8 @@ bool MojDbQuery::operator==(const MojDbQuery& rhs) const
 
 void MojDbQuery::init()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	m_limit = LimitDefault;
 	m_desc = false;
 	m_forceIndex = NULL;
@@ -434,6 +472,8 @@ void MojDbQuery::init()
 
 MojErr MojDbQuery::addClauses(WhereMap& map, const MojObject& array)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojObject clause;
 	MojSize i = 0;
 	while (array.at(i++, clause)) {
@@ -466,6 +506,7 @@ MojErr MojDbQuery::addClauses(WhereMap& map, const MojObject& array)
 
 MojErr MojDbQuery::addClause(WhereMap& map, const MojChar* propName, CompOp op, const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(propName);
 
 	// only allow valid ops
@@ -493,6 +534,8 @@ MojErr MojDbQuery::addClause(WhereMap& map, const MojChar* propName, CompOp op, 
 
 MojErr MojDbQuery::createClause(WhereMap& map, const MojChar* propName, CompOp op, MojObject val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// construct the clause
 	MojErr err = MojErrNone;
 	WhereClause clause;
@@ -521,6 +564,8 @@ MojErr MojDbQuery::createClause(WhereMap& map, const MojChar* propName, CompOp o
 
 MojErr MojDbQuery::updateClause(WhereClause& clause, CompOp op, const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	// the only case where we can have two ops for the same prop is a combination
 	// of '<' or '<=' with '>' or '>='
 	switch (op) {
@@ -564,6 +609,8 @@ const MojDbQuery::StrOp MojDbQuery::s_ops[] = {
 
 MojErr MojDbQuery::stringToOp(const MojChar* str, CompOp& opOut)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	for (const StrOp* op = s_ops; op->m_str != NULL; ++op) {
 		if (MojStrCmp(op->m_str, str) == 0) {
 			opOut = op->m_op;
@@ -575,6 +622,8 @@ MojErr MojDbQuery::stringToOp(const MojChar* str, CompOp& opOut)
 
 const MojChar* MojDbQuery::opToString(CompOp op)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     if (op == OpNone || op > OpSubString)
 		return NULL;
 	return s_ops[op-1].m_str;
@@ -582,6 +631,8 @@ const MojChar* MojDbQuery::opToString(CompOp op)
 
 MojErr MojDbQuery::appendClauses(MojObjectVisitor& visitor, const MojChar* propName, const WhereMap& map)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErr err = visitor.propName(propName);
 	MojErrCheck(err);
 	err = visitor.beginArray();
@@ -605,6 +656,7 @@ MojErr MojDbQuery::appendClauses(MojObjectVisitor& visitor, const MojChar* propN
 MojErr MojDbQuery::appendClause(MojObjectVisitor& visitor, const MojChar* propName, CompOp op,
  							   const MojObject& val, MojDbCollationStrength coll)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(propName);
 
 	MojErr err = visitor.beginObject();

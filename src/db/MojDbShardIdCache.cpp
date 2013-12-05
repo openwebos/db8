@@ -21,47 +21,51 @@
 
 using namespace std;
 
-MojLogger MojDbShardIdCache::s_log(_T("db.shardIdCache"));
+//db.shardIdCache
 
 MojDbShardIdCache::MojDbShardIdCache()
 {
-    MojLogTrace(s_log);
 }
 
 MojDbShardIdCache::~MojDbShardIdCache()
 {
-    MojLogTrace(s_log);
 }
 
 bool MojDbShardIdCache::isExist (const MojUInt32 id) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     return ( m_map.find(id) != m_map.end() );
 }
 
 void MojDbShardIdCache::put (const MojUInt32 id, const MojObject& obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     std::pair<std::map<MojUInt32, MojObject>::iterator, bool> ret;
     ret = m_map.insert(std::make_pair(id, obj));
 
     if(ret.second)
     {
-        MojLogDebug(MojDbShardIdCache::s_log, _T("new element was inserted: [%x]\n"), id);
+        LOG_DEBUG("[db_shardIdCache] new element was inserted: [%x]\n", id);
     }
     else
     {
-        MojLogWarning(MojDbShardIdCache::s_log, _T("element already exist: [%x]\n"), id);
+        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 0, "element already exist: [%x]\n", id);
     }
 }
 
 bool MojDbShardIdCache::get (const MojUInt32 id, MojObject& o_obj) const
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     std::map<MojUInt32, MojObject>::const_iterator it;
     it = m_map.find(id);
 
     if(it != m_map.end())
     {
         o_obj = it->second;
-        MojLogDebug(MojDbShardIdCache::s_log, _T("get element by id [%x]\n"), id);
+        LOG_DEBUG("[db_shardIdCache] get element by id [%x]\n", id);
         return true;
     }
 
@@ -70,13 +74,15 @@ bool MojDbShardIdCache::get (const MojUInt32 id, MojObject& o_obj) const
 
 bool MojDbShardIdCache::update (const MojUInt32 id, const MojObject& i_obj)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     std::map<MojUInt32, MojObject>::iterator it;
     it = m_map.find(id);
 
     if(it != m_map.end())
     {
         (*it).second = i_obj;
-        MojLogDebug(MojDbShardIdCache::s_log, _T("update element by id [%x]\n"), id);
+        LOG_DEBUG("[db_shardIdCache] update element by id [%x]\n", id);
         return true;
     }
 
@@ -85,19 +91,23 @@ bool MojDbShardIdCache::update (const MojUInt32 id, const MojObject& i_obj)
 
 void MojDbShardIdCache::del (const MojUInt32 id)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     if(m_map.erase(id) > 0) //was erased
     {
-        MojLogDebug(MojDbShardIdCache::s_log, _T("id [%x] was erased\n"), id);
+        LOG_DEBUG("[db_shardIdCache] id [%x] was erased\n", id);
     }
     else
     {
-        MojLogWarning(MojDbShardIdCache::s_log, _T("id [%x] was not erased\n"), id);
+        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 1, PMLOGKS("id", id), "id [%x] was not erased\n", id);
     }
 }
 
 void MojDbShardIdCache::clear (void)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     m_map.clear();
-    MojLogDebug(MojDbShardIdCache::s_log, _T("map was cleaned\n"));
+    LOG_DEBUG("[db_shardIdCache] map was cleaned\n");
 }
 

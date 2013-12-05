@@ -137,7 +137,6 @@ public:
 	static const MojUInt32 CfgFileIoThreadsDefault;
 	static const MojUInt32 CfgReadIoThreadsDefault;
 	static const MojUInt32 CfgWriteIoThreadsDefault;
-	static MojLogger s_log;
 
 	MojDbInnoEngine();
 	~MojDbInnoEngine();

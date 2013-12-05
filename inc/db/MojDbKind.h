@@ -146,8 +146,6 @@ private:
 	MojRefCountedPtr<MojDbKindState> m_state;
 	bool m_backup;
 	bool m_builtin;
-
-	static MojLogger s_log;
 };
 
 #endif /* MOJDBKIND_H_ */

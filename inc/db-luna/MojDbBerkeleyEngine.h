@@ -111,8 +111,6 @@ private:
 class MojDbBerkeleyEnv : public MojDbEnv
 {
 public:
-	static MojLogger s_log;
-
 	MojDbBerkeleyEnv();
 	~MojDbBerkeleyEnv();
 
@@ -160,8 +158,6 @@ private:
 class MojDbBerkeleyEngine : public MojDbStorageEngine
 {
 public:
-	static MojLogger s_log;
-
 	MojDbBerkeleyEngine();
 	~MojDbBerkeleyEngine();
 

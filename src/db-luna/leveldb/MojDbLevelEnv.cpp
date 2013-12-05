@@ -25,19 +25,17 @@ const MojChar* const MojDbLevelEnv::LockFileName = _T("_ldblock");
 MojDbLevelEnv::MojDbLevelEnv()
  : m_db(NULL)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
 }
 
 
 MojDbLevelEnv::~MojDbLevelEnv()
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
     close();
 }
 
 MojErr MojDbLevelEnv::configure(const MojObject& conf)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
 
     bool found = false;
     MojString logDir;
@@ -51,11 +49,13 @@ MojErr MojDbLevelEnv::configure(const MojObject& conf)
 
 MojErr MojDbLevelEnv::open(const MojChar* dir)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     return lockDir(dir);
 }
 
 MojErr MojDbLevelEnv::close()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     unlockDir();
 
     /*if (m_db)
@@ -66,6 +66,7 @@ MojErr MojDbLevelEnv::close()
 
 MojErr MojDbLevelEnv::lockDir(const MojChar* path)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(path);
 
     MojErr err = MojCreateDirIfNotPresent(path);
@@ -86,6 +87,8 @@ MojErr MojDbLevelEnv::lockDir(const MojChar* path)
 
 MojErr MojDbLevelEnv::unlockDir()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
     MojErr err = MojErrNone;
     if (m_lockFile.open()) {
             // unlink before we close to ensure that we hold
@@ -101,6 +104,6 @@ MojErr MojDbLevelEnv::unlockDir()
 
 MojErr MojDbLevelEnv::postCommit(MojSize updateSize)
 {
-    MojLogTrace(MojDbLevelEngine::s_log);
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     return MojErrNone;
 }

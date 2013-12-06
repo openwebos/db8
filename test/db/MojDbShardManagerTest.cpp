@@ -252,7 +252,8 @@ MojErr MojDbShardManagerTest::testShardEngine (MojDbShardEngine* ip_eng)
 
     //get shard by wrong id
     MojDbShardEngine::ShardInfo info;
-    ip_eng->get(0xFFFFFFFE, info, found);
+    err = ip_eng->get(0xFFFFFFFE, info, found);
+    MojTestErrCheck(err);
     MojTestAssert(!found);
 
     //store sample shard info

@@ -94,9 +94,11 @@ public:
             for (it = listKindIds.begin(); it != listKindIds.end(); ++it)
             {
                 if(it != listKindIds.begin())
-                    str.append(",");
+                {
+                    MojErrCheck(str.append(","));
+                }
 
-                str.append(*it);
+                MojErrCheck(str.append(*it));
             }
 
             return MojErrNone;
@@ -119,7 +121,7 @@ public:
 
             for(it = tokens.begin(); it != tokens.end(); ++it)
             {
-                item.assign((*it).c_str());
+                MojErrCheck(item.assign((*it).c_str()));
                 listKindIds.push_back(item);
             }
 

@@ -551,7 +551,12 @@ MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, Moj
 	} else {
 		iter.value() += 1;
 		if (iter.value() > WatchWarningThreshold) {
-            LOG_WARNING(MSGID_MOJ_DB_INDEX_WARNING, 0, "db:'%s' has %zd watches open on index '%s - %s'", req.domain().data(), iter.value(), m_kind->id().data(), m_name.data());
+            LOG_WARNING(MSGID_MOJ_DB_INDEX_WARNING, 4,
+            		PMLOGKS("domain", req.domain().data()),
+            		PMLOGFV("iter", "%zd", iter.value()),
+            		PMLOGKS("kindId", m_kind->id().data()),
+            		PMLOGKS("name", m_name.data()),
+            		"db:'domain' has 'iter' watches open on index 'kindId - name'");
 		}
 	}
 	LOG_DEBUG("[db_mojodb] DbIndex_addWatch - '%s' on index '%s - %s'",

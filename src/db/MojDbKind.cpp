@@ -454,7 +454,7 @@ MojErr MojDbKind::update(MojObject* newObj, const MojObject* oldObj, MojDbOp op,
                 LOG_WARNING(MSGID_MOJ_DB_KIND_WARNING, 2,
                     PMLOGKS("kind", m_id.data()),
                     PMLOGKS("msg", res.msg().data()),
-                    "schema validation failed for kind '%s': %s \n", m_id.data(), res.msg().data());
+                    "schema validation failed for kind 'kind': 'msg'");
 
                 MojErrThrowMsg(MojErrSchemaValidation, _T("schema validation failed for kind '%s': %s"),
 		            m_id.data(), res.msg().data());
@@ -610,7 +610,7 @@ MojErr MojDbKind::deny(MojDbReq& req)
     LOG_WARNING(MOJ_DB_KIND_WARNING, 2,
         PMLOGKS("caller", req.domain().data()),
         PMLOGKS("kind", m_id.data()),
-        "db: permission denied for caller '%s' on kind '%s'", req.domain().data(), m_id.data());
+        "db: permission denied for caller 'caller' on kind 'kind'");
 
 	if (m_kindEngine->permissionEngine()->enabled()) {
 		// don't leak any information in an error message
@@ -685,7 +685,7 @@ MojErr MojDbKind::preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq
 			LOG_WARNING(MOJ_DB_KIND_WARNING, 2,
                 PMLOGKS("kind", m_id.data()),
                 PMLOGKS("msg", res.msg().data()),
-                "schema validation failed for kind '%s': %s", m_id.data(), res.msg().data());
+                "schema validation failed for kind 'kind': 'msg'");
 		}
 	}
 	return MojErrNone;

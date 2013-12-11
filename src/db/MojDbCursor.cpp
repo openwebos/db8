@@ -57,8 +57,8 @@ MojErr MojDbCursor::close()
 		} else {
 			if (m_lastErr == MojErrInternalIndexOnFind)
                 LOG_WARNING(MSGID_MOJ_DB_CURSOR_WARNING, 1,
-                    PMLOGKS("code", (int)m_lastErr),
-                    "dbcursor_close: IndexFind Warning - abort tran; code = %d\n", (int)m_lastErr);
+                    PMLOGFV("code", "%d", (int)m_lastErr),
+                    "dbcursor_close: IndexFind Warning - abort tran; code = 'code'");
 			errClose = m_txn->abort();
 			MojErrAccumulate(err, errClose);
 		}

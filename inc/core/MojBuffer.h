@@ -20,6 +20,7 @@
 #ifndef MOJBUFFER_H_
 #define MOJBUFFER_H_
 
+#include "core/MojLog.h"
 #include "core/MojCoreDefs.h"
 #include "core/MojAutoPtr.h"
 #include "core/MojList.h"

@@ -412,9 +412,9 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 	int ret = ::statvfs(DatabaseRoot, &dbFsStat);
 	if (ret != 0) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 2,
-            PMLOGKS("error", ret),
+            PMLOGFV("error", "%d", ret),
             PMLOGKS("db_root", DatabaseRoot),
-            "Error %d attempting to stat database filesystem mounted at \"%s\"", ret, DatabaseRoot);
+            "Error 'error' attempting to stat database filesystem mounted at 'db_root'");
 		return MojErrInternal;
 	}
 
@@ -440,10 +440,9 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 
 	if ((AlertLevel)alertLevel > NoSpaceAlert) {
         LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 2,
-            PMLOGKS("volume", percentUsed),
+            PMLOGFV("volume", "%.1f", percentUsed),
             PMLOGKS("severity", SpaceAlertNames[alertLevel - NoSpaceAlert]),
-            "Database volume usage %.1f, generating warning, severity \"%s\"",
-            percentUsed, SpaceAlertNames[alertLevel - NoSpaceAlert]);
+            "Database volume usage 'volume', generating warning, severity");
 	} else {
 		if ((AlertLevel)alertLevel != m_spaceAlertLevel) {
 			// Generate 'ok' message only if there has been a transition.
@@ -580,7 +579,9 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleComplete(MojObject& payl
 	m_adoptSlot.cancel();
 	m_subscription.reset();
 	if (errCode != MojErrNone) {
-        LOG_ERROR(MSGID_DB_SERVICE_ERROR, 0, "error completing activity: %d", errCode);
+        LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
+        		PMLOGFV("error", "%d", errCode),
+        		"error completing activity: 'error'");
 		MojErrThrow(errCode);
 	}
 	return MojErrNone;
@@ -607,7 +608,9 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	if (errCode != MojErrNone) {
-        LOG_ERROR(MSGID_DB_SERVICE_ERROR, 0, "error from system service, locale query: %d", errCode);
+        LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
+        		PMLOGFV("error", "%d", errCode),
+        		"error from system service, locale query: 'error'");
 		MojErrThrow(errCode);
 	}
 
@@ -636,7 +639,7 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
         if (U_FAILURE(errorU)) {
             LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 1,
                         PMLOGKS("locale", str.data()),
-                        "MojDbServiceHandlerInternal::LocaleHandler::handleResponse. Can't set locale to %s", str.data());
+                        "MojDbServiceHandlerInternal::LocaleHandler::handleResponse. Can't set locale to 'locale'");
         }
 	}
 	return MojErrNone;
@@ -671,8 +674,8 @@ MojErr MojDbServiceHandlerInternal::AlertHandler::handleBootStatusResponse(MojOb
 
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-            PMLOGKS("error", errCode),
-            "error attempting to get sysmgr boot status %d", errCode);
+            PMLOGFV("error", "%d", errCode),
+            "error attempting to get sysmgr boot status 'error'");
 		MojErrThrow(errCode);
 	}
 
@@ -696,8 +699,8 @@ MojErr MojDbServiceHandlerInternal::AlertHandler::handleAlertResponse(MojObject&
 
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-            PMLOGKS("error", errCode),
-            "error attempting to display alert: %d", errCode);
+            PMLOGFV("error", "%d", errCode),
+            "error attempting to display alert: 'error'");
 		MojErrThrow(errCode);
 	}
 	return MojErrNone;

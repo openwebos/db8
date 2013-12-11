@@ -22,6 +22,6 @@
 #include "core/MojTime.h"
 
 #ifdef MOJ_HAVE_SYSLOG_H
-#	include "syslog.h"
+#include "syslog.h"
 #endif
 

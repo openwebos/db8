@@ -214,7 +214,10 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 	MojErrCheck(err);
 
 	if (!req->admin()) {
-        LOG_ERROR(MSGID_DB_ADMIN_ERROR, 0, "access denied: '%s' cannot dump db to path: '%s'", req->domain().data(), path);
+        LOG_ERROR(MSGID_DB_ADMIN_ERROR, 2,
+        		PMLOGKS("data", req->domain().data()),
+        		PMLOGKS("path", path),
+        		"access denied: 'data' cannot dump db to path: 'path'");
 		MojErrThrow(MojErrDbAccessDenied);
 	}
 
@@ -541,8 +544,8 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 
     if (warns > 0) {
         LOG_WARNING(MSGID_MOJ_DB_ADMIN_WARNING, 1,
-            PMLOGKS("warn", warns),
-            "Finished Backup with %d warnings \n", (int)warns);
+            PMLOGFV("warn", "%d", (int)warns),
+            "Finished Backup with 'warn' warnings");
     } else {
         LOG_DEBUG("[db_mojodb] Finished Backup with no warnings \n");
     }

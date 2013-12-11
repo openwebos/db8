@@ -51,7 +51,9 @@ void MojDbShardIdCache::put (const MojUInt32 id, const MojObject& obj)
     }
     else
     {
-        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 0, "element already exist: [%x]\n", id);
+        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 1,
+        		PMLOGFV("id", "%x", id),
+        		"element already exist");
     }
 }
 
@@ -82,7 +84,7 @@ bool MojDbShardIdCache::update (const MojUInt32 id, const MojObject& i_obj)
     if(it != m_map.end())
     {
         (*it).second = i_obj;
-        LOG_DEBUG("[db_shardIdCache] update element by id [%x]\n", id);
+        LOG_DEBUG("[db_shardIdCache] update element by id", id);
         return true;
     }
 
@@ -95,11 +97,12 @@ void MojDbShardIdCache::del (const MojUInt32 id)
 
     if(m_map.erase(id) > 0) //was erased
     {
-        LOG_DEBUG("[db_shardIdCache] id [%x] was erased\n", id);
+        LOG_DEBUG("[db_shardIdCache] id [%x] was erased", id);
     }
     else
     {
-        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 1, PMLOGKS("id", id), "id [%x] was not erased\n", id);
+        LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 1,
+        		PMLOGFV("id", "%d", id), "id was not erased");
     }
 }
 
@@ -108,6 +111,6 @@ void MojDbShardIdCache::clear (void)
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
     m_map.clear();
-    LOG_DEBUG("[db_shardIdCache] map was cleaned\n");
+    LOG_DEBUG("[db_shardIdCache] map was cleaned");
 }
 

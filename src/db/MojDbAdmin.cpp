@@ -544,7 +544,7 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
 
     if (warns > 0) {
         LOG_WARNING(MSGID_MOJ_DB_ADMIN_WARNING, 1,
-            PMLOGFV("warn", "%d", (int)warns),
+            PMLOGKFV("warn", "%d", (int)warns),
             "Finished Backup with 'warn' warnings");
     } else {
         LOG_DEBUG("[db_mojodb] Finished Backup with no warnings \n");

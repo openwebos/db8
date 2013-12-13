@@ -175,7 +175,7 @@ MojErr MojService::dispatchRequest(MojServiceMessage* msg)
                     PMLOGKS("method", msg->method()),
                     PMLOGKS("payload", payloadStr.data()),
                     PMLOGKS("error", errStr.data()),
-                    PMLOGFV("reqErr", "%d", (int)reqErr),
+                    PMLOGKFV("reqErr", "%d", (int)reqErr),
                     "");
 
 		if (msg->numReplies() == 0) {
@@ -436,7 +436,7 @@ MojErr MojService::CategoryHandler::invoke(const MojChar* method, MojServiceMess
 	MojTime endTime;
 	err = MojGetCurrentTime(endTime);
 	MojErrCheck(err);
-	LOG_DEBUG("[core_messageService] %s invoked: %.3fms"), method, ((double) (endTime.microsecs() - startTime.microsecs()) / 1000);
+	LOG_DEBUG("[core_messageService] %s invoked: %.3f ms", method, ((double) (endTime.microsecs() - startTime.microsecs()) / 1000));
 
 	return MojErrNone;
 }

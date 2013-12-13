@@ -412,7 +412,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 	int ret = ::statvfs(DatabaseRoot, &dbFsStat);
 	if (ret != 0) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 2,
-            PMLOGFV("error", "%d", ret),
+            PMLOGKFV("error", "%d", ret),
             PMLOGKS("db_root", DatabaseRoot),
             "Error 'error' attempting to stat database filesystem mounted at 'db_root'");
 		return MojErrInternal;
@@ -440,7 +440,7 @@ MojErr MojDbServiceHandlerInternal::doSpaceCheck(MojDbServiceHandlerInternal::Al
 
 	if ((AlertLevel)alertLevel > NoSpaceAlert) {
         LOG_WARNING(MSGID_MOJ_DB_SERVICE_WARNING, 2,
-            PMLOGFV("volume", "%.1f", percentUsed),
+            PMLOGKFV("volume", "%.1f", percentUsed),
             PMLOGKS("severity", SpaceAlertNames[alertLevel - NoSpaceAlert]),
             "Database volume usage 'volume', generating warning, severity");
 	} else {
@@ -580,7 +580,7 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::handleComplete(MojObject& payl
 	m_subscription.reset();
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-        		PMLOGFV("error", "%d", errCode),
+        		PMLOGKFV("error", "%d", errCode),
         		"error completing activity: 'error'");
 		MojErrThrow(errCode);
 	}
@@ -609,7 +609,7 @@ MojErr MojDbServiceHandlerInternal::LocaleHandler::handleResponse(MojObject& pay
 
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-        		PMLOGFV("error", "%d", errCode),
+        		PMLOGKFV("error", "%d", errCode),
         		"error from system service, locale query: 'error'");
 		MojErrThrow(errCode);
 	}
@@ -674,7 +674,7 @@ MojErr MojDbServiceHandlerInternal::AlertHandler::handleBootStatusResponse(MojOb
 
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-            PMLOGFV("error", "%d", errCode),
+            PMLOGKFV("error", "%d", errCode),
             "error attempting to get sysmgr boot status 'error'");
 		MojErrThrow(errCode);
 	}
@@ -699,7 +699,7 @@ MojErr MojDbServiceHandlerInternal::AlertHandler::handleAlertResponse(MojObject&
 
 	if (errCode != MojErrNone) {
         LOG_ERROR(MSGID_DB_SERVICE_ERROR, 1,
-            PMLOGFV("error", "%d", errCode),
+            PMLOGKFV("error", "%d", errCode),
             "error attempting to display alert: 'error'");
 		MojErrThrow(errCode);
 	}

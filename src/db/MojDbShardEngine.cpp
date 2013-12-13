@@ -433,8 +433,8 @@ MojErr MojDbShardEngine::allocateId (const MojString& deviceUuid, MojUInt32& sha
 
         if (found) {
             LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 2,
-                PMLOGFV("id", "%x", id),
-                PMLOGFV("prefix", "%u", prefix),
+                PMLOGKFV("id", "%x", id),
+                PMLOGKFV("prefix", "%u", prefix),
                 "id generation -> 'id' exist already, prefix = 'prefix'");
             prefix++;
         } else {
@@ -447,7 +447,7 @@ MojErr MojDbShardEngine::allocateId (const MojString& deviceUuid, MojUInt32& sha
         if (prefix == 128)
         {
             LOG_WARNING(MSGID_DB_SHARDENGINE_WARNING, 1,
-                        PMLOGFV("prefix", "%u", prefix),
+                        PMLOGKFV("prefix", "%u", prefix),
                         "id generation -> next iteration");
             prefix = 1;
             MojString modified_uuid;

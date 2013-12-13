@@ -553,7 +553,7 @@ MojErr MojDbIndex::addWatch(const MojDbQueryPlan& plan, MojDbCursor& cursor, Moj
 		if (iter.value() > WatchWarningThreshold) {
             LOG_WARNING(MSGID_MOJ_DB_INDEX_WARNING, 4,
             		PMLOGKS("domain", req.domain().data()),
-            		PMLOGFV("iter", "%zd", iter.value()),
+            		PMLOGKFV("iter", "%zd", iter.value()),
             		PMLOGKS("kindId", m_kind->id().data()),
             		PMLOGKS("name", m_name.data()),
             		"db:'domain' has 'iter' watches open on index 'kindId - name'");

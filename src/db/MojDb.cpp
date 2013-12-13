@@ -331,7 +331,7 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 	if (pk->nsubkinds() > 0) {
         LOG_WARNING(MSGID_MOJ_DB_WARNING, 2,
             PMLOGKS("kind", idStr.data()),
-            PMLOGFV("subkinds", "%d", pk->nsubkinds()),
+            PMLOGKFV("subkinds", "%d", pk->nsubkinds()),
             "delKind_error: 'kind' has 'subkinds' subkinds");
 		MojErrThrow(MojErrDbKindHasSubKinds);
 	}
@@ -464,7 +464,7 @@ MojErr MojDb::merge(const MojDbQuery& query, const MojObject& props, MojUInt32& 
 	if (warns > 0)
         LOG_WARNING(MSGID_MOJ_DB_WARNING, 2,
             PMLOGKS("from", query.from().data()),
-            PMLOGFV("warn", "%d", warns),
+            PMLOGKFV("warn", "%d", warns),
             "Merge index_warnings: 'from'; count: 'warn'");
 	err = cursor.close();
 	MojErrCheck(err);

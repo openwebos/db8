@@ -68,11 +68,11 @@ void SpamDatabaseSuite::mountTmpFs()
     //ASSERT_FALSE (geteuid()) << "Require root privileges to mount tmpfs dir";
     // lazy mount of tmpfs
 
-    string command = "mountpoint -q " + Test1DatabasePath + " || (mkdir -p " + Test1DatabasePath + " && sudo mount -t tmpfs tmpfs " + Test1DatabasePath + " -o size=2M)";
+    string command = "mountpoint -q " + Test1DatabasePath + " || (mkdir -p " + Test1DatabasePath + " && su mount -t tmpfs tmpfs " + Test1DatabasePath + " -o size=2M)";
     int ret = system(command.c_str());
     ASSERT_EQ (WEXITSTATUS(ret), 0) << command;
 
-    command = "mountpoint -q " + Test2DatabasePath + " || (mkdir -p " + Test1DatabasePath + " && sudo mount -t tmpfs tmpfs " + Test2DatabasePath + " -o size=5M)";
+    command = "mountpoint -q " + Test2DatabasePath + " || (mkdir -p " + Test2DatabasePath + " && su mount -t tmpfs tmpfs " + Test2DatabasePath + " -o size=5M)";
     ret = system(command.c_str());
     ASSERT_EQ (WEXITSTATUS(ret), 0) << command;
 

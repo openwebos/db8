@@ -1,0 +1,19 @@
+{
+    "activity" : {
+        "name" : "mojomediadbspace",
+        "description" : "Scheduled mojomediadb space check activity",
+        "schedule" : {
+            "interval" : "5m"
+        },
+        "callback" : {
+            "method" : "palm://com.palm.mediadb/internal/scheduledSpaceCheck" 
+        },
+        "type" : {
+            "foreground" : true,
+            "persist" : true,
+            "power" : true
+        }
+    },
+    "replace" : true,
+    "start" : true
+}

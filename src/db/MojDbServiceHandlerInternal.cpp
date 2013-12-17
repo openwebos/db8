@@ -275,7 +275,8 @@ MojErr MojDbServiceHandlerInternal::handleSpaceCheck(MojServiceMessage* msg, Moj
 	MojErrCheck(err);
 	err = response.putInt(_T("bytesAvailable"), bytesAvailable);
 	MojErrCheck(err);
-
+    err = response.putString(_T("path"), spaceAlert.getDatabaseRoot());
+    MojErrCheck(err);
 	err = response.putBool("subscribed", subscribed);
 	MojErrCheck(err);
 	err = msg->reply(response);
@@ -375,14 +376,16 @@ MojErr MojDbServiceHandlerInternal::PurgeHandler::init()
 MojErr MojDbServiceHandlerInternal::PurgeHandler::handleAdopt(MojObject& payload, MojErr errCode)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+
 	MojErrCheck(errCode);
+	 MojErr err;
 
 	// do the purge and compact
 	if (!m_handled) {
 		m_handled = true;
-        MojErr err = MojErrNone;
         if( m_doSpaceCheck )
         {
+           LOG_DEBUG("Do space check");
            err = m_serviceHandler->m_db.getSpaceAlert().doSpaceCheck();
            MojErrCheck(err);
         }

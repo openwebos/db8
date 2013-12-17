@@ -78,7 +78,7 @@ MojErr MojDbSpaceAlert::doSpaceCheck()
     // first display message if needed
         if (alertLevel != m_spaceAlertLevel) {
             MojObject message;
-            MojErr err = message.putString(_T("severity"), SpaceAlertNames[alertLevel - NoSpaceAlert]);
+            MojErr err = message.putString(_T("severity"), getAlertName(alertLevel));
             MojErrCheck(err);
             err = message.putInt(_T("bytesUsed"), bytesUsed);
             MojErrCheck(err);

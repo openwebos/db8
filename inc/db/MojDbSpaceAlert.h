@@ -48,6 +48,7 @@ public:
     AlertLevel spaceAlertLevel();
 
     void subscribe(MojServiceMessage* msg);
+    const MojString& getDatabaseRoot() const { return m_databaseRoot; }
 
     MojErr doSpaceCheck();
     MojErr doSpaceCheck(AlertLevel& level, int& bytesUsed, int& bytesAvailable);

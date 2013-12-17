@@ -73,7 +73,7 @@ namespace MojNumber {
         static const int exponentBase = 10;
         static const int exponentBound = (INT_MAX - (base - 1)) / base;
 
-        static const int int64_pow10_max = 18; // log_10 {2^63 - 1} = 18.96
+        static const int int64_pow_max = 18; // log_10 {2^63 - 1} = 18.96
 
     public:
         Parser()
@@ -111,8 +111,17 @@ namespace MojNumber {
 
             if (alignExp < 0)
             {
+                // check that we able to call npow(10, alignExp)
+                if (G_UNLIKELY(-alignExp > int64_pow_max))
+                {
+                    // too small number. Just assign 0
+                    decimal.assignRep(0);
+                    return MojErrNone;
+                }
+
                 // drop all but last extra digits
-                if (alignExp < -1) rep /= npow((uint64_t)base, (size_t)(-alignExp - 1));
+                uint64_t powed = npow((uint64_t)base, (size_t)(-alignExp - 1));
+                if (alignExp < -1) rep /= powed;
 
                 // round logic
                 if ((int)((rep % base) * 2) > base)
@@ -127,7 +136,7 @@ namespace MojNumber {
             else
             {
                 // check that we able to call npow(10, alignExp)
-                if (G_UNLIKELY(alignExp > int64_pow10_max))
+                if (G_UNLIKELY(alignExp > int64_pow_max))
                 {
                     MojErrThrowMsg( MojErrValueOutOfRange, "Too big value for MojDecimal %" PRIu64 " * %d^%d",
                                     value, base, alignExp - MojDecimal::Precision );

@@ -321,3 +321,15 @@ TEST(NumberTest, parse_decimal_exponent_bound)
     MojExpectNoErr( parser.toDecimal(d) );
     EXPECT_EQ( MojDecimal(9.223372036854774376e12), d );
 }
+
+TEST(NumberTest, small_small_number)
+{
+    MojNumber::Parser parser;
+
+    MojAssertNoErr( MojNumber::Lexer::parse(parser, "3.1844206213736e-308") );
+    EXPECT_TRUE( parser.haveFraction() );
+
+    MojDecimal d;
+    EXPECT_EQ( MojErrNone, parser.toDecimal(d) );
+    EXPECT_EQ( MojDecimal(0,0), d );    // should be zero
+}

@@ -958,8 +958,11 @@ MojErr MojDb::delImpl(const MojDbQuery& quer, MojUInt32& countOut, MojDbReq& req
             MojObject deleted;
             err = delObj(id, obj, item, deleted, req, flags);
             MojErrCheck(err);
-            ++count;
-            numberInBatch++;
+
+            if (deleted !=  obj) {
+                ++count;
+                ++numberInBatch;
+            }
         }
 
         if (warns > 0)

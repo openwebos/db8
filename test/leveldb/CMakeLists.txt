@@ -24,7 +24,7 @@ set(CMAKE_INSTALL_RPATH "")
 
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_definitions(-Wall -ansi -Wno-deprecated -pthread)
+add_definitions(-Wall -ansi -Wno-deprecated -pthread --std=c++0x)
 
 foreach(filename ${DB_BACKEND_WRAPPER_SOURCES})
     set(DB_BACKEND_WRAPPER_SOURCES_CPP ${DB_BACKEND_WRAPPER_SOURCES_CPP} "${CMAKE_SOURCE_DIR}/${filename}")
@@ -32,10 +32,12 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                Runner.cpp
+               utils.cpp
                TestContainerIterator.cpp
                TestIterator.cpp
                TestTxn.cpp
                TestTxnIterator.cpp
+               LeveldbNoSpace.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
 target_link_libraries(${PROJECT_NAME}

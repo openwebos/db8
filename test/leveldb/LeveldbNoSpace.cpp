@@ -18,14 +18,14 @@
 * LICENSE@@@
 ****************************************************************/
 
-#include "SpamTest.h"
+#include "LeveldbNoSpace.h"
 #include <array>
 
-#include "utils.h"
 #include "Runner.h"
 #include "db-luna/MojDbLunaServiceApp.h"
 #include <string>
 #include <sstream>
+#include "utils.h"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ namespace
     volatile unsigned int IoErrorCount { 0 };
 }
 
-void SpamDatabaseSuite::SetUp()
+void LeveldbNoSpaceSuite::SetUp()
 {
     ostringstream stream;
     stream << time(static_cast<time_t>(0));
@@ -53,7 +53,7 @@ void SpamDatabaseSuite::SetUp()
     mountTmpFs();
 }
 
-void SpamDatabaseSuite::TearDown()
+void LeveldbNoSpaceSuite::TearDown()
 {
     string dbPathTest1 = Test1DatabasePath;
     string dbPathTest2 = Test2DatabasePath;
@@ -63,7 +63,7 @@ void SpamDatabaseSuite::TearDown()
 }
 
 
-void SpamDatabaseSuite::mountTmpFs()
+void LeveldbNoSpaceSuite::mountTmpFs()
 {
     //ASSERT_FALSE (geteuid()) << "Require root privileges to mount tmpfs dir";
     // lazy mount of tmpfs
@@ -130,7 +130,7 @@ void joinThreads(C& threadPool)
     }
 }
 
-void SpamDatabaseSuite::copyDatabaseContent()
+void LeveldbNoSpaceSuite::copyDatabaseContent()
 {
     string dbPathTest1 = Test1DatabasePath + "/" + baseDir;
     string dbPathTest2 = Test2DatabasePath + "/" + baseDir;
@@ -140,7 +140,7 @@ void SpamDatabaseSuite::copyDatabaseContent()
     ASSERT_EQ (WEXITSTATUS(ret), 0) << command;
 }
 
-void SpamDatabaseSuite::spamDatabase()
+void LeveldbNoSpaceSuite::spamDatabase()
 {
     const string path = Test1DatabasePath + "/" + baseDir;
     MojAssertNoErr( db.open(  path.c_str()) );
@@ -162,7 +162,7 @@ void SpamDatabaseSuite::spamDatabase()
 
 
 }
-void SpamDatabaseSuite::readSpammedDatabase()
+void LeveldbNoSpaceSuite::readSpammedDatabase()
 {
     string dbPathTest2 = Test2DatabasePath + "/" + baseDir;
     MojAssertNoErr( db.open(dbPathTest2.c_str()) );
@@ -196,7 +196,7 @@ void SpamDatabaseSuite::readSpammedDatabase()
     MojExpectNoErr( db.close() );
 }
 
-TEST_F(SpamDatabaseSuite, spamTempdb)
+TEST_F(LeveldbNoSpaceSuite, spamTempdb)
 {
     spamDatabase();
     copyDatabaseContent();

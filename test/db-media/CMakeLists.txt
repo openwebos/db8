@@ -33,9 +33,7 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                MediaTest.cpp
-               SpamTest.cpp
                Runner.cpp
-               utils.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
 target_link_libraries(${PROJECT_NAME}

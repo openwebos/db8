@@ -17,13 +17,13 @@
 *
 * LICENSE@@@
 ****************************************************************/
-#ifndef SPAMTEST_H
-#define SPAMTEST_H
+#ifndef LEVELDBNOSPACE_H
+#define LEVELDBNOSPACE_H
 
 #include "gtest/gtest.h"
 #include "db/MojDb.h"
 
-class SpamDatabaseSuite : public ::testing::Test
+class LeveldbNoSpaceSuite : public ::testing::Test
 {
 protected:
     void SetUp();

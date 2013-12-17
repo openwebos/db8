@@ -8,22 +8,17 @@
         {
             "service":"com.palm.db",
             "inbound":["*"],
-            "outbound":["com.palm.service.backup","com.palm.systemservice","com.palm.systemmanager","com.palm.activitymanager"]
+            "outbound":["com.palm.service.backup","com.palm.systemservice","com.palm.systemmanager","com.palm.activitymanager", "com.webos.service.attachedstoragemanager"]
         },
         {
             "service":"com.palm.tempdb",
             "inbound":["*"],
-            "outbound":["com.palm.activitymanager"]
+            "outbound":["com.palm.activitymanager", "com.palm.systemservice","com.palm.systemmanager", "com.webos.service.attachedstoragemanager"]
         },
         {
             "service":"com.webos.mediadb",
             "inbound":["*"],
-            "outbound":["com.palm.activitymanager"]
-        },
-        {
-            "service": "com.palm.mojodbclient",
-            "inbound":[],
-            "outbound":["com.webos.service.attachedstoragemanager"]
+            "outbound":["com.palm.activitymanager","com.palm.systemservice","com.palm.systemmanager", "com.webos.service.attachedstoragemanager"]
         }
     ]
 }

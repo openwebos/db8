@@ -52,7 +52,6 @@ MojDbLunaServiceApp::MojDbLunaServiceApp()
 , m_mainService(m_dispatcher)
 , m_mediaService(m_dispatcher)
 , m_tempService(m_dispatcher)
-, m_pdmService(m_dispatcher)
 {
    // set up db first
 #ifdef MOJ_USE_BDB
@@ -91,8 +90,6 @@ MojErr MojDbLunaServiceApp::init()
     MojErrCheck(err);
     err = m_tempService.init(m_reactor);
     MojErrCheck(err);
-    err = m_pdmService.init(m_reactor);
-    MojErrCheck(err);
 
     return MojErrNone;
 }
@@ -114,8 +111,6 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     err = m_mediaService.db().configure(conf);
     MojErrCheck(err);
     err = m_tempService.db().configure(conf);
-    MojErrCheck(err);
-    err = m_pdmService.configure(conf);
     MojErrCheck(err);
 
     m_conf = dbConf;
@@ -160,23 +155,6 @@ MojErr MojDbLunaServiceApp::open()
 		MojErrCheck(err);
 	}
 
-	if (m_pdmService.isEnabled()) {
-        // open pdm service conection
-        err = m_pdmService.open(m_reactor, MojDbServiceDefs::PDMClientName, MojDbServiceDefs::PDMServiceName);
-        MojErrCheck(err);
-
-        if (!dbOpenFailed) {
-            err = m_pdmService.addShardEngine(m_mainService.db().shardEngine());
-            MojErrCheck(err);
-
-            err = m_pdmService.addShardEngine(m_tempService.db().shardEngine());
-            MojErrCheck(err);
-
-            err = m_pdmService.addShardEngine(m_mediaService.db().shardEngine());
-            MojErrCheck(err);
-        }
-    }
-
 	// open internal handler
 	err = m_internalHandler->open();
 	MojErrCheck(err);
@@ -193,6 +171,13 @@ MojErr MojDbLunaServiceApp::open()
     err = m_mediaInternalHandler->open();
     MojErrCheck(err);
     err = m_mediaService.service().addCategory(MojDbServiceDefs::InternalCategory, m_mediaInternalHandler.get());
+    MojErrCheck(err);
+
+    err = m_internalHandler->subscribe();
+    MojErrCheck(err);
+    err = m_tempInternalHandler->subscribe();
+    MojErrCheck(err);
+    err = m_mediaInternalHandler->subscribe();
     MojErrCheck(err);
 
     LOG_DEBUG("[mojodb] started");
@@ -217,9 +202,6 @@ MojErr MojDbLunaServiceApp::close()
 	errClose = m_tempService.close();
 	MojErrAccumulate(err, errClose);
     errClose = m_mediaService.close();
-    MojErrAccumulate(err, errClose);
-
-    errClose = m_pdmService.close();
     MojErrAccumulate(err, errClose);
 
 	m_internalHandler->close();

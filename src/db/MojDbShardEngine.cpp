@@ -42,7 +42,6 @@ static const MojChar* const ShardInfoKind1Str =
 //db.shardEngine
 
 MojDbShardEngine::MojDbShardEngine(void)
-    : m_pdmWatcher(this)
 {
     mp_db = 0;
 }
@@ -505,90 +504,6 @@ MojErr MojDbShardEngine::computeId (const MojString& mediaUuid, MojUInt32& sharI
 
     //Prefix the 24 bit hash with 0x01 to create a 32 bit unique shard ID
     sharId = code & 0xFFFFFF;
-
-    return MojErrNone;
-}
-
-/**
- * watcher
- */
-MojDbShardEngine::PDMSignalWatcher::PDMSignalWatcher(MojDbShardEngine* shardEngine)
-    : m_shardEngine(shardEngine),
-    m_pdmSlot(this, &PDMSignalWatcher::handleShardInfoSlot)
-{
-}
-
-/**
- * handler for media 'inserted' or 'removed' events
- */
-MojErr MojDbShardEngine::PDMSignalWatcher::handleShardInfoSlot(ShardInfo pdmShardInfo)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-    LOG_DEBUG("[db_shardEngine] Shard engine notified about new shard");
-    MojAssert(m_shardEngine->m_mediaLinkManager.get());
-
-    MojErr err;
-    bool found;
-    ShardInfo databaseShardInfo;
-
-    // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName
-    err = m_shardEngine->getByDeviceUuid(pdmShardInfo.deviceId, databaseShardInfo, found);
-    MojErrCheck(err);
-
-    if (found) {    // shard already registered in database
-        updateShard(pdmShardInfo, databaseShardInfo);
-        err = m_shardEngine->m_mediaLinkManager->processShardInfo(databaseShardInfo);
-        MojErrCheck(err);
-
-        err = processShard(databaseShardInfo);
-        MojErrCheck(err);
-
-        err = m_shardEngine->update(databaseShardInfo);
-        MojErrCheck(err);
-    } else {        // not found in database
-        err = m_shardEngine->allocateId(pdmShardInfo.deviceId, databaseShardInfo.id);
-        MojErrCheck(err);
-        LOG_DEBUG("[db_shardEngine] shardEngine for device %s generated shard id: %d", databaseShardInfo.deviceId.data(), databaseShardInfo.id);
-
-        updateShard(pdmShardInfo, databaseShardInfo);
-        databaseShardInfo.deviceId = pdmShardInfo.deviceId;
-        databaseShardInfo.transient = false;
-
-        err = m_shardEngine->m_mediaLinkManager->processShardInfo(databaseShardInfo);
-        MojErrCheck(err);
-
-        err = m_shardEngine->put(databaseShardInfo);
-        MojErrCheck(err);
-    }
-    return MojErrNone;
-}
-
-void MojDbShardEngine::PDMSignalWatcher::updateShard(const ShardInfo& from, ShardInfo& to)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-    to.deviceUri = from.deviceUri;
-    to.deviceName = from.deviceName;
-    to.active = from.active;
-}
-
-MojErr MojDbShardEngine::PDMSignalWatcher::processShard(ShardInfo& shardInfo)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-
-    MojErr err;
-    if (!shardInfo.active && shardInfo.transient) {
-        bool found;
-        err = m_shardEngine->isIdExist(shardInfo.id, found);
-        MojErrCheck(err);
-
-        if(found) {
-            err = m_shardEngine->removeShardObjects(shardInfo.id_base64);
-            MojErrCheck(err);
-            err = m_shardEngine->removeShardInfo(shardInfo.id);
-            MojErrCheck(err);
-        }
-    }
 
     return MojErrNone;
 }
@@ -1195,11 +1110,76 @@ MojErr MojDbShardEngine::removeShardInfo (const MojUInt32 shardId)
     return MojErrNone;
 }
 
-MojErr MojDbShardEngine::connectPdmServiceSignal(SignalPdm* signal)
+MojErr MojDbShardEngine::processShardInfo(const ShardInfo& shardInfo)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    LOG_DEBUG("[db_shardEngine] Shard engine notified about new shard");
+    MojAssert(m_mediaLinkManager.get());
+
+    MojErr err;
+    bool found;
+    ShardInfo databaseShardInfo;
+
+    // Inside shardInfo we have only filled deviceId deviceUri mountPath MojString deviceName
+    err = getByDeviceUuid(shardInfo.deviceId, databaseShardInfo, found);
+    MojErrCheck(err);
+
+    if (found) {    // shard already registered in database
+        copyRequiredFields(shardInfo, databaseShardInfo);
+        err = m_mediaLinkManager->processShardInfo(databaseShardInfo);
+        MojErrCheck(err);
+
+        err = removeTransientShard(databaseShardInfo);
+        MojErrCheck(err);
+
+        err = update(databaseShardInfo);
+        MojErrCheck(err);
+    } else {        // not found in database
+        err = allocateId(shardInfo.deviceId, databaseShardInfo.id);
+        MojErrCheck(err);
+        LOG_DEBUG("[db_shardEngine] shardEngine for device %s generated shard id: %d", databaseShardInfo.deviceId.data(), databaseShardInfo.id);
+
+        copyRequiredFields(shardInfo, databaseShardInfo);
+        databaseShardInfo.deviceId = shardInfo.deviceId;
+        databaseShardInfo.transient = false;
+
+        err = m_mediaLinkManager->processShardInfo(databaseShardInfo);
+        MojErrCheck(err);
+
+        err = put(databaseShardInfo);
+        MojErrCheck(err);
+    }
+    return MojErrNone;
+}
+
+MojErr MojDbShardEngine::copyRequiredFields(const ShardInfo& from, ShardInfo& to)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-    MojAssert(signal);
-    signal->connect( m_pdmWatcher.getSlot() );
+    to.deviceUri = from.deviceUri;
+    to.deviceName = from.deviceName;
+    to.active = from.active;
+
+    return MojErrNone;
+}
+
+MojErr MojDbShardEngine::removeTransientShard(const ShardInfo& shardInfo)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    MojErr err;
+    if (!shardInfo.active && shardInfo.transient) {
+        bool found;
+        err = isIdExist(shardInfo.id, found);
+        MojErrCheck(err);
+
+        if(found) {
+            err = removeShardObjects(shardInfo.id_base64);
+            MojErrCheck(err);
+            err = removeShardInfo(shardInfo.id);
+            MojErrCheck(err);
+        }
+    }
+
     return MojErrNone;
 }

@@ -1,4 +1,4 @@
 [D-BUS Service]
 Name=com.palm.tempdb
-Exec=/usr/bin/mojodb-luna /var/db
+Exec=/usr/bin/mojodb-luna /var/db /var/db
 Type=static

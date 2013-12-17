@@ -28,7 +28,6 @@
 #include "core/MojMessageDispatcher.h"
 #include "luna/MojLunaService.h"
 #include "db-luna/MojDbLunaServiceDb.h"
-#include "db-luna/MojDbLunaServicePdm.h"
 
 class MojDbEnv;
 class MojDb;
@@ -63,7 +62,6 @@ private:
     MojDbLunaServiceDb m_mainService;
     MojDbLunaServiceDb m_mediaService;
     MojDbLunaServiceDb m_tempService;
-    MojDbLunaServicePdm m_pdmService;
     MojMessageDispatcher m_dispatcher;
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;

@@ -24,6 +24,7 @@
 #include "db/MojDb.h"
 #include "db/MojDbSpaceAlert.h"
 #include "db/MojDbServiceHandlerBase.h"
+#include "db/MojDbMediaHandler.h"
 #include "core/MojService.h"
 #include "core/MojServiceMessage.h"
 #include "core/MojServiceRequest.h"
@@ -48,6 +49,7 @@ public:
 	virtual MojErr close();
 
 	MojErr configure(bool fatalError);
+    MojErr subscribe();
 
 private:
 	class PurgeHandler : public MojSignalHandler
@@ -111,6 +113,7 @@ private:
 
 	MojService& m_service;
 	MojRefCountedPtr<LocaleHandler> m_localeChangeHandler;
+    MojRefCountedPtr<MojDbMediaHandler> m_mediaChangeHandler;
 	static const Method s_privMethods[];
 
 };

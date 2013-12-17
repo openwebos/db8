@@ -25,10 +25,6 @@
 #include "core/MojServiceRequest.h"
 #include "core/MojTime.h"
 
-#include <sys/statvfs.h>
-
-#define MASSIVE_AVAILABLE_SPACE (500000000L) // 500 MB
-
 const MojDbServiceHandlerInternal::Method MojDbServiceHandlerInternal::s_privMethods[] = {
 	{MojDbServiceDefs::PostBackupMethod, (Callback) &MojDbServiceHandlerInternal::handlePostBackup},
 	{MojDbServiceDefs::PostRestoreMethod, (Callback) &MojDbServiceHandlerInternal::handlePostRestore},
@@ -63,6 +59,17 @@ MojErr MojDbServiceHandlerInternal::open()
 	return MojErrNone;
 }
 
+MojErr MojDbServiceHandlerInternal::subscribe()
+{
+    MojAssert(!m_mediaChangeHandler.get());
+    m_mediaChangeHandler = new MojDbMediaHandler(m_service, m_db);
+
+    MojErr err = m_mediaChangeHandler->subscribe();
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
 MojErr MojDbServiceHandlerInternal::close()
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
@@ -81,6 +88,7 @@ MojErr MojDbServiceHandlerInternal::configure(bool fatalError)
 		MojErr err = requestLocale();
 		MojErrCheck(err);
 	}
+
 	return MojErrNone;
 }
 

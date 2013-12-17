@@ -154,6 +154,7 @@ set(DB_LIB_SOURCES
     src/db/MojDbSpaceAlert.cpp
     src/db/MojDbKindState.cpp
     src/db/MojDbMediaLinkManager.cpp
+    src/db/MojDbMediaHandler.cpp
     src/db/MojDbObjectHeader.cpp
     src/db/MojDbObjectItem.cpp
     src/db/MojDbPermissionEngine.cpp
@@ -213,8 +214,6 @@ webos_build_library(TARGET mojoluna NOHEADERS)
 set(LUNA_BIN_SOURCES
     src/db-luna/MojDbLunaServiceApp.cpp
     src/db-luna/MojDbLunaServiceDb.cpp
-    src/db-luna/MojDbLunaServicePdm.cpp
-    src/db-luna/MojDbLunaServicePdmHandler.cpp
 )
 
 include_directories (${DB_BACKEND_INCLUDES})

@@ -23,7 +23,6 @@
 #include "core/MojCoreDefs.h"
 #include "core/MojErr.h"
 #include "core/MojString.h"
-#include "core/MojSignal.h"
 #include "core/MojObject.h"
 #include "db/MojDbReq.h"
 
@@ -167,26 +166,6 @@ public:
         }
     };
 
-    class PDMSignalWatcher;
-
-    typedef MojSignal<ShardInfo> SignalPdm;
-    typedef SignalPdm::Slot<PDMSignalWatcher> SlotPdm;
-
-    class PDMSignalWatcher : public MojSignalHandler
-    {
-    public:
-        PDMSignalWatcher(MojDbShardEngine* shardEngine);
-        SlotPdm& getSlot() { return  m_pdmSlot; }
-    private:
-        MojErr handleShardInfoSlot(ShardInfo pdmShardInfo);
-        MojErr processShard(ShardInfo& shardInfo);
-        void updateShard(const ShardInfo& from, ShardInfo& to);
-
-        MojDbShardEngine* m_shardEngine;
-        SlotPdm m_pdmSlot;
-    };
-
-
     MojDbShardEngine(void);
     ~MojDbShardEngine(void);
 
@@ -285,9 +264,12 @@ public:
     MojErr unlinkShardAndKindId (const MojString& shardIdBase64, const MojString& kindId, MojDbReqRef req = MojDbReq());
     MojErr unlinkShardAndKindId (const MojUInt32 shardId, const MojString& kindId, MojDbReqRef req = MojDbReq());
 
-    MojErr connectPdmServiceSignal(SignalPdm* signal);
+    MojErr processShardInfo(const ShardInfo& shardInfo);
 
 private:
+    MojErr copyRequiredFields(const ShardInfo& from, ShardInfo& to);
+    MojErr removeTransientShard(const ShardInfo& shardInfo);
+
     /**
      * Configure shard engine after init
      */
@@ -333,9 +315,6 @@ private:
     std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
     MojDb* mp_db;
     MojDbShardIdCache m_cache;
-
-public:
-    PDMSignalWatcher m_pdmWatcher;
 };
 
 #endif /* MOJDBSHARDENGINE_H_ */

@@ -74,18 +74,23 @@ MojErr MojDbQueryFilter::test(const MojObject& obj, bool& isFound) const
         // check whether the value exists in range.
         bool testResult = false;
         for (MojObject::ConstArrayIterator valIter = objVals.arrayBegin(); valIter != objVals.arrayEnd(); ++valIter) {
-            err = testLower(*filterIter, *valIter, isFound);
+            err = testLower(*filterIter, *valIter, testResult);
             MojErrCheck(err);
-            if (!isFound)
-                return MojErrNone;
+            if (!testResult)
+                continue;
 
             err = testUpper(*filterIter, *valIter, testResult);
             MojErrCheck(err);
 
             if (testResult) {
-                isFound = true;
-                return MojErrNone;
+                isFound = false;
+                break;
             }
+        }
+
+        if (!testResult) {
+            isFound = false;
+            return MojErrNone;
         }
     }
 

@@ -352,7 +352,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
                 bool isFound;
                 err = m_queryFilter->test(obj, isFound);
                 MojErrCheck(err);
-                if (isFound)
+                if (!isFound)
                     continue;
             }
 			// create object item

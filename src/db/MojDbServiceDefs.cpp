@@ -102,6 +102,7 @@ const MojChar* const MojDbServiceDefs::GetMethod = _T("get");
 const MojChar* const MojDbServiceDefs::GetPermissionsMethod = _T("getPermissions");
 const MojChar* const MojDbServiceDefs::LoadMethod = _T("load");
 const MojChar* const MojDbServiceDefs::MergeMethod = _T("merge");
+const MojChar* const MojDbServiceDefs::MergePutMethod = _T("mergePut");
 const MojChar* const MojDbServiceDefs::PostBackupMethod = _T("postBackup");
 const MojChar* const MojDbServiceDefs::PostRestoreMethod = _T("postRestore");
 const MojChar* const MojDbServiceDefs::PreBackupMethod = _T("preBackup");

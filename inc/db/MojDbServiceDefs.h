@@ -108,6 +108,7 @@ public:
 	static const MojChar* const GetPermissionsMethod;
 	static const MojChar* const LoadMethod;
 	static const MojChar* const MergeMethod;
+    static const MojChar* const MergePutMethod;
 	static const MojChar* const PostBackupMethod;
 	static const MojChar* const PostRestoreMethod;
 	static const MojChar* const PreBackupMethod;

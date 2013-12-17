@@ -90,6 +90,7 @@ private:
 	MojErr handleGet(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleLoad(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleMerge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+    MojErr handleMergePut(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handlePurge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handlePurgeStatus(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handlePut(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);

@@ -24,27 +24,32 @@
 #include "utils.h"
 #include "Runner.h"
 #include "db-luna/MojDbLunaServiceApp.h"
+#include <string>
+#include <sstream>
 
 using namespace std;
 
 namespace
 {
-    constexpr const MojChar* TestKind = "{\"id\":\"Test:1\", \"owner\":\"com.foo.bar\", \"indexes\":[{\"name\":\"foo\",\"props\":[{\"name\":\"foo\",\"collate\":\"secondary\"}]}]}";
-    constexpr const MojChar* TestObject = "{\"_kind\":\"Test:1\",\"foo\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\"}";
-    constexpr unsigned int ThreadsCount = 100;
+    const MojChar* TestKind = "{\"id\":\"Test:1\", \"owner\":\"com.foo.bar\", \"indexes\":[{\"name\":\"foo\",\"props\":[{\"name\":\"foo\",\"collate\":\"secondary\"}]}]}";
+    const MojChar* TestObject = "{\"_kind\":\"Test:1\",\"foo\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\"}";
+    unsigned int ThreadsCount = 100;
 
-    constexpr const MojChar* ConfigFile = "'{ \"db\" : {\"path\" : \"/tmp/db8-spam-test1\", \"service_name\" : \"com.palm.testdb\" } }'";
+    const MojChar* ConfigFile = "'{ \"db\" : {\"path\" : \"/tmp/db8-spam-test1\", \"service_name\" : \"com.palm.testdb\" } }'";
 
     MojAtomicInt WrittenObjects = 0;
-    const string Test1DatabasePath { "/tmp/db8-spam-test1"};
-    const string Test2DatabasePath { "/tmp/db8-spam-test2"};
+    const string Test1DatabasePath { "/tmp/db8-spam-test1" };
+    const string Test2DatabasePath { "/tmp/db8-spam-test2" };
 
     volatile unsigned int IoErrorCount { 0 };
 }
 
 void SpamDatabaseSuite::SetUp()
 {
-    baseDir = to_string(time(static_cast<time_t>(0)));
+    ostringstream stream;
+    stream << time(static_cast<time_t>(0));
+
+    baseDir = stream.str();
     mountTmpFs();
 }
 

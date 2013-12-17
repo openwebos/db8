@@ -51,7 +51,7 @@ public:
     void   unsubscribe(const MojString& owner);
     MojErr checkQuota(MojServiceMessage* pMsg, const MojString& owner, MojInt64& bytesUsed, MojInt64& bytesAvailable);
     MojErr notifySubscriber (const MojChar* pServiceName, const MojInt64& bytesUsed, const MojInt64& bytesAvailable);
-    QuotaCheckNode* getSubscriber (MojInt32 index);
+    QuotaCheckNode* getSubscriber (MojUInt32 index);
 
 private:
     MojDb& m_db;

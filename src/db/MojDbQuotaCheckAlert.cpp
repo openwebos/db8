@@ -46,15 +46,12 @@ MojErr MojDbQuotaCheckAlert::subscribe(MojServiceMessage* pMsg, const MojString&
     }
 
     //exist?
-    for (MojSize i = 0; i < m_quotaCheckSubscribers.size(); ++i)
+    for (MojUInt32 i = 0; i < m_quotaCheckSubscribers.size(); ++i)
     {
         MojAssert(m_quotaCheckSubscribers.at(i).get());
-        MojChar* pSender = getSubscriber(i)->m_owner.data();
 
-        if(MojStrCmp(owner.data(), pSender) == 0)
-        {
+        if (getSubscriber(i)->m_owner == owner)
             return MojErrNone;
-        }
     }
 
     //add new
@@ -68,10 +65,9 @@ void MojDbQuotaCheckAlert::unsubscribe(const MojString& owner)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(owner.empty());
-    for (MojSize i = 0; i < m_quotaCheckSubscribers.size(); ++i)
+    for (MojUInt32 i = 0; i < m_quotaCheckSubscribers.size(); ++i)
     {
-        MojChar* pSender = getSubscriber(i)->m_owner.data();
-        if(MojStrCmp(owner.data(), pSender) == 0) {
+        if(owner == getSubscriber(i)->m_owner) {
             m_quotaCheckSubscribers.erase(i);
             break;
         }
@@ -83,12 +79,11 @@ MojErr MojDbQuotaCheckAlert::notifySubscriber (const MojChar* pServiceName, cons
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(pServiceName);
 
-    for (MojSize i = 0; i < m_quotaCheckSubscribers.size(); ++i)
+    for (MojUInt32 i = 0; i < m_quotaCheckSubscribers.size(); ++i)
     {
         MojAssert(m_quotaCheckSubscribers.at(i).get());
-        MojChar* pSender = getSubscriber(i)->m_owner.data();
 
-        if(MojStrCmp(pServiceName, pSender) == 0)
+        if (getSubscriber(i)->m_owner == pServiceName)
         {
             getSubscriber(i)->handleAlert(bytesUsed, bytesAvailable);
             break;
@@ -119,7 +114,7 @@ MojErr MojDbQuotaCheckAlert::checkQuota(MojServiceMessage* pMsg, const MojString
     return MojErrNone;
 }
 
-MojDbQuotaCheckAlert::QuotaCheckNode* MojDbQuotaCheckAlert::getSubscriber (MojInt32 index)
+MojDbQuotaCheckAlert::QuotaCheckNode* MojDbQuotaCheckAlert::getSubscriber (MojUInt32 index)
 {
     MojAssert(index < m_quotaCheckSubscribers.size());
     return(m_quotaCheckSubscribers.at(index).get());

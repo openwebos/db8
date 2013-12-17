@@ -348,8 +348,13 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 			err = item->toObject(obj, *m_kindEngine);
 			MojErrCheck(err);
 			// filter results
-            if (m_queryFilter.get() && !MojBoolResult(m_queryFilter->test, obj))
-				continue;
+            if (m_queryFilter.get()) {
+                bool isFound;
+                err = m_queryFilter->test(obj, isFound);
+                MojErrCheck(err);
+                if (isFound)
+                    continue;
+            }
 			// create object item
 			MojRefCountedPtr<MojDbObjectItem> item(new MojDbObjectItem(obj));
 			MojAllocCheck(item.get());

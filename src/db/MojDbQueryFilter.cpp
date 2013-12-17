@@ -51,7 +51,7 @@ MojErr MojDbQueryFilter::init(const MojDbQuery& query)
  *   3. Check whether retrieved value from delivered object exists in range.
  * overflows and to report any truncations.
  ***********************************************************************/
-MojErr MojDbQueryFilter::test(const MojObject& obj, bool & ret) const
+MojErr MojDbQueryFilter::test(const MojObject& obj, bool& isFound) const
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -65,25 +65,32 @@ MojErr MojDbQueryFilter::test(const MojObject& obj, bool & ret) const
 
         // find values by using key name and contain results into object array.
         MojObject objVals;
-        if (!MojBoolResult(findValue, obj, keyVec.begin(), keyVec.end(), objVals)) {
-            ret = false;
+        err = findValue( obj, keyVec.begin(), keyVec.end(), objVals, isFound);
+        MojErrCheck(err);
+
+        if (!isFound) // object not found
             return MojErrNone;
-        }
+
         // check whether the value exists in range.
         bool testResult = false;
         for (MojObject::ConstArrayIterator valIter = objVals.arrayBegin(); valIter != objVals.arrayEnd(); ++valIter) {
-            if (MojBoolResult(testLower, *filterIter, *valIter) && MojBoolResult(testUpper, *filterIter, *valIter)) {
-                testResult = true;
-                break;
+            err = testLower(*filterIter, *valIter, isFound);
+            MojErrCheck(err);
+            if (!isFound)
+                return MojErrNone;
+
+            err = testUpper(*filterIter, *valIter, testResult);
+            MojErrCheck(err);
+
+            if (testResult) {
+                isFound = true;
+                return MojErrNone;
             }
-        }
-        if(!testResult) {
-            ret = false;
-            return MojErrNone;
         }
     }
 
-    ret = true;
+    isFound = true;
+
     return MojErrNone;
 }
 

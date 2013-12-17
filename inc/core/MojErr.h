@@ -184,7 +184,6 @@ void MojAssertLogDebug(const MojChar* function, const MojChar* file, int line, c
 #	define MojErrCheck(E)				do if (E) {MojErrLogMsg(_T("  CHECKED"), (MojErr) E, _T("")); return (MojErr) (E);} while(0)
 #	define MojErrGoto(E, LABEL)			do if (E) {MojErrLogMsg(_T("  CHECKED"), E, _T("")); MojErrGotoNoLog(E, LABEL);} while(0)
 #	define MojAllocCheck(P)				if ((P) == NULL) MojErrThrow(MojErrNoMem)
-#   define MojAllocCatch(P)             if ((P) == NULL && (MojErrLog(_T("THROWN/CAUGHT"), MojErrNoMem), true) )
 #	ifdef MOJ_USE_ASSERT
 #		define MojAssertNoLog(COND)		assert(COND)
 #	endif
@@ -199,21 +198,12 @@ void MojAssertLogDebug(const MojChar* function, const MojChar* file, int line, c
 #	define MojErrCheck(E)				MojErrCheckNoLog(E)
 #	define MojErrGoto(E, LABEL)			MojErrGotoNoLog(E, LABEL)
 #	define MojAllocCheck(P)				MojAllocCheckNoLog(P)
-#	define MojAllocCatch(P)				if ((P) == NULL)
 #	define MojAssertNoLog(COND)
 #	define MojAssert(COND)
 #endif
 
 #define MojAssertNotReachedNoLog()		MojAssertNoLog(false)
 #define MojAssertNotReached()			MojAssert(false)
-
-#define MojBoolResult(something_callable, ...)                      \
-       ({                                                           \
-         bool result;                                               \
-         MojErr err = something_callable(__VA_ARGS__, result) ;     \
-         MojErrCheck(err);                                          \
-         result;                                                    \
-       })
 
 #include "core/MojLog.h"
 

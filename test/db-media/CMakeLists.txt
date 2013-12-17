@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2013 LG Electronics, Inc.
+# Copyright (c) 2013-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                MediaTest.cpp
+               SpamTest.cpp
+               Runner.cpp
+               utils.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
 target_link_libraries(${PROJECT_NAME}

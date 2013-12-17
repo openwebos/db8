@@ -59,6 +59,7 @@ private:
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;
     MojObject m_conf;
+    MojObject m_engineConf;
 };
 
 #endif /* MOJDBLUNASERVICEAPP_H_ */

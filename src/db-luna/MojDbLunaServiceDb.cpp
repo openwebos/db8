@@ -58,38 +58,65 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     MojErrCheck(err);
     err = m_service.addCategory(MojDbServiceDefs::Category, m_handler.get());
     MojErrCheck(err);
+
+    LOG_DEBUG("[MojDb] service name: %s", serviceName);
+
     // open db
     err = openDb(env, dir, conf);
     if (err != MojErrNone) {
-        LOG_DEBUG("[MojDb] service name: %s", serviceName);
+        MojString msg;
+        MojErrToString(err, msg);
+        LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN,
+                      3,
+                      PMLOGKS("dbdir", dir),
+                      PMLOGKS("dbdata", msg.data()),
+                      PMLOGKFV("dberror", "%d", err),
+                      "Can't open database");
 
-        MojString recoveryScriptPath;
-        MojErrCheck(conf.getRequired("recoveryScriptPath", recoveryScriptPath));
-
-        int res = system(recoveryScriptPath.data());
-        if (res == 0) {
-            LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN, 0, "reopen database after recovery" );
-            err = openDb(env, dir, conf);
-        } else {
-            LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN,
-                    2,
-                    PMLOGKS("recoveryScriptPath", recoveryScriptPath.data()),
-                    PMLOGKFV("return", "%i", res),
-                    "Can't run recovery script");
-        }
-
-        if (err != MojErrNone) {
-            MojString msg;
-            MojErrToString(err, msg);
-            LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 3,
-                PMLOGKS("dir", dir),
-                PMLOGKS("data", msg.data()),
-                PMLOGKFV("error", "%d", err),
-                "Error opening 'dir' - 'data' ('error')");
-        }
+        err = recoverDb(env, dir, conf);
+        MojErrCheck(err);
     }
 
     return err;
+}
+
+MojErr MojDbLunaServiceDb::recoverDb(MojDbEnv* env, const MojChar* dir, const MojObject& conf)
+{
+    MojErr err;
+
+    if (m_recoveryScriptPath.empty()) {
+        LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN,0, "No recovery script, close database");
+        return MojErrDbFatal;
+    }
+
+    int recoveryResult = system(m_recoveryScriptPath.data());
+    if (recoveryResult != 0) {
+        LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN,
+                  3,
+                  PMLOGKS("recoveryScript", m_recoveryScriptPath.data()),
+                  PMLOGKFV("scriptExecResult", "%i", recoveryResult),
+                  PMLOGKS("dbdir", dir),
+                  "Can't recovery database with help of recovery script");
+
+        return MojErrDbFatal;   // close database and stop process
+    }
+
+    LOG_INFO(MSGID_LUNA_SERVICE_DB_OPEN, 0, "Recovery database success, reopen database" );
+    err = openDb(env, dir, conf);
+
+    if (err != MojErrNone) {
+        MojString msg;
+        MojErrToString(err, msg);
+        LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 3,
+                  PMLOGKS("dbdir", dir),
+                  PMLOGKS("dbdata", msg.data()),
+                  PMLOGKFV("dberror", "%d", err),
+                  "Error re-opening database after recovery");
+
+        return err;
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* dir, const MojObject& conf)
@@ -110,6 +137,26 @@ MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* dir, const MojOb
     // open db
     err = m_db.open(dir, engine.get());
     MojErrCheck(err);
+
+    return MojErrNone;
+}
+
+MojErr MojDbLunaServiceDb::configure(const MojObject& conf)
+{
+    MojErr err;
+
+    err = conf.getRequired("recoveryScriptPath", m_recoveryScriptPath);
+    MojErrCheck(err);
+
+    // check if bash scipt exist and have exec rights
+    if (access(m_recoveryScriptPath.data(), X_OK) != 0) {
+        LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN,
+                  1,
+                  PMLOGKS("recoveryScriptPath", m_recoveryScriptPath.data()),
+                  "Can't find recovery script or no exec right");
+
+        m_recoveryScriptPath.clear();
+    }
 
     return MojErrNone;
 }

@@ -35,6 +35,7 @@ public:
     MojErr init(MojReactor& reactor);
     MojErr open(MojGmainReactor& reactor, MojDbEnv* env,
                 const MojChar* serviceName, const MojChar* dir, const MojObject& conf);
+    MojErr configure(const MojObject& conf);
     MojErr openDb(MojDbEnv* env, const MojChar* dir, const MojObject& conf);
     MojErr close();
 
@@ -42,8 +43,11 @@ public:
     MojLunaService& service() { return m_service; }
 
 private:
+    MojErr recoverDb(MojDbEnv* env, const MojChar* dir, const MojObject& conf);
+
     MojDb m_db;
     MojLunaService m_service;
+    MojString m_recoveryScriptPath;
     MojRefCountedPtr<MojDbServiceHandler> m_handler;
 };
 

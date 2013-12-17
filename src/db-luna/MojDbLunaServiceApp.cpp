@@ -86,14 +86,13 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     MojErr err = Base::configure(conf);
     MojErrCheck(err);
 
-    MojObject engineConf;
+    m_conf = conf;
 
-    conf.get(MojDbStorageEngine::engineFactory()->name(), engineConf);
-    err = m_env->configure(engineConf);
+    conf.get(MojDbStorageEngine::engineFactory()->name(), m_engineConf);
+    err = m_env->configure(m_engineConf);
     MojErrCheck(err);
     err = m_mainService.db().configure(conf);
     MojErrCheck(err);
-    m_conf = engineConf;
 
     MojObject dbConf;
     err = conf.getRequired("db", dbConf);
@@ -109,6 +108,9 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     err = dbConf.getRequired("service_name", serviceName);
     MojErrCheck(err);
     err = serviceName.stringValue(m_serviceName);
+    MojErrCheck(err);
+
+    err = m_mainService.configure(dbConf);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -134,7 +136,7 @@ MojErr MojDbLunaServiceApp::open()
 	}
 
 	// open db services
-    err = m_mainService.open(m_reactor, m_env.get(), m_serviceName, m_dbDir, m_conf);
+    err = m_mainService.open(m_reactor, m_env.get(), m_serviceName, m_dbDir, m_engineConf);
     MojErrCatchAll(err) {
 		dbOpenFailed = true;
 	}

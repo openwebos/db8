@@ -1,6 +1,6 @@
 #@@@LICENSE
 #
-#  Copyright (c) 2014 LG Electronics, Inc.
+# Copyright (c) 2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,23 @@
 #
 # LICENSE@@@
 
-# Note: this upstart script used only for openwebos
+# Note: This upstart script used ONLY by OpenWebos and qemu builds
 
-description "Start/Stop all required db8 databases"
+description "@WEBOS_PROJECT_SUMMARY@"
 
-start on (started db8-maindb and started db8-tempdb)
-stop on (stopped db8-maindb and stopped db8-tempdb)
+start on (stopped finish or starting db8)
+stop on (started start_update or stopping db8)
 
+respawn
+
+# Comment this line out to suppress logs on the console
 #console output
+
+pre-start script
+	mkdir -p @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8
+	mkdir -p @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8/mountpoints
+end script
+
+script
+	exec @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/db8/tempdb.conf
+end script

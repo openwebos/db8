@@ -245,8 +245,10 @@ install(FILES src/db-luna/mojodb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFD
 install(FILES src/db-luna/backup-com.palm.db DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/backup)
 install(FILES src/db-luna/activity-com.palm.db.purge.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.db)
 install(FILES src/db-luna/activity-com.palm.db.space.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.db)
+install(FILES src/db-luna/activity-com.palm.tempdb.space.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.tempdb)
 install(FILES src/db-luna/activity-com.palm.tempdb.purge.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.tempdb)
 install(FILES src/db-luna/activity-com.webos.mediadb.purge.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.webos.mediadb)
+install(FILES src/db-luna/activity-com.webos.mediadb.space.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.webos.mediadb)
 
 install(DIRECTORY inc/ DESTINATION ${WEBOS_INSTALL_INCLUDEDIR}/mojodb/)
 

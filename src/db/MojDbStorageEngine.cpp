@@ -85,7 +85,8 @@ MojDbStorageTxn::MojDbStorageTxn()
   m_refreshQuotas(false),
   m_quotaEngine(NULL),
   m_preCommit(this),
-  m_postCommit(this)
+  m_postCommit(this),
+  m_reverseTransaction(false)
 {
 }
 

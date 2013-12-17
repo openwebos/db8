@@ -308,6 +308,11 @@ MojErr MojDbKind::configure(const MojObject& obj, const KindMap& map, const MojS
 			MojString str;
 			err = i->stringValue(str);
 			MojErrCheck(err);
+
+			// check, if we have "extends" permission for super kind
+			err = checkExtendPermission(str, req);
+			MojErrCheck(err);
+
 			err = superIds.push(str);
 			MojErrCheck(err);
 		}
@@ -548,6 +553,17 @@ MojErr MojDbKind::checkPermission(MojDbOp op, MojDbReq& req)
 		}
 	}
 	return MojErrNone;
+}
+
+MojErr MojDbKind::checkExtendPermission(const MojChar* superId, MojDbReq& req)
+{
+    const MojChar* opStr = stringFromOperation(OpExtend);
+    MojDbPermissionEngine::Value val = m_kindEngine->permissionEngine()->check(PermissionType, superId, req.domain(), opStr);
+    if (val == MojDbPermissionEngine::ValueDeny) {
+        return MojErrDbPermissionDenied;
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbKind::checkOwnerPermission(MojDbReq& req)

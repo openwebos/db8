@@ -36,6 +36,7 @@
 #include "core/MojSignal.h"
 #include "core/MojString.h"
 #include "core/MojFile.h"
+#include "core/MojLogDb8.h"
 
 class MojDb : private MojNoCopy
 {

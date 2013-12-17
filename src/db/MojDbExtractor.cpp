@@ -20,6 +20,7 @@
 #include "db/MojDbExtractor.h"
 #include "db/MojDbTextTokenizer.h"
 #include "db/MojDbUtils.h"
+#include "core/MojLogDb8.h"
 
 const MojChar* const MojDbExtractor::NameKey = _T("name");
 const MojChar* const MojDbExtractor::CollateKey = _T("collate");

@@ -18,7 +18,7 @@
 
 
 #include "core/MojApp.h"
-#include "core/MojLogEngine.h"
+#include "core/MojLogDb8.h"
 
 MojApp::MojApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* versionString)
 : m_runMode(ModeDefault),

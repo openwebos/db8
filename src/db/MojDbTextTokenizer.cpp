@@ -23,6 +23,7 @@
 #include "db/MojDbKey.h"
 #include "core/MojObject.h"
 #include "core/MojString.h"
+#include "core/MojLogDb8.h"
 
 MojDbTextTokenizer::MojDbTextTokenizer()
 {

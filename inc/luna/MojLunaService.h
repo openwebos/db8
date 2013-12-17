@@ -24,6 +24,7 @@
 #include "luna/MojLunaDefs.h"
 #include "core/MojService.h"
 #include "core/MojString.h"
+#include "core/MojLogDb8.h"
 
 class MojLunaService : public MojService
 {

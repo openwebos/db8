@@ -20,6 +20,7 @@
 #include "db/MojDbKey.h"
 #include "db/MojDbTextCollator.h"
 #include "core/MojObjectSerialization.h"
+#include "core/MojLogDb8.h"
 
 MojErr MojDbKey::assign(const MojObject& obj, MojDbTextCollator* coll)
 {

@@ -23,6 +23,7 @@
 #include "db-luna/leveldb/MojDbLevelItem.h"
 #include "db-luna/leveldb/defs.h"
 #include "db-luna/leveldb/MojDbLevelTxnIterator.h"
+#include "core/MojLogDb8.h"
 
 MojDbLevelCursor::MojDbLevelCursor() :
     m_db(0),

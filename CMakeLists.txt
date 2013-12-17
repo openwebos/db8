@@ -102,6 +102,7 @@ set(CORE_LIB_SOURCES
     src/core/MojJson.cpp
     src/core/MojList.cpp
     src/core/MojLog.cpp
+    src/core/MojLogDb8.cpp
     src/core/MojLogEngine.cpp
     src/core/MojMessageDispatcher.cpp
     src/core/MojObject.cpp

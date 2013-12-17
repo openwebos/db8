@@ -16,64 +16,97 @@
 *
 * LICENSE@@@ */
 
+/* ===================================================================================
+ * WARNING !!!
+ * This code is redundant and DB8 NOT USE it anymore!
+ * It stay here for compatibility reason with projects: filecache and activitymanager.
+ * Please, don't use it.
+ * ===================================================================================
+ */
 
 #ifndef MOJLOG_H_
 #define MOJLOG_H_
 
 #include <stdio.h>
 #include <glib.h>
+#include "core/MojCoreDefs.h"
 #include "core/MojListEntry.h"
 
-#include "PmLogLib.h"
+#ifdef MOJ_HAVE_STDARG_H
+#	include <stdarg.h>
+#endif
 
-/* Logging ********
- * The parameters needed are
- * msgid - unique message id
- * kvcount - count for key-value pairs
- * ... - key-value pairs and free text. key-value pairs are formed using PMLOGKS or PMLOGKFV e.g.)
- * LOG_CRITICAL(msgid, 2, PMLOGKS("key1", "value1"), PMLOGKFV("key2", "%d", value2), "free text message");
- */
-#define LOG_CRITICAL(msgid, kvcount, ...) \
-PmLogCritical(getdb8context(), msgid, kvcount, ##__VA_ARGS__)
+#if defined(MOJ_DEBUG) || defined(MOJ_DEBUG_LOGGING)
+#	define MojLogDebug(LOGGER, ...)		(LOGGER).log(MojLogger::LevelDebug, __VA_ARGS__)
+#	define MojLogTrace(LOGGER)			MojLogTracer __MOJTRACER(LOGGER, _T(__PRETTY_FUNCTION__), _T(__FILE__), __LINE__)
+#else
+#	define MojLogDebug(LOGGER, ...)
+#	define MojLogTrace(LOGGER)
+#endif
 
-#define LOG_ERROR(msgid, kvcount, ...) \
-PmLogError(getdb8context(), msgid, kvcount,##__VA_ARGS__)
+#define MojLogInfo(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelInfo, __VA_ARGS__)
+#define MojLogNotice(LOGGER, ...)		(LOGGER).log(MojLogger::LevelNotice, __VA_ARGS__)
+#define MojLogWarning(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelWarning, __VA_ARGS__)
+#define MojLogError(LOGGER, ...) 		(LOGGER).log(MojLogger::LevelError, __VA_ARGS__)
+#define MojLogCritical(LOGGER, ...) 	(LOGGER).log(MojLogger::LevelCritical, __VA_ARGS__)
 
-#define LOG_WARNING(msgid, kvcount, ...) \
-PmLogWarning(getdb8context(), msgid, kvcount, ##__VA_ARGS__)
+class MojLogger : private MojNoCopy
+{
+public:
+	enum Level {
+		LevelTrace,
+		LevelDebug,
+		LevelInfo,
+		LevelNotice,
+		LevelWarning,
+		LevelError,
+		LevelCritical,
+		LevelNone,
+		LevelDefault = LevelNotice,
+		LevelMax = LevelNone
+	};
 
-#define LOG_INFO(msgid, kvcount, ...) \
-PmLogInfo(getdb8context(), msgid, kvcount, ##__VA_ARGS__)
+	MojLogger(const MojChar* name, MojLogEngine* engine = NULL);
+	~MojLogger();
 
-#define LOG_DEBUG(...) \
-PmLogDebug(getdb8context(), ##__VA_ARGS__)
+	Level level() const { return m_level; }
+	const MojChar* name() const { return m_name; }
 
-#define LOG_TRACE(...) \
-PMLOG_TRACE(__VA_ARGS__);
+	void level(Level level) { m_level = level; }
+	void log(Level level, const MojChar* format, ...) MOJ_FORMAT_ATTR((printf, 3, 4));
+	void vlog(Level level, const MojChar* format, va_list args) MOJ_FORMAT_ATTR((printf, 3, 0));
 
-#define MSGID_ERROR_CALL               "ERROR_CALL"
-#define MSGID_MESSAGE_CALL             "MESSAGE_CALL"
-#define MSGID_LUNA_SERVICE_DB_OPEN     "LUNA_SERVICE_DB_OPEN"
-#define MSGID_LUNA_ERROR_RESPONSE      "LUNA_ERROR_RESPONSE"
-#define MSGID_LEVEL_DB_ENGINE_ERROR    "LEVEL_DB_ENGINE_ERROR"
-#define MSGID_DB_ADMIN_ERROR           "DB_ADMIN_ERROR"
-#define MSGID_DB_KIND_ENGINE_ERROR     "DB_KIND_ENGINE_ERROR"
-#define MSGID_DB_SERVICE_ERROR         "DB_SERVICE_ERROR"
-#define MSGID_DB_ERROR                 "DB_ERROR"
-#define MSGID_MOJ_SERVICE_WARNING      "MOJ_SERVICE_WARNING"
-#define MSGID_DB_BERKLEY_TXN_WARNING   "DB_BERKLEY_TXN_WARNING"
-#define MSGID_LUNA_SERVICE_WARNING     "LUNA_SERVICE_WARNING"
-#define MSGID_LEVEL_DB_WARNING         "LEVEL_DB_WARNING"
-#define MSGID_MOJ_DB_WARNING           "MOJ_DB_WARNING"
-#define MOJ_DB_KIND_WARNING            "DB_KIND_WARNING"
-#define MSGID_MOJ_DB_CURSOR_WARNING    "MOJ_DB_CURSOR_WARNING"
-#define MSGID_MOJ_DB_ADMIN_WARNING     "MOJ_DB_ADMIN_WARNING"
-#define MSGID_MOJ_DB_INDEX_WARNING     "MOJ_DB_INDEX_WARNING"
-#define MSGID_MOJ_DB_KIND_WARNING      "MOJ_DB_KIND_WARNING"
-#define MSGID_MOJ_DB_MEDIALINK_WARNING "MOJ_DB_MEDIALINK_WARNING"
-#define MSGID_MOJ_DB_SERVICE_WARNING   "MOJ_DB_SERVICE_WARNING"
-#define MSGID_DB_SHARDENGINE_WARNING   "DB_SHARDENGINE_WARNING"
+	static const MojChar* stringFromLevel(Level level);
+	static MojErr levelFromString(const MojChar* str, Level& levelOut);
 
-extern PmLogContext getdb8context();
+	void *data() const { return m_data; }
+	void setData(void *data) { m_data = data; }
+
+private:
+	friend class MojLogEngine;
+
+	MojListEntry m_entry;
+	MojLogEngine* m_engine;
+	const MojChar* m_name;
+	Level m_level;
+	void *m_data;
+
+	static const MojChar* const s_levelNames[];
+};
+
+class MojLogTracer : public MojNoCopy
+{
+public:
+	MojLogTracer(MojLogger& logger, const MojChar* function, const MojChar* file, int line);
+	~MojLogTracer();
+
+private:
+	static const int IndentSpaces = 2;
+	int indentLevel(int inc);
+
+	MojLogger& m_logger;
+	const MojChar* m_function;
+	int m_level;
+};
 
 #endif /* MOJLOG_H_ */

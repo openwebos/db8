@@ -24,12 +24,106 @@
 #include "core/MojLogEngine.h"
 #include "core/MojLog.h"
 
-PmLogContext getdb8context()
+const MojChar* const MojLogger::s_levelNames[] = {
+	_T("trace"),
+	_T("debug"),
+	_T("info"),
+	_T("notice"),
+	_T("warning"),
+	_T("error"),
+	_T("critical"),
+	_T("none")
+};
+
+MojLogger::MojLogger(const MojChar* name, MojLogEngine* engine)
+: m_engine(engine),
+  m_name(name),
+  m_level(LevelDefault),
+  m_data(NULL)
 {
-    static PmLogContext logContext = 0;
-    if (0 == logContext)
-    {
-        PmLogGetContext("DB8", &logContext);
-    }
-    return logContext;
+	MojAssertNoLog(name);
+	if (m_engine == NULL)
+		m_engine = MojLogEngine::instance();
+	m_engine->addLogger(this);
 }
+
+MojLogger::~MojLogger()
+{
+	if (m_entry.inList()) {
+		m_engine->removeLogger(this);
+	}
+}
+
+void MojLogger::log(Level level, const MojChar* format, ...)
+{
+	MojAssertNoLog(format);
+	MojAssertNoLog(m_engine);
+
+	if (level >= m_level) {
+		va_list args;
+		va_start(args, format);
+		m_engine->log(level, this, format, args);
+		va_end(args);
+	}
+}
+
+void MojLogger::vlog(Level level, const MojChar* format, va_list args)
+{
+	MojAssertNoLog(format);
+	MojAssertNoLog(m_engine);
+
+	if (level >= m_level) {
+		m_engine->log(level, this, format, args);
+	}
+}
+
+const MojChar* MojLogger::stringFromLevel(Level level)
+{
+	if (level > LevelMax)
+		return _T("unknown");
+	return s_levelNames[level];
+}
+
+MojErr MojLogger::levelFromString(const MojChar* str, Level& levelOut)
+{
+	MojAssertNoLog(str);
+
+	for (int i = 0; i <= LevelMax; ++i) {
+		if (!MojStrCmp(str, s_levelNames[i])) {
+			levelOut = (Level) i;
+			return MojErrNone;
+		}
+	}
+	MojErrThrowMsg(MojErrLogLevelNotFound, _T("log: level not found: '%s'"), str);
+}
+
+MojLogTracer::MojLogTracer(MojLogger& logger, const MojChar* function, const MojChar* file, int line)
+: m_logger(logger),
+  m_function(function),
+  m_level(indentLevel(1))
+{
+	MojAssertNoLog(function && file);
+	logger.log(MojLogger::LevelTrace, _T("%*s-> %s (%s:%d)"),
+			m_level * IndentSpaces, _T(""), function, MojFileNameFromPath(file), line);
+}
+
+MojLogTracer::~MojLogTracer()
+{
+	m_logger.log(MojLogger::LevelTrace, _T("%*s<- %s"),
+			m_level * IndentSpaces, _T(""), m_function);
+	indentLevel(-1);
+}
+
+int MojLogTracer::indentLevel(int inc)
+{
+	static MojThreadLocalValue<int, MojThreadLocalValueZeroCtor<int> > s_level;
+	int *level = NULL;
+	MojErr err = s_level.get(level);
+	MojErrCatchAllNoLog(err) {
+		return 0;
+	}
+	int curVal = *level;
+	*level += inc;
+	return curVal;
+}
+

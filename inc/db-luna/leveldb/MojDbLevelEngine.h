@@ -22,6 +22,7 @@
 #include <leveldb/db.h>
 #include "db/MojDbDefs.h"
 #include "db/MojDbStorageEngine.h"
+#include "core/MojLogDb8.h"
 
 class MojDbLevelDatabase;
 class MojDbLevelEnv;

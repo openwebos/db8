@@ -19,6 +19,7 @@
 
 #include "db/MojDbUtils.h"
 #include "core/MojString.h"
+#include "core/MojLogDb8.h"
 
 struct MojDbCollationStrInfo {
 	const MojChar* m_str;

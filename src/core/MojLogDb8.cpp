@@ -16,31 +16,19 @@
 *
 * LICENSE@@@ */
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <glib.h>
 
-template<class REACTOR>
-MojErr MojReactorApp<REACTOR>::init()
+#include "core/MojLogDb8.h"
+
+PmLogContext getdb8context()
 {
-	MojErr err = MojServiceApp::init();
-	MojErrCheck(err);
-	err = m_reactor.init();
-	MojErrCheck(err);
-
-	return MojErrNone;
-}
-
-template<class REACTOR>
-MojErr MojReactorApp<REACTOR>::run()
-{
-	MojErr err = m_reactor.run();
-	MojErrCheck(err);
-
-	return MojErrNone;
-}
-
-template<class REACTOR>
-void MojReactorApp<REACTOR>::shutdown()
-{
-	MojErr err = m_reactor.stop();
-	MojErrCatchAll(err);
-	MojServiceApp::shutdown();
+    static PmLogContext logContext = 0;
+    if (0 == logContext)
+    {
+        PmLogGetContext("DB8", &logContext);
+    }
+    return logContext;
 }

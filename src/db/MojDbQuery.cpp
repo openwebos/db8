@@ -20,6 +20,7 @@
 #include "db/MojDbQuery.h"
 #include "db/MojDbUtils.h"
 #include "core/MojObjectBuilder.h"
+#include "core/MojLogDb8.h"
 
 const MojChar* const MojDbQuery::SelectKey = _T("select");
 const MojChar* const MojDbQuery::FromKey = _T("from");

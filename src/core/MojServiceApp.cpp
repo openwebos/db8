@@ -18,6 +18,7 @@
 
 
 #include "core/MojServiceApp.h"
+#include "core/MojLogDb8.h"
 
 MojServiceApp* MojServiceApp::s_instance = NULL;
 

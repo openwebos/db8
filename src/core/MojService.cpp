@@ -24,6 +24,7 @@
 #include "core/MojServiceMessage.h"
 #include "core/MojServiceRequest.h"
 #include "core/MojTime.h"
+#include "core/MojLogDb8.h"
 
 const MojChar* const MojService::DefaultCategory = _T("/");
 //core.messageService

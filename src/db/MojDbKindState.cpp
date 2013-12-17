@@ -21,6 +21,7 @@
 #include "db/MojDbStorageEngine.h"
 #include "db/MojDbReq.h"
 #include "core/MojObjectSerialization.h"
+#include "core/MojLogDb8.h"
 
 const MojChar* const MojDbKindState::IndexIdsKey = _T("indexIds");
 const MojChar* const MojDbKindState::KindTokensKey = _T("kindTokens");

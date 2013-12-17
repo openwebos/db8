@@ -22,6 +22,7 @@
 #include "core/MojObjectSerialization.h"
 #include "core/MojString.h"
 #include "unicode/ucol.h"
+#include "core/MojLogDb8.h"
 
 MojDbTextCollator::MojDbTextCollator()
 : m_ucol(NULL)

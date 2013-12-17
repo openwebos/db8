@@ -19,6 +19,7 @@
 #include "db-luna/leveldb/MojDbLevelItem.h"
 #include "db/MojDbKindEngine.h"
 #include "core/MojObjectBuilder.h"
+#include "core/MojLogDb8.h"
 
 ////////////////////MojDbLevelItem////////////////////////////////////////////
 

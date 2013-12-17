@@ -242,6 +242,7 @@ webos_build_daemon(NAME mojodb-luna LAUNCH files/launch/)
 install (FILES files/scripts/errorOpenMainDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
 install (FILES files/scripts/errorOpenMediaDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
 install (FILES files/scripts/errorOpenTempDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
+install (FILES files/scripts/errorNoSpace.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
 
 # configuration files per database
 install(FILES files/conf/maindb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/db8)

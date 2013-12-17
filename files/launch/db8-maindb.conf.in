@@ -36,7 +36,7 @@ pre-start script
 
 	# if not enough disk space, make factory reset and reboot.
 	if [ "$BYTES_FREE" -le "$BYTES_THRESHOLD" ]; then
-	        /usr/bin/luna-send -n 1 luna://com.webos.service.tv.systemproperty/doUserDefault '{}'
+        /usr/lib/db8/bin/errorNoSpace.bash
 		exit 1
 	fi
 
@@ -51,7 +51,6 @@ pre-start script
 
 	mkdir -p @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8
 	mkdir -p @WEBOS_INSTALL_LOCALSTATEDIR@/run/db8/mountpoints
-
 end script
 
 script

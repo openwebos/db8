@@ -20,6 +20,9 @@
 #include "core/MojApp.h"
 #include "core/MojLogDb8.h"
 
+//this line is required for compatibility with mojomail-pop
+MojLogger MojApp::s_log(_T("core.app"));
+
 MojApp::MojApp(MojUInt32 majorVersion, MojUInt32 minorVersion, const MojChar* versionString)
 : m_runMode(ModeDefault),
   m_errDisplayed(false),

@@ -18,7 +18,7 @@
 
 description "@WEBOS_PROJECT_SUMMARY@"
 
-start on datastore-init-start
+start on init-boot-done
 stop on started start_update
 
 respawn
@@ -27,11 +27,6 @@ respawn
 #console output
 
 pre-start script
-	# remove temp db
-	if [ -e @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp ]; then
-		rm -r @WEBOS_INSTALL_LOCALSTATEDIR@/db/temp
-	fi
-
 	# move logs
 	if [ -d @WEBOS_INSTALL_LOCALSTATEDIR@/dblog ]; then
 		mv @WEBOS_INSTALL_LOCALSTATEDIR@/dblog/* @WEBOS_INSTALL_LOCALSTATEDIR@/db

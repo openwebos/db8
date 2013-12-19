@@ -44,6 +44,10 @@
 static const MojChar* const MojEnvIndexDbName = _T("indexes.ldb");
 static const MojChar* const MojEnvSeqDbName = _T("seq.ldb");
 
+leveldb::ReadOptions MojDbLevelEngine::ReadOptions;
+leveldb::WriteOptions MojDbLevelEngine::WriteOptions;
+leveldb::Options MojDbLevelEngine::OpenOptions;
+
 
 ////////////////////MojDbLevelEngine////////////////////////////////////////////
 
@@ -59,9 +63,27 @@ MojDbLevelEngine::~MojDbLevelEngine()
     MojErrCatchAll(err);
 }
 
-MojErr MojDbLevelEngine::configure(const MojObject& conf)
+MojErr MojDbLevelEngine::configure(const MojObject& config)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    if (!config.get("sync", WriteOptions.sync)) {
+        WriteOptions.sync = true;
+    }
+
+    if (!config.get("fill_cache", ReadOptions.fill_cache)) {
+        ReadOptions.fill_cache = true;
+    }
+
+    if (!config.get("verify_checksums", ReadOptions.verify_checksums)) {
+        ReadOptions.verify_checksums = false;
+    }
+
+    if (!config.get("paranoid_checks", OpenOptions.paranoid_checks)) {
+        OpenOptions.paranoid_checks = true;
+    }
+
+    OpenOptions.create_if_missing = true;
 
     return MojErrNone;
 }

@@ -20,13 +20,13 @@
 
 #include <leveldb/db.h>
 #include "db-luna/leveldb/MojDbLevelIterator.h"
-
+#include "db-luna/leveldb/MojDbLevelEngine.h"
 #include <iostream>
 
 MojDbLevelIterator::MojDbLevelIterator (database_t* database)
     : m_database(database)
 {
-    m_it = m_database->NewIterator(leveldb::ReadOptions());
+    m_it = m_database->NewIterator(MojDbLevelEngine::getReadOptions());
     toFirst();
 }
 
@@ -96,7 +96,7 @@ void MojDbLevelIterator::save()
 
 void MojDbLevelIterator::restore()
 {
-    m_it = m_database->NewIterator(leveldb::ReadOptions());
+    m_it = m_database->NewIterator(MojDbLevelEngine::getReadOptions());
 
     if (!savedKey.empty())
         seek(savedKey.ToString());

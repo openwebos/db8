@@ -59,17 +59,14 @@ MojErr MojDbLevelDatabase::open(const MojChar* dbName, MojDbLevelEngine* eng, bo
     }
 
     // create and open db
-    leveldb::Options options;
-    options.create_if_missing = true;
-    options.paranoid_checks = true;
-    leveldb::Status status = leveldb::DB::Open(options, m_file.data(), &m_db);
+    leveldb::Status status = leveldb::DB::Open(MojDbLevelEngine::getOpenOptions(), m_file.data(), &m_db);
 
     if (status.IsCorruption()) {    // database corrupted
         // try restore database
         // AHTUNG! After restore database can lost some data!
-        status = leveldb::RepairDB(m_file.data(), options);
+        status = leveldb::RepairDB(m_file.data(), MojDbLevelEngine::getOpenOptions());
         MojLdbErrCheck(status, _T("db corrupted"));
-        status = leveldb::DB::Open(options, m_file.data(), &m_db);  // database restored, re-open
+        status = leveldb::DB::Open(MojDbLevelEngine::getOpenOptions(), m_file.data(), &m_db);  // database restored, re-open
     }
 
     MojLdbErrCheck(status, _T("db_create"));
@@ -259,7 +256,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
         leveldb_txn->tableTxn(impl()).Put(*key.impl(), *val.impl());
     }
     else
-        s = m_db->Put(leveldb::WriteOptions(), *key.impl(), *val.impl());
+        s = m_db->Put(MojDbLevelEngine::getWriteOptions(), *key.impl(), *val.impl());
 
 #if defined(MOJ_DEBUG)
     char str_buf[1024];
@@ -300,7 +297,7 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
     if (leveldb_txn)
         s = leveldb_txn->tableTxn(impl()).Get(*key.impl(), str);
     else
-        s = m_db->Get(leveldb::ReadOptions(), *key.impl(), &str);
+        s = m_db->Get(MojDbLevelEngine::getReadOptions(), *key.impl(), &str);
 
     //MojLdbErrCheck(s, _T("db->get"));
 
@@ -360,7 +357,7 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
         leveldb_txn->tableTxn(impl()).Delete(*key.impl());
     }
     else
-        st = m_db->Delete(leveldb::WriteOptions(), *key.impl());
+        st = m_db->Delete(MojDbLevelEngine::getWriteOptions(), *key.impl());
 
 #if defined(MOJ_DEBUG)
     char str_buf[1024];     // big enough for any key

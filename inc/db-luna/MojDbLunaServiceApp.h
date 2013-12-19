@@ -69,6 +69,7 @@ private:
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_tempInternalHandler;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_mediaInternalHandler;
+    MojObject m_conf;
 };
 
 #endif /* MOJDBLUNASERVICEAPP_H_ */

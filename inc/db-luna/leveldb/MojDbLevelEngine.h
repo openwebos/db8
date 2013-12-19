@@ -34,7 +34,7 @@ public:
     MojDbLevelEngine();
     ~MojDbLevelEngine();
 
-    virtual MojErr configure(const MojObject& conf);
+    virtual MojErr configure(const MojObject& config);
     virtual MojErr drop(const MojChar* path, MojDbStorageTxn* txn);
     virtual MojErr open(const MojChar* path);
     virtual MojErr open(const MojChar* path, MojDbEnv* env);
@@ -53,6 +53,9 @@ public:
 
     MojDbLevelDatabase* indexDb() { return m_indexDb.get(); }
 
+    static const leveldb::WriteOptions& getWriteOptions() { return WriteOptions; }
+    static const leveldb::ReadOptions& getReadOptions() { return ReadOptions; }
+    static const leveldb::Options& getOpenOptions() { return OpenOptions; }
 private:
     typedef MojVector<MojRefCountedPtr<MojDbLevelDatabase> > DatabaseVec;
     typedef MojVector<MojRefCountedPtr<MojDbLevelSeq> > SequenceVec;
@@ -65,6 +68,10 @@ private:
     DatabaseVec m_dbs;
     SequenceVec m_seqs;
     bool m_isOpen;
+
+    static leveldb::ReadOptions ReadOptions;
+    static leveldb::WriteOptions WriteOptions;
+    static leveldb::Options OpenOptions;
 };
 
 #endif /* MOJDBLEVELENGINE_H_ */

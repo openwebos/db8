@@ -40,7 +40,7 @@ MojErr MojDbLunaServiceDb::init(MojReactor& reactor)
 }
 
 MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
-                                            const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir)
+                                const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir, const MojObject& conf)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(serviceName && baseDir && subDir);
@@ -56,7 +56,7 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     err = m_service.addCategory(MojDbServiceDefs::Category, m_handler.get());
     MojErrCheck(err);
     // open db
-    err = openDb(env, baseDir, subDir);
+    err = openDb(env, baseDir, subDir, conf);
     if (err != MojErrNone) {
         MojString msg;
         MojErrToString(err, msg);
@@ -72,7 +72,7 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     return MojErrNone;
 }
 
-MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir)
+MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir, const MojObject& conf)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(env && baseDir && subDir);
@@ -85,8 +85,11 @@ MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* baseDir, const M
     MojRefCountedPtr<MojDbStorageEngine> engine;
     MojDbStorageEngine::engineFactory()->create(engine);
     MojAllocCheck(engine.get());
+    err = engine->configure(conf);
+    MojErrCheck(err);
     err = engine->open(path, env);
     MojErrCheck(err);
+
     // open db
     err = m_db.open(path, engine.get());
     MojErrCheck(err);

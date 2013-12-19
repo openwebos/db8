@@ -118,6 +118,8 @@ MojErr MojDbLunaServiceApp::configure(const MojObject& conf)
     err = m_pdmService.configure(conf);
     MojErrCheck(err);
 
+    m_conf = dbConf;
+
     return MojErrNone;
 }
 
@@ -141,15 +143,15 @@ MojErr MojDbLunaServiceApp::open()
 	}
 
 	// open db services
-	err = m_mainService.open(m_reactor, m_env.get(), MojDbServiceDefs::ServiceName, m_dbDir, MainDir);
+	err = m_mainService.open(m_reactor, m_env.get(), MojDbServiceDefs::ServiceName, m_dbDir, MainDir, m_conf);
 	MojErrCatchAll(err) {
 		dbOpenFailed = true;
 	}
-	err = m_mediaService.open(m_reactor, m_env.get(), MojDbServiceDefs::MediaServiceName, m_mediaDbDir, MediaDir);
+	err = m_mediaService.open(m_reactor, m_env.get(), MojDbServiceDefs::MediaServiceName, m_mediaDbDir, MediaDir, m_conf);
     MojErrCatchAll(err) {
         dbOpenFailed = true;
     }
-	err = m_tempService.open(m_reactor, m_env.get(), MojDbServiceDefs::TempServiceName, m_dbDir, TempDir);
+	err = m_tempService.open(m_reactor, m_env.get(), MojDbServiceDefs::TempServiceName, m_dbDir, TempDir, m_conf);
 	MojErrCatchAll(err) {
 		dbOpenFailed = true;
 	}
@@ -240,7 +242,7 @@ MojErr MojDbLunaServiceApp::dropTemp()
 	MojErrCatch(err, MojErrNotFound) {
 		err = m_tempService.db().drop(TempDir);
 		MojErrCheck(err);
-		err = m_tempService.openDb(m_env.get(), m_dbDir, TempDir);
+		err = m_tempService.openDb(m_env.get(), m_dbDir, TempDir, m_conf);
 		MojErrCheck(err);
 		err = MojCreateDirIfNotPresent(TempStateDir);
 		MojErrCheck(err);

@@ -53,10 +53,7 @@ public:
     MojDbLevelTableTxn();
     ~MojDbLevelTableTxn();
 
-    MojErr begin(
-            leveldb::DB* db,
-            const leveldb::WriteOptions& options = leveldb::WriteOptions()
-            );
+    MojErr begin(leveldb::DB* db);
 
     MojErr abort();
 
@@ -83,7 +80,6 @@ private:
 
     // where and how to write this batch
     leveldb::DB *m_db;
-    leveldb::WriteOptions m_writeOptions;
 
     // local view for pending writes
     typedef std::map<std::string, std::string> PendingValues;

@@ -34,8 +34,8 @@ public:
     MojDbLunaServiceDb(MojMessageDispatcher& dispatcher);
     MojErr init(MojReactor& reactor);
     MojErr open(MojGmainReactor& reactor, MojDbEnv* env,
-                const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir);
-    MojErr openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir);
+                const MojChar* serviceName, const MojChar* baseDir, const MojChar* subDir, const MojObject& conf);
+    MojErr openDb(MojDbEnv* env, const MojChar* baseDir, const MojChar* subDir, const MojObject& conf);
     MojErr close();
 
     MojDb& db() { return m_db; }

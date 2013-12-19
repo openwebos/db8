@@ -48,17 +48,13 @@ MojDbLevelTxnIterator* MojDbLevelTableTxn::createIterator()
 }
 
 // class MojDbLevelTableTxn
-MojErr MojDbLevelTableTxn::begin(
-            leveldb::DB* db,
-            const leveldb::WriteOptions& options /* = leveldb::WriteOptions() */
-            )
+MojErr MojDbLevelTableTxn::begin(leveldb::DB* db)
 {
     MojAssert(db);
     MojAssert( m_iterators.empty() );
 
     // TODO: mutex and lock-file serialization
     m_db = db;
-    m_writeOptions = options;
 
     return MojErrNone;
 }
@@ -117,7 +113,7 @@ leveldb::Status MojDbLevelTableTxn::Get(const leveldb::Slice& key,
     }
 
     // go directly to db
-    return m_db->Get(leveldb::ReadOptions(), key, &val);
+    return m_db->Get(MojDbLevelEngine::getReadOptions(), key, &val);
 }
 
 void MojDbLevelTableTxn::Delete(const leveldb::Slice& key)
@@ -160,7 +156,7 @@ MojErr MojDbLevelTableTxn::commitImpl()
         writeBatch.Put(it->first, it->second);
     }
 
-    leveldb::Status s = m_db->Write(m_writeOptions, &writeBatch);
+    leveldb::Status s = m_db->Write(MojDbLevelEngine::getWriteOptions(), &writeBatch);
     MojLdbErrCheck(s, _T("db->Write"));
 
     cleanup();

@@ -55,6 +55,7 @@ const MojChar* const MojDb::QuotaIdPrefix = _T("_quotas/");
 const MojChar* const MojDb::PermissionIdPrefix = _T("_permissions/");
 const MojUInt32 MojDb::AutoBatchSize = 1000;
 const MojUInt32 MojDb::AutoCompactSize = 5000;
+const MojUInt32 MojDb::TmpVersionFileLength = 32;
 
 //db.mojodb
 static volatile bool DefaultLocaleAlreadyInited = false;
@@ -1184,34 +1185,60 @@ MojErr MojDb::updateState(const MojChar* key, const MojObject& val, MojDbReq& re
 MojErr MojDb::checkDbVersion(const MojChar* path)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
-	MojAssert(path);
+    MojAssert(path);
 
-	MojString version;
-	MojString versionFileName;
-	MojErr err = versionFileName.format(_T("%s/%s"), path, VersionFileName);
-	MojErrCheck(err);
-	err = MojFileToString(versionFileName, version);
-	MojErrCatch(err, MojErrNotFound) {
-		// if the version file is not found, create it
-		// make sure the directory exists
-		err = MojCreateDirIfNotPresent(path);
-		MojErrCheck(err);
-		err = version.format(_T("%lld"), DatabaseVersion);
-		MojErrCheck(err);
-		err = MojFileFromString(versionFileName, version);
-		MojErrCheck(err);
-	} else {
-		MojObject versionObj;
-		err = versionObj.fromJson(version);
-		MojErrCheck(err);
-		if (versionObj != DatabaseVersion) {
-			MojErrThrowMsg(MojErrDbVersionMismatch,
-					_T("db: version mismatch: expected '%lld', got '%lld'"),
-					DatabaseVersion, versionObj.intValue());
-		}
-	}
-	return MojErrNone;
+    MojString version;
+    MojString versionFileName;
+    MojErr err = versionFileName.format(_T("%s/%s"), path, VersionFileName);
+    MojErrCheck(err);
+    err = MojFileToString(versionFileName, version);
+    MojErrCatch(err, MojErrNotFound) {
+        // if the version file is not found, create it
+        // make sure the directory exists
+        err = MojCreateDirIfNotPresent(path);
+        MojErrCheck(err);
+        err = createVersionFile(path, versionFileName);
+        MojErrCheck(err);
+    } else {
+        MojObject versionObj;
+        err = versionObj.fromJson(version);
+        MojErrCatchAll(err) {
+            err = createVersionFile(path, versionFileName);
+            MojErrCheck(err);
+        } else {
+            if (versionObj != DatabaseVersion) {
+            MojErrThrowMsg(MojErrDbVersionMismatch,
+                _T("db: version mismatch: expected '%lld', got '%lld'"),
+                DatabaseVersion, versionObj.intValue());
+            }
+        }
+    }
+    return MojErrNone;
 }
+
+MojErr MojDb::createVersionFile(const MojChar* path, const MojString versionFileName)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert(path);
+
+    MojChar nameTemplate[TmpVersionFileLength] = _T("_tmpVersion_XXXXXX");
+    MojString tmpVersionFileName;
+    MojErr err = tmpVersionFileName.format(_T("%s/%s"), path, MojMkTemp(nameTemplate));
+    MojErrCheck(err);
+
+    MojString version;
+    err = version.format(_T("%lld"), DatabaseVersion);
+    MojErrCheck(err);
+
+    err = MojFileFromString(tmpVersionFileName, version, true);
+    MojErrCheck(err);
+
+    err = MojFileRename(tmpVersionFileName, versionFileName);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
+
 
 MojErr MojDb::beginReq(MojDbReq& req, bool lockSchema)
 {

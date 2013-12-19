@@ -63,6 +63,7 @@ public:
     static const MojChar* const PermissionIdPrefix;
 	static const MojUInt32 AutoBatchSize;
 	static const MojUInt32 AutoCompactSize;
+    static const MojUInt32 TmpVersionFileLength;
 
 	MojDb();
 	virtual ~MojDb();
@@ -132,7 +133,7 @@ private:
 	static const MojChar* const RoleType;
 	static const MojChar* const TimestampKey;
 	static const MojChar* const VersionFileName;
-	
+
 	static const MojInt64 DatabaseVersion = 8;
 	static const int PurgeNumDaysDefault = 14;
         // The magic number 173 is just an arbitrary number in the high hundreds, which is prime. Primality is
@@ -173,6 +174,8 @@ private:
 	MojErr getState(const MojChar* key, MojObject& valOut, MojDbReq& req);
 	MojErr updateState(const MojChar* key, const MojObject& val, MojDbReq& req);
 	MojErr checkDbVersion(const MojChar* path);
+    MojErr createVersionFile(const MojChar* path, const MojString versionFileName);
+
 	MojErr beginReq(MojDbReq& req, bool lockSchema = false);
 	MojErr commitKind(const MojString& id, MojDbReq& req, MojErr err);
 	MojErr reloadKind(const MojString& id);

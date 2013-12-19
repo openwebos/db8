@@ -81,7 +81,7 @@ MojErr MojCreateDirIfNotPresent(const MojChar* path);
 MojErr MojRmDirRecursive(const MojChar* path);
 MojErr MojRmDirContent(const MojChar* path);
 MojErr MojFileToString(const MojChar* path, MojString& strOut);
-MojErr MojFileFromString(const MojChar* path, const MojChar* data);
+MojErr MojFileFromString(const MojChar* path, const MojChar* data, bool sync = false);
 const MojChar* MojFileNameFromPath(const MojChar* path);
 MojErr MojByteArrayToHex(const MojByte *bytes, MojSize len, MojChar *s);
 

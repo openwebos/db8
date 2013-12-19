@@ -312,7 +312,10 @@ MojErr MojFileLock(MojFileT file, int op);
 MojErr MojFileOpen(MojFileT& fileOut, const MojChar* path, int flags, MojModeT mode = 0);
 MojErr MojFileRead(MojFileT file, void* buf, MojSize bufSize, MojSize& sizeOut);
 MojErr MojFileWrite(MojFileT file, const void* data, MojSize size, MojSize& sizeOut);
+MojErr MojFileSync(MojFileT file);
+MojErr MojFileRename(const MojChar* oldName, const MojChar* newName);
 
+const MojChar* MojMkTemp(MojChar* name);
 MojErr MojMkDir(const MojChar* path, MojModeT mode);
 MojErr MojRmDir(const MojChar* path);
 MojErr MojStat(const MojChar* path, MojStatT* buf);

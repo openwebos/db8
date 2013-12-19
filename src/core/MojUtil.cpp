@@ -380,7 +380,7 @@ MojErr MojFileToString(const MojChar* path, MojString& strOut)
 	return MojErrNone;
 }
 
-MojErr MojFileFromString(const MojChar* path, const MojChar* data)
+MojErr MojFileFromString(const MojChar* path, const MojChar* data, bool sync)
 {
 	MojFile file;
 	MojErr err = file.open(path, MOJ_O_WRONLY | MOJ_O_CREAT | MOJ_O_TRUNC, MOJ_S_IRUSR | MOJ_S_IWUSR);
@@ -388,6 +388,10 @@ MojErr MojFileFromString(const MojChar* path, const MojChar* data)
 	MojSize size;
 	err = file.writeString(data, size);
 	MojErrCheck(err);
+    if (sync) {
+        err = file.sync();
+        MojErrCheck(err);
+    }
 
 	return MojErrNone;
 }

@@ -213,6 +213,39 @@ MojErr MojFileWrite(MojFileT file, const void* data, MojSize size, MojSize& size
 }
 #endif /* MOJ_USE_FILE_WRITE */
 
+#ifdef MOJ_USE_FILE_SYNC
+MojErr MojFileSync(MojFileT file)
+{
+    MojAssert(file != MojInvalidFile);
+
+    int res = fsync(file);
+    if (res < 0)
+        MojErrThrowErrno(_T("fsync"));
+
+    return MojErrNone;
+}
+#endif /* MOJ_USE_FILE_SYNC */
+
+#ifdef MOJ_USE_FILE_RENAME
+MojErr MojFileRename(const MojChar* oldName, const MojChar* newName)
+{
+    MojAssert(oldName);
+
+    int res = rename(oldName, newName);
+    if (res < 0)
+        MojErrThrowErrno(_T("rename"));
+
+    return MojErrNone;
+}
+#endif /* MOJ_USE_FILE_RENAME */
+
+#ifdef MOJ_USE_MKTEMP
+const MojChar* MojMkTemp(MojChar* name)
+{
+    return mktemp(name);
+}
+#endif /* MOJ_USE_MKTEMP */
+
 #ifdef MOJ_USE_MKDIR
 MojErr MojMkDir(const MojChar* path, MojModeT mode)
 {

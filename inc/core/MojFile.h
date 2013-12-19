@@ -37,6 +37,7 @@ public:
 	MojErr read(void* buf, MojSize bufSize, MojSize& sizeOut) { return MojFileRead(m_file, buf, bufSize, sizeOut); }
 	MojErr writeString(const MojChar* data, MojSize& sizeOut);
 	MojErr write(const void* data, MojSize size, MojSize& sizeOut) { return MojFileWrite(m_file, data, size, sizeOut); }
+    MojErr sync() {return MojFileSync(m_file);}
 
 private:
 	MojFileT m_file;

@@ -57,7 +57,6 @@ public:
 
 private:
     MojString m_databaseRoot;
-    GSource* m_spaceCheckTimer;
     AlertLevel m_spaceAlertLevel;
     bool m_compactRunning;
 

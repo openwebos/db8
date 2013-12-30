@@ -27,6 +27,17 @@ respawn
 #console output
 
 pre-start script
+	# check available disk space
+	# MINIMAL_BYTES_FREE is 95.5% of disk space
+	BYTES_FREE=$(($(stat -f -c "%a*%S" /var/db)))
+	MINIMAL_BYTES_FREE="30696013"
+
+	# if not enough disk space, make factory reset and reboot tv
+	if [ "$BYTES_FREE" -le "$MINIMAL_BYTES_FREE" ]; then
+	        /usr/bin/luna-send -n 1 luna://com.webos.service.tv.systemproperty/doUserDefault '{}'
+		exit 1
+	fi
+
 	# move logs
 	if [ -d @WEBOS_INSTALL_LOCALSTATEDIR@/dblog ]; then
 		mv @WEBOS_INSTALL_LOCALSTATEDIR@/dblog/* @WEBOS_INSTALL_LOCALSTATEDIR@/db

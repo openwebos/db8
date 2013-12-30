@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@
 static const MojSize MojMaxDirDepth = 100;
 
 static MojErr MojRmDirContent(const MojChar* path, MojSize depth);
+static MojErr MojRmDirRecursive(const MojChar* path, MojSize depth);
 
 static MojErr MojBase64EncodeImpl(const MojChar charset[], const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad = true);
 static MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut);
@@ -298,7 +299,17 @@ MojErr MojCreateDirIfNotPresent(const MojChar* path)
 
 MojErr MojRmDirRecursive(const MojChar* path)
 {
-    MojErr err = MojRmDirContent(path, 0);
+    return MojRmDirRecursive(path, 0);
+}
+
+MojErr MojRmDirContent(const MojChar* path)
+{
+    return MojRmDirContent(path, 0);
+}
+
+MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
+{
+    MojErr err = MojRmDirContent(path, depth);
     MojErrCheck(err);
 
     // remove dir
@@ -306,11 +317,6 @@ MojErr MojRmDirRecursive(const MojChar* path)
     MojErrCheck(err);
 
     return MojErrNone;
-}
-
-MojErr MojRmDirContent(const MojChar* path)
-{
-    return MojRmDirContent(path, 0);
 }
 
 MojErr MojRmDirContent(const MojChar* path, MojSize depth)
@@ -354,7 +360,7 @@ MojErr MojRmDirContent(const MojChar* path, MojSize depth)
 		MojStrNCpy(entName.get() + pathLen, ent.d_name, nameLen);
 		entName[pathLen + nameLen] = '\0';
 		if (ent.d_type == DT_DIR) {
-			err = MojRmDirContent(entName.get(), depth + 1);
+			err = MojRmDirRecursive(entName.get(), depth + 1);
 			MojErrGoto(err, Done);
 		} else {
 			err = MojUnlink(entName.get());

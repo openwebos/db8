@@ -56,6 +56,7 @@ class MojDbStorageItem;
 class MojDbStorageQuery;
 class MojDbStorageSeq;
 class MojDbStorageTxn;
+class MojDbMediaLinkManager;
 
 enum MojDbOp {
 	OpNone 		= 0,

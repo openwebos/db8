@@ -22,7 +22,7 @@
 #include "core/MojSignal.h"
 #include "core/MojObject.h"
 #include "db/MojDbDefs.h"
-#include "db/MojDbShardEngine.h"
+#include "db/MojDbShardInfo.h"
 #include "luna/MojLunaService.h"
 #include "luna/MojLunaRequest.h"
 
@@ -31,14 +31,14 @@
 
 class MojDbMediaHandler : public MojSignalHandler
 {
-    typedef std::map<MojString, MojDbShardEngine::ShardInfo> shard_cache_t;
+    typedef std::map<MojString, MojDbShardInfo> shard_cache_t;
 
 public:
     MojDbMediaHandler(MojService& service, MojDb& db);
     MojErr subscribe();
 
 private:
-    MojErr convert(const MojObject& object, MojDbShardEngine::ShardInfo& shardInfo);
+    MojErr convert(const MojObject& object, MojDbShardInfo& shardInfo);
 
     MojErr handleDeviceListResponse(MojObject& payload, MojErr errCode);
 

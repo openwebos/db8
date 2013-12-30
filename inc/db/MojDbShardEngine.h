@@ -24,181 +24,49 @@
 #include "core/MojErr.h"
 #include "core/MojString.h"
 #include "core/MojObject.h"
-#include "db/MojDbReq.h"
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    #include <boost/smart_ptr/scoped_ptr.hpp>
-#else
-    #include <auto_ptr.h>
-#endif
-
-#include <list>
-#include <algorithm>
-#include "db/MojDbShardIdCache.h"
 #include "core/MojTime.h"
-#include <boost/tokenizer.hpp>
-
-class MojDb;
-class MojDbReq;
-class MojDbMediaLinkManager;
+#include "db/MojDbDefs.h"
+#include "db/MojDbReq.h"
+#include "db/MojDbShardIdCache.h"
+#include "db/MojDbShardInfo.h"
+#include "db/MojDbMediaLinkManager.h"
 
 class MojDbShardEngine : private MojNoCopy
 {
 public:
-
-    struct KindIdsList
-    {
-    private:
-        std::list<MojString> listKindIds;
-
-    public:
-
-        std::list<MojString>::iterator begin (void)
-        {
-            return listKindIds.begin();
-        }
-
-        std::list<MojString>::iterator end (void)
-        {
-            return listKindIds.end();
-        }
-
-        bool isExist (const MojString& kindId)
-        {
-            std::list<MojString>::iterator it;
-            it = std::find(listKindIds.begin(), listKindIds.end(), kindId);
-            return (it != listKindIds.end());
-        }
-
-        void add (const MojString& kindId)
-        {
-            listKindIds.push_back(kindId);
-        }
-
-        void remove (const MojString& kindId)
-        {
-            std::list<MojString>::iterator it;
-            it = std::find(listKindIds.begin(), listKindIds.end(), kindId);
-
-            if(it != listKindIds.end())
-            {
-                listKindIds.erase(it);
-            }
-        }
-
-        MojErr toString (MojString& str) const
-        {
-            std::list<MojString>::const_iterator it;
-
-            for (it = listKindIds.begin(); it != listKindIds.end(); ++it)
-            {
-                if(it != listKindIds.begin())
-                {
-                    MojErrCheck(str.append(","));
-                }
-
-                MojErrCheck(str.append(*it));
-            }
-
-            return MojErrNone;
-        }
-
-        MojErr fromString (const MojString& str)
-        {
-            listKindIds.clear();
-
-            if(str.empty())
-            {
-                return MojErrNone;
-            }
-
-            MojString item;
-            std::string testStr = str.data();
-            boost::char_separator<char> sep(",");
-            boost::tokenizer<boost::char_separator<char> > tokens(testStr, sep);
-            boost::tokenizer<boost::char_separator<char> >::iterator it;
-
-            for(it = tokens.begin(); it != tokens.end(); ++it)
-            {
-                MojErrCheck(item.assign((*it).c_str()));
-                listKindIds.push_back(item);
-            }
-
-            return MojErrNone;
-        }
-    };
-
-    struct ShardInfo
-    {
-        bool active;
-        bool transient;
-        MojUInt32 id;
-        MojInt64 timestamp;
-        MojString id_base64;
-        MojString deviceId;
-        MojString deviceUri;
-        MojString mountPath;
-        MojString deviceName;
-
-        KindIdsList kindIds;
-
-        ShardInfo(MojUInt32 _id = 0, bool _active = false, bool _transient = false)
-        {
-            id = _id;
-            active = _active;
-            transient = _transient;
-            timestamp = 0;
-        }
-
-        ShardInfo& operator=(const ShardInfo& i_src)
-        {
-            this->active = i_src.active;
-            this->transient = i_src.transient;
-            this->id = i_src.id;
-            this->id_base64 = i_src.id_base64;
-            this->deviceId = i_src.deviceId;
-            this->deviceUri = i_src.deviceUri;
-            this->mountPath = i_src.mountPath;
-            this->deviceName = i_src.deviceName;
-            this->kindIds = i_src.kindIds;
-
-            return (*this);
-        }
-    };
-
-    MojDbShardEngine(void);
-    ~MojDbShardEngine(void);
+    MojDbShardEngine(MojDb& db);
+    ~MojDbShardEngine();
 
 
     /**
      * initialize MojDbShardEngine
      */
-    MojErr init (const MojObject& conf, MojDb* ip_db, MojDbReqRef req = MojDbReq());
+    MojErr init (const MojObject& conf, MojDbReqRef req = MojDbReq());
 
     /**
     * put a new shard description to db
     */
-    MojErr put (const ShardInfo& shardInfo, MojDbReqRef req = MojDbReq());
+    MojErr put (const MojDbShardInfo& shardInfo, MojDbReqRef req = MojDbReq());
 
     /**
      * get shard description by id
      */
-    MojErr get (MojUInt32 shardId, ShardInfo& shardInfo, bool& found);
+    MojErr get (MojUInt32 shardId, MojDbShardInfo& shardInfo, bool& found);
 
     /**
      * get shard description by uuid
      */
-    MojErr getByDeviceUuid (const MojString& deviceUuid, ShardInfo& shardInfo, bool& found);
+    MojErr getByDeviceUuid (const MojString& deviceUuid, MojDbShardInfo& shardInfo, bool& found);
 
     /**
      * get list of all active shards
      */
-    MojErr getAllActive (std::list<ShardInfo>& shardInfo, MojUInt32& count, MojDbReqRef req = MojDbReq());
+    MojErr getAllActive (std::list<MojDbShardInfo>& shardInfo, MojUInt32& count, MojDbReqRef req = MojDbReq());
 
     /**
      * update shardInfo
      */
-    MojErr update (const ShardInfo& i_shardInfo, MojDbReqRef req = MojDbReq());
+    MojErr update (const MojDbShardInfo& i_shardInfo, MojDbReqRef req = MojDbReq());
 
     /**
      * get device id by uuid
@@ -227,12 +95,12 @@ public:
     /**
      * convert device info to MojObject
      */
-    static MojErr convert (const ShardInfo& i_shardInfo, MojObject& o_obj);
+    static MojErr convert (const MojDbShardInfo& i_shardInfo, MojObject& o_obj);
 
     /**
      * convert MojObject to device info
      */
-    static MojErr convert (const MojObject& i_obj, ShardInfo& o_shardInfo);
+    static MojErr convert (const MojObject& i_obj, MojDbShardInfo& o_shardInfo);
 
     /**
      * Support garbage collection of obsolete shards
@@ -264,11 +132,11 @@ public:
     MojErr unlinkShardAndKindId (const MojString& shardIdBase64, const MojString& kindId, MojDbReqRef req = MojDbReq());
     MojErr unlinkShardAndKindId (const MojUInt32 shardId, const MojString& kindId, MojDbReqRef req = MojDbReq());
 
-    MojErr processShardInfo(const ShardInfo& shardInfo);
+    MojErr processShardInfo(const MojDbShardInfo& shardInfo);
 
 private:
-    MojErr copyRequiredFields(const ShardInfo& from, ShardInfo& to);
-    MojErr removeTransientShard(const ShardInfo& shardInfo);
+    MojErr copyRequiredFields(const MojDbShardInfo& from, MojDbShardInfo& to);
+    MojErr removeTransientShard(const MojDbShardInfo& shardInfo);
 
     /**
      * Configure shard engine after init
@@ -303,17 +171,17 @@ private:
     MojErr removeShardKindObjects (const MojUInt32 shardId, const MojString& kindId, MojDbReq& req);
 
     /**
-     * update ShardInfo::timestamp with current time value
+     * update MojDbShardInfo::timestamp with current time value
      */
-    MojErr updateTimestamp (ShardInfo& shardInfo);
+    MojErr updateTimestamp (MojDbShardInfo& shardInfo);
 
     /**
      * remove shard info record (from db + cache)
      */
     MojErr removeShardInfo (const MojUInt32 shardId);
 
-    std::auto_ptr<MojDbMediaLinkManager> m_mediaLinkManager;
-    MojDb* mp_db;
+    MojDbMediaLinkManager m_mediaLinkManager;
+    MojDb& m_db;
     MojDbShardIdCache m_cache;
 };
 

@@ -251,13 +251,13 @@ MojErr MojDbShardManagerTest::testShardEngine (MojDbShardEngine* ip_eng)
     bool found;
 
     //get shard by wrong id
-    MojDbShardEngine::ShardInfo info;
+    MojDbShardInfo info;
     err = ip_eng->get(0xFFFFFFFE, info, found);
     MojTestErrCheck(err);
     MojTestAssert(!found);
 
     //store sample shard info
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     generateItem(shardInfo);
     shardInfo.mountPath.assign("/tmp/db8-test/media01");
     id = shardInfo.id;
@@ -325,7 +325,7 @@ MojErr MojDbShardManagerTest::testShardCreateAndRemoveWithRecords (MojDb& db)
     MojDbShardEngine* p_eng = db.shardEngine();
     MojTestAssert(p_eng);
 
-    MojDbShardEngine::ShardInfo shard1, shard2;
+    MojDbShardInfo shard1, shard2;
     MojVector<MojUInt32> arrShardIds;
     MojUInt32 count;
 
@@ -406,7 +406,7 @@ MojErr MojDbShardManagerTest::testShardCreateAndRemoveWithRecords (MojDb& db)
 /**
  * Add records to first shard for a single Kind
  */
-MojErr MojDbShardManagerTest::createShardObjects1 (MojDb& db, MojDbShardEngine::ShardInfo& shard)
+MojErr MojDbShardManagerTest::createShardObjects1 (MojDb& db, MojDbShardInfo& shard)
 {
     MojObject objKind;
     MojString kindId;
@@ -451,7 +451,7 @@ MojErr MojDbShardManagerTest::createShardObjects1 (MojDb& db, MojDbShardEngine::
 /**
  * Add records for second shard for three different Kinds
  */
-MojErr MojDbShardManagerTest::createShardObjects2 (MojDb& db, MojDbShardEngine::ShardInfo& shard)
+MojErr MojDbShardManagerTest::createShardObjects2 (MojDb& db, MojDbShardInfo& shard)
 {
     MojObject objKind1;
     MojString kindId1;
@@ -583,7 +583,7 @@ MojErr MojDbShardManagerTest::verifyKindExistance (MojString kindId, MojDb& db)
 /**
  * verifyRecords
  */
-MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardEngine::ShardInfo& shard, MojUInt32& count)
+MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardInfo& shard, MojUInt32& count)
 {
     MojDbQuery query;
     MojDbCursor cursor;
@@ -616,7 +616,7 @@ MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, 
 /**
  * verifyExistance1
  */
-MojErr MojDbShardManagerTest::verifyShardExistance (MojDb& db, const MojDbShardEngine::ShardInfo& shard)
+MojErr MojDbShardManagerTest::verifyShardExistance (MojDb& db, const MojDbShardInfo& shard)
 {
     bool found;
 
@@ -635,7 +635,7 @@ MojErr MojDbShardManagerTest::verifyShardExistance (MojDb& db, const MojDbShardE
 /**
  * generateItem
  */
-MojErr MojDbShardManagerTest::generateItem (MojDbShardEngine::ShardInfo& o_shardInfo)
+MojErr MojDbShardManagerTest::generateItem (MojDbShardInfo& o_shardInfo)
 {
     static MojUInt32 id = 0xFF;
     o_shardInfo.id = ++id;

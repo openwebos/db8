@@ -19,7 +19,7 @@
 #define MOJDBMEDIALINKMANAGER_H
 
 #include "core/MojString.h"
-#include "db/MojDbShardEngine.h"
+#include "db/MojDbShardInfo.h"
 
 class MojDbMediaLinkManager
 {
@@ -27,9 +27,9 @@ public:
     MojDbMediaLinkManager();
     MojErr setLinkDirectory(const MojString& dir);
 
-    MojErr processShardInfo(MojDbShardEngine::ShardInfo& shardInfo);
-    MojErr createLink(MojDbShardEngine::ShardInfo& shardInfo);
-    MojErr removeLink(const MojDbShardEngine::ShardInfo& shardInfo);
+    MojErr processShardInfo(MojDbShardInfo& shardInfo);
+    MojErr createLink(MojDbShardInfo& shardInfo);
+    MojErr removeLink(const MojDbShardInfo& shardInfo);
 private:
     MojErr getLinkPath(MojUInt32 shardId, MojString& linkPath);
 

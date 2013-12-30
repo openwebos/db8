@@ -21,7 +21,9 @@
 #define MOJDBNEWIDTEST_H_
 
 #include "MojDbTestRunner.h"
-#include "db/MojDbShardEngine.h"
+#include "db/MojDbShardInfo.h"
+
+class MojDbShardEngine;
 
 class MojDbNewIdTest : public MojTestCase
 {
@@ -38,7 +40,7 @@ private:
     MojErr duplicateTest(MojDb& db);
     MojUInt32 getKindCount (const MojChar* MojQueryStr, MojDb& db);
     MojErr addShardIdTest(MojDb& db);
-    MojErr generateItem (MojUInt32 i_id, MojDbShardEngine::ShardInfo& o_shardInfo);
+    MojErr generateItem (MojUInt32 i_id, MojDbShardInfo& o_shardInfo);
 };
 
 #endif /* MOJDBNEWIDTEST_H_ */

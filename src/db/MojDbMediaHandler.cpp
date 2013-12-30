@@ -87,7 +87,7 @@ MojErr MojDbMediaHandler::handleDeviceListResponse(MojObject& payload, MojErr er
         MojErrCheck(err);
 
         for (MojObject::ConstArrayIterator it = subDevices.arrayBegin(); it != subDevices.arrayEnd(); ++it) {
-            MojDbShardEngine::ShardInfo shardInfo;
+            MojDbShardInfo shardInfo;
             err = convert(*it, shardInfo);
             MojErrCheck(err);
 
@@ -139,7 +139,7 @@ MojErr MojDbMediaHandler::handleDeviceListResponse(MojObject& payload, MojErr er
     return MojErrNone;
 }
 
-MojErr MojDbMediaHandler::convert(const MojObject& object, MojDbShardEngine::ShardInfo& shardInfo)
+MojErr MojDbMediaHandler::convert(const MojObject& object, MojDbShardInfo& shardInfo)
 {
     MojErr err;
     err = object.getRequired("deviceId", shardInfo.deviceId);

@@ -62,6 +62,7 @@ static volatile bool DefaultLocaleAlreadyInited = false;
 
 MojDb::MojDb()
 : m_spaceAlert(*this),
+  m_shardEngine(*this),
   m_purgeWindow(PurgeNumDaysDefault),
   m_loadStepSize(LoadStepSizeDefault),
   m_isOpen(false)
@@ -201,7 +202,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 
     // shard's
     LOG_DEBUG("[db_mojodb] Init shard engine");
-    err = m_shardEngine.init(m_conf, this, req);
+    err = m_shardEngine.init(m_conf, req);
     MojErrCheck(err);
 
     // explicitly finish request

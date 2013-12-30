@@ -55,12 +55,12 @@ private:
     /**
      * create objects for shard 1
      */
-    MojErr createShardObjects1 (MojDb& db, MojDbShardEngine::ShardInfo& shard);
+    MojErr createShardObjects1 (MojDb& db, MojDbShardInfo& shard);
 
     /**
      * create objects for shard 2
      */
-    MojErr createShardObjects2 (MojDb& db, MojDbShardEngine::ShardInfo& shard);
+    MojErr createShardObjects2 (MojDb& db, MojDbShardInfo& shard);
 
     /**
      * add kind to db
@@ -75,17 +75,17 @@ private:
     /**
      * get number of records for kind
      */
-    MojErr verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardEngine::ShardInfo& shard, MojUInt32& count);
+    MojErr verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardInfo& shard, MojUInt32& count);
 
     /**
      * is shard exist?
      */
-    MojErr verifyShardExistance (MojDb& db, const MojDbShardEngine::ShardInfo& shard);
+    MojErr verifyShardExistance (MojDb& db, const MojDbShardInfo& shard);
 
     /**
      * generate dummy shard info
      */
-    MojErr generateItem (MojDbShardEngine::ShardInfo& o_shardInfo);
+    MojErr generateItem (MojDbShardInfo& o_shardInfo);
 
     /**
      * display message

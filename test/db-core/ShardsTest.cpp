@@ -84,7 +84,7 @@ struct ShardsTest : public MojDbCoreTest
     void registerShards()
     {
         // add shards
-        MojDbShardEngine::ShardInfo shardInfo;
+        MojDbShardInfo shardInfo;
         shardInfo.id = MagicId;
         shardInfo.active = true;
         MojAssertNoErr( shardEngine->put( shardInfo ) );
@@ -164,7 +164,7 @@ TEST_F(ShardsTest, putShardInfo)
 {
     // add shard
     shardEngine = db.shardEngine();
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     shardInfo.id = MagicId;
     shardInfo.active = true;
     MojAssertNoErr( shardEngine->put( shardInfo ) );
@@ -184,7 +184,7 @@ TEST_F(ShardsTest, setActivity)
 {
     registerShards();
 
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     bool found;
 
     MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
@@ -215,7 +215,7 @@ TEST_F(ShardsTest, setActivity)
  */
 TEST_F(ShardsTest, nonexistingShard)
 {
-    MojDbShardEngine::ShardInfo shardInfo = {};
+    MojDbShardInfo shardInfo = {};
     bool found;
 
     MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
@@ -241,7 +241,7 @@ TEST_F(ShardsTest, initalInactivity)
 {
     registerShards();
 
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     bool found;
 
     MojAssertNoErr( shardEngine->get( MagicId, shardInfo, found ) );
@@ -276,7 +276,7 @@ TEST_F(ShardsTest, queryInactiveShard)
     registerShards();
     fillData();
 
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     bool found;
     MojAssertNoErr (shardEngine->get(MagicId, shardInfo, found));
     ASSERT_TRUE(found);
@@ -297,7 +297,7 @@ TEST_F(ShardsTest, queryInactiveShardWithoutIgnore)
     registerShards();
     fillData();
 
-    MojDbShardEngine::ShardInfo shardInfo;
+    MojDbShardInfo shardInfo;
     bool found;
     MojAssertNoErr (shardEngine->get(MagicId, shardInfo, found));
     ASSERT_TRUE(found);

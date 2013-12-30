@@ -659,7 +659,7 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
     MojString shards_info;
 
     // Request list of active media and receive a JSON object
-    std::list<MojDbShardEngine::ShardInfo> list;
+    std::list<MojDbShardInfo> list;
     err = m_db.shardEngine()->getAllActive(list, count);
     MojErrCheck(err);
 
@@ -676,7 +676,7 @@ MojErr MojDbServiceHandler::handleListActiveMedia(MojServiceMessage* msg, MojObj
     MojErrCheck(err);
 
     // Add result of active media list
-    std::list<MojDbShardEngine::ShardInfo>::iterator it;
+    std::list<MojDbShardInfo>::iterator it;
 
     for (it = list.begin(); it != list.end(); ++it)
     {
@@ -753,7 +753,7 @@ MojErr MojDbServiceHandler::handleShardInfo(MojServiceMessage* msg, MojObject& p
         err = MojDbShardEngine::convertId(shardIdBase64, shardId);
         MojErrCheck(err);
 
-        MojDbShardEngine::ShardInfo info;
+        MojDbShardInfo info;
 
         err = m_db.shardEngine()->get(shardId, info, found);
         MojErrCheck(err);
@@ -940,7 +940,7 @@ MojErr MojDbServiceHandler::handleSetShardMode(MojServiceMessage* msg, MojObject
 
         bool found;
         MojUInt32 shardId;
-        MojDbShardEngine::ShardInfo shardInfo;
+        MojDbShardInfo shardInfo;
 
         err = MojDbShardEngine::convertId(shardIdBase64, shardId);
         MojErrCheck(err);

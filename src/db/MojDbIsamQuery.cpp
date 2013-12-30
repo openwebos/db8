@@ -476,7 +476,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
             //       id there is a still chance that some nasty client used
             //       96 bits encoded in base64. Or more correctly used
             //       string that can be decoded from base64 into 96 bits.
-            MojDbShardEngine::ShardInfo shardInfo;
+            MojDbShardInfo shardInfo;
 
             // Note: shardEngine should keep ShardInfo in memory to keep
             //       this reasonable.

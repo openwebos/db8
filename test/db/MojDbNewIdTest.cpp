@@ -180,7 +180,7 @@ void MojDbNewIdTest::cleanup()
 MojErr MojDbNewIdTest::initShardEngine (MojDbShardEngine* ip_engine)
 {
     MojUInt32 arr[] = { 0xFFFFFFFA, 0xFFFFFFFB, 0xFFFFFFFC, 0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF };
-    MojDbShardEngine::ShardInfo info;
+    MojDbShardInfo info;
 
     for (MojSize i = 0; i < 6; i++)
     {
@@ -191,7 +191,7 @@ MojErr MojDbNewIdTest::initShardEngine (MojDbShardEngine* ip_engine)
     return MojErrNone;
 }
 
-MojErr MojDbNewIdTest::generateItem (MojUInt32 i_id, MojDbShardEngine::ShardInfo& o_shardInfo)
+MojErr MojDbNewIdTest::generateItem (MojUInt32 i_id, MojDbShardInfo& o_shardInfo)
 {
     static MojUInt32 id = 0xFF;
 

@@ -149,10 +149,8 @@ set(DB_LIB_SOURCES
     src/db/MojDbKey.cpp
     src/db/MojDbKind.cpp
     src/db/MojDbKindEngine.cpp
-    src/db/MojDbShardIdCache.cpp
-    src/db/MojDbShardEngine.cpp
-    src/db/MojDbSpaceAlert.cpp
     src/db/MojDbKindState.cpp
+    src/db/MojDbKindIdList.cpp
     src/db/MojDbMediaLinkManager.cpp
     src/db/MojDbMediaHandler.cpp
     src/db/MojDbObjectHeader.cpp
@@ -172,6 +170,10 @@ set(DB_LIB_SOURCES
     src/db/MojDbServiceHandlerBase.cpp
     src/db/MojDbServiceSchemas.cpp
     src/db/MojDbStorageEngine.cpp
+    src/db/MojDbShardIdCache.cpp
+    src/db/MojDbShardEngine.cpp
+    src/db/MojDbSpaceAlert.cpp
+    src/db/MojDbShardInfo.cpp
     src/db/MojDbTextCollator.cpp
     src/db/MojDbTextTokenizer.cpp
     src/db/MojDbTextUtils.cpp

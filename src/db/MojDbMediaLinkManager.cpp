@@ -53,7 +53,7 @@ MojErr MojDbMediaLinkManager::getLinkPath(MojUInt32 shardId, MojString& linkPath
     return linkPath.format("%s/%s", m_dir.data(), linkname.c_str());
 }
 
-MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardEngine::ShardInfo& shardInfo)
+MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardInfo& shardInfo)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     if (shardInfo.active)
@@ -62,7 +62,7 @@ MojErr MojDbMediaLinkManager::processShardInfo(MojDbShardEngine::ShardInfo& shar
         return removeLink(shardInfo);
 }
 
-MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
+MojErr MojDbMediaLinkManager::createLink(MojDbShardInfo& shardInfo)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -90,7 +90,7 @@ MojErr MojDbMediaLinkManager::createLink(MojDbShardEngine::ShardInfo& shardInfo)
     return err;
 }
 
-MojErr MojDbMediaLinkManager::removeLink(const MojDbShardEngine::ShardInfo& shardInfo)
+MojErr MojDbMediaLinkManager::removeLink(const MojDbShardInfo& shardInfo)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojErr err;

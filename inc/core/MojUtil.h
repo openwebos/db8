@@ -79,6 +79,7 @@ MojSize MojPrefixSize(const MojByte* data1, MojSize size1, const MojByte* data2,
 
 MojErr MojCreateDirIfNotPresent(const MojChar* path);
 MojErr MojRmDirRecursive(const MojChar* path);
+MojErr MojRmDirContent(const MojChar* path);
 MojErr MojFileToString(const MojChar* path, MojString& strOut);
 MojErr MojFileFromString(const MojChar* path, const MojChar* data);
 const MojChar* MojFileNameFromPath(const MojChar* path);

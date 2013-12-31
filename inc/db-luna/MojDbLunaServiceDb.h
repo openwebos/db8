@@ -27,6 +27,7 @@
 #include "core/MojMessageDispatcher.h"
 #include "db/MojDb.h"
 #include "luna/MojLunaService.h"
+#include "luna/MojFactoryReset.h"
 
 class MojDbLunaServiceDb
 {
@@ -45,6 +46,7 @@ private:
     MojDb m_db;
     MojLunaService m_service;
     MojRefCountedPtr<MojDbServiceHandler> m_handler;
+    MojFactoryReset m_factoryResetRequest;
 };
 
 #endif

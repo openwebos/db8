@@ -197,6 +197,7 @@ set(LUNA_LIB_SOURCES
     src/luna/MojLunaMessage.cpp
     src/luna/MojLunaRequest.cpp
     src/luna/MojLunaService.cpp
+    src/luna/MojFactoryReset.cpp
     )
 
 add_library(mojoluna SHARED ${LUNA_LIB_SOURCES})

@@ -8,7 +8,7 @@
         {
             "service":"com.palm.db",
             "inbound":["*"],
-            "outbound":["com.palm.service.backup","com.palm.systemservice","com.palm.systemmanager","com.palm.activitymanager", "com.webos.service.attachedstoragemanager"]
+            "outbound":["com.palm.service.backup","com.palm.systemservice","com.palm.systemmanager","com.palm.activitymanager", "com.webos.service.attachedstoragemanager", "com.webos.service.tv.systemproperty"]
         },
         {
             "service":"com.palm.tempdb",

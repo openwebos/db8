@@ -21,6 +21,10 @@
 #include "db-luna/MojDbLunaServiceDb.h"
 #include "db/MojDbServiceDefs.h"
 #include "core/MojApp.h"
+#include "core/MojComp.h"
+#include "core/MojUtil.h"
+#include "luna/MojFactoryReset.h"
+#include <cstring>
 
 //db-luna.dbservice
 
@@ -66,6 +70,22 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
             PMLOGKS("data", msg.data()),
             PMLOGKFV("error", "%d", err),
             "Error opening 'baseDir'/'subDir' - 'data' ('error')");
+
+        LOG_DEBUG("[MojDb] service name: %s", serviceName);
+
+        //com.palm.db
+        if(strcmp(serviceName, MojDbServiceDefs::ServiceName) == 0)
+        {
+            LOG_INFO("MAINDB_RESET", 0, "[MojDb] do factory reset");
+            m_factoryResetRequest.perform(m_service);
+        }
+
+        //com.palm.mediadb
+        if(strcmp(serviceName, MojDbServiceDefs::MediaServiceName) == 0)
+        {
+            LOG_INFO("MEDIADB_RESET", 0, "[MojDb] clean mediadb folder '%s'", baseDir);
+            MojRmDirContent(baseDir); // remove only content of base folder
+        }
     }
     MojErrCheck(err);
 

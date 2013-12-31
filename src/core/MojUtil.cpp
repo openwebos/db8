@@ -31,7 +31,7 @@
 
 static const MojSize MojMaxDirDepth = 100;
 
-static MojErr MojRmDirRecursive(const MojChar* path, MojSize depth);
+static MojErr MojRmDirContent(const MojChar* path, MojSize depth);
 
 static MojErr MojBase64EncodeImpl(const MojChar charset[], const MojByte* src, MojSize srcSize, MojChar* bufOut, MojSize bufLen, MojSize& lenOut, bool pad = true);
 static MojErr MojBase64DecodeImpl(const MojByte vals[], MojSize size, const MojChar* src, MojSize srcLen, MojByte* bufOut, MojSize bufSize, MojSize& sizeOut);
@@ -298,10 +298,22 @@ MojErr MojCreateDirIfNotPresent(const MojChar* path)
 
 MojErr MojRmDirRecursive(const MojChar* path)
 {
-	return MojRmDirRecursive(path, 0);
+    MojErr err = MojRmDirContent(path, 0);
+    MojErrCheck(err);
+
+    // remove dir
+    err = MojRmDir(path);
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
-MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
+MojErr MojRmDirContent(const MojChar* path)
+{
+    return MojRmDirContent(path, 0);
+}
+
+MojErr MojRmDirContent(const MojChar* path, MojSize depth)
 {
 	MojAssert(path);
 	MojErr err = MojErrNone;
@@ -342,16 +354,14 @@ MojErr MojRmDirRecursive(const MojChar* path, MojSize depth)
 		MojStrNCpy(entName.get() + pathLen, ent.d_name, nameLen);
 		entName[pathLen + nameLen] = '\0';
 		if (ent.d_type == DT_DIR) {
-			err = MojRmDirRecursive(entName.get(), depth + 1);
+			err = MojRmDirContent(entName.get(), depth + 1);
 			MojErrGoto(err, Done);
 		} else {
 			err = MojUnlink(entName.get());
 			MojErrGoto(err, Done);
 		}
 	}
-	// remove dir
-	err = MojRmDir(path);
-	MojErrGoto(err, Done);
+
 Done:
 	if (dir != MojInvalidDir)
 		(void) MojDirClose(dir);
@@ -389,9 +399,9 @@ const MojChar* MojFileNameFromPath(const MojChar* path)
 	return sep ? sep + 1 : path;
 }
 
-MojErr MojByteArrayToHex(const MojByte *bytes, MojSize len, MojChar *s) 
+MojErr MojByteArrayToHex(const MojByte *bytes, MojSize len, MojChar *s)
 {
-	// Convert a byte array to Hex String for printing 
+	// Convert a byte array to Hex String for printing
 	char hexval[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 	for(MojSize j = 0; j < len; j++){
 		s[j*2] = hexval[((bytes[j] >> 4) & 0xF)];

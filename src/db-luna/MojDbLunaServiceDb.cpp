@@ -62,14 +62,6 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     // open db
     err = openDb(env, baseDir, subDir, conf);
     if (err != MojErrNone) {
-        MojString msg;
-        MojErrToString(err, msg);
-        LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 4,
-            PMLOGKS("baseDir", baseDir),
-            PMLOGKS("subDir", subDir),
-            PMLOGKS("data", msg.data()),
-            PMLOGKFV("error", "%d", err),
-            "Error opening 'baseDir'/'subDir' - 'data' ('error')");
 
         LOG_DEBUG("[MojDb] service name: %s", serviceName);
 
@@ -85,6 +77,21 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
         {
             LOG_INFO("MEDIADB_RESET", 0, "[MojDb] clean mediadb folder '%s'", baseDir);
             MojRmDirContent(baseDir); // remove only content of base folder
+            //reopen db
+            LOG_INFO("MEDIADB_REOPEN", 0, "[MojDb] reopen mediadb");
+            err = openDb(env, baseDir, subDir, conf);
+        }
+
+        if (err != MojErrNone)
+        {
+            MojString msg;
+            MojErrToString(err, msg);
+            LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 4,
+                PMLOGKS("baseDir", baseDir),
+                PMLOGKS("subDir", subDir),
+                PMLOGKS("data", msg.data()),
+                PMLOGKFV("error", "%d", err),
+                "Error opening 'baseDir'/'subDir' - 'data' ('error')");
         }
     }
     MojErrCheck(err);

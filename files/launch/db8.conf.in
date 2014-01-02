@@ -1,4 +1,4 @@
-# @@@LICENSE
+#@@@LICENSE
 #
 #      Copyright (c) 2012-2013 LG Electronics, Inc.
 #
@@ -28,12 +28,14 @@ respawn
 
 pre-start script
 	# check available disk space
-	# MINIMAL_BYTES_FREE is 95.5% of disk space
+	BYTES_TOTAL=$(($(stat -f -c "%b*%S" /var/db)))
 	BYTES_FREE=$(($(stat -f -c "%a*%S" /var/db)))
-	MINIMAL_BYTES_FREE="30696013"
 
-	# if not enough disk space, make factory reset and reboot tv
-	if [ "$BYTES_FREE" -le "$MINIMAL_BYTES_FREE" ]; then
+	# If /var/db contain less 4.5% of free space, do factory reset
+    BYTES_THRESHOLD=$(($BYTES_TOTAL*45/1000))
+
+	# if not enough disk space, make factory reset and reboot.
+	if [ "$BYTES_FREE" -le "$BYTES_THRESHOLD" ]; then
 	        /usr/bin/luna-send -n 1 luna://com.webos.service.tv.systemproperty/doUserDefault '{}'
 		exit 1
 	fi

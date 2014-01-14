@@ -18,8 +18,8 @@
 
 description "@WEBOS_PROJECT_SUMMARY@"
 
-start on datastore-init-start
-stop on started start_update
+start on (datastore-init-start or starting db8)
+stop on (started start_update or stopping db8)
 
 respawn
 

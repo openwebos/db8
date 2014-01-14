@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -133,7 +133,8 @@ static const MojErrStr s_errStrings[] = {
 	{MojErrDbWatchUnsupported, _T("db: watch not supported for query")},
 	{MojErrDbWarnings, _T("db: warnings - run stats")},
 	{MojErrDbKindHasSubKinds, _T("db: can not delete kind that has sub-kinds")},
-    {MojErrDbInvalidShardId, _T("db: invalid shard id")},
+	{MojErrDbInvalidShardId, _T("db: invalid shard id")},
+	{MojErrDbIO, _T("db: I/O error")},
 	// LS ERRORS
 	{MojErrLuna, _T("luna: generic fault")},
 	{MojErrCategoryNotFound, _T("luna: category not found")},

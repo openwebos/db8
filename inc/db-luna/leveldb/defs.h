@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2013 LG Electronics
+* Copyright (c) 2013-2014 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 #ifndef LEVELDB_DEFS_H
 #define LEVELDB_DEFS_H
 
-#include "core/MojErr.h"
+MojErr LdbToMojErr(const leveldb::Status&);
 
-#define MojLdbErrCheck(E, FNAME)                if (!E.ok()) MojErrThrowMsg(MojErrDbFatal, _T("ldb: %s - %s"), FNAME, E.ToString().data())
+#define MojLdbErrCheck(E, FNAME)                if (!E.ok()) MojErrThrowMsg(LdbToMojErr(E), _T("ldb: %s - %s"), FNAME, E.ToString().data())
 #define MojLdbErrAccumulate(EACC, E, FNAME)     if (!E.ok()) MojErrAccumulate(EACC, MojErrDbFatal)
 
 #endif

@@ -242,8 +242,12 @@ webos_build_system_bus_files()
 # (see cmake_webos)
 webos_build_daemon(NAME mojodb-luna LAUNCH files/launch/)
 
+# configuration files per database
+install(FILES files/conf/maindb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/db8)
+install(FILES files/conf/mediadb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/db8)
+install(FILES files/conf/tempdb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/db8)
+
 # extras
-install(FILES src/db-luna/mojodb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR})
 install(FILES src/db-luna/backup-com.palm.db DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/backup)
 install(FILES src/db-luna/activity-com.palm.db.purge.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.db)
 install(FILES src/db-luna/activity-com.palm.db.space.json DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/activities/com.palm.db)

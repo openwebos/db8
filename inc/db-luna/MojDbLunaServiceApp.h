@@ -43,30 +43,21 @@ public:
     virtual MojErr close();
 private:
     static const MojChar* const VersionString;
-    static const MojChar* const MainDir;
-    static const MojChar* const MediaDir;
-    static const MojChar* const MediaBaseDir;
-    static const MojChar* const TempDir;
-    static const MojChar* const TempStateDir;
-    static const MojChar* const TempInitStateFile;
     static const MojInt32 NumThreads = 3;
 
     typedef MojReactorApp<MojGmainReactor> Base;
 
-    MojErr dropTemp();
+    MojErr handleServiceName(const MojString& opt, const MojString& val);
     virtual MojErr handleArgs(const StringVec& args);
     virtual MojErr displayUsage();
 
     MojString m_dbDir;
-    MojString m_mediaDbDir;
+    MojString m_serviceName;
     MojDbLunaServiceDb m_mainService;
-    MojDbLunaServiceDb m_mediaService;
-    MojDbLunaServiceDb m_tempService;
+
     MojMessageDispatcher m_dispatcher;
     MojRefCountedPtr<MojDbEnv> m_env;
     MojRefCountedPtr<MojDbServiceHandlerInternal> m_internalHandler;
-    MojRefCountedPtr<MojDbServiceHandlerInternal> m_tempInternalHandler;
-    MojRefCountedPtr<MojDbServiceHandlerInternal> m_mediaInternalHandler;
     MojObject m_conf;
 };
 

@@ -1600,7 +1600,7 @@ MojErr MojDbBerkeleyIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
     LOG_DEBUG("[db.bdb] bdbindexdel: %s; keylen: %zu, key: %s ; err = %d\n", m_db->m_name.data(), size1, s, err);
 
 	if (!found)
-        LOG_WARNING(MSGID_DB_BERKLEY_TXN_WARNING, 0, "bdbindexdel_warn: not found: %s \n", s);
+        LOG_WARNING(MSGID_DB_BERKLEY_TXN_WARNING, 0, "bdbindexdel_warn: not found: %s", s);
 #endif
 
 	MojErrCheck(err);

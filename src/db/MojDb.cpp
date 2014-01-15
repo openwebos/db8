@@ -519,7 +519,7 @@ MojErr MojDb::put(MojObject* begin, const MojObject* end, MojUInt32 flags, MojDb
         bool found = false;
         err = shardEngine()->isIdExist(id, found);
         if(!found) {
-            LOG_WARNING(MSGID_MOJ_DB_WARNING, 0, "Invalid shard ID\n");
+            LOG_WARNING(MSGID_MOJ_DB_WARNING, 0, "Invalid shard ID");
             MojErrThrowMsg(MojErrDbMalformedId, _T("db: Invalid shard ID"));
         }
     }

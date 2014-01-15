@@ -145,7 +145,7 @@ MojErr MojDbLevelIndex::del(const MojDbKey& key, MojDbStorageTxn* txn)
     if (!found)
         LOG_WARNING(MSGID_LEVEL_DB_WARNING, 1,
             PMLOGKS("index", s),
-            "ldbindexdel_warn: not found: %s \n", s);
+            "ldbindexdel_warn: not found: %s", s);
 #endif
 
     MojErrCheck(err);

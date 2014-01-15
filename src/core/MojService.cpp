@@ -174,7 +174,7 @@ MojErr MojService::dispatchRequest(MojServiceMessage* msg)
         LOG_WARNING(MSGID_MOJ_SERVICE_WARNING, 5,
                     PMLOGKS("sender", msg->senderName()),
                     PMLOGKS("method", msg->method()),
-                    PMLOGKS("payload", payloadStr.data()),
+                    PMLOGJSON("payload", payloadStr.data()),
                     PMLOGKS("error", errStr.data()),
                     PMLOGKFV("reqErr", "%d", (int)reqErr),
                     "");

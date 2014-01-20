@@ -30,4 +30,6 @@ target_link_libraries(test_dbclient
                       mojoluna
 )
 
-install(PROGRAMS ${CMAKE_BINARY_DIR}/test/dbclient/test_dbclient DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/test/dbclient/test_dbclient
+        DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ)

@@ -69,7 +69,9 @@ target_link_libraries(test_db_core
                       mojodb
                       ${DB_BACKEND_LIB}
 )
-install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_core DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_core 
+        DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ)
 
 # --------------------------------
 # performance test target
@@ -90,7 +92,9 @@ target_link_libraries(test_db_performance
                       mojodb
                       ${DB_BACKEND_LIB}
 )
-install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_performance DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_performance 
+        DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ)
 
 # --------------------------------
 # stress test target
@@ -106,6 +110,8 @@ target_link_libraries(test_db_stress
                       mojoluna
                       ${DB_BACKEND_LIB}
 )
-install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_stress DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/test/db/test_db_stress
+        DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ)
 
 #add_test(NAME MojDbStressTest COMMAND test_db_stress)

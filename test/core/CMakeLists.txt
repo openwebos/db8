@@ -51,4 +51,6 @@ set (CORE_TEST_SOURCES
 add_executable(test_core ${CORE_TEST_SOURCES})
 target_link_libraries(test_core mojocore)
 
-install(PROGRAMS ${CMAKE_BINARY_DIR}/test/core/test_core DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/test/core/test_core
+        DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ)

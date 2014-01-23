@@ -19,6 +19,10 @@
 
 #include "core/MojSignal.h"
 
+MojSignalHandler::~MojSignalHandler()
+{
+}
+
 MojErr MojSignalHandler::handleCancel()
 {
 	return MojErrNone;
@@ -39,7 +43,7 @@ void MojSlotBase::cancel()
 {
    if(m_signal == NULL)
       return;
-   
+
    if (m_connected) {
       m_signal->cancel(this);
       m_signal = NULL;
@@ -85,16 +89,16 @@ void MojSignalBase::cancel(MojSlotBase* slot)
 	MojThreadGuard guard(m_mutex);
     if(slot->m_connected == false)
        return;
-    
+
     guard.unlock();
-    
+
 	// add ref to make sure that handler isn't destroyed before handleCancel returns.
 	MojRefCountedPtr<MojSignalHandler> handler(m_handler);
 	MojErr err = m_handler->handleCancel();
 	MojErrCatchAll(err);
 
     guard.lock();
-    // Not sure if it's possible but who knows what might happened once we unlock the mutex  
+    // Not sure if it's possible but who knows what might happened once we unlock the mutex
     if(slot->m_connected == false)
        return;
 	MojAssert(slot && m_slots.contains(slot));

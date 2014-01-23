@@ -38,6 +38,7 @@ protected:
 	friend class MojSignalBase;
 
 	virtual MojErr handleCancel();
+	virtual ~MojSignalHandler();
 };
 
 class MojSlotBase : private MojNoCopy

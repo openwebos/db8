@@ -151,7 +151,7 @@ MojErr MojDbSpaceAlert::doSpaceCheck(AlertLevel& alertLevel, int& bytesUsed, int
     fsblkcnt_t blocksUsed = dbFsStat.f_blocks - dbFsStat.f_bfree;
 
     MojInt64 bigBytesUsed = (MojInt64)blocksUsed * dbFsStat.f_frsize;
-    MojInt64 bigBytesAvailable = (MojInt64)dbFsStat.f_blocks * dbFsStat.f_frsize;
+    MojInt64 bigBytesAvailable = (MojInt64)dbFsStat.f_blocks * dbFsStat.f_frsize - bigBytesUsed;
 
     MojDouble percentUsed =
     ((MojDouble)blocksUsed / (MojDouble)dbFsStat.f_blocks) * 100.0;

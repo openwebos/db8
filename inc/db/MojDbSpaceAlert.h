@@ -51,7 +51,7 @@ public:
     const MojString& getDatabaseRoot() const { return m_databaseRoot; }
 
     MojErr doSpaceCheck();
-    MojErr doSpaceCheck(AlertLevel& level, int& bytesUsed, int& bytesAvailable);
+    MojErr doSpaceCheck(AlertLevel& level, MojInt64& bytesUsed, MojInt64& bytesAvailable);
     gboolean periodicSpaceCheck(gpointer data);
     const MojChar* getAlertName(AlertLevel alertLevel) const { return SpaceAlertNames[alertLevel - NoSpaceAlert]; }
 

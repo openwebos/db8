@@ -6,7 +6,7 @@
             "interval" : "5m"
         },
         "callback" : {
-            "method" : "palm://com.palm.mediadb/internal/scheduledSpaceCheck" 
+            "method" : "palm://com.webos.mediadb/internal/scheduledSpaceCheck"
         },
         "type" : {
             "foreground" : true,

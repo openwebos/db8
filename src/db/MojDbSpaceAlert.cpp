@@ -49,8 +49,8 @@ MojDbSpaceAlert::AlertLevel MojDbSpaceAlert::spaceAlertLevel()
 
     if(m_compactRunning) // do the real space check - we have no idea how long it'll take to clean up everything
    {
-       int bytesUsed = 0;
-       int bytesAvailable = 0;
+       MojInt64 bytesUsed = 0;
+       MojInt64 bytesAvailable = 0;
        AlertLevel alertLevel = AlertLevelHigh;
        doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
        return alertLevel;
@@ -69,8 +69,8 @@ MojErr MojDbSpaceAlert::doSpaceCheck()
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
     AlertLevel alertLevel;
-    int bytesUsed;
-    int bytesAvailable;
+    MojInt64 bytesUsed;
+    MojInt64 bytesAvailable;
     MojErr err = doSpaceCheck(alertLevel, bytesUsed, bytesAvailable);
     if (err != MojErrNone)
         return err;
@@ -128,7 +128,7 @@ MojErr MojDbSpaceAlert::doSpaceCheck()
         return err;
 }
 
-MojErr MojDbSpaceAlert::doSpaceCheck(AlertLevel& alertLevel, int& bytesUsed, int& bytesAvailable)
+MojErr MojDbSpaceAlert::doSpaceCheck(AlertLevel& alertLevel, MojInt64& bytesUsed, MojInt64& bytesAvailable)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!m_databaseRoot.empty());
@@ -181,8 +181,8 @@ MojErr MojDbSpaceAlert::doSpaceCheck(AlertLevel& alertLevel, int& bytesUsed, int
     }
 
     // On embedded devices, available/used space normally well below 2GB, but on desktop environments cap to 2GB
-    bytesUsed = (int)(bigBytesUsed > MojInt32Max ? MojInt32Max : bigBytesUsed);
-    bytesAvailable = (int)(bigBytesAvailable > MojInt32Max ? MojInt32Max : bigBytesAvailable);
+    bytesUsed = bigBytesUsed;
+    bytesAvailable = bigBytesAvailable;
 
     return MojErrNone;
 }

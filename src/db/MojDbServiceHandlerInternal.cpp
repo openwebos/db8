@@ -266,8 +266,8 @@ MojErr MojDbServiceHandlerInternal::handleSpaceCheck(MojServiceMessage* msg, Moj
 
 	MojObject response;
     MojDbSpaceAlert::AlertLevel alertLevel;
-	int bytesUsed;
-	int bytesAvailable;
+	MojInt64 bytesUsed;
+	MojInt64 bytesAvailable;
 	bool subscribed = msg->subscribed();
 
 	if (subscribed) {

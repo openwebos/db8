@@ -846,15 +846,17 @@ MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem
 		req.fixmode(true);
 		MojErr err = m_kindEngine.update(NULL, &obj, req, OpDelete, tokenSet);
 		MojErrCheck(err);
-		// gross layering violation
-		err = req.txn()->offsetQuota(-(MojInt64) item->size());
-		MojErrCheck(err);
 		// permanently delete
 		bool found = false;
 		err = m_objDb->del(id, req.txn(), found);
 		MojErrCheck(err);
 		if (!found)
 			MojErrThrow(MojErrDbCorruptDatabase);
+
+		// delete succeed, change quota on a size of item
+		err = req.txn()->offsetQuota(-(MojInt64) item->size());
+		MojErrCheck(err);
+
 		err = foundObjOut.put(IdKey, id);
 		MojErrCheck(err);
 	} else {

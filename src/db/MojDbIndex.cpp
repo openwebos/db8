@@ -295,10 +295,10 @@ MojErr MojDbIndex::update(const MojObject* newObj, const MojObject* oldObj, MojD
 		KeySet keysToDel;
 		err = oldKeys.diff(newKeys, keysToDel);
 		MojErrCheck(err);
-		err = insertKeys(keysToPut, txn);
-		MojErrCheck(err);
 		err = delKeys(keysToDel, txn, forcedel);
-		
+		MojErrCheck(err);
+		err = insertKeys(keysToPut, txn);
+
         LOG_DEBUG("[db_mojodb] IndexMerge: %s; OldKeys= %zu; NewKeys= %zu; Dropped= %zu; Added= %zu ; err = %d\n",
 			this->name().data(), oldKeys.size(), newKeys.size(), keysToDel.size(), keysToPut.size(), (int)err);
 

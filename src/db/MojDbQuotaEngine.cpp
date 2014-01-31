@@ -433,6 +433,7 @@ MojInt64 MojDbQuotaEngine::Quota::available() const
 
 	MojThreadGuard guard(m_mutex);
 	MojInt64 available = m_size - m_usage;
+	available = (available < 0) ? 0 : available;
 	return available;
 }
 

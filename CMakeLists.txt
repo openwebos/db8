@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2012-2013 LG Electronics, Inc.
+# Copyright (c) 2012-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -199,7 +199,6 @@ set(LUNA_LIB_SOURCES
     src/luna/MojLunaMessage.cpp
     src/luna/MojLunaRequest.cpp
     src/luna/MojLunaService.cpp
-    src/luna/MojFactoryReset.cpp
     )
 
 add_library(mojoluna SHARED ${LUNA_LIB_SOURCES})
@@ -241,6 +240,11 @@ webos_build_system_bus_files()
 # of all files named as <name>.in into upstart/name
 # (see cmake_webos)
 webos_build_daemon(NAME mojodb-luna LAUNCH files/launch/)
+
+#install error handling scripts
+install (FILES files/scripts/errorOpenMainDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
+install (FILES files/scripts/errorOpenMediaDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
+install (FILES files/scripts/errorOpenTempDb.bash DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/bin PERMISSIONS OWNER_EXECUTE OWNER_READ)
 
 # configuration files per database
 install(FILES files/conf/maindb.conf DESTINATION ${WEBOS_INSTALL_WEBOS_SYSCONFDIR}/db8)

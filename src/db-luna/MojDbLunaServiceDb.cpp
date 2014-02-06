@@ -1,7 +1,7 @@
 /****************************************************************
  * @@@LICENSE
  *
- * Copyright (c) 2013 LG Electronics, Inc.
+ * Copyright (c) 2013-2014 LG Electronics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@
 #include "core/MojApp.h"
 #include "core/MojComp.h"
 #include "core/MojUtil.h"
-#include "luna/MojFactoryReset.h"
 #include <cstring>
+#include <stdlib.h>
 
 //db-luna.dbservice
 
@@ -63,25 +63,22 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
     if (err != MojErrNone) {
         LOG_DEBUG("[MojDb] service name: %s", serviceName);
 
-        //com.palm.db
-        if(strcmp(serviceName, MojDbServiceDefs::ServiceName) == 0)
-        {
-            LOG_INFO("MAINDB_RESET", 0, "[MojDb] do factory reset");
-            m_factoryResetRequest.perform(m_service);
-        }
+        MojString recoveryScriptPath;
+        MojErrCheck(conf.getRequired("recoveryScriptPath", recoveryScriptPath));
 
-        //com.palm.mediadb
-        if(strcmp(serviceName, MojDbServiceDefs::MediaServiceName) == 0)
-        {
-            LOG_INFO("MEDIADB_RESET", 0, "[MojDb] clean mediadb folder '%s'", dir);
-            MojRmDirContent(dir); // remove only content of base folder
-            //reopen db
-            LOG_INFO("MEDIADB_REOPEN", 0, "[MojDb] reopen mediadb");
+        int res = system(recoveryScriptPath.data());
+        if (res == 0) {
+            LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN, 0, "reopen database after recovery" );
             err = openDb(env, dir, conf);
+        } else {
+            LOG_WARNING(MSGID_LUNA_SERVICE_DB_OPEN,
+                    2,
+                    PMLOGKS("recoveryScriptPath", recoveryScriptPath.data()),
+                    PMLOGKFV("return", "%i", res),
+                    "Can't run recovery script");
         }
 
-        if (err != MojErrNone)
-        {
+        if (err != MojErrNone) {
             MojString msg;
             MojErrToString(err, msg);
             LOG_ERROR(MSGID_LUNA_SERVICE_DB_OPEN, 3,
@@ -91,9 +88,8 @@ MojErr MojDbLunaServiceDb::open(MojGmainReactor& reactor, MojDbEnv* env,
                 "Error opening 'dir' - 'data' ('error')");
         }
     }
-    MojErrCheck(err);
 
-    return MojErrNone;
+    return err;
 }
 
 MojErr MojDbLunaServiceDb::openDb(MojDbEnv* env, const MojChar* dir, const MojObject& conf)

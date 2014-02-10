@@ -159,10 +159,21 @@ bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const Mo
 	case MojDbQuery::OpGreaterThanEq:
 		return val >= lowerVal;
 
-    case MojDbQuery::OpSubString:
-        return findSubString(val, lowerVal);
+    case MojDbQuery::OpSubString: {
+        FindSubStringResult ret;
+        MojErr err = findSubString(val, lowerVal, ret);
+        MojErrCheck(err);
+        return ret.isFound();
+    }
+	case MojDbQuery::OpPrefix: {
+        FindSubStringResult ret;
+        MojErr err = findSubString(val, lowerVal, ret);
+        MojErrCheck(err);
 
-	default:
+        return (ret.isFound() && ret.pos() == 0) || (ret.srcIsEmpty() && ret.subStringIsEmpty());
+	}
+
+        default:
 		MojAssertNotReached();
 		return false;
 	}
@@ -199,7 +210,7 @@ bool MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const Mo
  *      convert their to upper case for case insensitivity
  *   3. If "subString" is found in "src", return true.
  ***********************************************************************/
-bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subString)
+MojErr MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subString, FindSubStringResult& ret)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -207,14 +218,17 @@ bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subS
         // If "subString" type is array, take out each items for recursive process
         MojObject::ConstArrayIterator end = subString.arrayEnd();
         for (MojObject::ConstArrayIterator i = subString.arrayBegin(); i != end; ++i) {
-            if(findSubString(src, *i)) {
-                return true;
+            MojErr err = findSubString(src, *i, ret);
+            MojErrCheck( err );
+            if(ret.isFound()) {
+                return MojErrNone;
             }
         }
     } else {
         // Type of "src" and "subString" should be string.
         if(src.type() != MojObject::TypeString || subString.type() != MojObject::TypeString) {
-            return false;
+            ret = FindSubStringResult();
+            return MojErrNone;
         }
         MojString srcStr;
         MojErr err;
@@ -223,25 +237,35 @@ bool MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& subS
         MojString subStringStr;
         err = subString.stringValue(subStringStr);
         MojErrCheck(err);
+
         // Filtering out in case of "" string. Because ICU does not support.
-        if (srcStr.empty() && subStringStr.empty())
-            return true;
-        else if (srcStr.empty() || subStringStr.empty())
-            return false;
+        if (srcStr.empty() && subStringStr.empty()) {
+            ret = FindSubStringResult(true, true);
+            return MojErrNone;
+        }
+        else if (srcStr.empty() || subStringStr.empty()) {
+            ret = FindSubStringResult(srcStr.empty(), subStringStr.empty());
+            return MojErrNone;
+        }
         // convert "src" to upper case.
         MojDbTextUtils::UnicodeVec srcOut;
         // locale info did not set for locale insesitivity.
         err = MojDbTextUtils::strToUpper(srcStr, _T(""), srcOut);
         MojErrCheck(err);
+
         // convert "subString" to upper case.
         MojDbTextUtils::UnicodeVec subStringOut;
         err = MojDbTextUtils::strToUpper(subStringStr, _T(""), subStringOut);
         MojErrCheck(err);
+
         // If "subString" is found in "src", return true.
-        if(u_strstr(srcOut.begin(), subStringOut.begin())) {
-            return true;
+        UChar * b = u_strstr(srcOut.begin(), subStringOut.begin());
+        if( b ) {
+            ret = FindSubStringResult( static_cast<int>(  b - srcOut.begin() ) );
+            return MojErrNone;
         }
     }
-    return false;
+    ret = FindSubStringResult();
+    return MojErrNone;
 }
 

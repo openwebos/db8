@@ -34,9 +34,34 @@ public:
     bool findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const;
 
 private:
+    class FindSubStringResult
+    {
+    public:
+        FindSubStringResult()               : m_pos(-1), m_srcIsEmpty(false), m_subStringIsEmpty(false) {}
+        explicit FindSubStringResult(int p) : m_pos( p), m_srcIsEmpty(false), m_subStringIsEmpty(false) {}
+        explicit FindSubStringResult(bool src, bool sub) : m_pos( -1), m_srcIsEmpty(src), m_subStringIsEmpty(sub) {}
+
+        bool isFound() const
+        {
+            return m_pos > -1 || ( m_srcIsEmpty  && m_subStringIsEmpty );
+        }
+
+        int pos() const
+        {
+            return m_pos;
+        }
+
+        bool srcIsEmpty() const {return m_srcIsEmpty;}
+        bool subStringIsEmpty() const {return m_subStringIsEmpty;}
+    private:
+        int m_pos;
+        bool m_srcIsEmpty;
+        bool m_subStringIsEmpty;
+    };
+
 	static bool testLower(const MojDbQuery::WhereClause& clause, const MojObject& val);
 	static bool testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val);
-    static bool findSubString(const MojObject& src, const MojObject& subString);
+    static MojErr findSubString(const MojObject& src, const MojObject& subString, FindSubStringResult& ret);
 
 	MojDbQuery::WhereMap m_clauses;
 };

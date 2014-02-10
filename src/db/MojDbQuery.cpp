@@ -416,10 +416,6 @@ MojErr MojDbQuery::validate() const
 		}
 	}
 	for (WhereMap::ConstIterator i = m_filterClauses.begin(); i != m_filterClauses.end(); ++i) {
-		// verify that we only have inequality op on one prop
-		if (i->lowerOp() == OpPrefix) {
-			MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: query contains prefix operator in filter"));
-		}
 		if (i->lowerOp() == OpSearch) {
 			MojErrThrowMsg(MojErrDbInvalidQuery, _T("db: query contains search operator in filter"));
 		}

@@ -35,7 +35,7 @@
 			_T("\"type\":\"object\",") \
 			 _T("\"properties\":{") \
 				 _T("\"prop\":{\"type\":\"string\"},") \
-                 _T("\"op\":{\"type\":\"string\",\"enum\":[\"<\",\"<=\",\"=\",\">=\",\">\",\"!=\",\"%%\"]},") \
+                 _T("\"op\":{\"type\":\"string\",\"enum\":[\"<\",\"<=\",\"=\",\">=\",\">\",\"!=\",\"%%\",\"%\"]},") \
 				 _T("\"val\":{}}}},") \
 		 _T("\"orderBy\":{\"type\":\"string\",\"optional\":true},") \
 		 _T("\"distinct\":{\"type\":\"string\",\"optional\":true},") \

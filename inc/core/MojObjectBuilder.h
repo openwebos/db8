@@ -18,7 +18,7 @@
 
 
 #ifndef MOJOBJECTBUILDER_H_
-#define MOJOBJECTBUDILER_H_
+#define MOJOBJECTBUILDER_H_
 
 #include "core/MojCoreDefs.h"
 #include "core/MojObject.h"

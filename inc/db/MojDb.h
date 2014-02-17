@@ -114,9 +114,9 @@ public:
     MojInt64 purgeWindow() {return m_purgeWindow;}
 
     //verify _kind
-    bool isValidKind (MojString& i_kindStr);
+    MojErr isValidKind (MojString& i_kindStr, bool & ret);
     //successful, if records for the _kind have been written to this shard
-    bool isSupported (MojString& i_shardId, MojString& i_kindStr);
+    MojErr isSupported (MojString& i_shardId, MojString& i_kindStr, bool & ret);
 
     MojDbSpaceAlert& getSpaceAlert() { return m_spaceAlert; }
 private:

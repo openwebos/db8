@@ -391,12 +391,15 @@ bool MojLunaService::handleCancel(LSHandle* sh, LSMessage* msg, void* ctx)
 	MojLunaService* service = static_cast<MojLunaService*>(ctx);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg));
-	MojAllocCheck(request.get());
+    MojAllocCatch(request.get()) {
+        return false;
+    }
+
     LOG_DEBUG("[db_lunaService] cancel received: %s", request->payload());
 	MojErr err = service->MojService::handleCancel(request.get());
 	MojErrCatchAll(err);
 
-	return true;
+    return true;
 }
 
 bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
@@ -407,20 +410,23 @@ bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
 	MojLunaService* service = static_cast<MojLunaService*>(category->m_service);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, category));
-	MojAllocCheck(request.get());
+    MojAllocCatch(request.get()) {
+        return false;
+    }
+
     LOG_DEBUG("[db_lunaService] request received: %s", request->payload());
 
 	MojErr reqErr;
 	MojErr err = reqErr = request->processSubscriptions();
 	MojErrCatchAll(err) {
 		(void) request->replyError(reqErr);
-		return true;
+        return true;
 	}
 
 	err = service->MojService::handleRequest(request.get());
 	MojErrCatchAll(err);
 
-	return true;
+    return true;
 }
 
 bool MojLunaService::handleResponse(LSHandle* sh, LSMessage* msg, void* ctx)
@@ -430,10 +436,13 @@ bool MojLunaService::handleResponse(LSHandle* sh, LSMessage* msg, void* ctx)
 	MojLunaService* service = static_cast<MojLunaService*>(ctx);
 
 	MojRefCountedPtr<MojLunaMessage> request(new MojLunaMessage(service, msg, NULL, true));
-	MojAllocCheck(request.get());
+    MojAllocCatch(request.get()) {
+        return false;
+    }
+
     LOG_DEBUG("[db_lunaService] response received: %s", request->payload());
 	MojErr err = service->handleReply(request.get());
 	MojErrCatchAll(err);
 
-	return true;
+    return true;
 }

@@ -348,7 +348,7 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 			err = item->toObject(obj, *m_kindEngine);
 			MojErrCheck(err);
 			// filter results
-			if (m_queryFilter.get() && !m_queryFilter->test(obj))
+            if (m_queryFilter.get() && !MojBoolResult(m_queryFilter->test, obj))
 				continue;
 			// create object item
 			MojRefCountedPtr<MojDbObjectItem> item(new MojDbObjectItem(obj));
@@ -433,4 +433,3 @@ MojErr MojDbSearchCursor::distinct()
 
 	return MojErrNone;
 }
-

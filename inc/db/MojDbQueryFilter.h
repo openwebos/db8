@@ -30,8 +30,8 @@ public:
 	~MojDbQueryFilter();
 
 	MojErr init(const MojDbQuery& query);
-	bool test(const MojObject& obj) const;
-    bool findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const;
+    MojErr test(const MojObject& obj, bool & ret) const;
+    MojErr findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut, bool & ret) const;
 
 private:
     class FindSubStringResult
@@ -59,8 +59,8 @@ private:
         bool m_subStringIsEmpty;
     };
 
-	static bool testLower(const MojDbQuery::WhereClause& clause, const MojObject& val);
-	static bool testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val);
+    static MojErr testLower(const MojDbQuery::WhereClause& clause, const MojObject& val, bool & ret);
+    static MojErr testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val, bool & ret);
     static MojErr findSubString(const MojObject& src, const MojObject& subString, FindSubStringResult& ret);
 
 	MojDbQuery::WhereMap m_clauses;

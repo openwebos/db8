@@ -856,12 +856,12 @@ MojErr MojDbServiceHandler::handleShardKind(MojServiceMessage* msg, MojObject& p
 
         if (G_LIKELY(found))
         {
-            if (G_LIKELY(m_db.isValidKind(kindStr)))
+            if (G_LIKELY(MojBoolResult(m_db.isValidKind, kindStr)))
             {
                 //ok
                 err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
                 MojErrCheck(err);
-                err = writer.stringProp("isSupported", m_db.isSupported(shardIdBase64, kindStr) ? "true" : "false");
+                err = writer.stringProp("isSupported", MojBoolResult(m_db.isSupported, shardIdBase64, kindStr) ? "true" : "false");
                 MojErrCheck(err);
                 err = writer.stringProp("shardId", shardIdBase64.data());
                 MojErrCheck(err);

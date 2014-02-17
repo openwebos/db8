@@ -181,7 +181,10 @@ MojErr MojDbQueryFilterTest::check(const MojChar* objJson, const MojChar* filter
 	MojDbQueryFilter filter;
 	err = filter.init(query);
 	MojTestErrCheck(err);
-	MojTestAssert(filter.test(obj) == expected);
+    bool result;
+    err = filter.test(obj, result);
+    MojTestErrCheck(err);
+    MojTestAssert(result == expected);
 
 	return MojErrNone;
 }

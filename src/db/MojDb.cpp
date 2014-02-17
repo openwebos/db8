@@ -1392,7 +1392,7 @@ MojErr MojDb::assignIds(MojObject& obj)
 /**
  * verify _kind
  */
-bool MojDb::isValidKind (MojString& i_kindStr)
+MojErr MojDb::isValidKind (MojString& i_kindStr, bool & ret)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -1415,13 +1415,14 @@ bool MojDb::isValidKind (MojString& i_kindStr)
     MojErrCheck(err);
     cursor.close();
 
-    return foundOut;
+    ret = foundOut;
+    return MojErrNone;
 }
 
 /**
  * successful, if records for the _kind have been written to this shard
  */
-bool MojDb::isSupported (MojString& i_shardId, MojString& i_kindStr)
+MojErr MojDb::isSupported (MojString& i_shardId, MojString& i_kindStr, bool & ret)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -1467,6 +1468,7 @@ bool MojDb::isSupported (MojString& i_shardId, MojString& i_kindStr)
         }
     }
 
-    return isExist;
+    ret = isExist;
+    return MojErrNone;
 }
 

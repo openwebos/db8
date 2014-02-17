@@ -51,7 +51,7 @@ MojErr MojDbQueryFilter::init(const MojDbQuery& query)
  *   3. Check whether retrieved value from delivered object exists in range.
  * overflows and to report any truncations.
  ***********************************************************************/
-bool MojDbQueryFilter::test(const MojObject& obj) const
+MojErr MojDbQueryFilter::test(const MojObject& obj, bool & ret) const
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -65,20 +65,26 @@ bool MojDbQueryFilter::test(const MojObject& obj) const
 
         // find values by using key name and contain results into object array.
         MojObject objVals;
-        if (!findValue(obj, keyVec.begin(), keyVec.end(), objVals))
-            return false;
-
+        if (!MojBoolResult(findValue, obj, keyVec.begin(), keyVec.end(), objVals)) {
+            ret = false;
+            return MojErrNone;
+        }
         // check whether the value exists in range.
         bool testResult = false;
         for (MojObject::ConstArrayIterator valIter = objVals.arrayBegin(); valIter != objVals.arrayEnd(); ++valIter) {
-            if (testLower(*filterIter, *valIter) && testUpper(*filterIter, *valIter)) {
+            if (MojBoolResult(testLower, *filterIter, *valIter) && MojBoolResult(testUpper, *filterIter, *valIter)) {
                 testResult = true;
                 break;
             }
         }
-        if(!testResult) return false;
+        if(!testResult) {
+            ret = false;
+            return MojErrNone;
+        }
     }
-    return true;
+
+    ret = true;
+    return MojErrNone;
 }
 
 /***********************************************************************
@@ -88,7 +94,7 @@ bool MojDbQueryFilter::test(const MojObject& obj) const
  * by using name vector from filter condition.
  * and contain the result into object array.
  ***********************************************************************/
-bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut) const
+MojErr MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, const MojString* end, MojObject& valOut, bool& ret) const
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -97,12 +103,14 @@ bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, co
         if(childObj.type() == MojObject::TypeArray) {
             // if array, find values recursively
             for (MojObject::ConstArrayIterator childObjIter = childObj.arrayBegin(); childObjIter != childObj.arrayEnd(); ++childObjIter) {
-                findValue(*childObjIter, key, end, valOut);
+                findValue(*childObjIter, key, end, valOut, ret);
             }
-            return (!valOut.empty());
+            ret = !valOut.empty();
+            return MojErrNone;
         } else {
             if(!childObj.get(key->data(), childObj)) {
-                return false;
+                ret = false;
+                return MojErrNone;
             }
         }
     }
@@ -124,79 +132,87 @@ bool MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, co
         valOut.push(childObj);
     }
 
-    return true;
+    ret = true;
+    return MojErrNone;
 }
 
-bool MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const MojObject& val)
+MojErr MojDbQueryFilter::testLower(const MojDbQuery::WhereClause& clause, const MojObject& val, bool & ret)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	const MojObject& lowerVal = clause.lowerVal();
 	switch (clause.lowerOp()) {
-	case MojDbQuery::OpNone:
-		return true;
-
+    case MojDbQuery::OpNone:
+        ret = true;
+        return MojErrNone;
 	case MojDbQuery::OpEq:
         // if lower value type is array, lower operation can use equal operator only.
         if (lowerVal.type() == MojObject::TypeArray) {
             MojObject::ConstArrayIterator end = lowerVal.arrayEnd();
             for (MojObject::ConstArrayIterator i = lowerVal.arrayBegin(); i != end; ++i) {
                 if (val == *i) {
-                    return true;
+                    ret = true;
+                    return MojErrNone;
                 }
             }
-            return false;
+            ret = false;
+            return MojErrNone;
         } else {
-            return val == lowerVal;
+            ret = (val == lowerVal);
+            return MojErrNone;
         }
 
 	case MojDbQuery::OpNotEq:
-		return val != lowerVal;
-
+        ret = (val != lowerVal);
+        return MojErrNone;
 	case MojDbQuery::OpGreaterThan:
-		return val > lowerVal;
-
+        ret = (val > lowerVal);
+        return MojErrNone;
 	case MojDbQuery::OpGreaterThanEq:
-		return val >= lowerVal;
-
+        ret = (val >= lowerVal);
+        return MojErrNone;
     case MojDbQuery::OpSubString: {
-        FindSubStringResult ret;
-        MojErr err = findSubString(val, lowerVal, ret);
+        FindSubStringResult res;
+        MojErr err = findSubString(val, lowerVal, res);
         MojErrCheck(err);
-        return ret.isFound();
+        ret = res.isFound();
+        return MojErrNone;
     }
 	case MojDbQuery::OpPrefix: {
-        FindSubStringResult ret;
-        MojErr err = findSubString(val, lowerVal, ret);
+        FindSubStringResult res;
+        MojErr err = findSubString(val, lowerVal, res);
         MojErrCheck(err);
 
-        return (ret.isFound() && ret.pos() == 0) || (ret.srcIsEmpty() && ret.subStringIsEmpty());
+        ret = ((res.isFound() && res.pos() == 0) || (res.srcIsEmpty() && res.subStringIsEmpty()));
+        return MojErrNone;
 	}
 
         default:
 		MojAssertNotReached();
-		return false;
+        ret = false;
+        return MojErrNone;
 	}
 }
 
-bool MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val)
+MojErr MojDbQueryFilter::testUpper(const MojDbQuery::WhereClause& clause, const MojObject& val, bool & ret)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
 	const MojObject& upperVal = clause.upperVal();
 	switch (clause.upperOp()) {
 	case MojDbQuery::OpNone:
-		return true;
-
+        ret = true;
+        return MojErrNone;
 	case MojDbQuery::OpLessThan:
-		return val < upperVal;
-
+        ret = (val < upperVal);
+        return MojErrNone;
 	case MojDbQuery::OpLessThanEq:
-		return val <= upperVal;
-
+        ret = (val <= upperVal);
+        return MojErrNone;
 	default:
 		MojAssertNotReached();
-		return false;
+        ret = false;
+        return MojErrNone;
 	}
 }
 
@@ -268,4 +284,3 @@ MojErr MojDbQueryFilter::findSubString(const MojObject& src, const MojObject& su
     ret = FindSubStringResult();
     return MojErrNone;
 }
-

@@ -12,7 +12,7 @@
         },
         {
             "service":"com.palm.tempdb",
-            "inbound":["*"],
+            "inbound":[],
             "outbound":["com.palm.activitymanager", "com.palm.systemservice","com.palm.systemmanager", "com.webos.service.attachedstoragemanager"]
         },
         {

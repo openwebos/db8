@@ -125,6 +125,10 @@ MojErr MojDbReq::end(bool commitNow)
 			unlock();
 		}
 	}
+	else{
+		LOG_DEBUG("[db_mojodb] MojDbReq::end -> ignored commit! m_beginCount: %d, m_batch: %d\n", m_beginCount, (m_batch ? 1 : 0));
+	}
+
 	return MojErrNone;
 }
 

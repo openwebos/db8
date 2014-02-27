@@ -433,6 +433,8 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 
 	err = req->end();
 	MojErrCheck(err);
+	err = req->endBatch(); //double call for commit() isn't a problem
+	MojErrCheck(err);
 
 	gettimeofday(&stopTime, NULL);
 	long int elapsedTimeMS = (stopTime.tv_sec - startTime.tv_sec) * 1000 +

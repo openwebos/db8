@@ -67,6 +67,8 @@ MojErr MojDbShardEngine::init (const MojObject& conf, MojDbReqRef req)
     MojErr err;
     MojObject obj;
 
+    m_cache.clear();
+
     err = configure(conf);
     MojErrCheck(err);
 

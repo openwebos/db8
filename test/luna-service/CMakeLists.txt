@@ -16,9 +16,6 @@
 #
 # LICENSE@@@
 
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "")
-
 set (LUNA_SERVICE_TEST_SOURCES
      MojLunaServiceTest.cpp
 )

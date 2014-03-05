@@ -16,9 +16,6 @@
 #
 # LICENSE@@@
 
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "")
-
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 set(DB_BACKEND_WRAPPER_SOURCES_CPP "")
 foreach(filename ${DB_BACKEND_WRAPPER_SOURCES})

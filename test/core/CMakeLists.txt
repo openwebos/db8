@@ -16,9 +16,6 @@
 #
 # LICENSE@@@
 
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "")
-
 set (CORE_TEST_SOURCES
      MojCoreTestRunner.cpp
      MojAtomicIntTest.cpp

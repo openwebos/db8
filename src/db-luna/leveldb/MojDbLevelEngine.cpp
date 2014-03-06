@@ -252,6 +252,18 @@ MojErr MojDbLevelEngine::openSequence(const MojChar* name, MojDbStorageTxn* txn,
 // placeholder
 MojErr MojDbLevelEngine::compact()
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojThreadGuard guard(m_dbMutex);
+
+    MojDbLevelDatabase* db;
+    MojSize idx;
+    MojSize size = m_dbs.size();
+    for (idx = 0; idx < size; ++idx) {
+        db = m_dbs[idx].get();
+        MojAssert(db);
+        db->compact();
+    }
+
     return MojErrNone;
 }
 MojErr MojDbLevelEngine::addDatabase(MojDbLevelDatabase* db)

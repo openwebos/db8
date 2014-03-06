@@ -51,6 +51,7 @@ public:
     MojErr put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbStorageTxn* txn, bool updateIdQuota);
     MojErr del(MojDbLevelItem& key, bool& foundOut, MojDbStorageTxn* txn);
     MojErr get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool forUpdate, MojDbLevelItem& valOut, bool& foundOut);
+    void   compact();
 
     leveldb::DB* impl() { return m_db; }
     MojDbLevelEngine* engine() { return m_engine; }

@@ -378,6 +378,14 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
     return MojErrNone;
 }
 
+void MojDbLevelDatabase::compact()
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert(m_db);
+
+    m_db->CompactRange(NULL, NULL);
+}
+
 MojErr MojDbLevelDatabase::closeImpl()
 {
     if (m_db) {

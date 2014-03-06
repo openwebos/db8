@@ -199,6 +199,9 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	err = req->end();
 	MojErrCheck(err);
 
+	//compact db
+	compact();
+
     LOG_DEBUG("[db_mojodb] purged %d objects", countOut);
 
 	return MojErrNone;

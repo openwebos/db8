@@ -583,12 +583,10 @@ MojErr MojDbShardManagerTest::verifyKindExistance (MojString kindId, MojDb& db)
 /**
  * verifyRecords
  */
-MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardInfo& shard, MojUInt32& count)
+MojErr MojDbShardManagerTest::verifyRecords (const MojChar* strKind, MojDb& db, const MojDbShardInfo&, MojUInt32& count)
 {
     MojDbQuery query;
     MojDbCursor cursor;
-    MojObject dbObj;
-    bool found;
     count = 0;
 
     MojErr err = query.from(strKind);

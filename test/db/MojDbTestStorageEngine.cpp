@@ -26,7 +26,7 @@
 #error "Specify database engine"
 #endif
 
-#define MojTestTxn(TXN) ((TXN) ? ((MojDbTestStorageTxn*)(TXN))->txn() : NULL)
+#define MojTestTxn(TXN) ((TXN) ? (static_cast<MojDbTestStorageTxn*>((TXN)))->txn() : NULL)
 
 MojDbTestStorageEngine::MojDbTestStorageEngine(MojDbStorageEngine* engine)
 : m_engine(engine)

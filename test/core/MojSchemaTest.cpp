@@ -88,10 +88,9 @@ MojErr MojSchemaTest::run()
 MojErr MojSchemaTest::typeTest()
 {
 	// null
-	MojErr err = MojErrNone;
-	err = checkValid(_T("{\"type\":\"null\"}"),
-					 _T("null"),
-					 true);
+	MojErr err = checkValid(_T("{\"type\":\"null\"}"),
+                    _T("null"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"type\":\"null\"}"),
 					 _T("5"),
@@ -263,10 +262,9 @@ MojErr MojSchemaTest::typeTest()
 MojErr MojSchemaTest::disallowTest()
 {
 	// null
-	MojErr err = MojErrNone;
-	err = checkValid(_T("{\"disallow\":\"null\"}"),
-					 _T("null"),
-					 false);
+	MojErr err = checkValid(_T("{\"disallow\":\"null\"}"),
+                    _T("null"),
+                    false);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"disallow\":\"null\"}"),
 					 _T("5"),
@@ -433,11 +431,10 @@ MojErr MojSchemaTest::disallowTest()
 **/
 MojErr MojSchemaTest::propertiesTest()
 {
-	MojErr err = MojErrNone;
 	// empty properties
-	err = checkValid(_T("{\"properties\":{}}"),
-					 _T("{}"),
-					 true);
+	MojErr err = checkValid(_T("{\"properties\":{}}"),
+                    _T("{}"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"properties\":{}}"),
 					 _T("{\"foo\":\"bar\"}"),
@@ -481,11 +478,10 @@ MojErr MojSchemaTest::propertiesTest()
 **/
 MojErr MojSchemaTest::itemsTest()
 {
-	MojErr err = MojErrNone;
 	// non-array
-	err = checkValid(_T("{\"items\":{\"type\":\"integer\"}}"),
-					 _T("null"),
-					 true);
+	MojErr err = checkValid(_T("{\"items\":{\"type\":\"integer\"}}"),
+                    _T("null"),
+                    true);
 	MojTestErrCheck(err);
 	// empty array
 	err = checkValid(_T("{\"items\":{\"type\":\"integer\"}}"),
@@ -560,10 +556,9 @@ MojErr MojSchemaTest::itemsTest()
 **/
 MojErr MojSchemaTest::requiresTest()
 {
-	MojErr err = MojErrNone;
-	err = checkValid(_T("{\"properties\":{\"foo\":{\"optional\":true,\"requires\":\"bar\"}}}"),
-					 _T("{\"foo\":1,\"bar\":2}"),
-					 true);
+	MojErr err = checkValid(_T("{\"properties\":{\"foo\":{\"optional\":true,\"requires\":\"bar\"}}}"),
+                    _T("{\"foo\":1,\"bar\":2}"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"properties\":{\"foo\":{\"optional\":true,\"requires\":\"bar\"}}}"),
 					 _T("{}"),
@@ -604,11 +599,10 @@ MojErr MojSchemaTest::requiresTest()
 **/
 MojErr MojSchemaTest::minmaxTest()
 {
-	MojErr err = MojErrNone;
 	// min
-	err = checkValid(_T("{\"minimum\":2}"),
-					 _T("2"),
-					 true);
+	MojErr err = checkValid(_T("{\"minimum\":2}"),
+                    _T("2"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"minimum\":2}"),
 					 _T("2.0"),
@@ -705,11 +699,10 @@ MojErr MojSchemaTest::minmaxTest()
 **/
 MojErr MojSchemaTest::arrayTest()
 {
-	MojErr err = MojErrNone;
 	// minItems
-	err = checkValid(_T("{\"minItems\":5}"),
-					 _T("false"),
-					 true);
+	MojErr err = checkValid(_T("{\"minItems\":5}"),
+                    _T("false"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"minItems\":0}"),
 					 _T("[]"),
@@ -810,11 +803,10 @@ MojErr MojSchemaTest::arrayTest()
 
 MojErr MojSchemaTest::stringTest()
 {
-	MojErr err = MojErrNone;
 	// minLength
-	err = checkValid(_T("{\"minLength\":3}"),
-					 _T("18"),
-					 true);
+	MojErr err = checkValid(_T("{\"minLength\":3}"),
+                    _T("18"),
+                    true);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"minLength\":0}"),
 					 _T("\"\""),
@@ -887,10 +879,9 @@ MojErr MojSchemaTest::stringTest()
 
 MojErr MojSchemaTest::enumTest()
 {
-	MojErr err = MojErrNone;
-	err = checkValid(_T("{\"enum\":[]}"),
-					 _T("18"),
-					 false);
+	MojErr err = checkValid(_T("{\"enum\":[]}"),
+                    _T("18"),
+                    false);
 	MojTestErrCheck(err);
 	err = checkValid(_T("{\"enum\":[1]}"),
 					 _T("1"),

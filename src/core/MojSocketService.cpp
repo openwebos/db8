@@ -43,7 +43,7 @@ MojErr MojSocketService::SocHandler::close()
 
 MojSocketService::Connection::Connection(MojSocketService& service)
 : SockHandler(service),
-  m_state(StateInit)
+  m_state(StateInit),
   m_writer(m_writeBuf),
   m_readSlot(this, &Connection::read),
   m_flushSlot(this, &Connection::flush)
@@ -409,9 +409,9 @@ MojErr MojSocketService::addToReactor(MojSockT sock, MojReactor::Flags flags)
 
 MojErr MojSocketService::acceptConnection()
 {
-	MojErr err = MojErrNone;
+	MojErr err;
 	MojSockT sock;
-	int flags = -1;
+	int flags;
 	struct sockaddr_un cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 	MojSharedPtr<ConInfo> info;
@@ -619,7 +619,7 @@ MojErr MojSocketService::sendMessage(MojSockT sock, const MojSocketMessage& msg)
 MojErr MojSocketService::handleConnectionClose(MojSockT sock)
 {
 	bool didDel;
-	MojErr err = MojErrNone;
+	MojErr err;
 
 	MojFileClose(sock);
 

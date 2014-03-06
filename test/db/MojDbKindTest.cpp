@@ -721,7 +721,7 @@ MojErr MojDbKindTest::testPutKind()
 	err = cursor.close();
 	MojTestErrCheck(err);
 
-	MojDbTestStorageEngine* engineImpl = (MojDbTestStorageEngine*)db.storageEngine();
+	MojDbTestStorageEngine* engineImpl = static_cast<MojDbTestStorageEngine*>(db.storageEngine());
 	err = engineImpl->setNextError(_T("txn.commit"), MojErrDbDeadlock);
 	MojTestErrCheck(err);
 
@@ -857,7 +857,7 @@ MojErr MojDbKindTest::testDelKind()
 	MojTestErrCheck(err);
 
 	//now try to delete the kind with an error on transaction commit
-	MojDbTestStorageEngine* engineImpl = (MojDbTestStorageEngine*)db.storageEngine();
+	MojDbTestStorageEngine* engineImpl = static_cast<MojDbTestStorageEngine*>(db.storageEngine());
 	err = engineImpl->setNextError(_T("txn.commit"), MojErrDbDeadlock);
 	MojTestErrCheck(err);
 

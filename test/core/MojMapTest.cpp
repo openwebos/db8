@@ -63,8 +63,8 @@ MojErr MojMapTest::run()
 	MojMap<MojString, int> strMap1;
 	MojMap<MojString, int> strMap2(strMap1);
 	MojString str;
-	MojMap<int, MojString>::ConstIterator ci1, ci2, ci3;
-	MojMap<int, MojString>::Iterator i1, i2, i3;
+	MojMap<int, MojString>::ConstIterator ci1, ci2;
+	MojMap<int, MojString>::Iterator i1;
 	bool found = true;
 	int c;
 
@@ -184,7 +184,7 @@ MojErr MojMapTest::run()
 		MojTestAssert(strMap1.contains(str));
 	}
 	c = 0;
-	for (MojMap<int, MojString>::ConstIterator i = intMap1.begin(); i != intMap2.end(); ++i) {
+	for (MojMap<int, MojString>::ConstIterator i = intMap1.begin(); i != intMap1.end(); ++i) {
 		MojTestAssert(i.key() == c++);
 	}
 	MojTestAssert(c == 1000);

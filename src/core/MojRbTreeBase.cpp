@@ -524,8 +524,8 @@ void MojRbTreeBase::release()
 void MojRbTreeBase::release(Node* node)
 {
 	MojAssert(node);
-	Node** child;
-	while (node != NULL) {
+    while (node != NULL) {
+        Node** child;
 		if (*(child = &node->m_children[DirLeft]) != NULL
 			|| *(child = &node->m_children[DirRight]) != NULL) {
 			node = *child;

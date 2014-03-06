@@ -103,7 +103,7 @@ MojAutoPtrTest::MojAutoPtrTest()
 **/
 MojErr MojAutoPtrTest::run()
 {
-	MojErr err = MojErrNone;
+	MojErr err;
 	MojAutoPtr<int> intPtr1;
 	MojAutoPtr<MojString> strPtr1;
 	MojAutoArrayPtr<MojChar> charPtr1;

@@ -178,7 +178,7 @@ MojReactorTest::MojReactorTest()
 
 MojErr MojReactorTest::run()
 {
-	MojErr err = MojErrNone;
+    MojErr err;
 #ifdef MOJ_USE_GLIB
 	MojGmainReactor gmainReactor;
 	err = simpleTest(gmainReactor);

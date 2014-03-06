@@ -198,8 +198,8 @@ MojErr MojService::dispatchReply(MojServiceMessage* msg)
 	// parse payload
 	MojObjectBuilder builder;
 	MojObject payload;
-	MojErr err = MojErrNone;
-	MojInt64 errCode = MojErrNone;
+    MojErr err;
+    MojInt64 errCode;
 	errCode = err = msg->payload(builder);
 	MojErrCatchAll(err);
 	if (errCode == MojErrNone)

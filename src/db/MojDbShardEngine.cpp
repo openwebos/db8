@@ -789,14 +789,12 @@ MojErr MojDbShardEngine::removeShardObjects (const MojVector<MojUInt32>& arrShar
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-    MojVector<MojObject> objList;
-    MojDbShardInfo info;
-    bool foundOut;
-    MojErr err;
-    MojDbKind* pKind;
-
     if (arrShardIds.size() > 0)
     {
+        MojDbShardInfo info;
+        bool foundOut;
+        MojErr err;
+        MojDbKind* pKind;
         for (MojVector<MojUInt32>::ConstIterator itShardId = arrShardIds.begin();
                 itShardId != arrShardIds.end();
                 ++itShardId)

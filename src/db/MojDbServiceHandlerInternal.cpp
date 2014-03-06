@@ -141,7 +141,7 @@ MojErr MojDbServiceHandlerInternal::handlePreBackup(MojServiceMessage* msg, MojO
     LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(msg);
 
-	MojErr err = MojErrNone;
+	MojErr err;
 	MojString dir;
 	err = payload.getRequired(MojDbServiceDefs::DirKey, dir);
 	MojErrCheck(err);

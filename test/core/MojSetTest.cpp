@@ -139,7 +139,7 @@ MojErr MojSetTest::run()
 		MojTestAssert(strSet1.contains(str));
 	}
 	c = 0;
-	for (MojSet<int>::ConstIterator i = intSet1.begin(); i != intSet2.end(); ++i) {
+	for (MojSet<int>::ConstIterator i = intSet1.begin(); i != intSet1.end(); ++i) {
 		MojTestAssert(*i == c++);
 	}
 	MojTestAssert(c == 1000);

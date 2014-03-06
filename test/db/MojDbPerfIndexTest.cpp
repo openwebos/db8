@@ -459,7 +459,6 @@ MojErr MojDbPerfIndexTest::_cursorChange10PersentsRecords (MojDb& db, MojDbCurso
 
 	for (;;)
 	{
-		MojUInt32 count = 0;
 		MojObject dbObj;
 		bool found;
 		err = cursor.get(dbObj, found);
@@ -471,9 +470,11 @@ MojErr MojDbPerfIndexTest::_cursorChange10PersentsRecords (MojDb& db, MojDbCurso
 		MojInt32 value;
 		MojObject update;
 		err = dbObj.get(_T("Limit"), value, found);
+		MojTestErrCheck(err);
 
 		if( found )
 		{
+			MojUInt32 count = 0;
 			MojDbQuery subquery;
 			err = subquery.from(_T("Test1:1"));
 			MojTestErrCheck(err);

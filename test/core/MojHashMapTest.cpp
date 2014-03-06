@@ -59,9 +59,9 @@ MojErr MojHashMapTest::run()
 	MojHashMap<int, int>::ConstIterator ci1, ci2;
 	MojHashMap<MojString, int> map3;
 	MojHashMap<MojString, int> map4(map3);
-	MojHashMap<const MojChar*, int> map5, map6;
+	MojHashMap<const MojChar*, int> map5;
 	MojHashMap<MojString, int, const MojChar*> map7;
-	MojString str1, str2;
+	MojString str1;
 	int val1, count;
 	bool found;
 
@@ -178,6 +178,7 @@ MojErr MojHashMapTest::run()
 	MojTestAssert(map3.get(str1, val1));
 	MojTestAssert(val1 == 8);
 	err = map5.put(_T("howdy"), 27);
+	MojTestErrCheck(err);
 	MojTestAssert(map5.get(_T("howdy"), val1));
 	MojTestAssert(val1 == 27);
 	err = map7.put(str1, 89);

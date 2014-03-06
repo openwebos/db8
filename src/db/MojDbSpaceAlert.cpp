@@ -218,8 +218,7 @@ MojErr MojDbSpaceAlert::SpaceCheckHandler::dispatchUpdate(const MojObject& messa
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-    MojErr err = MojErrNone;
-    err = m_msg->reply(message);
+    MojErr err = m_msg->reply(message);
     MojErrCheck(err);
 
     return err;

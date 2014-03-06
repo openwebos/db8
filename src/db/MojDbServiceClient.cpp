@@ -99,8 +99,6 @@ MojErr MojDbServiceClient::getPermissions(Signal::SlotRef handler, const MojChar
 	MojErrCheck(err);
 
 	return MojErrNone;
-
-	return MojErrNone;
 }
 
 MojErr MojDbServiceClient::put(Signal::SlotRef handler, const MojObject* begin,

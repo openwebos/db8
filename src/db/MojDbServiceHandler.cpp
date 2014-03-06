@@ -310,9 +310,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 	MojAssert(msg);
 
 	MojErr err = MojErrNone;
-	MojUInt32 count = 0;
 	MojObject obj;
-
 
 	if (payload.get(MojDbServiceDefs::ObjectsKey, obj)) {
 		if (payload.contains(MojDbServiceDefs::QueryKey))
@@ -332,6 +330,7 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 		MojErrCheck(err);
 	}
 	else if (payload.get(MojDbServiceDefs::QueryKey, obj)) {
+		MojUInt32 count = 0;
 		MojObject props;
 		err = payload.getRequired(MojDbServiceDefs::PropsKey, props);
 		MojErrCheck(err);

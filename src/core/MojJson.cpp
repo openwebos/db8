@@ -256,7 +256,7 @@ MojErr MojJsonParser::parse(MojObjectVisitor& visitor, const MojChar* chars, Moj
 	MojAssert(chars || len == 0);
 
 	MojJsonParser parser;
-	MojErr err = MojErrNone;
+    MojErr err;
 	parser.begin();
 
 	const MojChar* parseEnd = NULL;

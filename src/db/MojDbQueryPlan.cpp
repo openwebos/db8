@@ -64,7 +64,7 @@ MojErr MojDbQueryPlan::buildRanges(const MojDbIndex& index)
     LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(!index.props().empty());
 
-	MojErr err = MojErrNone;
+	MojErr err;
 	const MojDbQuery::WhereMap& where = m_query.where();
 	const StringVec& props = index.props();
 	const MojDbQuery::WhereClause* lastClause = NULL;

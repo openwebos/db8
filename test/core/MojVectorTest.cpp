@@ -132,7 +132,7 @@ MojErr MojVectorTest::intTest()
 	MojTestAssert(v1.capacity() == 0);
 	MojTestAssert(v1.empty());
 	MojTestAssert(v1.begin() == v1.end());
-	MojTestAssert(v1 == v1);
+    MojTestAssert(v1 == v1);
 	MojTestAssert(v1 == v2);
 	MojTestAssert(v1 <= v2);
 	MojTestAssert(v1 >= v2);

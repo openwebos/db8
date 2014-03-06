@@ -72,7 +72,7 @@ MojErr MojDecimalTest::run()
 	MojTestAssert(d2 <= d4);
 	MojTestAssert(d1 <= d3);
 	MojTestAssert(d2 > d3);
-	MojTestAssert(d1 >= d1);
+	MojTestAssert(d2 >= d1);
 	MojTestAssert(d2 >= d3);
 
 	d1.assign(MojDecimal::MagnitudeMax, MojDecimal::FractionMax);

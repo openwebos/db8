@@ -92,9 +92,9 @@ MojErr MojDb::configure(const MojObject& conf)
 
 	MojErr err = requireNotOpen();
 	MojErrCheck(err);
-	bool found = false;
 	MojObject dbConf;
 	if (conf.get(ConfKey, dbConf)) {
+		bool found = false;
 		err = dbConf.get(_T("storageEngine"), m_engineName, found);
 		MojErrCheck(err);
 		found = dbConf.get(_T("purgeWindow"), m_purgeWindow);

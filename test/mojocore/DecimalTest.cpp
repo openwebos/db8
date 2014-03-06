@@ -168,7 +168,7 @@ TEST(DecimalTest, original)
     EXPECT_TRUE(d2 <= d4);
     EXPECT_TRUE(d1 <= d3);
     EXPECT_TRUE(d2 > d3);
-    EXPECT_TRUE(d1 >= d1);
+	EXPECT_TRUE(d2 >= d1);
     EXPECT_TRUE(d2 >= d3);
 
     d1.assign(MojDecimal::MagnitudeMax, MojDecimal::FractionMax);

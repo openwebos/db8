@@ -263,7 +263,7 @@ MojErr MojStringTest::run()
 	MojTestAssert(str2 > chars1);
 	MojTestAssert(str2 > str1);
 	MojTestAssert(str2 >= chars1);
-	MojTestAssert(str2 >= str2);
+	MojTestAssert(str2 >= str3);
 	MojTestAssert(str1 >= chars1);
 	MojTestAssert(str1 >= str3);
 	str1.clear();

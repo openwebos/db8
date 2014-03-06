@@ -116,9 +116,9 @@ MojErr MojDbQueryFilter::findValue(const MojObject obj, const MojString* begin, 
     }
 
     // if found, push result value into object array.
-    bool foundOut;
-    MojErr err;
     if(childObj.type() == MojObject::TypeArray) {
+        bool foundOut;
+        MojErr err;
         MojObject::ArrayIterator iter;
         err = childObj.arrayBegin(iter);
         MojErrCheck(err);

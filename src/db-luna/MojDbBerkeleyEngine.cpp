@@ -462,9 +462,9 @@ MojErr MojDbBerkeleyDatabase::get(MojDbBerkeleyItem& key, MojDbStorageTxn* txn, 
 
 	foundOut = false;
 	// acquire a write lock if we are going to do an update
-	int flags = MojDbGetFlags;
-	if (forUpdate)
-		flags |= DB_RMW;
+	//	int flags = MojDbGetFlags;
+	//	if (forUpdate)
+	//		flags |= DB_RMW;
 	DB_TXN* dbTxn = MojBdbTxnFromStorageTxn(txn);
 	int dbErr = m_db->get(m_db, dbTxn, key.impl(), valOut.impl(), 0);
 	if (dbErr != DB_NOTFOUND) {
@@ -1068,11 +1068,11 @@ MojErr MojDbBerkeleyEngine::compact()
 			// could disrupt the compaction. Without locking, we might miss an insertion or deletion
 			// happening between compactions, but that 
 
-			int key_total = 0, value_total = 0; // Tracked only for debugging purposes.
-
 			dbErr = db->cursor(db, NULL, &dbc, 0);
 
 			if (dbErr == 0) {
+
+				int key_total = 0, value_total = 0; // Tracked only for debugging purposes.
 
 				if (key1.data == NULL) {
 					// Move the cursor to the beginning of the database

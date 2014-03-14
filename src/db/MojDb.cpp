@@ -564,15 +564,15 @@ MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
 	err = obj.putString(IdKey, dbId);
 	MojErrCheck(err);
 
+	// attempt the putKind
+	MojErr errAcc = m_kindEngine.putKind(obj, req);
+	MojErrAccumulate(err, errAcc);
+
 	// put the object
 	MojDbAdminGuard guard(req);
 	err = putImpl(obj, flags | FlagForce, req);
 	MojErrCheck(err);
 	guard.unset();
-
-	// attempt the putKind
-	MojErr errAcc = m_kindEngine.putKind(obj, req);
-	MojErrAccumulate(err, errAcc);
 
 	err = commitKind(id, req, err);
 	MojErrCheck(err);

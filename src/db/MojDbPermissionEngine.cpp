@@ -79,11 +79,7 @@ MojErr MojDbPermissionEngine::put(MojObject& perm, MojDbReq& req, bool putObj)
 	// check owner permissions on kinds
 	if (type == MojDbKind::PermissionType) {
 		err = m_db->kindEngine()->checkPermission(object, OpKindUpdate, req);
-
-		//this is hot fix to disable 'kind not registered' error which cause factory reset
-		//please, make a fix for incorrect behaviour of delKind
-		//MojErrCheck(err);
-		err = MojErrNone;
+		MojErrCheck(err);
 	}
 
 	// create operation map

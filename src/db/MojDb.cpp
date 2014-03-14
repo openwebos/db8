@@ -193,15 +193,7 @@ MojErr MojDb::open(const MojChar* path, MojDbStorageEngine* engine)
 	// perms
     LOG_DEBUG("[db_mojodb] Open Permissions");
 	err = m_permissionEngine.open(m_conf, this, req);
-
-	//this is hot fix to disable 'kind not registered' error which cause factory reset
-	//please, make a fix for incorrect behaviour of delKind
-	//MojErrCheck(err);
-	if(err == MojErrDbKindNotSpecified)
-	{
-		LOG_WARNING(MSGID_MOJ_DB_WARNING, 0, "Open permissions: kind not registered");
-		err = MojErrNone;
-	}
+	MojErrCheck(err);
 
 	// quota
     LOG_DEBUG("[db_mojodb] Open Quota engine");

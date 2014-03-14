@@ -140,7 +140,7 @@ MojErr MojDbPermissionTest::testKindPermissions(MojDb& db)
 	err = req.domain(_T("com.bar"));
 	MojTestErrCheck(err);
 	err = db.putKind(kind, MojDb::FlagNone, req);
-	//MojTestErrExpected(err, MojErrDbPermissionDenied);
+	MojTestErrExpected(err, MojErrDbPermissionDenied);
 	// new kind, matched owner and caller
 	err = req.domain(_T("com.foo"));
 	MojTestErrCheck(err);
@@ -152,8 +152,8 @@ MojErr MojDbPermissionTest::testKindPermissions(MojDb& db)
 	// existing kind, mismatched owner and caller
 	err = req.domain(_T("com.bar"));
 	MojTestErrCheck(err);
-	//err = db.putKind(kind, MojDb::FlagNone, req);
-	//MojTestErrExpected(err, MojErrDbPermissionDenied);
+	err = db.putKind(kind, MojDb::FlagNone, req);
+	MojTestErrExpected(err, MojErrDbPermissionDenied);
 	// delKind, mismatched owner and caller
 	MojString id;
 	err = id.assign(_T("PermissionTest:1"));

@@ -573,7 +573,7 @@ MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
 
 	// put the object
 	MojDbAdminGuard guard(req);
-	err = putImpl(obj, flags | FlagForce, req);
+	err = putImpl(obj, flags | FlagForce, req, true, MojString(), false);
 	MojErrCheck(err);
 	guard.unset();
 
@@ -780,7 +780,8 @@ MojErr MojDb::mergeInto(MojObject& dest, const MojObject& obj, const MojObject& 
  * TODO: Implement normal phisical transaction
  */
 MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
-                     MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema, MojString shardId)
+                     MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema,
+                     MojString shardId, bool reverseTransaction)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -818,7 +819,7 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
 
     // change physical commit order.
     // TODO: remove this when phisical transaction will be ready
-	req.txn()->reverseTransaction();
+	req.txn()->reverseTransaction(reverseTransaction);
 
 	// validate, update indexes, etc.
 	MojTokenSet tokenSet;
@@ -1022,7 +1023,7 @@ MojErr MojDb::getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op
 	return MojErrNone;
 }
 
-MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema, MojString shardId)
+MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema, MojString shardId, bool reverseTransaction)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
@@ -1085,7 +1086,7 @@ MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool check
 	}
 
 	// save it
-    MojErr err = putObj(id, obj, prevPtr, prevItem.get(), req, op, checkSchema, shardId);
+    MojErr err = putObj(id, obj, prevPtr, prevItem.get(), req, op, checkSchema, shardId, reverseTransaction);
 	MojErrCheck(err);
 
 	if (prevItem.get()) {

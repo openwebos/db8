@@ -151,11 +151,13 @@ private:
 	MojErr mergeInto(MojObject& dest, const MojObject& obj, const MojObject& prev);
 	MojErr mergeArray(MojObject& dest, const MojObject& obj, MojObject& prev);
     MojErr putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
-                  MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema = true, MojString shardId = MojString());
+                  MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op,
+                  bool checkSchema = true, MojString shardId = MojString(), bool reverseTransaction = true);
 	MojErr delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem* item, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
 	MojErr delImpl(const MojObject& id, bool& foundOut, MojObject& foundObjOut, MojDbReq& req, MojUInt32 flags);
 	MojErr delImpl(const MojDbQuery& query, MojUInt32& countOut, MojDbReq& req, MojUInt32 flags = FlagNone);
-    MojErr putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema = true, MojString shardId = MojString());
+    MojErr putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema = true,
+				MojString shardId = MojString(), bool reverseTransaction = true);
     MojErr addShardIdToMasterKind(MojString shardId, MojObject& obj, MojDbReqRef req);
 	MojErr putConfig(MojObject* begin, const MojObject* end, MojDbReq& req, MojDbPutHandler& handler);
 

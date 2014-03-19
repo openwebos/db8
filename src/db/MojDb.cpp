@@ -327,7 +327,7 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 	MojErr err = beginReq(req, true);
 	MojErrCheck(err);
 
-	// del kind obj
+	// get kind as string
 	MojString idStr;
 	err = id.stringValue(idStr);
 	MojErrCheck(err);
@@ -354,13 +354,15 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 	MojString dbId;
 	err = MojDbKindEngine::formatKindId(idStr, dbId);
 	MojErrCheck(err);
-	MojObject deleted;
-	bool found = false;
-	MojDbAdminGuard adminGuard(req);
-	err = delImpl(dbId, found, deleted, req, flags);
-	MojErrCheck(err);
 
-	if (found) {
+	MojDbAdminGuard adminGuard(req);
+	//is kind exist?
+	MojRefCountedPtr<MojDbStorageItem> item;
+	err = m_objDb->get(dbId, req->txn(), true, item);
+	MojErrCheck(err);
+	if (item.get())
+	{
+		MojObject deleted;
 		// del objects
 		MojDbQuery query;
 		err = query.from(idStr);
@@ -382,13 +384,18 @@ MojErr MojDb::delKind(const MojObject& id, bool& foundOut, MojUInt32 flags, MojD
 		err = delImpl(query, count, req, flags);
 		MojErrCheck(err);
 
+		bool found;
+		err = delImpl(dbId, found, deleted, req, flags);
+		MojErrCheck(err);
+
 		// del kind
 		MojErr errAcc = m_kindEngine.delKind(idStr, req);
 		MojErrAccumulate(err, errAcc);
+
+		err = commitKind(idStr, req, err);
+		MojErrCheck(err);
+		foundOut = true;
 	}
-	err = commitKind(idStr, req, err);
-	MojErrCheck(err);
-	foundOut = found;
 
 	return MojErrNone;
 }

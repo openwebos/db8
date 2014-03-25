@@ -37,6 +37,7 @@
 #include "core/MojString.h"
 #include "core/MojFile.h"
 #include "core/MojLogDb8.h"
+#include "core/MojThread.h"
 
 class MojDb : private MojNoCopy
 {
@@ -196,6 +197,8 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
+
+	MojThreadMutex m_compact_mutex;
 };
 
 #endif /* MOJDB_H_ */

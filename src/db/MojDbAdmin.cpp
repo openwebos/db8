@@ -87,16 +87,19 @@ MojErr MojDb::updateLocale(const MojChar* locale, MojDbReqRef req)
 MojErr MojDb::compact()
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojThreadGuard guard(m_compact_mutex, false);
+    if(guard.tryLock())
+    {
+		MojErr err = requireOpen();
+		MojErrCheck(err);
 
-	MojErr err = requireOpen();
-	MojErrCheck(err);
+		LOG_DEBUG("[db_mojodb] compacting...");
 
-    LOG_DEBUG("[db_mojodb] compacting...");
+		err = m_storageEngine->compact();
+		MojErrCheck(err);
 
-	err = m_storageEngine->compact();
-	MojErrCheck(err);
-
-    LOG_DEBUG("[db_mojodb] compaction complete");
+		LOG_DEBUG("[db_mojodb] compaction complete");
+    }
 
 	return MojErrNone;
 }
@@ -177,7 +180,7 @@ MojErr MojDb::purge(MojUInt32& countOut, MojInt64 numDays, MojDbReqRef req)
 	MojUInt32 batchCount = 0;
 	MojUInt32 totalCount = 0;
 
-	while ((found)) 
+	while ((found))
 	{
 		// Do it in AutoBatchSize batches
 		batchCount = 0;
@@ -298,7 +301,7 @@ MojErr MojDb::dump(const MojChar* path, MojUInt32& countOut, bool incDel, MojDbR
 		err = dumpImpl(file, backup, true, revParam, delRevParam, false, countOut, req, backupResponse, MojDbServiceDefs::DeletedRevKey, bytesWritten, newwarns, maxBytes);
 		MojErrCheck(err);
 	}
-	totalwarns += newwarns; 
+	totalwarns += newwarns;
 
 	// Add the Full and Version keys
 	if (backup && backupResponse) {
@@ -345,21 +348,21 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 
 	int total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize;
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
-				
+
     LOG_DEBUG("[db_mojodb] Starting load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
 		path,	total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 
 	int orig_mutexes_used = mutexes_used;
-	
+
 	struct timeval startTime = {0,0}, stopTime = {0,0};
 
 	gettimeofday(&startTime, NULL);
-	
+
 	int total_transaction_time = 0;
 
 	int total = 0;
 	int transactions = 0;
-	
+
 	do {
 		MojChar buf[MojFile::MojFileBufSize];
 		err = file.read(buf, sizeof(buf), bytesRead);
@@ -376,22 +379,22 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 				countOut++;
 				parser.begin();
 				visitor.reset();
-				
+
 				total++;
-				
+
 				if ((total % 10) == 0) {
 					// For debugging mutex consumption during load operations, we periodically retrieve the mutex stats.
 					m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
-				
+
 					LOG_DEBUG("[db_mojodb] Loading %s record %d, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
 						path, total, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 				}
-				
+
 				// If a loadStepSize is configured, then break up the load into separate transactions.
 				// This is intended to prevent run-away mutex consumption in some particular scenarios.
 				// The transactions do not reverse or prevent mutex consumption, but seem to reduce the
-				// growth and eventually cause it to level off. 
-				
+				// growth and eventually cause it to level off.
+
 				if ((m_loadStepSize > 0) && ((total % m_loadStepSize) == 0)) {
 					// Close and reopen transaction, to prevent a very large transaction from building up.
 					LOG_DEBUG("[db_mojodb] Loading %s record %d, closing and reopening transaction.\n", path, total);
@@ -407,17 +410,17 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 					MojErrCheck(err);
 
 					req->beginBatch(); // beginBatch() invocation for first transaction happened in MojDbServiceHandlerBase::invokeImpl
-					
+
 					err = beginReq(req, true);
 					MojErrCheck(err);
 
 					gettimeofday(&transactionStopTime, NULL);
-					
+
 					long int elapsedTransactionTimeMS = (transactionStopTime.tv_sec - transactionStartTime.tv_sec) * 1000 +
 								(transactionStopTime.tv_usec - transactionStartTime.tv_usec) / 1000;
-					
+
 					total_transaction_time += (int)elapsedTransactionTimeMS;
-					
+
 					transactions++;
 				}
 			}
@@ -444,7 +447,7 @@ MojErr MojDb::load(const MojChar* path, MojUInt32& countOut, MojUInt32 flags, Mo
 				(stopTime.tv_usec - startTime.tv_usec) / 1000;
 
 	m_objDb->mutexStats(&total_mutexes, &mutexes_free, &mutexes_used, &mutexes_used_highwater, &mutex_regionsize);
-				
+
 	LOG_DEBUG("[db_mojodb] Finished load of %s, total_mutexes: %d, mutexes_free: %d, mutexes_used: %d, mutexes_used_highwater: %d, &mutex_regionsize: %d\n",
 		path, total_mutexes, mutexes_free, mutexes_used, mutexes_used_highwater, mutex_regionsize);
 
@@ -554,7 +557,7 @@ MojErr MojDb::dumpImpl(MojFile& file, bool backup, bool incDel, const MojObject&
     } else {
         LOG_DEBUG("[db_mojodb] Finished Backup with no warnings \n");
     }
-	
+
 	// construct the next incremental key
 	if (response && !curRev.undefined()) {
 		err = insertIncrementalKey(*response, keyName, curRev);
@@ -700,7 +703,7 @@ MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
 	MojErrCheck(err);
 
 	MojUInt32 backupCount = 0;
-	req.autobatch(true);	
+	req.autobatch(true);
 	req.fixmode(true);
 	objQuery.limit(AutoBatchSize);
 	err = delImpl(objQuery, backupCount, req, FlagPurge);
@@ -731,7 +734,7 @@ MojErr MojDb::purgeImpl(MojObject& obj, MojUInt32& countOut, MojDbReq& req)
 	countOut = count + backupCount;
 
 	req.autobatch(false);
-	
+
 	// if we actually deleted objects, store this rev num as the last purge rev
 	if (countOut > 0) {
 		err = updateState(LastPurgedRevKey, val, req);

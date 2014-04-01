@@ -42,16 +42,16 @@ private:
 	MojErr testBatchInsertLgNestedObj(MojDb& db, const MojChar* kindId);
 	MojErr testBatchInsertLgArrayObj(MojDb& db, const MojChar* kindId);
 
-	MojErr putSmallObj(MojDb& db, const MojChar* kindId, MojTime& smallObjTime);
-	MojErr putMedObj(MojDb& db, const MojChar* kindId, MojTime& medObjTime);
-	MojErr putLargeObj(MojDb& db, const MojChar* kindId, MojTime& largeObjTime);
-	MojErr putMedNestedObj(MojDb& db, const MojChar* kindId, MojTime& medNestedObjTime);
-	MojErr putLargeNestedObj(MojDb& db, const MojChar* kindId, MojTime& lgNestedObjTime);
-	MojErr putMedArrayObj(MojDb& db, const MojChar* kindId, MojTime& medArrayObjTime);
-	MojErr putLargeArrayObj(MojDb& db, const MojChar* kindId, MojTime& lgArrayObjTime);
-	MojErr batchPutLargeObj(MojDb& db, const MojChar* kindId, MojTime& largeObjTime);
-	MojErr batchPutLargeNestedObj(MojDb& db, const MojChar* kindId, MojTime& lgNestedObjTime);
-	MojErr batchPutLargeArrayObj(MojDb& db, const MojChar* kindId, MojTime& lgArrayObjTime);
+	MojErr putSmallObj(MojDb& db, const MojChar* kindId, MojUInt64& smallObjTime);
+	MojErr putMedObj(MojDb& db, const MojChar* kindId, MojUInt64& medObjTime);
+	MojErr putLargeObj(MojDb& db, const MojChar* kindId, MojUInt64& largeObjTime);
+	MojErr putMedNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& medNestedObjTime);
+	MojErr putLargeNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& lgNestedObjTime);
+	MojErr putMedArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& medArrayObjTime);
+	MojErr putLargeArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& lgArrayObjTime);
+	MojErr batchPutLargeObj(MojDb& db, const MojChar* kindId, MojUInt64& largeObjTime);
+	MojErr batchPutLargeNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& lgNestedObjTime);
+	MojErr batchPutLargeArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& lgArrayObjTime);
 
 };
 

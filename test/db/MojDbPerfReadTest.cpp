@@ -19,7 +19,6 @@
 
 #include "MojDbPerfReadTest.h"
 #include "db/MojDb.h"
-#include "core/MojTime.h"
 #include "core/MojJson.h"
 
 static const MojUInt64 numInsertForGet = 100;
@@ -27,7 +26,8 @@ static const MojUInt64 numInsertForFind = 500;
 static const MojUInt64 numRepetitionsForGet = 100;
 static const MojUInt64 numRepetitionsForFind = 20;
 
-static MojTime totalTestTime;
+extern MojUInt64 allTestsTime;
+static MojUInt64 totalTestTime = 0;
 static MojFile file;
 const MojChar* const ReadTestFileName = _T("MojDbPerfReadTest.csv");
 
@@ -57,13 +57,14 @@ MojErr MojDbPerfReadTest::run()
 	MojTestErrCheck(err);
 	err = testFindPaged(db);
 	MojTestErrCheck(err);
+	allTestsTime += totalTestTime;
 
-	err = MojPrintF("\n\n TOTAL TEST TIME: %llu microseconds\n\n", totalTestTime.microsecs());
+	err = MojPrintF("\n\n TOTAL TEST TIME: %llu nanoseconds. | %10.3f seconds.\n\n", totalTestTime, totalTestTime / 1000000000.0f);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n-------\n");
 	MojTestErrCheck(err);
 
-	err = m_buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime.microsecs());
+	err = m_buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime);
 	MojTestErrCheck(err);
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
@@ -322,7 +323,7 @@ MojErr MojDbPerfReadTest::testGet(MojDb& db)
 MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& query)
 {
 	// register all the kinds
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
@@ -332,20 +333,20 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 	MojTestErrCheck(err);
 
 	MojUInt32 count;
-	MojTime countTime;
+	MojUInt64 countTime = 0;
 	MojDbQuery::Page nextPage;
 
-	MojTime find30Time;
+	MojUInt64 find30Time = 0;
 	query.limit(30);
 	err = timeFind(db, query, find30Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
 
-	MojUInt64 findTime = find30Time.microsecs();
+	MojUInt64 findTime = find30Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %llu of kind %s %llu times (with writer): %llu microsecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %llu of kind %s %llu times (with writer): %llu nanosecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (30 * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (30 * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -357,16 +358,16 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 	MojTestErrCheck(err);
 
 
-	MojTime find2nd30Time;
+	MojUInt64 find2nd30Time = 0;
 	query.page(nextPage);
 	err = timeFind(db, query, find2nd30Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find2nd30Time.microsecs();
+	findTime = find2nd30Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find 2nd %d objects out of %llu of kind %s %llu times (with writer): %llu microsecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find 2nd %d objects out of %llu of kind %s %llu times (with writer): %llu nanosecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (30 * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (30 * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -375,16 +376,16 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find3rd30Time;
+	MojUInt64 find3rd30Time = 0;
 	query.page(nextPage);
 	err = timeFind(db, query, find3rd30Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find3rd30Time.microsecs();
+	findTime = find3rd30Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find 3rd %d objects out of %llu of kind %s %llu times (with writer): %llu microsecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find 3rd %d objects out of %llu of kind %s %llu times (with writer): %llu nanosecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (30 * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (30 * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -393,16 +394,16 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find4th30Time;
+	MojUInt64 find4th30Time = 0;
 	query.page(nextPage);
 	err = timeFind(db, query, find4th30Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find4th30Time.microsecs();
+	findTime = find4th30Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find 4th %d objects out of %llu of kind %s %llu times (with writer): %llu microsecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find 4th %d objects out of %llu of kind %s %llu times (with writer): %llu nanosecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (30 * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (30 * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -411,16 +412,16 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find5th30Time;
+	MojUInt64 find5th30Time = 0;
 	query.page(nextPage);
 	err = timeFind(db, query, find5th30Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find5th30Time.microsecs();
+	findTime = find5th30Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find 5th %d objects out of %llu of kind %s %llu times (with writer): %llu microsecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find 5th %d objects out of %llu of kind %s %llu times (with writer): %llu nanosecs\n", 30, numInsertForFind, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (30 * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (30 * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -435,7 +436,7 @@ MojErr MojDbPerfReadTest::findObjsPaged(MojDb& db, const MojChar* kindId, MojErr
 MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& query)
 {
 	// register all the kinds
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
@@ -460,42 +461,42 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	MojTestErrCheck(err);
 
 	MojUInt32 count;
-	MojTime countTime;
+	MojUInt64 countTime = 0;
 	MojDbQuery::Page nextPage;
 
-	MojTime find10Time3;
+	MojUInt64 find10Time3 = 0;
 	MojUInt32 limit = 10;
 	query.limit(limit);
 	err = timeFind(db, query, find10Time3, true, nextPage, true, count, countTime);
 	MojTestErrCheck(err);
 	MojUInt32 numObjs = (count > limit) ? limit : count;
 
-	MojUInt64 findTime = find10Time3.microsecs();
+	MojUInt64 findTime = find10Time3;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer and count): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer and count): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs\n", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs\n", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
-	err = MojPrintF("   count: %d, countTime: %llu microsecs", count, countTime.microsecs() / numRepetitionsForFind);
+	err = MojPrintF("   count: %d, countTime: %llu nanosecs", count, countTime / numRepetitionsForFind);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	err = m_buf.format("Find %d objects out of %d %llu times (with writer and count),%s,%llu,%llu,%llu,\nCount: %d,%s,%llu,,,\n", limit, count, numRepetitionsForFind, kindId,
-			findTime, findTime/numRepetitionsForFind, findTime/(numObjs*numRepetitionsForFind),count,kindId,countTime.microsecs()/numRepetitionsForFind);
+			findTime, findTime/numRepetitionsForFind, findTime/(numObjs*numRepetitionsForFind),count,kindId,countTime/numRepetitionsForFind);
 	MojTestErrCheck(err);
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find10Time;
+	MojUInt64 find10Time = 0;
 	err = timeFind(db, query, find10Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find10Time.microsecs();
+	findTime = find10Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -505,15 +506,15 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find10Time2;
+	MojUInt64 find10Time2 = 0;
 	err = timeFind(db, query, find10Time2, false, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find10Time2.microsecs();
+	findTime = find10Time2;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -523,19 +524,19 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find50Time;
+	MojUInt64 find50Time = 0;
 	limit = 50;
 	query.limit(limit);
 	err = timeFind(db, query, find50Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find50Time.microsecs();
+	findTime = find50Time;
 	numObjs = (count > limit) ? limit : count;
 
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -545,15 +546,15 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find50Time2;
+	MojUInt64 find50Time2 = 0;
 	err = timeFind(db, query, find50Time2, false, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find50Time2.microsecs();
+	findTime = find50Time2;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -563,18 +564,18 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find100Time;
+	MojUInt64 find100Time = 0;
 	limit = 100;
 	query.limit(limit);
 	err = timeFind(db, query, find100Time, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
 	numObjs = (count > limit) ? limit : count;
-	findTime = find100Time.microsecs();
+	findTime = find100Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -584,15 +585,15 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime find100Time2;
+	MojUInt64 find100Time2 = 0;
 	err = timeFind(db, query, find100Time2, false, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = find100Time2.microsecs();
+	findTime = find100Time2;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu microsecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu nanosecs\n", limit, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -602,18 +603,18 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime findAllTime;
+	MojUInt64 findAllTime = 0;
 	limit = MojUInt32Max;
 	query.limit(limit);
 	err = timeFind(db, query, findAllTime, true, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
 	numObjs = (count > limit) ? limit : count;
-	findTime = findAllTime.microsecs();
+	findTime = findAllTime;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu microsecs\n", count, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with writer): %llu nanosecs\n", count, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -623,15 +624,15 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime findAllTime2;
+	MojUInt64 findAllTime2 = 0;
 	err = timeFind(db, query, findAllTime2, false, nextPage, false, count, countTime);
 	MojTestErrCheck(err);
-	findTime = findAllTime2.microsecs();
+	findTime = findAllTime2;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu microsecs\n", count, count, kindId, numRepetitionsForFind, findTime);
+	err = MojPrintF("   time to find %d objects out of %d of kind %s %llu times (with eater): %llu nanosecs\n", count, count, kindId, numRepetitionsForFind, findTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (findTime) / (numObjs * numRepetitionsForFind));
+	err = MojPrintF("   time per object: %llu nanosecs", (findTime) / (numObjs * numRepetitionsForFind));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -648,7 +649,7 @@ MojErr MojDbPerfReadTest::findObjs(MojDb& db, const MojChar* kindId, MojErr (Moj
 MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64))
 {
 	// register all the kinds
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
@@ -657,19 +658,19 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = putObjs(db, kindId, numInsertForGet, createFn, ids);
 	MojTestErrCheck(err);
 
-	MojTime singleObjTime;
+	MojUInt64 singleObjTime = 0;
 	MojObject id;
 	bool exists = false;
 	exists = ids.at(0, id);
 	MojTestAssert(exists);
 	err = timeGet(db, id, singleObjTime);
 	MojTestErrCheck(err);
-	MojUInt64 getTime = singleObjTime.microsecs();
+	MojUInt64 getTime = singleObjTime;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get object %d of kind %s %llu times: %llu microsecs\n", 0, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get object %d of kind %s %llu times: %llu nanosecs\n", 0, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / numRepetitionsForGet);
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / numRepetitionsForGet);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -679,18 +680,18 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime singleObj2Time;
+	MojUInt64 singleObj2Time = 0;
 	exists = false;
 	exists = ids.at(numInsertForGet / 2, id);
 	MojTestAssert(exists);
 	err = timeGet(db, id, singleObj2Time);
 	MojTestErrCheck(err);
-	getTime = singleObj2Time.microsecs();
+	getTime = singleObj2Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get object %llu of kind %s %llu times: %llu microsecs\n", numInsertForGet/2, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get object %llu of kind %s %llu times: %llu nanosecs\n", numInsertForGet/2, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / numRepetitionsForGet);
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / numRepetitionsForGet);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -699,18 +700,18 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime singleObj3Time;
+	MojUInt64 singleObj3Time = 0;
 	exists = false;
 	exists = ids.at(numInsertForGet - 1, id);
 	MojTestAssert(exists);
 	err = timeGet(db, id, singleObj3Time);
 	MojTestErrCheck(err);
-	getTime = singleObj3Time.microsecs();
+	getTime = singleObj3Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get object %llu of kind %s %llu times: %llu microsecs\n", numInsertForGet - 1, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get object %llu of kind %s %llu times: %llu nanosecs\n", numInsertForGet - 1, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / numRepetitionsForGet);
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / numRepetitionsForGet);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -719,15 +720,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batchTime;
+	MojUInt64 batchTime = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayBegin() + 10, batchTime, true);
 	MojTestErrCheck(err);
-	getTime = batchTime.microsecs();
+	getTime = batchTime;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %d of kind %s %llu times (using writer): %llu microsecs\n", 0, 10, kindId, numRepetitionsForGet, batchTime.microsecs());
+	err = MojPrintF("   time to get objects %d to %d of kind %s %llu times (using writer): %llu nanosecs\n", 0, 10, kindId, numRepetitionsForGet, batchTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (batchTime.microsecs()) / (10 * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (batchTime) / (10 * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -736,15 +737,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batch2Time;
+	MojUInt64 batch2Time = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayBegin() + 10, batch2Time, false);
 	MojTestErrCheck(err);
-	getTime = batch2Time.microsecs();
+	getTime = batch2Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %d of kind %s %llu times (using eater): %llu microsecs\n", 0, 10, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get objects %d to %d of kind %s %llu times (using eater): %llu nanosecs\n", 0, 10, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / (10 * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / (10 * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -753,15 +754,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batch3Time;
+	MojUInt64 batch3Time = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayBegin() + numInsertForGet / 2, batch3Time, true);
 	MojTestErrCheck(err);
-	getTime = batch3Time.microsecs();
+	getTime = batch3Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using writer): %llu microsecs\n", 0, numInsertForGet / 2, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using writer): %llu nanosecs\n", 0, numInsertForGet / 2, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / ((numInsertForGet / 2) * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / ((numInsertForGet / 2) * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -770,15 +771,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batch4Time;
+	MojUInt64 batch4Time = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayBegin() + numInsertForGet / 2, batch4Time, false);
 	MojTestErrCheck(err);
-	getTime = batch4Time.microsecs();
+	getTime = batch4Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using eater): %llu microsecs\n", 0, numInsertForGet / 2, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using eater): %llu nanosecs\n", 0, numInsertForGet / 2, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / ((numInsertForGet / 2) * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / ((numInsertForGet / 2) * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -787,15 +788,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batch5Time;
+	MojUInt64 batch5Time = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayEnd(), batch5Time, true);
 	MojTestErrCheck(err);
-	getTime = batch5Time.microsecs();
+	getTime = batch5Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using writer): %llu microsecs\n", 0, numInsertForGet, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using writer): %llu nanosecs\n", 0, numInsertForGet, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / (numInsertForGet * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / (numInsertForGet * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -804,15 +805,15 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	err = fileWrite(file, m_buf);
 	MojTestErrCheck(err);
 
-	MojTime batch6Time;
+	MojUInt64 batch6Time = 0;
 	err = timeBatchGet(db, ids.arrayBegin(), ids.arrayEnd(), batch6Time, false);
 	MojTestErrCheck(err);
-	getTime = batch6Time.microsecs();
+	getTime = batch6Time;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using eater): %llu microsecs\n", 0, numInsertForGet, kindId, numRepetitionsForGet, getTime);
+	err = MojPrintF("   time to get objects %d to %llu of kind %s %llu times (using eater): %llu nanosecs\n", 0, numInsertForGet, kindId, numRepetitionsForGet, getTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (getTime) / (numInsertForGet * numRepetitionsForGet));
+	err = MojPrintF("   time per object: %llu nanosecs", (getTime) / (numInsertForGet * numRepetitionsForGet));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -824,15 +825,19 @@ MojErr MojDbPerfReadTest::getObjs(MojDb& db, const MojChar* kindId, MojErr (MojD
 	return MojErrNone;
 }
 
-MojErr MojDbPerfReadTest::timeFind(MojDb& db, MojDbQuery& query, MojTime& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, MojUInt32& count, MojTime& countTime)
+MojErr MojDbPerfReadTest::timeFind(MojDb& db, MojDbQuery& query, MojUInt64& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, MojUInt32& count, MojUInt64& countTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
+	
 	for (MojUInt64 i = 0; i < numRepetitionsForFind; i++) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		MojDbCursor cursor;
-		err = db.find(query, cursor);
+		MojErr err = db.find(query, cursor);
 		MojTestErrCheck(err);
 		if (useWriter) {
 			MojJsonWriter writer;
@@ -852,56 +857,61 @@ MojErr MojDbPerfReadTest::timeFind(MojDb& db, MojDbQuery& query, MojTime& findTi
 			err = cursor.close();
 			MojTestErrCheck(err);
 		}
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		findTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		findTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 
 		if (doCount) {
-			err = MojGetCurrentTime(startTime);
-			MojTestErrCheck(err);
+			clock_gettime(CLOCK_REALTIME, &startTime);
 			err = cursor.count(count);
 			MojTestErrCheck(err);
 			err = cursor.close();
 			MojTestErrCheck(err);
-			err = MojGetCurrentTime(endTime);
-			MojTestErrCheck(err);
-			countTime += (endTime - startTime);
-			totalTestTime += (endTime - startTime);
+			clock_gettime(CLOCK_REALTIME, &endTime);
+			countTime += timeDiff(startTime, endTime);
+			totalTestTime += timeDiff(startTime, endTime);
 		}
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfReadTest::timeGet(MojDb& db, MojObject& id, MojTime& getTime)
+MojErr MojDbPerfReadTest::timeGet(MojDb& db, MojObject& id, MojUInt64& getTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
+	
 	for (MojUInt64 i = 0; i < numRepetitionsForGet; i++) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		MojObject obj;
 		bool found;
-		err = db.get(id, obj, found);
+		MojErr err = db.get(id, obj, found);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &endTime);
 		MojTestAssert(found);
-		getTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		getTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfReadTest::timeBatchGet(MojDb& db, const MojObject* begin, const MojObject* end, MojTime& batchGetTime, bool useWriter)
+MojErr MojDbPerfReadTest::timeBatchGet(MojDb& db, const MojObject* begin, const MojObject* end, MojUInt64& batchGetTime, bool useWriter)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
+	
 	for (MojUInt64 i = 0; i < numRepetitionsForGet; i++) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		MojErr err;
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		if (useWriter) {
 			MojJsonWriter writer;
 			err = db.get(begin, end, writer);
@@ -911,10 +921,9 @@ MojErr MojDbPerfReadTest::timeBatchGet(MojDb& db, const MojObject* begin, const 
 			err = db.get(begin, end, eater);
 			MojTestErrCheck(err);
 		}
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		batchGetTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		batchGetTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;

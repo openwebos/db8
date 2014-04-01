@@ -23,6 +23,8 @@
 #include "MojDbPerfTestRunner.h"
 #include "core/MojFile.h"
 
+#include <time.h>
+
 class MojDbPerfTest : public MojTestCase {
 public:
 	MojDbPerfTest(const MojChar* name);
@@ -30,8 +32,8 @@ public:
 	virtual MojErr run() = 0;
 	virtual void cleanup() = 0;
 
-	MojErr putKinds(MojDb& db, MojTime& putKindTime);
-	MojErr timePutKind(MojDb& db, MojTime& putKindTime, MojObject kind);
+	MojErr putKinds(MojDb& db, MojUInt64& putKindTime);
+	MojErr timePutKind(MojDb& db, MojUInt64& putKindTime, MojObject kind);
 	MojErr delKinds(MojDb& db);
 
 	MojErr createSmallObj(MojObject& obj, MojUInt64 i);
@@ -43,6 +45,8 @@ public:
 	MojErr createLargeArrayObj(MojObject& obj, MojUInt64 i);
 
 	MojErr fileWrite(MojFile& file, MojString buf);
+	
+	MojUInt64 timeDiff(timespec start, timespec end);
 
 	static const MojChar* s_lastNames[];
 	static const MojChar* s_firstNames[];

@@ -26,6 +26,7 @@
 
 
 const MojChar* const MojDbTestDir = _T("mojodb-test-dir");
+MojUInt64 allTestsTime = 0;
 
 int main(int argc, char** argv)
 {
@@ -43,4 +44,7 @@ void MojDbPerfTestRunner::runTests()
 	test(MojDbPerfReadTest());
 	test(MojDbPerfUpdateTest());
 	test(MojDbPerfDeleteTest());
+	MojDouble res = allTestsTime / 1000000000.0f;
+	MojErr err = MojPrintF("\n\n ALL TESTS FINISHED. TIME ELAPSED: %10.3f seconds.\n\n", res);
+	MojTestErrCheck(err);
 }

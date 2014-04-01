@@ -21,6 +21,8 @@
 #include "db/MojDb.h"
 #include "core/MojTime.h"
 
+#include <time.h>
+
 const MojChar* MojDbPerfTest::s_lastNames[] = {
 	_T("Smith"), _T("Johnson"), _T("Williams"), _T("Jones"), _T("Brown"),
 	_T("Davis"), _T("Miller"), _T("Wilson"), _T("Moore"), _T("Taylor"),
@@ -139,7 +141,7 @@ MojDbPerfTest::MojDbPerfTest(const MojChar* name)
 }
 
 
-MojErr MojDbPerfTest::putKinds(MojDb& db, MojTime& putKindTime)
+MojErr MojDbPerfTest::putKinds(MojDb& db, MojUInt64& putKindTime)
 {
 	MojObject kind1;
 	MojErr err = kind1.fromJson(MojPerfSmKindStr);
@@ -318,17 +320,19 @@ MojErr MojDbPerfTest::delKinds(MojDb& db)
 	return MojErrNone;
 }
 
-MojErr MojDbPerfTest::timePutKind(MojDb& db, MojTime& putKindTime, MojObject kind)
+MojErr MojDbPerfTest::timePutKind(MojDb& db, MojUInt64& putKindTime, MojObject kind)
 {
-	MojTime startTime;
-	MojTime endTime;
-
-	MojErr err = MojGetCurrentTime(startTime);
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
+	clock_gettime(CLOCK_REALTIME, &startTime);
+	MojErr err = db.putKind(kind);
 	MojTestErrCheck(err);
-	err = db.putKind(kind);
-	MojTestErrCheck(err);
-	err = MojGetCurrentTime(endTime);
-	putKindTime += (endTime - startTime);
+	clock_gettime(CLOCK_REALTIME, &endTime);
+	putKindTime += timeDiff (startTime, endTime);
 
 	return MojErrNone;
 }
@@ -526,3 +530,19 @@ MojErr MojDbPerfTest::fileWrite(MojFile& file, MojString buf)
 	MojSize size;
 	return file.writeString(buf, size);
 }
+
+MojUInt64 MojDbPerfTest::timeDiff(timespec start, timespec end)
+{
+	timespec temp;
+	temp.tv_nsec = 0;
+	temp.tv_sec = 0;
+	if ((end.tv_nsec - start.tv_nsec) < 0) {
+		temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+		temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+	} else {
+		temp.tv_sec = end.tv_sec - start.tv_sec;
+		temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+	}
+	return temp.tv_sec * 1000000000 + temp.tv_nsec;
+}
+

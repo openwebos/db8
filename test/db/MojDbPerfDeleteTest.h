@@ -38,13 +38,13 @@ private:
 	MojErr putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,
 			MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64), MojObject& objs);
 
-	MojErr mergeObj(MojDb& db, MojObject& obj, MojTime& objTime);
-	MojErr batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
-	MojErr queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
-	MojErr delObj(MojDb& db, MojObject& id, MojTime& objTime, MojUInt32 flags = MojDb::FlagNone);
-	MojErr batchPutObj(MojDb& db, MojObject* begin, const MojObject* end, MojTime& objTime);
+	MojErr mergeObj(MojDb& db, MojObject& obj, MojUInt64& objTime);
+	MojErr batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt32& countOut, MojUInt64& objTime, MojUInt32 flags = MojDb::FlagNone);
+	MojErr queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32& countOut, MojUInt64& objTime, MojUInt32 flags = MojDb::FlagNone);
+	MojErr delObj(MojDb& db, MojObject& id, MojUInt64& objTime, MojUInt32 flags = MojDb::FlagNone);
+	MojErr batchPutObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt64& objTime);
 	MojErr updateKind(const MojChar* kindId, const MojChar* kindJson, const MojChar* extraIdxJson, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64));
-	MojErr timeUpdateKind(MojDb& db, const MojChar* kindJson, MojObject& kindObj, MojTime& addIndexTime, MojTime& dropIndexTime);
+	MojErr timeUpdateKind(MojDb& db, const MojChar* kindJson, MojObject& kindObj, MojUInt64& addIndexTime, MojUInt64& dropIndexTime);
 };
 
 #endif /* MOJDBPERFDELETETEST_H_ */

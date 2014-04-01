@@ -16,10 +16,8 @@
 *
 * LICENSE@@@ */
 
-
 #include "MojDbPerfDeleteTest.h"
 #include "db/MojDb.h"
-#include "core/MojTime.h"
 #include "core/MojJson.h"
 
 static const MojUInt64 numInsertForDel = 1000;
@@ -30,8 +28,9 @@ static const MojUInt64 numBatchDelIterations = 100;
 static const MojUInt64 numObjectsBeforeUpdateKind = 1000;
 static const MojUInt64 numUpdateKindIterations = 50;
 
+extern MojUInt64 allTestsTime;
 const MojChar* const DeleteTestFileName = _T("MojDbPerfDeleteTest.csv");
-static MojTime totalTestTime;
+static MojUInt64 totalTestTime = 0;
 static MojFile file;
 
 MojDbPerfDeleteTest::MojDbPerfDeleteTest()
@@ -52,13 +51,14 @@ MojErr MojDbPerfDeleteTest::run()
 
 	err = testDelete();
 	MojTestErrCheck(err);
+	allTestsTime += totalTestTime;
 
-	err = MojPrintF("\n\n TOTAL TEST TIME: %llu microseconds\n\n", totalTestTime.microsecs());
+	err = MojPrintF("\n\n TOTAL TEST TIME: %llu nanoseconds. | %10.3f seconds.\n\n", totalTestTime, totalTestTime / 1000000000.0f);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n-------\n");
 	MojTestErrCheck(err);
 
-	err = buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime.microsecs());
+	err = buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime);
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -120,7 +120,7 @@ MojErr MojDbPerfDeleteTest::testDelete()
 MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn) (MojObject&, MojUInt64))
 {
 	// register all the kinds
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
@@ -133,15 +133,15 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	bool found = objs.at(numInsertForDel/2, midId);
 	MojTestAssert(found);
 
-	MojTime objTime;
+	MojUInt64 objTime = 0;
 	err = delObj(db, midId, objTime);
 	MojTestErrCheck(err);
-	MojUInt64 delTime = objTime.microsecs();
+	MojUInt64 delTime = objTime;
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   deleting single object - index %llu - of kind %s %llu times took: %llu microsecs\n", numInsertForDel/2, kindId, numSingleDelIterations, delTime);
+	err = MojPrintF("   deleting single object - index %llu - of kind %s %llu times took: %llu nanosecs\n", numInsertForDel/2, kindId, numSingleDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per delete: %llu microsecs", (delTime) / (numSingleDelIterations));
+	err = MojPrintF("   time per delete: %llu nanosecs", (delTime) / (numSingleDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -156,13 +156,13 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	found = objs.at(numInsertForDel/2, midId2);
 	MojTestAssert(found);
 
-	MojTime objTime2;
+	MojUInt64 objTime2 = 0;
 	err = delObj(db, midId2, objTime2, MojDb::FlagPurge);
 	MojTestErrCheck(err);
-	delTime = objTime2.microsecs();
-	err = MojPrintF("   deleting single object with purge flag - index %llu - of kind %s %llu times took: %llu microsecs\n", numInsertForDel/2, kindId, numSingleDelIterations, delTime);
+	delTime = objTime2;
+	err = MojPrintF("   deleting single object with purge flag - index %llu - of kind %s %llu times took: %llu nanosecs\n", numInsertForDel/2, kindId, numSingleDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per delete: %llu microsecs", (delTime) / (numSingleDelIterations));
+	err = MojPrintF("   time per delete: %llu nanosecs", (delTime) / (numSingleDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -172,19 +172,19 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
 
-	MojTime batchTime;
+	MojUInt64 batchTime = 0;
 	MojObject::ArrayIterator beginArr;
 	err = objs.arrayBegin(beginArr);
 	MojTestErrCheck(err);
 	MojUInt32 count;
 	err = batchDelObj(db, beginArr, beginArr + 20, count, batchTime);
 	MojTestErrCheck(err);
-	delTime = batchTime.microsecs();
-	err = MojPrintF("   deleting batch - %d objects - of kind %s %llu times took: %llu microsecs\n", count, kindId, numBatchDelIterations, delTime);
+	delTime = batchTime;
+	err = MojPrintF("   deleting batch - %d objects - of kind %s %llu times took: %llu nanosecs\n", count, kindId, numBatchDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per batch merge: %llu microsecs\n", (delTime) / (numBatchDelIterations));
+	err = MojPrintF("   time per batch merge: %llu nanosecs\n", (delTime) / (numBatchDelIterations));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (delTime) / (count * numBatchDelIterations));
+	err = MojPrintF("   time per object: %llu nanosecs", (delTime) / (count * numBatchDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -194,16 +194,16 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
 
-	MojTime batchTime2;
+	MojUInt64 batchTime2 = 0;
 	count = 0;
 	err = batchDelObj(db, beginArr, beginArr + 20, count, batchTime2, MojDb::FlagPurge);
 	MojTestErrCheck(err);
-	delTime = batchTime2.microsecs();
-	err = MojPrintF("   deleting batch - %d objects - with purge flag of kind %s %llu times took: %llu microsecs\n", count, kindId, numBatchDelIterations, delTime);
+	delTime = batchTime2;
+	err = MojPrintF("   deleting batch - %d objects - with purge flag of kind %s %llu times took: %llu nanosecs\n", count, kindId, numBatchDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per batch merge: %llu microsecs\n", (delTime) / (numBatchDelIterations));
+	err = MojPrintF("   time per batch merge: %llu nanosecs\n", (delTime) / (numBatchDelIterations));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (delTime) / (count * numBatchDelIterations));
+	err = MojPrintF("   time per object: %llu nanosecs", (delTime) / (count * numBatchDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -213,7 +213,7 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
 
-	MojTime delQueryTime;
+	MojUInt64 delQueryTime = 0;
 	MojTestErrCheck(err);
 	MojDbQuery query;
 	err = query.from(kindId);
@@ -231,12 +231,12 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	count = 0;
 	err = queryDelObj(db, query, count, delQueryTime);
 	MojTestErrCheck(err);
-	delTime = delQueryTime.microsecs();
-	err = MojPrintF("   deleting with query - %d objects - of kind %s %llu times took: %llu microsecs\n", count, kindId, numBatchDelIterations, delTime);
+	delTime = delQueryTime;
+	err = MojPrintF("   deleting with query - %d objects - of kind %s %llu times took: %llu nanosecs\n", count, kindId, numBatchDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per merge: %llu microsecs\n", (delTime) / (numBatchDelIterations));
+	err = MojPrintF("   time per merge: %llu nanosecs\n", (delTime) / (numBatchDelIterations));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (delTime) / (count * numBatchDelIterations));
+	err = MojPrintF("   time per object: %llu nanosecs", (delTime) / (count * numBatchDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -246,16 +246,16 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
 
-	MojTime delQueryTime2;
+	MojUInt64 delQueryTime2 = 0;
 	count = 0;
 	err = queryDelObj(db, query, count, delQueryTime2, MojDb::FlagPurge);
 	MojTestErrCheck(err);
-	delTime = delQueryTime2.microsecs();
-	err = MojPrintF("   deleting with query - %d objects - with purge flag of kind %s %llu times took: %llu microsecs\n", count, kindId, numBatchDelIterations, delTime);
+	delTime = delQueryTime2;
+	err = MojPrintF("   deleting with query - %d objects - with purge flag of kind %s %llu times took: %llu nanosecs\n", count, kindId, numBatchDelIterations, delTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per merge: %llu microsecs\n", (delTime) / (numBatchDelIterations));
+	err = MojPrintF("   time per merge: %llu nanosecs\n", (delTime) / (numBatchDelIterations));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (delTime) / (count * numBatchDelIterations));
+	err = MojPrintF("   time per object: %llu nanosecs", (delTime) / (count * numBatchDelIterations));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
@@ -268,24 +268,26 @@ MojErr MojDbPerfDeleteTest::delObjects(MojDb& db, const MojChar* kindId, MojErr 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfDeleteTest::delObj(MojDb& db, MojObject& obj, MojTime& objTime, MojUInt32 flags)
+MojErr MojDbPerfDeleteTest::delObj(MojDb& db, MojObject& obj, MojUInt64& objTime, MojUInt32 flags)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numSingleDelIterations; i++) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		MojObject id;
-		err = obj.getRequired(MojDb::IdKey, id);
+		MojErr err = obj.getRequired(MojDb::IdKey, id);
 		MojTestErrCheck(err);
 		bool found = false;
 		err = db.del(id, found, flags);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		objTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		objTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 
 		//put the object back
 		err = obj.del(MojDb::RevKey, found);
@@ -297,10 +299,14 @@ MojErr MojDbPerfDeleteTest::delObj(MojDb& db, MojObject& obj, MojTime& objTime, 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfDeleteTest::batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags)
+MojErr MojDbPerfDeleteTest::batchDelObj(MojDb& db, MojObject* begin, const MojObject* end, MojUInt32& countOut, MojUInt64& objTime, MojUInt32 flags)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	MojObject ids;
 	for (const MojObject* i = begin; i != end; ++i) {
@@ -312,16 +318,14 @@ MojErr MojDbPerfDeleteTest::batchDelObj(MojDb& db, MojObject* begin, const MojOb
 	}
 
 	for (MojUInt64 i = 0; i < numBatchDelIterations; ++i) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		countOut = 0;
 		MojObject delObjs;
-		err = db.del(ids.arrayBegin(), ids.arrayEnd(), countOut, delObjs, flags);
+		MojErr err = db.del(ids.arrayBegin(), ids.arrayEnd(), countOut, delObjs, flags);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		objTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		objTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 
 		//put the objects back
 		for (MojObject* i = begin; i != end; ++i) {
@@ -336,10 +340,14 @@ MojErr MojDbPerfDeleteTest::batchDelObj(MojDb& db, MojObject* begin, const MojOb
 	return MojErrNone;
 }
 
-MojErr MojDbPerfDeleteTest::queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32& countOut, MojTime& objTime, MojUInt32 flags)
+MojErr MojDbPerfDeleteTest::queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32& countOut, MojUInt64& objTime, MojUInt32 flags)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	//find all the objects described by the query
 	MojObject objs;
@@ -361,15 +369,13 @@ MojErr MojDbPerfDeleteTest::queryDelObj(MojDb& db, MojDbQuery& query, MojUInt32&
 
 
 	for (MojUInt64 i = 0; i < numBatchDelIterations; i++) {
-		MojErr err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		countOut = 0;
-		err = db.del(query, countOut, flags);
+		MojErr err = db.del(query, countOut, flags);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		objTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		objTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 
 		//put everything back
 		MojObject::ArrayIterator begin;

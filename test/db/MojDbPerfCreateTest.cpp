@@ -20,7 +20,6 @@
 
 #include "MojDbPerfCreateTest.h"
 #include "db/MojDb.h"
-#include "core/MojTime.h"
 
 #ifdef MOJ_USE_BDB
 #include "db-luna/MojDbBerkeleyFactory.h"
@@ -35,7 +34,8 @@
 static const MojUInt64 numInsert = 1000;
 static const int numRepetitions = 5;
 
-static MojTime totalTestTime;
+extern MojUInt64 allTestsTime;
+static MojUInt64 totalTestTime = 0;
 static MojFile file;
 const MojChar* const CreateTestFileName = _T("MojDbPerfCreateTest.csv");
 
@@ -56,13 +56,14 @@ MojErr MojDbPerfCreateTest::run()
 
 	err = testCreate();
 	MojTestErrCheck(err);
+	allTestsTime += totalTestTime;
 
-	err = MojPrintF("\n\n TOTAL TEST TIME: %llu microseconds\n\n", totalTestTime.microsecs());
+	err = MojPrintF("\n\n TOTAL TEST TIME: %llu nanoseconds. | %10.3f seconds.\n\n", totalTestTime, totalTestTime / 1000000000.0f);
 	MojTestErrCheck(err);
 	err = MojPrintF("\n-------\n");
 	MojTestErrCheck(err);
 
-	err = buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime.microsecs());
+	err = buf.format("\n\nTOTAL TEST TIME,,%llu,,,", totalTestTime);
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -89,7 +90,7 @@ MojErr MojDbPerfCreateTest::testCreate()
 	MojTestErrCheck(err);
 
 	// time put kind
-	MojTime putKindTime;
+	MojUInt64 putKindTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putKinds(db, putKindTime);
 		MojTestErrCheck(err);
@@ -97,16 +98,15 @@ MojErr MojDbPerfCreateTest::testCreate()
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putKind = putKindTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   putKind took: %llu microsecs", (putKind / (numKinds * numRepetitions)));
+	err = MojPrintF("   putKind took: %llu nanosecs", (putKindTime / (numKinds * numRepetitions)));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 
 	MojString buf;
-	err = buf.format("put Kind,all %llu kinds,%llu,%llu,%llu,\n", numKinds, putKind, putKind/numRepetitions, putKind / (numKinds * numRepetitions));
+	err = buf.format("put Kind,all %llu kinds,%llu,%llu,%llu,\n", numKinds, putKindTime, putKindTime/numRepetitions, putKindTime / (numKinds * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -168,12 +168,12 @@ MojErr MojDbPerfCreateTest::testCreate()
 MojErr MojDbPerfCreateTest::testInsertSmallObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with small objects (5 properties)
-	MojTime smallObjTime;
+	MojUInt64 smallObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putSmallObj(db, kindId, smallObjTime);
 		MojTestErrCheck(err);
@@ -185,17 +185,16 @@ MojErr MojDbPerfCreateTest::testInsertSmallObj(MojDb& db, const MojChar* kindId)
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = smallObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, smallObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (smallObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, smallObjTime, smallObjTime/numRepetitions, smallObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -206,12 +205,12 @@ MojErr MojDbPerfCreateTest::testInsertSmallObj(MojDb& db, const MojChar* kindId)
 MojErr MojDbPerfCreateTest::testInsertMedObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with medium objects (10 properties)
-	MojTime medObjTime;
+	MojUInt64 medObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putMedObj(db, kindId, medObjTime);
 		MojTestErrCheck(err);
@@ -223,17 +222,16 @@ MojErr MojDbPerfCreateTest::testInsertMedObj(MojDb& db, const MojChar* kindId)
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = medObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, medObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (medObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, medObjTime, medObjTime/numRepetitions, medObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -244,12 +242,12 @@ MojErr MojDbPerfCreateTest::testInsertMedObj(MojDb& db, const MojChar* kindId)
 MojErr MojDbPerfCreateTest::testInsertLgObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large objects (20 properties)
-	MojTime largeObjTime;
+	MojUInt64 largeObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putLargeObj(db, kindId, largeObjTime);
 		MojTestErrCheck(err);
@@ -261,17 +259,16 @@ MojErr MojDbPerfCreateTest::testInsertLgObj(MojDb& db, const MojChar* kindId)
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = largeObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, largeObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (largeObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, largeObjTime, largeObjTime/numRepetitions, largeObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -282,12 +279,12 @@ MojErr MojDbPerfCreateTest::testInsertLgObj(MojDb& db, const MojChar* kindId)
 MojErr MojDbPerfCreateTest::testInsertMedNestedObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with med nested objects (2 levels of nesting, 10 properties)
-	MojTime medNestedObjTime;
+	MojUInt64 medNestedObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putMedNestedObj(db, kindId, medNestedObjTime);
 		MojTestErrCheck(err);
@@ -299,17 +296,16 @@ MojErr MojDbPerfCreateTest::testInsertMedNestedObj(MojDb& db, const MojChar* kin
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = medNestedObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, medNestedObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (medNestedObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, medNestedObjTime, medNestedObjTime/numRepetitions, medNestedObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -320,12 +316,12 @@ MojErr MojDbPerfCreateTest::testInsertMedNestedObj(MojDb& db, const MojChar* kin
 MojErr MojDbPerfCreateTest::testInsertLgNestedObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large nested objects (3 levels of nesting, 20 properties)
-	MojTime largeNestedObjTime;
+	MojUInt64 largeNestedObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putLargeNestedObj(db, kindId, largeNestedObjTime);
 		MojTestErrCheck(err);
@@ -337,17 +333,16 @@ MojErr MojDbPerfCreateTest::testInsertLgNestedObj(MojDb& db, const MojChar* kind
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = largeNestedObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s nested objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s nested objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, largeNestedObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (largeNestedObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, largeNestedObjTime, largeNestedObjTime/numRepetitions, largeNestedObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -359,12 +354,12 @@ MojErr MojDbPerfCreateTest::testInsertLgNestedObj(MojDb& db, const MojChar* kind
 MojErr MojDbPerfCreateTest::testInsertMedArrayObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with med array objects (10 properties + 1 array of 5 elements)
-	MojTime medArrayObjTime;
+	MojUInt64 medArrayObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putMedArrayObj(db, kindId, medArrayObjTime);
 		MojTestErrCheck(err);
@@ -376,17 +371,16 @@ MojErr MojDbPerfCreateTest::testInsertMedArrayObj(MojDb& db, const MojChar* kind
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = medArrayObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, medArrayObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (medArrayObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, medArrayObjTime, medArrayObjTime/numRepetitions, medArrayObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -398,12 +392,12 @@ MojErr MojDbPerfCreateTest::testInsertMedArrayObj(MojDb& db, const MojChar* kind
 MojErr MojDbPerfCreateTest::testInsertLgArrayObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large array objects (20 properties + 2 arrays of 5 elements each)
-	MojTime lgArrayObjTime = 0;
+	MojUInt64 lgArrayObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putLargeArrayObj(db, kindId, lgArrayObjTime);
 		MojTestErrCheck(err);
@@ -415,17 +409,16 @@ MojErr MojDbPerfCreateTest::testInsertLgArrayObj(MojDb& db, const MojChar* kindI
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = lgArrayObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, lgArrayObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (lgArrayObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, lgArrayObjTime, lgArrayObjTime/numRepetitions, lgArrayObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -436,12 +429,12 @@ MojErr MojDbPerfCreateTest::testInsertLgArrayObj(MojDb& db, const MojChar* kindI
 MojErr MojDbPerfCreateTest::testBatchInsertLgObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large array objects (20 properties + 2 arrays of 5 elements each)
-	MojTime batchLgObjTime = 0;
+	MojUInt64 batchLgObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = batchPutLargeObj(db, kindId, batchLgObjTime);
 		MojTestErrCheck(err);
@@ -453,19 +446,18 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgObj(MojDb& db, const MojChar* kindI
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = batchLgObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, batchLgObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per batch: %llu microsecs", (putTime) / (numRepetitions));
+	err = MojPrintF("   time per batch: %llu nanosecs", (batchLgObjTime) / (numRepetitions));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (batchLgObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, batchLgObjTime, batchLgObjTime/numRepetitions, batchLgObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -476,12 +468,12 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgObj(MojDb& db, const MojChar* kindI
 MojErr MojDbPerfCreateTest::testBatchInsertLgNestedObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large array objects (20 properties + 2 arrays of 5 elements each)
-	MojTime batchLgNestedObjTime = 0;
+	MojUInt64 batchLgNestedObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putLargeArrayObj(db, kindId, batchLgNestedObjTime);
 		MojTestErrCheck(err);
@@ -493,19 +485,18 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgNestedObj(MojDb& db, const MojChar*
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = batchLgNestedObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, batchLgNestedObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per batch: %llu microsecs", (putTime) / (numRepetitions));
+	err = MojPrintF("   time per batch: %llu nanosecs", (batchLgNestedObjTime) / (numRepetitions));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (batchLgNestedObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, batchLgNestedObjTime, batchLgNestedObjTime/numRepetitions, batchLgNestedObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -516,12 +507,12 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgNestedObj(MojDb& db, const MojChar*
 MojErr MojDbPerfCreateTest::testBatchInsertLgArrayObj(MojDb& db, const MojChar* kindId)
 {
 	// register all the kinds again
-	MojTime time;
+	MojUInt64 time = 0;
 	MojErr err = putKinds(db, time);
 	MojTestErrCheck(err);
 
 	// time put with large array objects (20 properties + 2 arrays of 5 elements each)
-	MojTime batchLgArrayObjTime = 0;
+	MojUInt64 batchLgArrayObjTime = 0;
 	for (int i = 0; i < numRepetitions; i++) {
 		err = putLargeArrayObj(db, kindId, batchLgArrayObjTime);
 		MojTestErrCheck(err);
@@ -533,19 +524,18 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgArrayObj(MojDb& db, const MojChar* 
 		MojTestErrCheck(err);
 	}
 
-	MojUInt64 putTime = batchLgArrayObjTime.microsecs();
 	err = MojPrintF("\n -------------------- \n");
 	MojTestErrCheck(err);
-	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu microsecs\n", numInsert, kindId, numRepetitions, putTime);
+	err = MojPrintF("   time to batch put %llu %s objects %d times: %llu nanosecs\n", numInsert, kindId, numRepetitions, batchLgArrayObjTime);
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per batch: %llu microsecs", (putTime) / (numRepetitions));
+	err = MojPrintF("   time per batch: %llu nanosecs", (batchLgArrayObjTime) / (numRepetitions));
 	MojTestErrCheck(err);
-	err = MojPrintF("   time per object: %llu microsecs", (putTime) / (numInsert * numRepetitions));
+	err = MojPrintF("   time per object: %llu nanosecs", (batchLgArrayObjTime) / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = MojPrintF("\n\n");
 	MojTestErrCheck(err);
 	MojString buf;
-	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, putTime, putTime/numRepetitions, putTime / (numInsert * numRepetitions));
+	err = buf.format("batch put %llu objects %d times,%s,%llu,%llu,%llu,\n", numInsert, numRepetitions, kindId, batchLgArrayObjTime, batchLgArrayObjTime/numRepetitions, batchLgArrayObjTime / (numInsert * numRepetitions));
 	MojTestErrCheck(err);
 	err = fileWrite(file, buf);
 	MojTestErrCheck(err);
@@ -553,10 +543,14 @@ MojErr MojDbPerfCreateTest::testBatchInsertLgArrayObj(MojDb& db, const MojChar* 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putSmallObj(MojDb& db, const MojChar* kindId, MojTime& smallObjTime)
+MojErr MojDbPerfCreateTest::putSmallObj(MojDb& db, const MojChar* kindId, MojUInt64& smallObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -565,23 +559,25 @@ MojErr MojDbPerfCreateTest::putSmallObj(MojDb& db, const MojChar* kindId, MojTim
 		err = createSmallObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		smallObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		smallObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putMedObj(MojDb& db, const MojChar* kindId, MojTime& medObjTime)
+MojErr MojDbPerfCreateTest::putMedObj(MojDb& db, const MojChar* kindId, MojUInt64& medObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -590,23 +586,25 @@ MojErr MojDbPerfCreateTest::putMedObj(MojDb& db, const MojChar* kindId, MojTime&
 		err = createMedObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		medObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		medObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putLargeObj(MojDb& db, const MojChar* kindId, MojTime& largeObjTime)
+MojErr MojDbPerfCreateTest::putLargeObj(MojDb& db, const MojChar* kindId, MojUInt64& largeObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -615,23 +613,25 @@ MojErr MojDbPerfCreateTest::putLargeObj(MojDb& db, const MojChar* kindId, MojTim
 		err = createLargeObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		largeObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		largeObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::batchPutLargeObj(MojDb& db, const MojChar* kindId, MojTime& largeObjTime)
+MojErr MojDbPerfCreateTest::batchPutLargeObj(MojDb& db, const MojChar* kindId, MojUInt64& largeObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	MojObject objArray;
 
@@ -649,22 +649,24 @@ MojErr MojDbPerfCreateTest::batchPutLargeObj(MojDb& db, const MojChar* kindId, M
 	MojErr err = objArray.arrayBegin(begin);
 	MojTestErrCheck(err);
 	MojObject::ConstArrayIterator end = objArray.arrayEnd();
-	err = MojGetCurrentTime(startTime);
-	MojTestErrCheck(err);
+	clock_gettime(CLOCK_REALTIME, &startTime);
 	err = db.put(begin, end);
 	MojTestErrCheck(err);
-	err = MojGetCurrentTime(endTime);
-	MojTestErrCheck(err);
-	largeObjTime += (endTime - startTime);
-	totalTestTime += (endTime - startTime);
+	clock_gettime(CLOCK_REALTIME, &endTime);
+	largeObjTime += timeDiff(startTime, endTime);
+	totalTestTime += timeDiff(startTime, endTime);
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putMedNestedObj(MojDb& db, const MojChar* kindId, MojTime& medNestedObjTime)
+MojErr MojDbPerfCreateTest::putMedNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& medNestedObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -673,23 +675,25 @@ MojErr MojDbPerfCreateTest::putMedNestedObj(MojDb& db, const MojChar* kindId, Mo
 		err = createMedNestedObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		medNestedObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		medNestedObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putLargeNestedObj(MojDb& db, const MojChar* kindId, MojTime& lgNestedObjTime)
+MojErr MojDbPerfCreateTest::putLargeNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& lgNestedObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -698,23 +702,25 @@ MojErr MojDbPerfCreateTest::putLargeNestedObj(MojDb& db, const MojChar* kindId, 
 		err = createLargeNestedObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		lgNestedObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		lgNestedObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::batchPutLargeNestedObj(MojDb& db, const MojChar* kindId, MojTime& lgNestedObjTime)
+MojErr MojDbPerfCreateTest::batchPutLargeNestedObj(MojDb& db, const MojChar* kindId, MojUInt64& lgNestedObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	MojObject objArray;
 
@@ -732,22 +738,24 @@ MojErr MojDbPerfCreateTest::batchPutLargeNestedObj(MojDb& db, const MojChar* kin
 	MojErr err = objArray.arrayBegin(begin);
 	MojTestErrCheck(err);
 	MojObject::ConstArrayIterator end = objArray.arrayEnd();
-	err = MojGetCurrentTime(startTime);
-	MojTestErrCheck(err);
+	clock_gettime(CLOCK_REALTIME, &startTime);
 	err = db.put(begin, end);
 	MojTestErrCheck(err);
-	err = MojGetCurrentTime(endTime);
-	MojTestErrCheck(err);
-	lgNestedObjTime += (endTime - startTime);
-	totalTestTime += (endTime - startTime);
+	clock_gettime(CLOCK_REALTIME, &endTime);
+	lgNestedObjTime += timeDiff(startTime, endTime);
+	totalTestTime += timeDiff(startTime, endTime);
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putMedArrayObj(MojDb& db, const MojChar* kindId, MojTime& medArrayObjTime)
+MojErr MojDbPerfCreateTest::putMedArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& medArrayObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -756,23 +764,25 @@ MojErr MojDbPerfCreateTest::putMedArrayObj(MojDb& db, const MojChar* kindId, Moj
 		err = createMedArrayObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		medArrayObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		medArrayObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::putLargeArrayObj(MojDb& db, const MojChar* kindId, MojTime& lgArrayObjTime)
+MojErr MojDbPerfCreateTest::putLargeArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& lgArrayObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	for (MojUInt64 i = 0; i < numInsert; i++) {
 		MojObject obj;
@@ -781,23 +791,25 @@ MojErr MojDbPerfCreateTest::putLargeArrayObj(MojDb& db, const MojChar* kindId, M
 		err = createLargeArrayObj(obj, i);
 		MojTestErrCheck(err);
 
-		err = MojGetCurrentTime(startTime);
-		MojTestErrCheck(err);
+		clock_gettime(CLOCK_REALTIME, &startTime);
 		err = db.put(obj);
 		MojTestErrCheck(err);
-		err = MojGetCurrentTime(endTime);
-		MojTestErrCheck(err);
-		lgArrayObjTime += (endTime - startTime);
-		totalTestTime += (endTime - startTime);
+		clock_gettime(CLOCK_REALTIME, &endTime);
+		lgArrayObjTime += timeDiff(startTime, endTime);
+		totalTestTime += timeDiff(startTime, endTime);
 	}
 
 	return MojErrNone;
 }
 
-MojErr MojDbPerfCreateTest::batchPutLargeArrayObj(MojDb& db, const MojChar* kindId, MojTime& lgArrayObjTime)
+MojErr MojDbPerfCreateTest::batchPutLargeArrayObj(MojDb& db, const MojChar* kindId, MojUInt64& lgArrayObjTime)
 {
-	MojTime startTime;
-	MojTime endTime;
+	timespec startTime;
+	startTime.tv_nsec = 0;
+	startTime.tv_sec = 0;
+	timespec endTime;
+	endTime.tv_nsec = 0;
+	endTime.tv_sec = 0;
 
 	MojObject objArray;
 
@@ -815,14 +827,12 @@ MojErr MojDbPerfCreateTest::batchPutLargeArrayObj(MojDb& db, const MojChar* kind
 	MojErr err = objArray.arrayBegin(begin);
 	MojTestErrCheck(err);
 	MojObject::ConstArrayIterator end = objArray.arrayEnd();
-	err = MojGetCurrentTime(startTime);
-	MojTestErrCheck(err);
+	clock_gettime(CLOCK_REALTIME, &startTime);
 	err = db.put(begin, end);
 	MojTestErrCheck(err);
-	err = MojGetCurrentTime(endTime);
-	MojTestErrCheck(err);
-	lgArrayObjTime += (endTime - startTime);
-	totalTestTime += (endTime - startTime);
+	clock_gettime(CLOCK_REALTIME, &endTime);
+	lgArrayObjTime += timeDiff(startTime, endTime);
+	totalTestTime += timeDiff(startTime, endTime);
 
 	return MojErrNone;
 }

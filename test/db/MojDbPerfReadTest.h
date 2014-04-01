@@ -39,9 +39,9 @@ private:
 	MojErr findObjs(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& q);
 	MojErr findObjsPaged(MojDb& db, const MojChar* kindId, MojErr (MojDbPerfTest::*createFn)(MojObject&, MojUInt64), MojDbQuery& query);
 
-	MojErr timeGet(MojDb& db, MojObject& id, MojTime& getTime);
-	MojErr timeBatchGet(MojDb& db, const MojObject* begin, const MojObject* end, MojTime& batchGetTime, bool useWriter);
-	MojErr timeFind(MojDb& db, MojDbQuery& query, MojTime& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, MojUInt32& count, MojTime& countTime);
+	MojErr timeGet(MojDb& db, MojObject& id, MojUInt64& getTime);
+	MojErr timeBatchGet(MojDb& db, const MojObject* begin, const MojObject* end, MojUInt64& batchGetTime, bool useWriter);
+	MojErr timeFind(MojDb& db, MojDbQuery& query, MojUInt64& findTime, bool useWriter, MojDbQuery::Page& nextPage, bool doCount, MojUInt32& count, MojUInt64& countTime);
 
 
 	MojErr putObjs(MojDb& db, const MojChar* kindId, MojUInt64 numInsert,

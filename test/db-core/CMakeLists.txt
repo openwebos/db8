@@ -22,7 +22,7 @@ project(gtest_db_core C CXX)
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 include_directories(../db)
 
-add_definitions(-Wall -ansi -Wno-deprecated -pthread --std=c++0x)
+add_definitions(-Wall -Wno-deprecated -pthread --std=c++0x)
 
 foreach(filename ${DB_BACKEND_WRAPPER_SOURCES})
     set(DB_BACKEND_WRAPPER_SOURCES_CPP ${DB_BACKEND_WRAPPER_SOURCES_CPP} "${CMAKE_SOURCE_DIR}/${filename}")

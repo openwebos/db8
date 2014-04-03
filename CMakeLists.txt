@@ -70,7 +70,7 @@ webos_build_system_bus_files()
 webos_build_pkgconfig(files/pkgconfig/mojodb)
 webos_build_pkgconfig(files/pkgconfig/db8)
 
-webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion
+webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion --std=c++0x
                          -Wno-unused-but-set-variable -Wno-unused-variable
                          -fno-exceptions -frename-registers -DMOJ_LINUX -fno-strict-aliasing
                          -Wno-psabi

@@ -186,6 +186,7 @@ private:
 	MojErr commitKind(const MojString& id, MojDbReq& req, MojErr err);
 	MojErr reloadKind(const MojString& id);
 	MojErr assignIds(MojObject& objOut);
+    MojErr checkSameKind(const MojObject& obj, const MojString& id, const MojDbReq& req, bool &isSame);
 
 	MojDbQuotaCheckAlert m_quotaAlert;
     MojDbSpaceAlert m_spaceAlert;

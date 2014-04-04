@@ -148,8 +148,12 @@ MojErr MojDbLevelTableTxn::commitImpl()
         writeBatch.Put(it->first, it->second);
     }
 
-    leveldb::Status s = m_db->Write(MojDbLevelEngine::getWriteOptions(), &writeBatch);
-    MojLdbErrCheck(s, _T("db->Write"));
+    if (!m_pendingDeletes.empty() || !m_pendingValues.empty())
+    {
+        // Write to leveldb only if pending deletes/values.
+        leveldb::Status s = m_db->Write(MojDbLevelEngine::getWriteOptions(), &writeBatch);
+        MojLdbErrCheck(s, _T("db->Write"));
+    }
 
     cleanup();
 

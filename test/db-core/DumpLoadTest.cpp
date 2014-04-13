@@ -1,7 +1,7 @@
 /****************************************************************
  * @@@LICENSE
  *
- * Copyright (c) 2013 LG Electronics, Inc.
+ * Copyright (c) 2013-2014 LG Electronics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,18 +49,24 @@ struct DatabaseSuite : public MojDbCoreTest
 {
     MojString kindId;
 
+	MojString MojLoadTestFilePath;
+	MojString MojDumpTestFilePath;
+
     void SetUp()
     {
         MojDbCoreTest::SetUp();
         MojAssertNoErr( kindId.assign(_T("LoadTest:1")) );
+
+		MojAssertNoErr( MojLoadTestFilePath.format("%s/%s", tempFolder, MojLoadTestFileName) );
+		MojAssertNoErr( MojDumpTestFilePath.format("%s/%s", tempFolder, MojDumpTestFileName) );
     }
 
     void TearDown()
     {
         MojDbCoreTest::TearDown();
 
-        MojExpectNoErr( MojUnlink(MojLoadTestFileName) );
-        MojExpectNoErr( MojUnlink(MojDumpTestFileName) );
+        MojExpectNoErr( MojUnlink(MojLoadTestFilePath) );
+        MojExpectNoErr( MojUnlink(MojDumpTestFilePath) );
     }
 
     void checkCount()
@@ -82,17 +88,17 @@ TEST_F(DatabaseSuite, dump_and_load)
 {
 
     // load
-    MojAssertNoErr( MojFileFromString(MojLoadTestFileName, MojTestStr) );
+    MojAssertNoErr( MojFileFromString(MojLoadTestFilePath, MojTestStr) );
 
     MojUInt32 count = 0;
-    MojAssertNoErr( db.load(MojLoadTestFileName, count) );
+    MojAssertNoErr( db.load(MojLoadTestFilePath, count) );
     EXPECT_EQ( 11LL, count );
 
     checkCount();
 
     // dump
     count = 0;
-    MojAssertNoErr( db.dump(MojDumpTestFileName, count) );
+    MojAssertNoErr( db.dump(MojDumpTestFilePath, count) );
     EXPECT_EQ( 11LL, count );
 
     EXPECT_TRUE( db.kindEngine() );
@@ -117,7 +123,7 @@ TEST_F(DatabaseSuite, dump_and_load)
     EXPECT_EQ( 1LL, count ) << "Purged kinds marked for delete";
 
     // load again. why 12?
-    MojAssertNoErr( db.load(MojDumpTestFileName, count) );
+    MojAssertNoErr( db.load(MojDumpTestFilePath, count) );
     EXPECT_EQ( 12LL, count );
 
     checkCount();

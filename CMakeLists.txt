@@ -272,6 +272,15 @@ if (WEBOS_CONFIG_BUILD_TESTS)
     if (WEBOS_DB8_BACKEND STREQUAL "leveldb")
         add_subdirectory(test/leveldb)
     endif ()
-    add_subdirectory(test/db-media)
+    #add_subdirectory(test/db-media)
+
+    include(ProcessorCount)
+    ProcessorCount(n)
+    if (NOT n EQUAL 0)
+        set(ctest_args ${ctest_args} -j${n})
+    endif ()
+
 endif()
 add_subdirectory(tool/dbgen)
+
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure ${ctest_args})

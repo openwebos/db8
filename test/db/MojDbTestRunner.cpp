@@ -57,7 +57,7 @@
 std::string getTestDir()
 {
     char buf[128];
-    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", time(0));
+    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", getpid());
     if (n < 0) return "/tmp/mojodb-test-dir"; // fallback
     else return std::string(buf, n);
 }

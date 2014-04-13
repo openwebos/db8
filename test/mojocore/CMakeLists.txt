@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2013 LG Electronics, Inc.
+# Copyright (c) 2013-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
                AtomicIntTest.cpp
                DecimalTest.cpp
                NumberTest.cpp
+               StringTest.cpp
                )
 
 target_link_libraries(${PROJECT_NAME}

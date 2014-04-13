@@ -30,7 +30,7 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                Runner.cpp
-               JsonTest.cpp
+               #JsonTest.cpp
                DumpLoadTest.cpp
                ReqTest.cpp
                QuotaTest.cpp
@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME}
                TextCollatorTest.cpp
                IdGeneratorTest.cpp
                ShardsTest.cpp
+               CrudTest.cpp
                ../db/MojDbTestStorageEngine.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 

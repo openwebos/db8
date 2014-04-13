@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,9 +20,22 @@
 #ifndef MOJREFCOUNTINTERNAL_H_
 #define MOJREFCOUNTINTERNAL_H_
 
+#include <cstddef>
+
 #include "core/internal/MojUtilInternal.h"
 
-#define MojRefCountPtrToAtomic(P) (((MojAtomicT*) P) - 1)
+namespace {
+	// malloc should give pointer to memory with alignment suitable for any type
+	constexpr MojSize MojMallocAligment = alignof(max_align_t);
+	constexpr MojSize MojAtomicPadding =
+		(sizeof(MojAtomicT)*MojMallocAligment - sizeof(MojAtomicT)) % MojMallocAligment;
+}
+
+inline MojAtomicT *MojRefCountPtrToAtomic(void *p)
+{ return (MojAtomicT*)((char *)p - MojAtomicPadding - sizeof(MojAtomicT)); }
+
+inline void *MojRefCountPtrFromAtomic(void *p)
+{ return (char *)p + MojAtomicPadding + sizeof(MojAtomicT); }
 
 template<class T>
 T* MojRefCountNew(MojSize numElems)

@@ -44,12 +44,12 @@ MojErr MojDbLevelCursor::open(MojDbLevelDatabase* db, MojDbStorageTxn* txn, MojU
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(db && txn);
     MojAssert(db->impl());
-    MojAssert( dynamic_cast<MojDbLevelAbstractTxn *>(txn) );
+    MojAssert( dynamic_cast<MojDbLevelEnvTxn *>(txn) );
 
     m_db = db->impl();
 
-    m_txn = static_cast<MojDbLevelAbstractTxn *>(txn);
-    m_ttxn = & m_txn->tableTxn(m_db);
+    m_txn = static_cast<MojDbLevelEnvTxn *>(txn);
+    m_ttxn = & m_txn->tableTxn(*m_db);
     m_txnIt.reset(m_ttxn->createIterator());
     MojAssert( m_txnIt.get() );
     m_warnCount = 0;

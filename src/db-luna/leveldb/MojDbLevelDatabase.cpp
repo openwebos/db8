@@ -235,7 +235,7 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_db );
-    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
+    MojAssert( !txn || dynamic_cast<MojDbLevelEnvTxn *> (txn) );
 
     MojErr err;
     if (txn)
@@ -247,13 +247,13 @@ MojErr MojDbLevelDatabase::put(MojDbLevelItem& key, MojDbLevelItem& val, MojDbSt
         MojErrCheck(err);
     }
 
-    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+    MojDbLevelEnvTxn * leveldb_txn = static_cast<MojDbLevelEnvTxn *> (txn);
 
     leveldb::Status s;
 
     if(leveldb_txn)
     {
-        leveldb_txn->tableTxn(impl()).Put(*key.impl(), *val.impl());
+        leveldb_txn->tableTxn(*impl()).Put(*key.impl(), *val.impl());
     }
     else
         s = m_db->Put(MojDbLevelEngine::getWriteOptions(), *key.impl(), *val.impl());
@@ -286,16 +286,16 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_db);
-    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
+    MojAssert( !txn || dynamic_cast<MojDbLevelEnvTxn *> (txn) );
 
     foundOut = false;
     std::string str;
 
-    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+    MojDbLevelEnvTxn * leveldb_txn = static_cast<MojDbLevelEnvTxn *> (txn);
 
     leveldb::Status s;
     if (leveldb_txn)
-        s = leveldb_txn->tableTxn(impl()).Get(*key.impl(), str);
+        s = leveldb_txn->tableTxn(*impl()).Get(*key.impl(), str);
     else
         s = m_db->Get(MojDbLevelEngine::getReadOptions(), *key.impl(), &str);
 
@@ -313,11 +313,12 @@ MojErr MojDbLevelDatabase::get(MojDbLevelItem& key, MojDbStorageTxn* txn, bool f
 MojErr MojDbLevelDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert( m_db );
    MojRefCountedPtr<MojDbLevelEnvTxn> txn(new MojDbLevelEnvTxn());
    MojAllocCheck(txn.get());
 
    // force TableTxn for this database to start
-   txn->tableTxn(impl()).begin(impl());
+   txn->tableTxn(*impl()).begin(*impl());
 
    txnOut = txn;
    return MojErrNone;
@@ -342,19 +343,19 @@ MojErr MojDbLevelDatabase::del(MojDbLevelItem& key, bool& foundOut, MojDbStorage
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(m_db);
-    MojAssert( !txn || dynamic_cast<MojDbLevelAbstractTxn *> (txn) );
+    MojAssert( !txn || dynamic_cast<MojDbLevelEnvTxn *> (txn) );
 
     foundOut = false;
     MojErr err = txn->offsetQuota(-(MojInt64) key.size());
     MojErrCheck(err);
 
-    MojDbLevelAbstractTxn * leveldb_txn = static_cast<MojDbLevelAbstractTxn *> (txn);
+    MojDbLevelEnvTxn * leveldb_txn = static_cast<MojDbLevelEnvTxn *> (txn);
 
     leveldb::Status st;
 
     if(leveldb_txn)
     {
-        leveldb_txn->tableTxn(impl()).Delete(*key.impl());
+        leveldb_txn->tableTxn(*impl()).Delete(*key.impl());
     }
     else
         st = m_db->Delete(MojDbLevelEngine::getWriteOptions(), *key.impl());

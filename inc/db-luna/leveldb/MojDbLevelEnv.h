@@ -19,35 +19,27 @@
 #ifndef MOJDBLEVELENV_H
 #define MOJDBLEVELENV_H
 
-#include <leveldb/db.h>
 #include "db/MojDbStorageEngine.h"
 #include "db/MojDbDefs.h"
 #include "core/MojFile.h"
 
-class MojDbLevelEnv : public MojDbEnv
+class MojDbLevelEnv final : public MojDbEnv
 {
 public:
-    MojDbLevelEnv();
-    ~MojDbLevelEnv();
+    ~MojDbLevelEnv() override;
 
-    MojErr configure(const MojObject& conf);
-    MojErr open(const MojChar* path);
-    MojErr close();
-    MojErr postCommit(MojSize updateSize);
-
-    void* impl() { return m_db; }
-    static MojErr translateErr(int dbErr);
+    MojErr configure(const MojObject& conf) override;
+    MojErr open(const MojChar* path) override;
 
 private:
     static const MojChar* const LockFileName;
 
+    MojErr close();
     MojErr lockDir(const MojChar* path);
     MojErr unlockDir();
 
     MojString m_lockFileName;
     MojFile m_lockFile;
-    MojString m_logDir;
-    leveldb::DB* m_db;
 };
 
 #endif

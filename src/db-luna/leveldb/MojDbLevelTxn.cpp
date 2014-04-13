@@ -48,13 +48,12 @@ MojDbLevelTxnIterator* MojDbLevelTableTxn::createIterator()
 }
 
 // class MojDbLevelTableTxn
-MojErr MojDbLevelTableTxn::begin(leveldb::DB* db)
+MojErr MojDbLevelTableTxn::begin(leveldb::DB &db)
 {
-    MojAssert(db);
     MojAssert( m_iterators.empty() );
 
     // TODO: mutex and lock-file serialization
-    m_db = db;
+    m_db = &db;
 
     return MojErrNone;
 }
@@ -65,13 +64,6 @@ MojErr MojDbLevelTableTxn::abort()
 
     cleanup();
     return MojErrNone;
-}
-
-MojDbLevelTableTxn &MojDbLevelTableTxn::tableTxn(leveldb::DB *db)
-{
-    MojAssert( db ); // database should exist
-    MojAssert( m_db == db ); // make sure we are within same database
-    return *this;
 }
 
 void MojDbLevelTableTxn::Put(const leveldb::Slice& key,
@@ -200,14 +192,14 @@ MojErr MojDbLevelEnvTxn::abort()
     return MojErrNone;
 }
 
-MojDbLevelTableTxn &MojDbLevelEnvTxn::tableTxn(leveldb::DB *db)
+MojDbLevelTableTxn &MojDbLevelEnvTxn::tableTxn(leveldb::DB &db)
 {
     // find within opened already
     for(TableTxns::iterator it = m_tableTxns.begin();
                             it != m_tableTxns.end();
                             ++it)
     {
-        if ((*it)->db() == db) return *(*it);
+        if ((*it)->db() == &db) return *(*it);
     }
 
     // create new

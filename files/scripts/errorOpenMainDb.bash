@@ -11,6 +11,7 @@ if [ "$BYTES_FREE" -ge "$BYTES_THRESHOLD" ]; then
     rm -f $BACKUP_FILENAME
     tar cjf $BACKUP_FILENAME /var/db/main
     chmod 400 $BACKUP_FILENAME
+    rm -rf /var/db/main/*
 else
     PmLogCtl log DB8 crit "mojodb-luna [] DB8 DBGMSG {} [maindb_errorOpenmainDb.bash] No space left to store corrupted maindb"
 fi

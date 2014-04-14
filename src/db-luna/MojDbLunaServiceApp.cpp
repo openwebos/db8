@@ -133,9 +133,6 @@ MojErr MojDbLunaServiceApp::open()
 	err = m_internalHandler->configure(dbOpenFailed);
 	MojErrCheck(err);
 
-    err = m_internalHandler->subscribe();
-    MojErrCheck(err);
-
     LOG_DEBUG("[mojodb] started");
 
 	return MojErrNone;

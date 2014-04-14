@@ -149,7 +149,6 @@ set(DB_LIB_SOURCES
     src/db/MojDbKindState.cpp
     src/db/MojDbKindIdList.cpp
     src/db/MojDbMediaLinkManager.cpp
-    src/db/MojDbMediaHandler.cpp
     src/db/MojDbObjectHeader.cpp
     src/db/MojDbObjectItem.cpp
     src/db/MojDbPermissionEngine.cpp

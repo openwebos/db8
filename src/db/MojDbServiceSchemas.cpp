@@ -248,3 +248,9 @@ const MojChar* const MojDbServiceHandler::SetShardModeSchema =
          _T("\"transient\":{\"type\":\"boolean\"}},")
      _T("\"additionalProperties\":false}");
 
+const MojChar* const MojDbServiceHandler::RegisterMediaSchema =
+    _T("{\"type\":\"object\",")
+     _T("\"properties\":{")
+         _T("\"devices\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}}},")
+     _T("\"additionalProperties\":false}");
+

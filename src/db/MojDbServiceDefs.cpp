@@ -28,6 +28,7 @@ const MojChar* const MojDbServiceDefs::CountryCodeKey = _T("countryCode");
 const MojChar* const MojDbServiceDefs::CreateKey = _T("create");
 const MojChar* const MojDbServiceDefs::DeleteKey = _T("delete");
 const MojChar* const MojDbServiceDefs::DeletedRevKey = _T("deletedRev");
+const MojChar* const MojDbServiceDefs::DevicesKey = _T("devices");
 const MojChar* const MojDbServiceDefs::DescriptionKey = _T("description");
 const MojChar* const MojDbServiceDefs::DirKey = _T("tempDir");
 const MojChar* const MojDbServiceDefs::ExtendKey = _T("extend");
@@ -84,6 +85,7 @@ const MojChar* const MojDbServiceDefs::ListActiveMediaKey = _T("listActiveMedia"
 const MojChar* const MojDbServiceDefs::ShardInfoKey = _T("shardInfo");
 const MojChar* const MojDbServiceDefs::ShardKindKey = _T("shardKind");
 const MojChar* const MojDbServiceDefs::SetShardModeKey = _T("setShardMode");
+const MojChar* const MojDbServiceDefs::RegisterMediaKey = _T("registerMedia");
 const MojChar* const MojDbServiceDefs::MediaKey = _T("media");
 const MojChar* const MojDbServiceDefs::TransientKey = _T("transient");
 // property values
@@ -122,6 +124,7 @@ const MojChar* const MojDbServiceDefs::ListActiveMediaMethod = _T("listActiveMed
 const MojChar* const MojDbServiceDefs::ShardInfoMethod = _T("shardInfo");
 const MojChar* const MojDbServiceDefs::ShardKindMethod = _T("shardKind");
 const MojChar* const MojDbServiceDefs::SetShardModeMethod = _T("setShardMode");
+const MojChar* const MojDbServiceDefs::RegisterMediaMethod = _T("registerMedia");
 // service name
 const MojChar* const MojDbServiceDefs::Category = MojService::DefaultCategory;
 const MojChar* const MojDbServiceDefs::InternalCategory = _T("/internal");

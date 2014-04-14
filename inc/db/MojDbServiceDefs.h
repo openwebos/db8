@@ -33,6 +33,7 @@ public:
 	static const MojChar* const CreateKey;
 	static const MojChar* const DeleteKey;
 	static const MojChar* const DeletedRevKey;
+	static const MojChar* const DevicesKey;
 	static const MojChar* const DescriptionKey;
 	static const MojChar* const DirKey;
 	static const MojChar* const ExtendKey;
@@ -89,6 +90,7 @@ public:
 	static const MojChar* const ShardInfoKey;
 	static const MojChar* const ShardKindKey;
 	static const MojChar* const SetShardModeKey;
+	static const MojChar* const RegisterMediaKey;
 	static const MojChar* const MediaKey;
 	static const MojChar* const TransientKey;
 	// property values
@@ -127,6 +129,7 @@ public:
 	static const MojChar* const ShardInfoMethod;
 	static const MojChar* const ShardKindMethod;
 	static const MojChar* const SetShardModeMethod;
+	static const MojChar* const RegisterMediaMethod;
 	// service names
 	static const MojChar* const Category;
 	static const MojChar* const InternalCategory;

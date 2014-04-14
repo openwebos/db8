@@ -21,6 +21,10 @@
 #define MOJDBSERVICEHANDLER_H_
 
 #include "db/MojDbServiceHandlerBase.h"
+#include "db/MojDbShardInfo.h"
+
+#include <map>
+#include <set>
 
 class MojDbServiceHandler : public MojDbServiceHandlerBase
 {
@@ -58,8 +62,10 @@ private:
 	static const MojChar* const ShardInfoSchema;
 	static const MojChar* const ShardKindSchema;
 	static const MojChar* const SetShardModeSchema;
+	static const MojChar* const RegisterMediaSchema;
 
 	typedef MojMap<MojString, DbCallback, const MojChar*, MojComp<const MojChar*>, MojCompAddr<DbCallback> > BatchMap;
+	typedef std::map<MojString, MojDbShardInfo> shard_cache_t;
 
 	class Watcher : public MojSignalHandler
 	{
@@ -98,10 +104,15 @@ private:
 	MojErr handleShardInfo(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleShardKind(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleSetShardMode(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleRegisterMedia(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 
 	MojErr findImpl(MojServiceMessage* msg, MojObject& payload, MojDbReq& req, MojDbCursor& cursor, bool doCount);
+	MojErr convert(const MojObject& object, MojDbShardInfo& shardInfo);
+	bool   existInCache(const MojString& id);
+	void   copyShardCache(std::set<MojString>* shardIdSet);
 
 	BatchMap m_batchCallbacks;
+	shard_cache_t m_shardCache;
 
 	static const SchemaMethod s_pubMethods[];
 	static const SchemaMethod s_privMethods[];

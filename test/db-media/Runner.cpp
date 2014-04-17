@@ -1,7 +1,7 @@
 /****************************************************************
  * @@@LICENSE
  *
- * Copyright (c) 2013 LG Electronics, Inc.
+ * Copyright (c) 2013-2014 LG Electronics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,27 +27,12 @@
 
 #include "core/MojUtil.h"
 
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#else
-#error "Database Engine doesn't set. See README.txt"
-#endif
-
 const char *tempFolder;
 
 int main(int argc, char **argv) {
     char buf[128] = "/tmp/mojodb-test-dir-XXXXXX";
     tempFolder = mkdtemp(buf);
     if (!tempFolder) tempFolder = "/tmp/mojodb-test-dir"; // fallback
-
-   // set up engine
-#ifdef MOJ_USE_BDB
-   MojDbStorageEngine::setEngineFactory(new MojDbBerkeleyFactory());
-#elif MOJ_USE_LDB
-   MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
-#endif
 
     // stup and run tests
     testing::InitGoogleTest(&argc, argv);

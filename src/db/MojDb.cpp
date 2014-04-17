@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2009-2013 LG Electronics, Inc.
+* Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@
 #include "core/MojObjectSerialization.h"
 #include "core/MojTime.h"
 #include "core/MojFile.h"
-#include "db-luna/leveldb/MojDbLevelItem.h"
 
 const MojChar* const MojDb::AdminRole = _T("admin");
 const MojChar* const MojDb::ObjDbName = _T("objects.db");

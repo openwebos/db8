@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2009-2013 LG Electronics, Inc.
+* Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -861,12 +861,12 @@ MojErr MojDbBerkeleyEnv::translateErr(int dbErr)
 
 void MojDbBerkeleyEnv::errcall(const DB_ENV *dbenv, const char *errpfx, const char *msg)
 {
-    LOG_ERROR(MSGID_ERROR_CALL, 1, PMLOGKS("bdb", msg), "");
+    LOG_ERROR(MSGID_ERROR_CALL, 1, PMLOGKS("berkeleydb", msg), "");
 }
 
 void MojDbBerkeleyEnv::msgcall(const DB_ENV *dbenv, const char *msg)
 {
-    LOG_ERROR(MSGID_MESSAGE_CALL, 1, PMLOGKS("bdb", msg), "");
+    LOG_ERROR(MSGID_MESSAGE_CALL, 1, PMLOGKS("berkeleydb", msg), "");
 }
 
 MojDbBerkeleyEngine::MojDbBerkeleyEngine()
@@ -991,8 +991,6 @@ MojErr MojDbBerkeleyEngine::compact()
 	const char * DatabaseRoot = "/var/db"; // FIXME: Should not be hard-coded, but so is the disk space monitor!
 
 	struct statvfs statAtBeginning, statAfterCompact, statAtEnd;
-
-	MojLogTrace(MojDbBerkeleyEngine::s_log);
 
 	struct timeval totalStartTime = {0,0}, totalStopTime = {0,0};
 

@@ -24,67 +24,71 @@
 # Optional variable:
 # DB_BACKEND_WRAPPER_CFLAGS     - compiller flags
 
-set(WEBOS_DB8_BACKEND "leveldb" CACHE STRING "Backend to use with DB8")
+set(WEBOS_DB8_BACKEND "leveldb" CACHE STRING "Backend(s) to use with DB8")
 
-message (STATUS "Use database frontend: ${WEBOS_DB8_BACKEND}")
+foreach (backend ${WEBOS_DB8_BACKEND})
+	message (STATUS "Use database frontend: ${backend}")
 
-if (WEBOS_DB8_BACKEND STREQUAL "berkeleydb")
-    # -- check for BerkeleyDB
-    # (add an alternate standard path in case building BDB locally: does not override)
-    find_library(BDB NAMES db-4.8 PATH /usr/local/BerkeleyDB.4.8/lib)
-    if(BDB STREQUAL "BDB-NOTFOUND")
-        MESSAGE(FATAL_ERROR "Failed to find BerkleyDB libaries. Please install.")
-    endif()
+	if (backend STREQUAL "berkeleydb")
+		# -- check for BerkeleyDB
+		# (add an alternate standard path in case building BDB locally: does not override)
+		find_library(BDB NAMES db-4.8 PATH /usr/local/BerkeleyDB.4.8/lib)
+		if(BDB STREQUAL "BDB-NOTFOUND")
+			MESSAGE(FATAL_ERROR "Failed to find BerkleyDB libaries. Please install.")
+		endif()
 
-    find_path(BDB_INC db.h
-              PATHS /usr/local/BerkeleyDB.4.8/include
-              PATH_SUFFIXES db4.8)
-    if(BDB_INC STREQUAL "BDB_INC-NOTFOUND")
-        MESSAGE(FATAL_ERROR "Failed to find BerkleyDB includes. Please install.")
-    endif()
+		find_path(BDB_INC db.h
+				  PATHS /usr/local/BerkeleyDB.4.8/include
+				  PATH_SUFFIXES db4.8)
+		if(BDB_INC STREQUAL "BDB_INC-NOTFOUND")
+			MESSAGE(FATAL_ERROR "Failed to find BerkleyDB includes. Please install.")
+		endif()
 
-    set (DB_BACKEND_INCLUDES "${BDB_INC}")
-    set (DB_BACKEND_LIB "${BDB}")
+		set (DB_BACKEND_INCLUDES ${DB_BACKEND_INCLUDES} ${BDB_INC})
+		set (DB_BACKEND_LIB ${DB_BACKEND_LIB} ${BDB})
 
-    set(DB_BACKEND_WRAPPER_SOURCES
-        src/db-luna/MojDbBerkeleyEngine.cpp
-        src/db-luna/MojDbBerkeleyFactory.cpp
-        src/db-luna/MojDbBerkeleyQuery.cpp
-    )
+		set(DB_BACKEND_WRAPPER_SOURCES
+			${DB_BACKEND_WRAPPER_SOURCES}
+			src/db-luna/MojDbBerkeleyEngine.cpp
+			src/db-luna/MojDbBerkeleyFactory.cpp
+			src/db-luna/MojDbBerkeleyQuery.cpp
+		)
 
-    set (DB_BACKEND_WRAPPER_CFLAGS "-DMOJ_USE_BDB")
-elseif (WEBOS_DB8_BACKEND STREQUAL "leveldb")
+		set (DB_BACKEND_WRAPPER_CFLAGS "${DB_BACKEND_WRAPPER_CFLAGS} -DMOJ_USE_BDB")
+	elseif (backend STREQUAL "leveldb")
 
-    # -- check for LevelDB backend
-    find_library(LDB NAMES leveldb ${WEBOS_INSTALL_ROOT}/lib)
-    if(LDB STREQUAL "LDB-NOTFOUND")
-        MESSAGE(FATAL_ERROR "Failed to find LevelDB libaries. Please install.")
-    endif()
+		# -- check for LevelDB backend
+		find_library(LDB NAMES leveldb ${WEBOS_INSTALL_ROOT}/lib)
+		if(LDB STREQUAL "LDB-NOTFOUND")
+			MESSAGE(FATAL_ERROR "Failed to find LevelDB libaries. Please install.")
+		endif()
 
-    set (DB_BACKEND_INCLUDES ${WEBOS_INSTALL_ROOT}/include)
-    set (DB_BACKEND_LIB "${LDB}")
+		set (DB_BACKEND_INCLUDES ${DB_BACKEND_INCLUDES} ${WEBOS_INSTALL_ROOT}/include)
+		set (DB_BACKEND_LIB ${DB_BACKEND_LIB} ${LDB})
 
-    set(DB_BACKEND_WRAPPER_SOURCES
-        src/db-luna/leveldb/defs.cpp
-        src/db-luna/leveldb/MojDbLevelEngine.cpp
-        src/db-luna/leveldb/MojDbLevelFactory.cpp
-        src/db-luna/leveldb/MojDbLevelDatabase.cpp
-        src/db-luna/leveldb/MojDbLevelQuery.cpp
-        src/db-luna/leveldb/MojDbLevelTxn.cpp
-        src/db-luna/leveldb/MojDbLevelSeq.cpp
-        src/db-luna/leveldb/MojDbLevelCursor.cpp
-        src/db-luna/leveldb/MojDbLevelEnv.cpp
-        src/db-luna/leveldb/MojDbLevelIndex.cpp
-        src/db-luna/leveldb/MojDbLevelItem.cpp
-        src/db-luna/leveldb/MojDbLevelTxnIterator.cpp
-        src/db-luna/leveldb/MojDbLevelIterator.cpp
-        src/db-luna/leveldb/MojDbLevelContainerIterator.cpp
-   )
+		set(DB_BACKEND_WRAPPER_SOURCES
+			${DB_BACKEND_WRAPPER_SOURCES}
+			src/db-luna/leveldb/defs.cpp
+			src/db-luna/leveldb/MojDbLevelEngine.cpp
+			src/db-luna/leveldb/MojDbLevelFactory.cpp
+			src/db-luna/leveldb/MojDbLevelDatabase.cpp
+			src/db-luna/leveldb/MojDbLevelQuery.cpp
+			src/db-luna/leveldb/MojDbLevelTxn.cpp
+			src/db-luna/leveldb/MojDbLevelSeq.cpp
+			src/db-luna/leveldb/MojDbLevelCursor.cpp
+			src/db-luna/leveldb/MojDbLevelEnv.cpp
+			src/db-luna/leveldb/MojDbLevelIndex.cpp
+			src/db-luna/leveldb/MojDbLevelItem.cpp
+			src/db-luna/leveldb/MojDbLevelTxnIterator.cpp
+			src/db-luna/leveldb/MojDbLevelIterator.cpp
+			src/db-luna/leveldb/MojDbLevelContainerIterator.cpp
+	   )
 
-    set (DB_BACKEND_WRAPPER_CFLAGS "-DMOJ_USE_LDB")
-else () 
-    message(FATAL_ERROR "WEBOS_DB8_BACKEND: unsuported value '${WEBOS_DB8_BACKEND}'")
-endif ()
+		set (DB_BACKEND_WRAPPER_CFLAGS "${DB_BACKEND_WRAPPER_CFLAGS} -DMOJ_USE_LDB")
+	else ()
+		message(FATAL_ERROR "WEBOS_DB8_BACKEND: unsuported value '${backend}'")
+	endif ()
+endforeach ()
 
 # -- check for errors
 if(NOT DEFINED DB_BACKEND_LIB)

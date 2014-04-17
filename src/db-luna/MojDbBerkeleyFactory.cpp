@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 * LICENSE@@@ */
 
 
+#include "core/MojLogDb8.h"
 #include "db-luna/MojDbBerkeleyFactory.h"
 #include "db-luna/MojDbBerkeleyEngine.h"
+
+namespace { MojDbStorageEngine::Registrator<MojDbBerkeleyFactory> factoryBerkeleyDB; }
 
 MojErr MojDbBerkeleyFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engineOut) const
 {
@@ -39,4 +42,4 @@ MojErr MojDbBerkeleyFactory::createEnv(MojRefCountedPtr<MojDbEnv>& envOut) const
 	return MojErrNone;
 }
 
-const MojChar* MojDbBerkeleyFactory::name() const {return _T("bdb");};
+const MojChar* MojDbBerkeleyFactory::name() const {return _T("berkeleydb");};

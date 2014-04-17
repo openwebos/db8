@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2013 LG Electronics, Inc.
+# Copyright (c) 2013-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,9 @@ foreach(test
         MojDbNewId
         MojDbShardManager
         )
-    add_test(NAME ${test} COMMAND test_db_core ${test})
+	foreach (backend ${WEBOS_DB8_BACKEND})
+		add_test(NAME ${backend}/${test} COMMAND env MOJODB_ENGINE=${backend} ${CMAKE_CURRENT_BINARY_DIR}/test_db_core ${test})
+	endforeach()
     set(DB_TEST_SOURCES ${DB_TEST_SOURCES} ${test}Test.cpp)
 endforeach()
 

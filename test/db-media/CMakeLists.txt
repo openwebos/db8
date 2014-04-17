@@ -41,7 +41,9 @@ target_link_libraries(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} gtest gtest_main)
 
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+foreach (backend ${WEBOS_DB8_BACKEND})
+    add_test(NAME ${backend}/${test} COMMAND env MOJODB_ENGINE=${backend} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+endforeach ()
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
         DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests

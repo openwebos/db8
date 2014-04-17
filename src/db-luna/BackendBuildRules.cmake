@@ -85,6 +85,35 @@ foreach (backend ${WEBOS_DB8_BACKEND})
 	   )
 
 		set (DB_BACKEND_WRAPPER_CFLAGS "${DB_BACKEND_WRAPPER_CFLAGS} -DMOJ_USE_LDB")
+	elseif (backend STREQUAL "sandwich")
+
+		# -- check for LevelDB backend
+		find_library(LDB NAMES leveldb ${WEBOS_INSTALL_ROOT}/lib)
+		if(LDB STREQUAL "LDB-NOTFOUND")
+			MESSAGE(FATAL_ERROR "Failed to find LevelDB libaries. Please install.")
+		endif()
+
+		set (DB_BACKEND_INCLUDES ${DB_BACKEND_INCLUDES} ${WEBOS_INSTALL_ROOT}/include)
+		set (DB_BACKEND_LIB ${DB_BACKEND_LIB} ${LDB})
+
+		set(DB_BACKEND_WRAPPER_SOURCES
+			${DB_BACKEND_WRAPPER_SOURCES}
+			src/storage-sandwich/MojDbSandwichEngine.cpp
+			src/storage-sandwich/MojDbSandwichFactory.cpp
+			src/storage-sandwich/MojDbSandwichDatabase.cpp
+			src/storage-sandwich/MojDbSandwichQuery.cpp
+			src/storage-sandwich/MojDbSandwichTxn.cpp
+			src/storage-sandwich/MojDbSandwichSeq.cpp
+			src/storage-sandwich/MojDbSandwichCursor.cpp
+			src/storage-sandwich/MojDbSandwichEnv.cpp
+			src/storage-sandwich/MojDbSandwichIndex.cpp
+			src/storage-sandwich/MojDbSandwichItem.cpp
+			src/storage-sandwich/MojDbSandwichTxnIterator.cpp
+			src/storage-sandwich/MojDbSandwichIterator.cpp
+			src/storage-sandwich/MojDbSandwichContainerIterator.cpp
+		)
+
+		set (DB_BACKEND_WRAPPER_CFLAGS "${DB_BACKEND_WRAPPER_CFLAGS} -I${CMAKE_SOURCE_DIR}/src/storage-sandwich -DMOJ_USE_SANDWICH")
 	else ()
 		message(FATAL_ERROR "WEBOS_DB8_BACKEND: unsuported value '${backend}'")
 	endif ()

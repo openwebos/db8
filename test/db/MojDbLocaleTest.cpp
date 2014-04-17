@@ -19,13 +19,7 @@
 
 #include "MojDbLocaleTest.h"
 #include "db/MojDb.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else 
-#error "Specify database engine"
-#endif
+#include "db/MojDbStorageEngine.h"
 #include "MojDbTestStorageEngine.h"
 
 static const MojChar* const MojTestKindStr =
@@ -91,13 +85,9 @@ MojErr MojDbLocaleTest::run()
 	// close and reopen with test engine
 	err = db.close();
 	MojTestErrCheck(err);
-#ifdef MOJ_USE_BDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
-#elif MOJ_USE_LDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
-#else
-#error No engine
-#endif
+	MojRefCountedPtr<MojDbStorageEngine> engine;
+	err = MojDbStorageEngine::createDefaultEngine(engine);
+	MojTestErrCheck(err);
 	MojAllocCheck(engine.get());
 	MojRefCountedPtr<MojDbTestStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
 	MojAllocCheck(testEngine.get());

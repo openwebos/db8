@@ -314,11 +314,11 @@ MojErr MojDbSandwichDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     //MojAssert( m_db );
-   MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn());
+   MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_engine->impl()));
    MojAllocCheck(txn.get());
 
    // force TableTxn for this database to start
-   txn->tableTxn(impl()).begin(impl());
+   txn->tableTxn(impl())/*.begin(impl())*/;
 
    txnOut = txn;
    return MojErrNone;

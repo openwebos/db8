@@ -36,7 +36,7 @@ class MojDbSandwichItem;
 
 class MojDbSandwichEnvTxn;
 class MojDbSandwichTableTxn;
-class MojDbSandwichTxnIterator;
+//class MojDbSandwichTxnIterator;
 
 class MojDbSandwichCursor : public MojNoCopy
 {
@@ -62,11 +62,12 @@ private:
     MojDbSandwichEngine::BackendDb::Part* m_db;
     MojDbSandwichEnvTxn* m_txn;
     MojDbSandwichTableTxn* m_ttxn;
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    boost::scoped_ptr<MojDbSandwichTxnIterator> m_txnIt;
-#else
-    std::auto_ptr<MojDbSandwichTxnIterator> m_txnIt;
-#endif
+//#ifdef __GXX_EXPERIMENTAL_CXX0X__
+//    boost::scoped_ptr<MojDbSandwichTxnIterator> m_txnIt;
+//#else
+//    std::auto_ptr<MojDbSandwichTxnIterator> m_txnIt;
+//#endif
+    std::unique_ptr<leveldb::Iterator> m_txnIt;
     MojSize m_warnCount;
 };
 

@@ -215,7 +215,7 @@ MojErr MojDbSandwichEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!txnOut.get());
 
-    MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn());
+    MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_db));
     MojAllocCheck(txn.get());
     MojErr err = txn->begin(this);
     MojErrCheck(err);

@@ -22,14 +22,13 @@
 #include "MojDbSandwichTxn.h"
 #include "MojDbSandwichItem.h"
 #include "db-luna/leveldb/defs.h"
-#include "MojDbSandwichTxnIterator.h"
+//#include "MojDbSandwichTxnIterator.h"
 #include "core/MojLogDb8.h"
 
 MojDbSandwichCursor::MojDbSandwichCursor() :
     m_db(0),
     m_txn(0),
-    m_ttxn(0),
-    m_txnIt(0)
+    m_ttxn(0)
 {
 }
 
@@ -50,11 +49,11 @@ MojErr MojDbSandwichCursor::open(MojDbSandwichDatabase* db, MojDbStorageTxn* txn
 
     m_txn = static_cast<MojDbSandwichEnvTxn *>(txn);
     m_ttxn = & m_txn->tableTxn(*m_db);
-    m_txnIt.reset(m_ttxn->createIterator());
+    m_txnIt = m_ttxn->createIterator();
     MojAssert( m_txnIt.get() );
     m_warnCount = 0;
 
-    m_txnIt->first();
+    m_txnIt->SeekToFirst();
 
     return MojErrNone;
 }
@@ -77,7 +76,7 @@ MojErr MojDbSandwichCursor::del()
     MojAssert( m_txn && m_ttxn );
     MojAssert( m_txnIt.get() );
 
-    std::string key = m_txnIt->getKey();
+    std::string key = m_txnIt->key().ToString();
     const size_t delSize = recSize();
 
     m_ttxn->Delete(key);
@@ -98,16 +97,16 @@ MojErr MojDbSandwichCursor::delPrefix(const MojDbKey& prefix)
     MojErrCheck(err);
 
     const std::string& searchKey = (*key.impl()).ToString();
-    m_txnIt->seek(searchKey);
+    m_txnIt->Seek(searchKey);
 
-    if (!m_txnIt->isValid()) {
+    if (!m_txnIt->Valid()) {
         return MojErrNone;
     }
 
-    while (m_txnIt->isValid() && m_txnIt->keyStartsWith(searchKey)) {
+    while (m_txnIt->Valid() && m_txnIt->key().starts_with(searchKey)) {
         err = del();
         MojErrCheck(err);
-        m_txnIt->next();
+        m_txnIt->Next();
     }
     return MojErrNone;
 }
@@ -123,30 +122,30 @@ MojErr MojDbSandwichCursor::get(MojDbSandwichItem& key, MojDbSandwichItem& val, 
     switch (flags)
     {
     case e_Set:
-        m_txnIt->seek(lkey);
+        m_txnIt->Seek(lkey);
     break;
 
     case e_Next:
-        m_txnIt->next();
+        m_txnIt->Next();
     break;
     case e_Prev:
-        m_txnIt->prev();
+        m_txnIt->Prev();
     break;
     case e_First:
-        m_txnIt->first();
+        m_txnIt->SeekToFirst();
     break;
     case e_Last:
-        m_txnIt->last();
+        m_txnIt->SeekToLast();
     break;
     default:
     break;
     }
 
-    if(m_txnIt->isValid())
+    if(m_txnIt->Valid())
     {
         foundOut = true;
-        key.from(m_txnIt->getKey());
-        val.from(m_txnIt->getValue());
+        key.from(m_txnIt->key());
+        val.from(m_txnIt->value());
 
     }
 
@@ -183,12 +182,12 @@ MojErr MojDbSandwichCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOu
     MojErrCheck(err);
 
     const std::string& searchKey = key.impl()->ToString();
-    m_txnIt->seek(searchKey);
+    m_txnIt->Seek(searchKey);
 
-    while (m_txnIt->isValid() && m_txnIt->keyStartsWith(searchKey)) {
+    while (m_txnIt->Valid() && m_txnIt->key().starts_with(searchKey)) {
         ++count;
         size += recSize();
-        m_txnIt->next();
+        m_txnIt->Next();
     }
     sizeOut = size;
     countOut = count;
@@ -198,7 +197,7 @@ MojErr MojDbSandwichCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOu
 
 size_t MojDbSandwichCursor::recSize() const
 {
-    if (!m_txnIt->isValid())
+    if (!m_txnIt->Valid())
         return 0;
-    return m_txnIt->getKey().size() + m_txnIt->getValue().size();
+    return m_txnIt->key().size() + m_txnIt->value().size();
 }

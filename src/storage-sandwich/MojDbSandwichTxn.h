@@ -26,6 +26,8 @@
 
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
+#include <leveldb/txn_db.hpp>
+#include <leveldb/bottom_db.hpp>
 
 #include <core/MojString.h>
 #include <core/MojErr.h>
@@ -39,21 +41,22 @@ namespace leveldb
 
 class MojDbSandwichEngine;
 class MojDbSandwichTableTxn;
-class MojDbSandwichTxnIterator;
+//class MojDbSandwichTxnIterator;
 
 // Note we implement kinda dirty read with shadowing by local wirtes
 class MojDbSandwichTableTxn
 {
 public:
-    MojDbSandwichTableTxn();
+    typedef leveldb::SandwichDB<leveldb::TxnDB<leveldb::BottomDB>> BackendDb;
+    MojDbSandwichTableTxn(BackendDb &txn, const BackendDb::Part &db);
     ~MojDbSandwichTableTxn();
 
-    MojErr begin(MojDbSandwichEngine::BackendDb::Part &db);
+    //MojErr begin(MojDbSandwichEngine::BackendDb::Part &db);
 
     MojErr abort();
 
-    bool isValid() { return (m_db == NULL); }
-    MojDbSandwichEngine::BackendDb::Part* db() { return m_db; }
+    bool isValid() { return m_db.Valid(); }
+    BackendDb::Part* db() { return &m_db; }
 
     // operations
     void Put(const leveldb::Slice& key,
@@ -63,8 +66,8 @@ public:
                         std::string& val);
 
     void Delete(const leveldb::Slice& key);
-    MojDbSandwichTxnIterator* createIterator();
-    void detach(MojDbSandwichTxnIterator *it);
+    std::unique_ptr<leveldb::Iterator> createIterator();
+    //void detach(MojDbSandwichTxnIterator *it);
 
     MojErr commitImpl();
 
@@ -72,21 +75,28 @@ private:
     void cleanup();
 
     // where and how to write this batch
-    MojDbSandwichEngine::BackendDb::Part* m_db;
+    BackendDb& m_txn;
+    BackendDb::Part m_db;
 
     // local view for pending writes
-    typedef std::map<std::string, std::string> PendingValues;
-    typedef std::set<std::string> PendingDeletes;
-    PendingValues m_pendingValues;
-    PendingDeletes m_pendingDeletes;
-    std::set<MojDbSandwichTxnIterator*> m_iterators;
+    //typedef std::map<std::string, std::string> PendingValues;
+    //typedef std::set<std::string> PendingDeletes;
+    //PendingValues m_pendingValues;
+    //PendingDeletes m_pendingDeletes;
+    //std::set<MojDbSandwichTxnIterator*> m_iterators;
 
-    friend class MojDbSandwichTxnIterator;
+    //friend class MojDbSandwichTxnIterator;
 };
 
 class MojDbSandwichEnvTxn final : public MojDbStorageTxn
 {
 public:
+    MojDbSandwichEnvTxn(MojDbSandwichEngine::BackendDb& db)
+        : m_txn(db.ref<leveldb::TxnDB>())
+    {
+
+    }
+
     ~MojDbSandwichEnvTxn()
     { abort(); }
 
@@ -100,8 +110,9 @@ public:
 private:
     MojErr commitImpl();
 
-    typedef std::list<MojSharedPtr<MojDbSandwichTableTxn> > TableTxns;
+    typedef std::map<MojDbSandwichEngine::BackendDb::Part *, MojSharedPtr<MojDbSandwichTableTxn> > TableTxns;
     TableTxns m_tableTxns;
+    MojDbSandwichTableTxn::BackendDb m_txn;
 };
 
 // Note: Current workaround uses EnvTxn not only for Env transaction but for

@@ -57,6 +57,7 @@ public:
     MojErr removeSeq(MojDbSandwichSeq* seq);
 
     MojDbSandwichDatabase* indexDb() { return m_indexDb.get(); }
+    BackendDb& impl() {return m_db;}
 
     static const leveldb::WriteOptions& getWriteOptions() { return WriteOptions; }
     static const leveldb::ReadOptions& getReadOptions() { return ReadOptions; }

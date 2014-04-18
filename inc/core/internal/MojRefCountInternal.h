@@ -26,8 +26,8 @@
 
 namespace {
 	// malloc should give pointer to memory with alignment suitable for any type
-	constexpr MojSize MojMallocAligment = alignof(max_align_t);
-	constexpr MojSize MojAtomicPadding =
+	const MojSize MojMallocAligment = sizeof(void*)*2;
+	const MojSize MojAtomicPadding =
 		(sizeof(MojAtomicT)*MojMallocAligment - sizeof(MojAtomicT)) % MojMallocAligment;
 }
 

@@ -198,10 +198,10 @@ public:
 
     static MojErr createDefaultEngine(MojRefCountedPtr<MojDbStorageEngine>& engineOut);
     static MojErr createEngine(const MojChar* name, MojRefCountedPtr<MojDbStorageEngine>& engineOut);
-    static MojErr createEnv(MojRefCountedPtr<MojDbEnv>& envOut) { return m_factory->createEnv(envOut); };
+    static MojErr createEnv(MojRefCountedPtr<MojDbEnv>& envOut);
     static MojErr setEngineFactory(MojDbStorageEngineFactory* factory);
     static MojErr setEngineFactory(const MojChar *name);
-    static const MojDbStorageEngineFactory* engineFactory() {return m_factory.get();};
+    static const MojDbStorageEngineFactory* engineFactory() {return m_factory.get();}
 
     virtual ~MojDbStorageEngine() {}
     virtual MojErr configure(const MojObject& config) = 0;
@@ -227,10 +227,9 @@ public:
 	template <typename T>
 	struct Registrator
 	{
-		template<typename... Args>
-		Registrator(Args &&... args)
+		Registrator()
 		{
-			Factory factory { new T(std::forward<args>...) };
+			Factory factory { new T() };
 			MojAssert(factory.get());
 			MojString key;
 			if (key.assign(factory->name()) != MojErrNone) return; // ignore invalid name

@@ -24,7 +24,7 @@
 # Optional variable:
 # DB_BACKEND_WRAPPER_CFLAGS     - compiller flags
 
-set(WEBOS_DB8_BACKEND "leveldb" CACHE STRING "Backend(s) to use with DB8")
+set(WEBOS_DB8_BACKEND "sandwich" CACHE STRING "Backend(s) to use with DB8")
 
 foreach (backend ${WEBOS_DB8_BACKEND})
 	message (STATUS "Use database frontend: ${backend}")

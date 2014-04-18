@@ -23,7 +23,7 @@
 #include "MojDbSandwichTxn.h"
 #include "MojDbSandwichIndex.h"
 #include "db/MojDb.h"
-#include "db-luna/leveldb/defs.h"
+#include "defs.h"
 
 ////////////////////MojDbSandwichDatabase////////////////////////////////////////////
 

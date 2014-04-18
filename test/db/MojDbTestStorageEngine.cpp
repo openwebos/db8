@@ -18,13 +18,6 @@
 
 
 #include "MojDbTestStorageEngine.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else 
-#error "Specify database engine"
-#endif
 
 #define MojTestTxn(TXN) ((TXN) ? (static_cast<MojDbTestStorageTxn*>((TXN)))->txn() : NULL)
 

@@ -22,13 +22,10 @@
 #include "MojDbSandwichTxn.h"
 #include "MojDbSandwichItem.h"
 #include "db-luna/leveldb/defs.h"
-//#include "MojDbSandwichTxnIterator.h"
 #include "core/MojLogDb8.h"
 
 MojDbSandwichCursor::MojDbSandwichCursor() :
-    m_db(0),
-    m_txn(0),
-    m_ttxn(0)
+    m_txn(0)
 {
 }
 
@@ -45,11 +42,9 @@ MojErr MojDbSandwichCursor::open(MojDbSandwichDatabase* db, MojDbStorageTxn* txn
     MojAssert(db->impl().Valid());
     MojAssert( dynamic_cast<MojDbSandwichEnvTxn *>(txn) );
 
-    m_db = &db->impl();
-
     m_txn = static_cast<MojDbSandwichEnvTxn *>(txn);
-    m_ttxn = & m_txn->tableTxn(*m_db);
-    m_txnIt = m_ttxn->createIterator();
+    m_part = m_txn->ref(db->impl());
+    m_txnIt = m_part.NewIterator();
     MojAssert( m_txnIt.get() );
     m_warnCount = 0;
 
@@ -63,9 +58,8 @@ MojErr MojDbSandwichCursor::close()
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
     m_txn = 0;
-    m_ttxn = 0;
+    m_part = {};
     m_txnIt.reset();
-    m_db = 0;
 
     return MojErrNone;
 }
@@ -73,13 +67,12 @@ MojErr MojDbSandwichCursor::close()
 MojErr MojDbSandwichCursor::del()
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
-    MojAssert( m_txn && m_ttxn );
+    MojAssert( m_txn && m_part.Valid() );
     MojAssert( m_txnIt.get() );
 
-    std::string key = m_txnIt->key().ToString();
     const size_t delSize = recSize();
 
-    m_ttxn->Delete(key);
+    m_part.Delete(m_txnIt->key());
     MojErr err = m_txn->offsetQuota(-(MojInt64) delSize);
     MojErrCheck(err);
 
@@ -96,7 +89,7 @@ MojErr MojDbSandwichCursor::delPrefix(const MojDbKey& prefix)
     MojErr err = key.fromBytes(prefix.data(), prefix.size());
     MojErrCheck(err);
 
-    const std::string& searchKey = (*key.impl()).ToString();
+    const auto& searchKey = *key.impl();
     m_txnIt->Seek(searchKey);
 
     if (!m_txnIt->Valid()) {
@@ -116,13 +109,11 @@ MojErr MojDbSandwichCursor::get(MojDbSandwichItem& key, MojDbSandwichItem& val, 
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert( m_txnIt.get() );
 
-    const std::string& lkey = key.impl()->ToString();
-
     foundOut = false;
     switch (flags)
     {
     case e_Set:
-        m_txnIt->Seek(lkey);
+        m_txnIt->Seek(*key.impl());
     break;
 
     case e_Next:
@@ -181,7 +172,7 @@ MojErr MojDbSandwichCursor::statsPrefix(const MojDbKey& prefix, MojSize& countOu
     MojSize size = 0;
     MojErrCheck(err);
 
-    const std::string& searchKey = key.impl()->ToString();
+    const auto& searchKey = *key.impl();
     m_txnIt->Seek(searchKey);
 
     while (m_txnIt->Valid() && m_txnIt->key().starts_with(searchKey)) {

@@ -38,49 +38,14 @@ MojDbSandwichDatabase::~MojDbSandwichDatabase()
     MojErrCatchAll(err);
 }
 
-MojErr MojDbSandwichDatabase::open(const MojChar* dbName, MojDbSandwichEngine* eng, bool& createdOut, MojDbStorageTxn* txn)
+MojErr MojDbSandwichDatabase::open(const MojChar* dbName, MojDbSandwichEngine* eng)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(dbName && eng);
-    MojAssert(!txn || txn->isValid());
 
-    // save eng, name and file
-    createdOut = false;
+    // save eng and name
     m_engine = eng;
     MojErr err = m_name.assign(dbName);
-    MojErrCheck(err);
-    const MojString& engPath = eng->path();
-    if (engPath.empty()) {
-        err = m_file.assign(dbName);
-        MojErrCheck(err);
-    } else {
-        err = m_file.format(_T("%s/%s"), engPath.data(), dbName);
-        MojErrCheck(err);
-    }
-
-//    // create and open db
-//    leveldb::Status status = leveldb::DB::Open(MojDbSandwichEngine::getOpenOptions(), m_file.data(), &m_db);
-
-//    if (status.IsCorruption()) {    // database corrupted
-//        // try restore database
-//        // AHTUNG! After restore database can lost some data!
-//        status = leveldb::RepairDB(m_file.data(), MojDbSandwichEngine::getOpenOptions());
-//        MojLdbErrCheck(status, _T("db corrupted"));
-//        status = leveldb::DB::Open(MojDbSandwichEngine::getOpenOptions(), m_file.data(), &m_db);  // database restored, re-open
-//    }
-
-//    MojLdbErrCheck(status, _T("db_create"));
-//    MojAssert(m_db);
-
-    // set up prop-vec for primary key queries
-    MojString idStr;
-    err = idStr.assign(MojDb::IdKey);
-    MojErrCheck(err);
-    err = m_primaryProps.push(idStr);
-    MojErrCheck(err);
-
-    //keep a reference to this database
-    err = eng->addDatabase(this);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -93,8 +58,6 @@ MojErr MojDbSandwichDatabase::close()
     MojErr err = MojErrNone;
     if (m_db.Valid()) {
         err = closeImpl();
-        m_primaryProps.clear();
-        engine()->removeDatabase(this);
     }
     return err;
 }
@@ -102,7 +65,7 @@ MojErr MojDbSandwichDatabase::close()
 MojErr MojDbSandwichDatabase::drop(MojDbStorageTxn* txn)
 {
     // TODO: implement this
-    return MojErrNone;
+    MojErrThrow(MojErrNotImplemented);
 }
 
 // not supported in levelDB
@@ -234,7 +197,7 @@ MojErr MojDbSandwichDatabase::put(const MojObject& id, MojBuffer& val, MojDbStor
 MojErr MojDbSandwichDatabase::put(MojDbSandwichItem& key, MojDbSandwichItem& val, MojDbStorageTxn* txn, bool updateIdQuota)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
-    //MojAssert(m_db );
+    MojAssert(m_db.Valid() );
     MojAssert( !txn || dynamic_cast<MojDbSandwichEnvTxn *> (txn) );
 
     MojErr err;
@@ -253,7 +216,7 @@ MojErr MojDbSandwichDatabase::put(MojDbSandwichItem& key, MojDbSandwichItem& val
 
     if(leveldb_txn)
     {
-        leveldb_txn->tableTxn(impl()).Put(*key.impl(), *val.impl());
+        s = leveldb_txn->ref(impl()).Put(*key.impl(), *val.impl());
     }
     else
         s = m_db.Put(*key.impl(), *val.impl());
@@ -270,9 +233,11 @@ MojErr MojDbSandwichDatabase::put(MojDbSandwichItem& key, MojDbSandwichItem& val
         this->m_name.data(), size1, str_buf, size2, s.ToString().c_str());
 #endif
 
+    /*
     if(leveldb_txn)
         ;//MojLdbErrCheck(batch->status(), _T("db->put"));
     else
+        */
         MojLdbErrCheck(s, _T("db->put"));
 
 
@@ -295,17 +260,16 @@ MojErr MojDbSandwichDatabase::get(MojDbSandwichItem& key, MojDbStorageTxn* txn, 
 
     leveldb::Status s;
     if (leveldb_txn)
-        s = leveldb_txn->tableTxn(impl()).Get(*key.impl(), str);
+        s = leveldb_txn->ref(impl()).Get(*key.impl(), str);
     else
         s = m_db.Get(*key.impl(), str);
 
-    //MojLdbErrCheck(s, _T("db->get"));
+    if (s.IsNotFound()) return MojErrNone; // normal case
 
-    if(s.IsNotFound() == false)
-    {
-        foundOut = true;
-        valOut.fromBytes(reinterpret_cast<const MojByte*>(str.data()), str.size());
-    }
+    MojLdbErrCheck(s, _T("db->get"));
+
+    foundOut = true;
+    valOut.fromBytes(reinterpret_cast<const MojByte*>(str.data()), str.size());
 
     return MojErrNone;
 }
@@ -316,9 +280,6 @@ MojErr MojDbSandwichDatabase::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut
     //MojAssert( m_db );
    MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_engine->impl()));
    MojAllocCheck(txn.get());
-
-   // force TableTxn for this database to start
-   txn->tableTxn(impl())/*.begin(impl())*/;
 
    txnOut = txn;
    return MojErrNone;
@@ -355,7 +316,7 @@ MojErr MojDbSandwichDatabase::del(MojDbSandwichItem& key, bool& foundOut, MojDbS
 
     if(leveldb_txn)
     {
-        leveldb_txn->tableTxn(impl()).Delete(*key.impl());
+        leveldb_txn->ref(impl()).Delete(*key.impl());
     }
     else
         st = m_db.Delete(*key.impl());

@@ -33,7 +33,7 @@ public:
     MojDbSandwichDatabase(const MojDbSandwichEngine::BackendDb::Part& part);
     ~MojDbSandwichDatabase();
 
-    MojErr open(const MojChar* dbName, MojDbSandwichEngine* env, bool& createdOut, MojDbStorageTxn* txn);
+    MojErr open(const MojChar* dbName, MojDbSandwichEngine* env);
     virtual MojErr close();
     virtual MojErr drop(MojDbStorageTxn* txn);
     virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
@@ -65,12 +65,9 @@ private:
     MojErr closeImpl();
     void postUpdate(MojDbStorageTxn* txn, MojSize updateSize);
 
-    //leveldb::DB* m_db;
     MojDbSandwichEngine::BackendDb::Part m_db;
     MojDbSandwichEngine* m_engine;
-    MojString m_file;
     MojString m_name;
-    MojVector<MojString> m_primaryProps;
 };
 
 #endif

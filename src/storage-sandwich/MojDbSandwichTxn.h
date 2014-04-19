@@ -34,93 +34,30 @@
 #include <db/MojDbStorageEngine.h>
 #include "MojDbSandwichEngine.h"
 
-namespace leveldb
-{
-    class DB;
-}
-
-class MojDbSandwichEngine;
-class MojDbSandwichTableTxn;
-//class MojDbSandwichTxnIterator;
-
-// Note we implement kinda dirty read with shadowing by local wirtes
-class MojDbSandwichTableTxn
-{
-public:
-    typedef leveldb::SandwichDB<leveldb::TxnDB<leveldb::BottomDB>> BackendDb;
-    MojDbSandwichTableTxn(BackendDb &txn, const BackendDb::Part &db);
-    ~MojDbSandwichTableTxn();
-
-    //MojErr begin(MojDbSandwichEngine::BackendDb::Part &db);
-
-    MojErr abort();
-
-    bool isValid() { return m_db.Valid(); }
-    BackendDb::Part* db() { return &m_db; }
-
-    // operations
-    void Put(const leveldb::Slice& key,
-            const leveldb::Slice& val);
-
-    leveldb::Status Get(const leveldb::Slice& key,
-                        std::string& val);
-
-    void Delete(const leveldb::Slice& key);
-    std::unique_ptr<leveldb::Iterator> createIterator();
-    //void detach(MojDbSandwichTxnIterator *it);
-
-    MojErr commitImpl();
-
-private:
-    void cleanup();
-
-    // where and how to write this batch
-    BackendDb& m_txn;
-    BackendDb::Part m_db;
-
-    // local view for pending writes
-    //typedef std::map<std::string, std::string> PendingValues;
-    //typedef std::set<std::string> PendingDeletes;
-    //PendingValues m_pendingValues;
-    //PendingDeletes m_pendingDeletes;
-    //std::set<MojDbSandwichTxnIterator*> m_iterators;
-
-    //friend class MojDbSandwichTxnIterator;
-};
-
 class MojDbSandwichEnvTxn final : public MojDbStorageTxn
 {
 public:
+    typedef leveldb::SandwichDB<leveldb::TxnDB<leveldb::BottomDB>> BackendDb;
+
     MojDbSandwichEnvTxn(MojDbSandwichEngine::BackendDb& db)
         : m_txn(db.ref<leveldb::TxnDB>())
-    {
-
-    }
+    { }
 
     ~MojDbSandwichEnvTxn()
     { abort(); }
 
-    MojErr begin(MojDbSandwichEngine* eng);
-    MojErr abort();
+    MojErr abort() override;
 
-    bool isValid() { return true; }
+    bool isValid() override
+    { return true; }
 
-    MojDbSandwichTableTxn &tableTxn(MojDbSandwichEngine::BackendDb::Part &db);
+    BackendDb::Part ref(MojDbSandwichEngine::BackendDb::Part &db)
+    { return db.ref(m_txn); }
 
 private:
-    MojErr commitImpl();
+    MojErr commitImpl() override;
 
-    typedef std::map<MojDbSandwichEngine::BackendDb::Part *, MojSharedPtr<MojDbSandwichTableTxn> > TableTxns;
-    TableTxns m_tableTxns;
-    MojDbSandwichTableTxn::BackendDb m_txn;
+    BackendDb m_txn;
 };
-
-// Note: Current workaround uses EnvTxn not only for Env transaction but for
-//       Database as well. Correct way would be to use different classes for that.
-// TODO:
-//   - We should rename TableTxn to TableData since it no more belongs to
-//     StorageTxn
-//   - Introduce new TableTxn that will simply return single tableData for
-//     a database it was constructed with
 
 #endif

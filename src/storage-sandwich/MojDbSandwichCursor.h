@@ -22,21 +22,12 @@
 #include <leveldb/db.h>
 #include "db/MojDbDefs.h"
 #include "MojDbSandwichEngine.h"
-
-#include <MojDbSandwichIterator.h>
-
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-    #include <boost/smart_ptr/scoped_ptr.hpp>
-#else
-    #include <auto_ptr.h>
-#endif
+#include "MojDbSandwichTxn.h"
 
 class MojDbSandwichDatabase;
 class MojDbSandwichItem;
 
 class MojDbSandwichEnvTxn;
-class MojDbSandwichTableTxn;
-//class MojDbSandwichTxnIterator;
 
 class MojDbSandwichCursor : public MojNoCopy
 {
@@ -59,14 +50,8 @@ public:
     size_t recSize() const;
 
 private:
-    MojDbSandwichEngine::BackendDb::Part* m_db;
     MojDbSandwichEnvTxn* m_txn;
-    MojDbSandwichTableTxn* m_ttxn;
-//#ifdef __GXX_EXPERIMENTAL_CXX0X__
-//    boost::scoped_ptr<MojDbSandwichTxnIterator> m_txnIt;
-//#else
-//    std::auto_ptr<MojDbSandwichTxnIterator> m_txnIt;
-//#endif
+    MojDbSandwichEnvTxn::BackendDb::Part m_part;
     std::unique_ptr<leveldb::Iterator> m_txnIt;
     MojSize m_warnCount;
 };

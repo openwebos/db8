@@ -108,8 +108,6 @@ foreach (backend ${WEBOS_DB8_BACKEND})
 			src/storage-sandwich/MojDbSandwichEnv.cpp
 			src/storage-sandwich/MojDbSandwichIndex.cpp
 			src/storage-sandwich/MojDbSandwichItem.cpp
-			src/storage-sandwich/MojDbSandwichIterator.cpp
-			src/storage-sandwich/MojDbSandwichContainerIterator.cpp
 		)
 
 		set (DB_BACKEND_WRAPPER_CFLAGS "${DB_BACKEND_WRAPPER_CFLAGS} -I${CMAKE_SOURCE_DIR}/src/storage-sandwich -DMOJ_USE_SANDWICH")

@@ -51,8 +51,6 @@ public:
 
     const MojString& path() const { return m_path; }
     MojDbSandwichEnv* env() { return m_env.get(); }
-    MojErr addDatabase(MojDbSandwichDatabase* db);
-    MojErr removeDatabase(MojDbSandwichDatabase* db);
     MojErr addSeq(MojDbSandwichSeq* seq);
     MojErr removeSeq(MojDbSandwichSeq* seq);
 
@@ -72,7 +70,6 @@ private:
     MojRefCountedPtr<MojDbSandwichDatabase> m_indexDb;
     MojRefCountedPtr<MojDbSandwichDatabase> m_seqDb;
     MojString m_path;
-    DatabaseVec m_dbs;
     SequenceVec m_seqs;
     bool m_isOpen;
 

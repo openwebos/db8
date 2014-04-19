@@ -105,14 +105,7 @@ MojErr MojDbSandwichEngine::drop(const MojChar* path, MojDbStorageTxn* txn)
     }
     m_seqs.clear();
 
-    // drop databases
-    for (DatabaseVec::ConstIterator i = m_dbs.begin(); i != m_dbs.end(); ++i) {
-        MojErr err = (*i)->closeImpl();
-        MojErrCheck(err);
-        err = (*i)->drop(txn);
-        MojErrCheck(err);
-    }
-    m_dbs.clear();
+    // TODO: drop transaction
 
     return MojErrNone;
 }
@@ -168,16 +161,15 @@ MojErr MojDbSandwichEngine::open(const MojChar* path, MojDbEnv* env)
     MojLdbErrCheck(status, _T("db_create/db_open"));
 
     // open seqence db
-    bool created = false;
     m_seqDb.reset(new MojDbSandwichDatabase(m_db.use(MojEnvSeqDbName)));
     MojAllocCheck(m_seqDb.get());
-    MojErr err = m_seqDb->open(MojEnvSeqDbName, this, created, NULL);
+    MojErr err = m_seqDb->open(MojEnvSeqDbName, this);
     MojErrCheck(err);
 
     // open index db
     m_indexDb.reset(new MojDbSandwichDatabase(m_db.use(MojEnvIndexDbName)));
     MojAllocCheck(m_indexDb.get());
-    err = m_indexDb->open(MojEnvIndexDbName, this, created, NULL);
+    err = m_indexDb->open(MojEnvIndexDbName, this);
     MojErrCheck(err);
     m_isOpen = true;
 
@@ -217,8 +209,6 @@ MojErr MojDbSandwichEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
 
     MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_db));
     MojAllocCheck(txn.get());
-    MojErr err = txn->begin(this);
-    MojErrCheck(err);
     txnOut = txn;
 
     return MojErrNone;
@@ -229,18 +219,16 @@ MojErr MojDbSandwichEngine::openDatabase(const MojChar* name, MojDbStorageTxn* t
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(name && !dbOut.get());
 
-    MojRefCountedPtr<MojDbSandwichDatabase> db(new MojDbSandwichDatabase(m_db.use(name)));
+    BackendDb::Cookie cookie;
+
+    leveldb::Status status = m_db.cook(name, cookie);
+    MojLdbErrCheck(status, "openDatabase");
+
+    MojRefCountedPtr<MojDbSandwichDatabase> db(new MojDbSandwichDatabase(m_db.use(cookie)));
     MojAllocCheck(db.get());
-    bool created = false;
 
-    MojErr err = db->open(name, this, created, txn);
+    MojErr err = db->open(name, this);
     MojErrCheck(err);
-
-    if (m_dbs.find(db) == MojInvalidIndex) {
-        m_dbs.push(db);
-
-        return MojErrDbFatal;
-    }
 
     dbOut = db;
 
@@ -272,46 +260,9 @@ MojErr MojDbSandwichEngine::compact()
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojThreadGuard guard(m_dbMutex);
 
-    MojDbSandwichDatabase* db;
-    MojSize idx;
-    MojSize size = m_dbs.size();
-    for (idx = 0; idx < size; ++idx) {
-        db = m_dbs[idx].get();
-        MojAssert(db);
-        db->compact();
-    }
+    // XXX: breaks DumpAndLoad
+    // (*m_db)->CompactRange(nullptr, nullptr);
 
-    return MojErrNone;
-}
-MojErr MojDbSandwichEngine::addDatabase(MojDbSandwichDatabase* db)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-    MojAssert(db);
-    MojThreadGuard guard(m_dbMutex);
-
-    if (m_dbs.find(db) != MojInvalidIndex) {
-        LOG_ERROR(MSGID_LEVEL_DB_ENGINE_ERROR, 0, "Database already in database pool");
-        return MojErrDbFatal;
-    }
-
-    return m_dbs.push(db);
-}
-
-MojErr MojDbSandwichEngine::removeDatabase(MojDbSandwichDatabase* db)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-    MojAssert(db);
-    MojThreadGuard guard(m_dbMutex);
-
-    MojSize idx;
-    MojSize size = m_dbs.size();
-    for (idx = 0; idx < size; ++idx) {
-        if (m_dbs.at(idx).get() == db) {
-            MojErr err = m_dbs.erase(idx);
-            MojErrCheck(err);
-            break;
-        }
-    }
     return MojErrNone;
 }
 

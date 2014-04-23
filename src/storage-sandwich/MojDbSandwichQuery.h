@@ -37,14 +37,10 @@ public:
 	MojErr close() override;
 
 private:
-	static const MojUInt32 SeekFlags;
-	static const MojUInt32 SeekEmptyFlags[2];
-	static const MojUInt32 NextFlags[2];
-
 	MojErr seekImpl(const ByteVec& key, bool desc, bool& foundOut) override;
 	MojErr next(bool& foundOut) override;
 	MojErr getVal(MojDbStorageItem*& itemOut, bool& foundOut) override;
-	MojErr getKey(bool& foundOut, MojUInt32 flags);
+	MojErr readEntry(bool &foundOut);;
 
 	std::unique_ptr<leveldb::Iterator> m_it;
 	MojDbSandwichItem m_key;

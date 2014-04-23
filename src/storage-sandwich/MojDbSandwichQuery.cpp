@@ -23,15 +23,6 @@
 #include "db/MojDbQueryPlan.h"
 #include "core/MojObjectSerialization.h"
 
-enum LDB_FLAGS
-{
-   e_First = 0, e_Last, e_Next, e_Prev, e_Range, e_Set, e_TotalFlags
-};
-
-const MojUInt32 MojDbSandwichQuery::SeekFlags = e_Set;
-const MojUInt32 MojDbSandwichQuery::SeekEmptyFlags[2] = {e_First, e_Last};
-const MojUInt32 MojDbSandwichQuery::NextFlags[2] = {e_Next, e_Prev};
-
 MojDbSandwichQuery::MojDbSandwichQuery()
 {
 }
@@ -123,17 +114,32 @@ MojErr MojDbSandwichQuery::seekImpl(const ByteVec& key, bool desc, bool& foundOu
 
     if (key.empty()) {
         // if key is empty, seek to beginning (or end if desc)
-        MojErr err = getKey(foundOut, SeekEmptyFlags[desc]);
+        if (desc) m_it->SeekToLast();
+        else m_it->SeekToFirst();
+        MojErr err = readEntry(foundOut);
         MojErrCheck(err);
     } else {
         // otherwise seek to the key
         MojErr err = m_key.fromBytes(key.begin(), key.size());
         MojErrCheck(err);
-        err = getKey(foundOut, SeekFlags);
-        MojErrCheck(err);
+        m_it->Seek(*m_key.impl());
         // if descending, skip the first result (which is outside the range)
         if (desc) {
-            err = next(foundOut);
+            if (m_it->Valid())
+            {
+                err = next(foundOut);
+                MojErrCheck(err);
+            }
+            else // if not found upper bound start looking from the end
+            {
+                m_it->SeekToLast();
+                err = readEntry(foundOut);
+                MojErrCheck(err);
+            }
+        }
+        else // ok we exactly on the first record - process it!
+        {
+            err = readEntry(foundOut);
             MojErrCheck(err);
         }
     }
@@ -145,7 +151,10 @@ MojErr MojDbSandwichQuery::next(bool& foundOut)
     MojAssert( m_it );
     MojAssert(m_state == StateNext);
 
-    MojErr err = getKey(foundOut, NextFlags[m_plan->desc()]); // get next or previous
+    // get next or previous
+    if (m_plan->desc()) m_it->Prev();
+    else m_it->Next();
+    MojErr err = readEntry(foundOut);
     MojErrCheck(err);
 
     return MojErrNone;
@@ -162,25 +171,22 @@ MojErr MojDbSandwichQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
     return MojErrNone;
 }
 
-MojErr MojDbSandwichQuery::getKey(bool& foundOut, MojUInt32 flags)
+MojErr MojDbSandwichQuery::readEntry(bool& foundOut)
 {
-    foundOut = false;
-    switch (flags)
-    {
-    case e_Set: m_it->Seek(*m_key.impl()); break;
-    case e_Next: m_it->Next(); break;
-    case e_Prev: m_it->Prev(); break;
-    case e_First: m_it->SeekToFirst(); break;
-    case e_Last: m_it->SeekToLast(); break;
-    default: MojAssert( e_First <= flags && flags < e_TotalFlags );
-    }
     if (m_it->Valid())
     {
-        m_key.from(m_it->key());
-        m_val.from(m_it->value());
+        MojErr err;
+        err = m_key.from(m_it->key());
+        MojErrCheck(err);
+        err = m_val.from(m_it->value());
+        MojErrCheck(err);
         m_keyData = m_key.data();
         m_keySize = m_key.size();
         foundOut = true;
+    }
+    else
+    {
+        foundOut = false;
     }
 
     return MojErrNone;

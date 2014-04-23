@@ -18,8 +18,9 @@
 
 #include "MojDbSandwichIndex.h"
 #include "MojDbSandwichEngine.h"
-#include "MojDbSandwichCursor.h"
 #include "MojDbSandwichQuery.h"
+#include "MojDbSandwichTxn.h"
+#include "defs.h"
 
 ////////////////////MojDbIndex////////////////////////////////////////////
 
@@ -61,40 +62,38 @@ MojErr MojDbSandwichIndex::close()
     return MojErrNone;
 }
 
-MojErr MojDbSandwichIndex::drop(MojDbStorageTxn* txn)
+MojErr MojDbSandwichIndex::drop(MojDbStorageTxn* abstractTxn)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert( dynamic_cast<MojDbSandwichEnvTxn *>(abstractTxn) );
 
-    MojDbSandwichCursor cursor;
-    MojErr err = cursor.open(m_db.get(), txn, 0);
-    MojErrCheck(err);
-    MojDbKey prefix;
-    err = prefix.assign(m_id);
-    MojErrCheck(err);
-    err = cursor.delPrefix(prefix);
-    MojErrCheck(err);
-    err = cursor.close();
+    auto txn = static_cast<MojDbSandwichEnvTxn *>(abstractTxn);
+
+    MojDbKey prefixKey;
+    MojErr err = prefixKey.assign(m_id);
     MojErrCheck(err);
 
-    return err;
+    err = m_db->delPrefix(*txn, { (const char *)prefixKey.data(), prefixKey.size() });
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
-MojErr MojDbSandwichIndex::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbSandwichIndex::stats(MojDbStorageTxn* abstractTxn, MojSize& countOut, MojSize& sizeOut)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert( dynamic_cast<MojDbSandwichEnvTxn *>(abstractTxn) );
 
-    MojDbSandwichCursor cursor;
-    MojErr err = cursor.open(m_db.get(), txn, 0);
-    MojErrCheck(err);
-    MojDbKey prefix;
-    err = prefix.assign(m_id);
-    MojErrCheck(err);
-    err = cursor.statsPrefix(prefix, countOut, sizeOut);
-    MojErrCheck(err);
-    err = cursor.close();
+    auto txn = static_cast<MojDbSandwichEnvTxn *>(abstractTxn);
+
+    MojDbKey prefixKey;
+    MojErr err = prefixKey.assign(m_id);
     MojErrCheck(err);
 
-    return err;
+    err = m_db->stats(txn, countOut, sizeOut, { (const char*)prefixKey.data(), prefixKey.size() });
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
 MojErr MojDbSandwichIndex::insert(const MojDbKey& key, MojDbStorageTxn* txn)

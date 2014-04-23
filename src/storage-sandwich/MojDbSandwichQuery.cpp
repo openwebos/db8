@@ -19,13 +19,18 @@
 #include "MojDbSandwichDatabase.h"
 #include "MojDbSandwichQuery.h"
 #include "MojDbSandwichEngine.h"
-#include "MojDbSandwichCursor.h"
+#include "MojDbSandwichTxn.h"
 #include "db/MojDbQueryPlan.h"
 #include "core/MojObjectSerialization.h"
 
-const MojUInt32 MojDbSandwichQuery::SeekFlags = MojDbSandwichCursor::e_Set;
-const MojUInt32 MojDbSandwichQuery::SeekEmptyFlags[2] = {MojDbSandwichCursor::e_First, MojDbSandwichCursor::e_Last};
-const MojUInt32 MojDbSandwichQuery::NextFlags[2] = {MojDbSandwichCursor::e_Next, MojDbSandwichCursor::e_Prev};
+enum LDB_FLAGS
+{
+   e_First = 0, e_Last, e_Next, e_Prev, e_Range, e_Set, e_TotalFlags
+};
+
+const MojUInt32 MojDbSandwichQuery::SeekFlags = e_Set;
+const MojUInt32 MojDbSandwichQuery::SeekEmptyFlags[2] = {e_First, e_Last};
+const MojUInt32 MojDbSandwichQuery::NextFlags[2] = {e_Next, e_Prev};
 
 MojDbSandwichQuery::MojDbSandwichQuery()
 {
@@ -38,15 +43,19 @@ MojDbSandwichQuery::~MojDbSandwichQuery()
 }
 
 MojErr MojDbSandwichQuery::open(MojDbSandwichDatabase* db, MojDbSandwichDatabase* joinDb,
-        MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn)
+        MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* abstractTxn)
 {
+    LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!m_isOpen);
     MojAssert(db && db->impl().Valid() && plan.get());
+    MojAssert( dynamic_cast<MojDbSandwichEnvTxn *>(abstractTxn) );
+
+    auto txn = static_cast<MojDbSandwichEnvTxn *>(abstractTxn);
 
     MojErr err = MojDbIsamQuery::open(plan, txn);
     MojErrCheck(err);
-    err = m_cursor.open(db, txn, 0);
-    MojErrCheck(err);
+
+    m_it = txn->ref(db->impl()).NewIterator();
 
     m_db = joinDb;
 
@@ -60,8 +69,7 @@ MojErr MojDbSandwichQuery::close()
     if (m_isOpen) {
         MojErr errClose = MojDbIsamQuery::close();
         MojErrAccumulate(err, errClose);
-        errClose = m_cursor.close();
-        MojErrAccumulate(err, errClose);
+        m_it.reset();
         m_db = NULL;
         m_isOpen = false;
     }
@@ -111,6 +119,8 @@ MojErr MojDbSandwichQuery::getById(const MojObject& id, MojDbStorageItem*& itemO
 
 MojErr MojDbSandwichQuery::seekImpl(const ByteVec& key, bool desc, bool& foundOut)
 {
+    MojAssert( m_it );
+
     if (key.empty()) {
         // if key is empty, seek to beginning (or end if desc)
         MojErr err = getKey(foundOut, SeekEmptyFlags[desc]);
@@ -132,6 +142,7 @@ MojErr MojDbSandwichQuery::seekImpl(const ByteVec& key, bool desc, bool& foundOu
 
 MojErr MojDbSandwichQuery::next(bool& foundOut)
 {
+    MojAssert( m_it );
     MojAssert(m_state == StateNext);
 
     MojErr err = getKey(foundOut, NextFlags[m_plan->desc()]); // get next or previous
@@ -153,10 +164,24 @@ MojErr MojDbSandwichQuery::getVal(MojDbStorageItem*& itemOut, bool& foundOut)
 
 MojErr MojDbSandwichQuery::getKey(bool& foundOut, MojUInt32 flags)
 {
-    MojErr err = m_cursor.get(m_key, m_val, foundOut, flags);
-    MojErrCheck(err);
-    m_keyData = m_key.data();
-    m_keySize = m_key.size();
+    foundOut = false;
+    switch (flags)
+    {
+    case e_Set: m_it->Seek(*m_key.impl()); break;
+    case e_Next: m_it->Next(); break;
+    case e_Prev: m_it->Prev(); break;
+    case e_First: m_it->SeekToFirst(); break;
+    case e_Last: m_it->SeekToLast(); break;
+    default: MojAssert( e_First <= flags && flags < e_TotalFlags );
+    }
+    if (m_it->Valid())
+    {
+        m_key.from(m_it->key());
+        m_val.from(m_it->value());
+        m_keyData = m_key.data();
+        m_keySize = m_key.size();
+        foundOut = true;
+    }
 
     return MojErrNone;
 }

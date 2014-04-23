@@ -18,7 +18,6 @@
 
 #include "MojDbSandwichDatabase.h"
 #include "MojDbSandwichEngine.h"
-#include "MojDbSandwichCursor.h"
 #include "MojDbSandwichQuery.h"
 #include "MojDbSandwichTxn.h"
 #include "MojDbSandwichIndex.h"
@@ -90,19 +89,13 @@ MojErr MojDbSandwichDatabase::mutexStats(int * total_mutexes, int * mutexes_free
     return MojErrNone;
 }
 
-MojErr MojDbSandwichDatabase::stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut)
+MojErr MojDbSandwichDatabase::stats(MojDbStorageTxn* abstractTxn, MojSize& countOut, MojSize& sizeOut)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
+    MojAssert( dynamic_cast<MojDbSandwichEnvTxn *>(abstractTxn) );
 
-    MojDbSandwichCursor cursor;
-    MojErr err = cursor.open(this, txn, 0);
-    MojErrCheck(err);
-    err = cursor.stats(countOut, sizeOut);
-    MojErrCheck(err);
-    err = cursor.close();
-    MojErrCheck(err);
-
-    return err;
+    auto txn = static_cast<MojDbSandwichEnvTxn *>(abstractTxn);
+    return stats(txn, countOut, sizeOut, {});
 }
 
 MojErr MojDbSandwichDatabase::insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn)
@@ -337,6 +330,60 @@ MojErr MojDbSandwichDatabase::del(MojDbSandwichItem& key, bool& foundOut, MojDbS
     }
     postUpdate(txn, key.size());
 
+    return MojErrNone;
+}
+
+MojErr MojDbSandwichDatabase::delPrefix(MojDbSandwichEnvTxn &txn, leveldb::Slice prefix)
+{
+    auto part = txn.ref(m_db);
+    auto it = part.NewIterator();
+
+    it->Seek(prefix);
+    while (it->Valid() && it->key().starts_with(prefix))
+    {
+        auto key = it->key();
+
+        size_t delSize = key.size() + it->value().size();
+        MojErr err = txn.offsetQuota(-(MojInt64) delSize);
+        MojErrCheck(err);
+
+        auto s = part.Delete(key);
+        MojLdbErrCheck(s, _T("db->delPrefix"));
+
+        it->Next(); // skip this ghost record
+    }
+    return MojErrNone;
+}
+
+MojErr MojDbSandwichDatabase::stats(MojDbSandwichEnvTxn* txn, MojSize &countOut, MojSize &sizeOut, leveldb::Slice prefix)
+{
+    MojAssert( txn );
+    MojDbSandwichEnvTxn::BackendDb::Part txnPart;
+    leveldb::AnyDB *db; // points either to txn or to database part
+
+    if (txn)
+    {
+        txnPart = txn->ref(m_db);
+        db = &txnPart;
+    }
+    else
+    {
+        db = &m_db;
+    }
+
+    auto it = db->NewIterator();
+
+    MojSize count = 0, size = 0;
+
+    it->Seek(prefix);
+    while (it->Valid() && it->key().starts_with(prefix))
+    {
+        ++count;
+        size += it->key().size() + it->value().size();
+        it->Next();
+    }
+    sizeOut = size;
+    countOut = count;
     return MojErrNone;
 }
 

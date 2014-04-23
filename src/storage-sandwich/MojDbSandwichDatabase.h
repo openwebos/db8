@@ -26,33 +26,37 @@
 
 class MojDbSandwichEngine;
 class MojDbSandwichItem;
+class MojDbSandwichEnvTxn;
 
-class MojDbSandwichDatabase : public MojDbStorageDatabase
+class MojDbSandwichDatabase final : public MojDbStorageDatabase
 {
 public:
     MojDbSandwichDatabase(const MojDbSandwichEngine::BackendDb::Part& part);
     ~MojDbSandwichDatabase();
 
     MojErr open(const MojChar* dbName, MojDbSandwichEngine* env);
-    virtual MojErr close();
-    virtual MojErr drop(MojDbStorageTxn* txn);
-    virtual MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut);
-    virtual MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn);
-    virtual MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn);
-    virtual MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut);
-    virtual MojErr get(const MojObject& id, MojDbStorageTxn* txn, bool forUpdate, MojRefCountedPtr<MojDbStorageItem>& itemOut);
-    virtual MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut);
-    virtual MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut);
-    virtual MojErr openIndex(const MojObject& id, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageIndex>& indexOut);
+    MojErr close() override;
+    MojErr drop(MojDbStorageTxn* txn) override;
+    MojErr stats(MojDbStorageTxn* txn, MojSize& countOut, MojSize& sizeOut) override;
+    MojErr insert(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn) override;
+    MojErr update(const MojObject& id, MojBuffer& val, MojDbStorageItem* oldVal, MojDbStorageTxn* txn) override;
+    MojErr del(const MojObject& id, MojDbStorageTxn* txn, bool& foundOut) override;
+    MojErr get(const MojObject& id, MojDbStorageTxn* txn, bool forUpdate, MojRefCountedPtr<MojDbStorageItem>& itemOut) override;
+    MojErr find(MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageQuery>& queryOut) override;
+    MojErr beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut) override;
+    MojErr openIndex(const MojObject& id, MojDbStorageTxn* txn, MojRefCountedPtr<MojDbStorageIndex>& indexOut) override;
 
 //hack:
-    virtual MojErr mutexStats(int* total_mutexes, int* mutexes_free, int* mutexes_used, int* mutexes_used_highwater, int* mutex_regionsize);
+    MojErr mutexStats(int* total_mutexes, int* mutexes_free, int* mutexes_used, int* mutexes_used_highwater, int* mutex_regionsize) override;
 
     MojErr put(const MojObject& id, MojBuffer& val, MojDbStorageTxn* txn, bool updateIdQuota);
     MojErr put(MojDbSandwichItem& key, MojDbSandwichItem& val, MojDbStorageTxn* txn, bool updateIdQuota);
     MojErr del(MojDbSandwichItem& key, bool& foundOut, MojDbStorageTxn* txn);
     MojErr get(MojDbSandwichItem& key, MojDbStorageTxn* txn, bool forUpdate, MojDbSandwichItem& valOut, bool& foundOut);
     void   compact();
+
+    MojErr delPrefix(MojDbSandwichEnvTxn &txn, leveldb::Slice prefix = {});
+    MojErr stats(MojDbSandwichEnvTxn* txn, MojSize &countOut, MojSize &sizeOut, leveldb::Slice prefix);
 
     MojDbSandwichEngine::BackendDb::Part& impl() { return m_db; }
     MojDbSandwichEngine* engine() { return m_engine; }

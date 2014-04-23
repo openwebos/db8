@@ -104,7 +104,6 @@ foreach (backend ${WEBOS_DB8_BACKEND})
 			src/storage-sandwich/MojDbSandwichQuery.cpp
 			src/storage-sandwich/MojDbSandwichTxn.cpp
 			src/storage-sandwich/MojDbSandwichSeq.cpp
-			src/storage-sandwich/MojDbSandwichCursor.cpp
 			src/storage-sandwich/MojDbSandwichEnv.cpp
 			src/storage-sandwich/MojDbSandwichIndex.cpp
 			src/storage-sandwich/MojDbSandwichItem.cpp

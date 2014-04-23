@@ -21,33 +21,32 @@
 
 #include "db/MojDbDefs.h"
 #include "MojDbSandwichEngine.h"
-#include "MojDbSandwichCursor.h"
 #include "MojDbSandwichItem.h"
 #include "db/MojDbIsamQuery.h"
 
-class MojDbSandwichQuery : public MojDbIsamQuery
+class MojDbSandwichQuery final : public MojDbIsamQuery
 {
 public:
 	MojDbSandwichQuery();
-	~MojDbSandwichQuery();
+	~MojDbSandwichQuery() override;
 
 	MojErr open(MojDbSandwichDatabase* db, MojDbSandwichDatabase* joinDb,
 			MojAutoPtr<MojDbQueryPlan> plan, MojDbStorageTxn* txn);
-	MojErr getById(const MojObject& id, MojDbStorageItem*& itemOut, bool& foundOut);
+	MojErr getById(const MojObject& id, MojDbStorageItem*& itemOut, bool& foundOut) override;
 
-	virtual MojErr close();
+	MojErr close() override;
 
 private:
 	static const MojUInt32 SeekFlags;
 	static const MojUInt32 SeekEmptyFlags[2];
 	static const MojUInt32 NextFlags[2];
 
-	virtual MojErr seekImpl(const ByteVec& key, bool desc, bool& foundOut);
-	virtual MojErr next(bool& foundOut);
-	virtual MojErr getVal(MojDbStorageItem*& itemOut, bool& foundOut);
+	MojErr seekImpl(const ByteVec& key, bool desc, bool& foundOut) override;
+	MojErr next(bool& foundOut) override;
+	MojErr getVal(MojDbStorageItem*& itemOut, bool& foundOut) override;
 	MojErr getKey(bool& foundOut, MojUInt32 flags);
 
-	MojDbSandwichCursor m_cursor;
+	std::unique_ptr<leveldb::Iterator> m_it;
 	MojDbSandwichItem m_key;
 	MojDbSandwichItem m_val;
 	MojDbSandwichItem m_primaryVal;

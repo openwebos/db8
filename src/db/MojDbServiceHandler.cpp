@@ -1003,6 +1003,10 @@ MojErr MojDbServiceHandler::handleRegisterMedia(MojServiceMessage* msg, MojObjec
 	MojErr err = payload.getRequired(MojDbServiceDefs::DevicesKey, deviceList);
 	MojErrCheck(err);
 
+    MojObjectVisitor& writer = msg->writer();
+    err = writer.beginObject();
+    MojErrCheck(err);
+
     std::set<MojString> shardIds;           // list of not processed ids of already know
     copyShardCache(&shardIds);
 
@@ -1062,6 +1066,11 @@ MojErr MojDbServiceHandler::handleRegisterMedia(MojServiceMessage* msg, MojObjec
             m_shardCache.erase(shardCacheIterator);
         }
     }
+
+    err = writer.boolProp(MojServiceMessage::ReturnValueKey, true);
+    MojErrCheck(err);
+    err = writer.endObject();
+    MojErrCheck(err);
 
 	return MojErrNone;
 }

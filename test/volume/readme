@@ -1,0 +1,13 @@
+Volume test:
+
+Test gives info about dependency between the size of the database and the performance of DB operations.
+
+What it do:
+* get available space on the disk via DB8 request 'spaceCheck';
+* create 10 iterations (number is configurable);
+* put data to DB8 with volume = 1/10 of available space (using 'put' operations);
+* run performance test and save 4 time values;
+* continue iterations till 10;
+* show report on the screen.
+
+Entry point is runtest.bash

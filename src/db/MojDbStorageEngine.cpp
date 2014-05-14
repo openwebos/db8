@@ -87,6 +87,10 @@ MojErr MojDbStorageEngine::createEnv(MojRefCountedPtr<MojDbEnv>& envOut)
     if (!m_factory.get())
     {
         const char *default_engine = getenv("MOJODB_ENGINE");
+        if(!default_engine)
+        {
+            default_engine = "sandwich";
+        }
         if (default_engine) // someone asked for specific engine through env variable
         {
             MojString key;

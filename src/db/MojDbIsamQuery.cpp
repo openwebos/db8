@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -464,7 +464,7 @@ MojErr MojDbIsamQuery::checkShard(bool &excludeOut)
             err = id.toJson(idJson);
             MojErrCheck( err );
 
-            LOG_DEBUG("[db_mojodb] Found id (%.*s) with a non-existing shardId (%08x)\n", idJson.length(), idJson.begin(), shardId);
+            LOG_DEBUG("[db_mojodb] Found id (%.*s) with an invalid base64 data\n", idJson.length(), idJson.data());
 
             shardId = MojDbIdGenerator::MainShardId;
         }

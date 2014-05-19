@@ -155,10 +155,14 @@ From the directory where you originally ran `make install`, enter:
 
 You will need to use `sudo` if you did not specify `WEBOS_INSTALL_ROOT`.
 
+#### Running
+
+If DB8 compiled with several backends you'll need to specify one in environment variable MOJODB_ENGINE .
+
 # Copyright and License Information
 
 All content, including all source code files and documentation files in this repository are:
- Copyright (c) 2009-2013 LG Electronics, Inc.
+ Copyright (c) 2009-2014 LG Electronics, Inc.
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

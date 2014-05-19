@@ -1,7 +1,7 @@
 /****************************************************************
  * @@@LICENSE
  *
- * Copyright (c) 2013 LG Electronics, Inc.
+ * Copyright (c) 2013-2014 LG Electronics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,7 @@
 
 #include "db/MojDb.h"
 
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else
-#error "Specify database engine"
-#endif
+#include "db/MojDbStorageEngine.h"
 #include "MojDbTestStorageEngine.h"
 
 #include "MojDbCoreTest.h"
@@ -386,11 +380,9 @@ TEST_F(QuotaTest, error)
     MojAssertNoErr( obj.fromJson(_T("{\"owner\":\"com.foo.*\",\"size\":1000}")) );
     MojExpectNoErr( db.putQuotas(&obj, &obj + 1) );
 
-#ifdef MOJ_USE_BDB
-    MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
-#elif MOJ_USE_LDB
-    MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
-#endif
+    MojRefCountedPtr<MojDbStorageEngine> engine;
+
+    MojAssertNoErr( MojDbStorageEngine::createDefaultEngine(engine) );
     EXPECT_TRUE( engine.get() ) << "Engine should be created successfully";
     MojRefCountedPtr<MojDbTestStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
     EXPECT_TRUE( testEngine.get() ) << "TestEngine should be created successfully";

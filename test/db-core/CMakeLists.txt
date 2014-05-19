@@ -1,6 +1,6 @@
 # @@@LICENSE
 #
-# Copyright (c) 2013 LG Electronics, Inc.
+# Copyright (c) 2013-2014 LG Electronics, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ endforeach ()
 
 add_executable(${PROJECT_NAME}
                Runner.cpp
-               JsonTest.cpp
+               #JsonTest.cpp
                DumpLoadTest.cpp
                ReqTest.cpp
                QuotaTest.cpp
@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME}
                TextCollatorTest.cpp
                IdGeneratorTest.cpp
                ShardsTest.cpp
+               CrudTest.cpp
                ../db/MojDbTestStorageEngine.cpp
                ${DB_BACKEND_WRAPPER_SOURCES_CPP})
 
@@ -48,7 +49,9 @@ target_link_libraries(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} gtest gtest_main)
 
-add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+foreach (backend ${WEBOS_DB8_BACKEND})
+    add_test(NAME ${backend}/${PROJECT_NAME} COMMAND env MOJODB_ENGINE=${backend} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+endforeach()
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
         DESTINATION ${WEBOS_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}/tests

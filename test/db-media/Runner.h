@@ -1,7 +1,7 @@
 /****************************************************************
  * @@@LICENSE
  *
- * Copyright (c) 2013 LG Electronics, Inc.
+ * Copyright (c) 2013-2014 LG Electronics, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,32 @@
 #ifndef __RUNNER_H
 #define __RUNNER_H
 
+#include <string>
+
+#include <core/MojString.h>
+#include <core/MojErr.h>
+
 #include "gtest/gtest.h"
 
-#define MojAssertNoErr( E ) ASSERT_EQ( MojErrNone, E )
-#define MojExpectNoErr( E ) EXPECT_EQ( MojErrNone, E )
+namespace std {
+	inline std::string to_string(MojErr err)
+	{
+		MojString strOut;
+		if (MojErrToString(err, strOut) == MojErrNone)
+		{ return std::string(strOut.data(), strOut.length()); }
+		else
+		{ return "Unknown error #" + std::to_string(int(err)); }
+	}
+}
+
+inline ::testing::AssertionResult noErr(MojErr err)
+{
+	if (err == MojErrNone) return ::testing::AssertionSuccess();
+	else return ::testing::AssertionFailure() << std::to_string(err);
+}
+
+#define MojAssertNoErr( E ) ASSERT_TRUE( noErr(E) )
+#define MojExpectNoErr( E ) EXPECT_TRUE( noErr(E) )
 
 extern const char *tempFolder;
 

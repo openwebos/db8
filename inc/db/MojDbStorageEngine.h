@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2009-2013 LG Electronics, Inc.
+* Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,12 +20,15 @@
 #ifndef MOJDBSTORAGEENGINE_H_
 #define MOJDBSTORAGEENGINE_H_
 
+#include <utility>
+
 #include "db/MojDbDefs.h"
 #include "db/MojDbWatcher.h"
 #include "db/MojDbQuotaEngine.h"
 #include "core/MojAutoPtr.h"
 #include "core/MojObject.h"
 #include "core/MojVector.h"
+#include "core/MojHashMap.h"
 #include "core/MojSignal.h"
 
 class MojDbEnv : public MojRefCounted
@@ -191,11 +194,14 @@ public:
 class MojDbStorageEngine : public MojRefCounted
 {
 public:
+    typedef MojRefCountedPtr<MojDbStorageEngineFactory> Factory;
+
     static MojErr createDefaultEngine(MojRefCountedPtr<MojDbStorageEngine>& engineOut);
     static MojErr createEngine(const MojChar* name, MojRefCountedPtr<MojDbStorageEngine>& engineOut);
-    static MojErr createEnv(MojRefCountedPtr<MojDbEnv>& envOut) { return m_factory->createEnv(envOut); };
+    static MojErr createEnv(MojRefCountedPtr<MojDbEnv>& envOut);
     static MojErr setEngineFactory(MojDbStorageEngineFactory* factory);
-    static const MojDbStorageEngineFactory* engineFactory() {return m_factory.get();};
+    static MojErr setEngineFactory(const MojChar *name);
+    static const MojDbStorageEngineFactory* engineFactory() {return m_factory.get();}
 
     virtual ~MojDbStorageEngine() {}
     virtual MojErr configure(const MojObject& config) = 0;
@@ -210,8 +216,26 @@ public:
 
 protected:
 	MojDbStorageEngine();
-	static MojRefCountedPtr<MojDbStorageEngineFactory> m_factory;
 
+	typedef MojHashMap<MojString, Factory> Factories;
+
+private:
+	static Factory m_factory;
+	static Factories m_factories;
+
+public:
+	template <typename T>
+	struct Registrator
+	{
+		Registrator()
+		{
+			Factory factory { new T() };
+			MojAssert(factory.get());
+			MojString key;
+			if (key.assign(factory->name()) != MojErrNone) return; // ignore invalid name
+			m_factories.put(key, factory);
+		}
+	};
 };
 
 

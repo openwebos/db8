@@ -19,13 +19,7 @@
 
 #include "MojDbQuotaTest.h"
 #include "db/MojDb.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else 
-#error "Specify database engine"
-#endif
+#include "db/MojDbStorageEngine.h"
 #include "MojDbTestStorageEngine.h"
 
 static const MojChar* const MojTestKind1Str1 =
@@ -360,17 +354,14 @@ MojErr MojDbQuotaTest::testEnforce(MojDb& db)
 
 MojErr MojDbQuotaTest::testErrors()
 {
-#ifdef MOJ_USE_BDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
-#elif MOJ_USE_LDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
-#else
-    MojRefCountedPtr<MojDbStorageEngine> engine;
-#endif
+	MojErr err;
+	MojRefCountedPtr<MojDbStorageEngine> engine;
+	err = MojDbStorageEngine::createDefaultEngine(engine);
+	MojTestErrCheck(err);
 	MojAllocCheck(engine.get());
 	MojRefCountedPtr<MojDbTestStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
 	MojAllocCheck(testEngine.get());
-	MojErr err = testEngine->open(MojDbTestDir);
+	err = testEngine->open(MojDbTestDir);
 	MojTestErrCheck(err);
 
 	MojDb db;

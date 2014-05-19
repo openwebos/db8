@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2009-2013 LG Electronics, Inc.
+* Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -89,16 +89,6 @@ each time.
 #include "db/MojDb.h"
 #include "core/MojTime.h"
 
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else
-    #error "Doesn't specified database type. See macro MOJ_USE_BDB and MOJ_USE_LDB"
-#endif
-
 static const MojChar* const TestKind1Str =
 	_T("{\"id\":\"Test1:1\",")
 	_T("\"owner\":\"mojodb.admin\",")
@@ -141,15 +131,6 @@ MojDbPerfIndexTest::MojDbPerfIndexTest()
 
 MojErr MojDbPerfIndexTest::run()
 {
-	//setup the test storage engine
-#ifdef MOJ_USE_BDB
-    MojDbStorageEngine::setEngineFactory (new MojDbBerkeleyFactory);
-#elif MOJ_USE_LDB
-    MojDbStorageEngine::setEngineFactory (new MojDbLevelFactory);
-#else
-    #error "Not defined engine type"
-#endif
-
 	MojDb db;
 
 	//_displayMessage("\n<<< Please, cleanup folder %s before this test! >>>\n", MojDbTestDir);

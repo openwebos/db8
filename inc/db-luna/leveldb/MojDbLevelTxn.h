@@ -40,12 +40,6 @@ class MojDbLevelEngine;
 class MojDbLevelTableTxn;
 class MojDbLevelTxnIterator;
 
-class MojDbLevelAbstractTxn : public MojDbStorageTxn
-{
-public:
-    virtual MojDbLevelTableTxn &tableTxn(leveldb::DB *db) = 0;
-};
-
 // Note we implement kinda dirty read with shadowing by local wirtes
 class MojDbLevelTableTxn
 {
@@ -53,14 +47,12 @@ public:
     MojDbLevelTableTxn();
     ~MojDbLevelTableTxn();
 
-    MojErr begin(leveldb::DB* db);
+    MojErr begin(leveldb::DB &db);
 
     MojErr abort();
 
     bool isValid() { return (m_db == NULL); }
     leveldb::DB *db() { return m_db; }
-
-    MojDbLevelTableTxn &tableTxn(leveldb::DB *db);
 
     // operations
     void Put(const leveldb::Slice& key,
@@ -91,7 +83,7 @@ private:
     friend class MojDbLevelTxnIterator;
 };
 
-class MojDbLevelEnvTxn : public MojDbLevelAbstractTxn
+class MojDbLevelEnvTxn final : public MojDbStorageTxn
 {
 public:
     ~MojDbLevelEnvTxn()
@@ -102,7 +94,7 @@ public:
 
     bool isValid() { return true; }
 
-    MojDbLevelTableTxn &tableTxn(leveldb::DB *db);
+    MojDbLevelTableTxn &tableTxn(leveldb::DB &db);
 
 private:
     MojErr commitImpl();

@@ -35,7 +35,7 @@ TEST_F(TestTxnIterator, reversing)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -72,7 +72,7 @@ TEST_F(TestTxnIterator, reversingThroughUpdate)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -94,7 +94,7 @@ TEST_F(TestTxnIterator, backReversingThroughUpdate)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -126,7 +126,7 @@ TEST_F(TestTxnIterator, tails)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -160,7 +160,7 @@ TEST_F(TestTxnIterator, visibility)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -205,7 +205,7 @@ TEST_F(TestTxnIterator, visibilityReversed)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -250,7 +250,7 @@ TEST_F(TestTxnIterator, seekInsert)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -272,7 +272,7 @@ TEST_F(TestTxnIterator, seekDelete)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -294,7 +294,7 @@ TEST_F(TestTxnIterator, seekUpdate)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -316,7 +316,7 @@ TEST_F(TestTxnIterator, seekMissing)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -338,7 +338,7 @@ TEST_F(TestTxnIterator, seekOutside)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -353,7 +353,7 @@ TEST_F(TestTxnIterator, backAfterSeekOutside)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -374,7 +374,7 @@ TEST_F(TestTxnIterator, insertIntoNext)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -410,7 +410,7 @@ TEST_F(TestTxnIterator, jumpOffDeleted)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -442,7 +442,7 @@ TEST_F(TestTxnIterator, jumpBackOffDeleted)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 

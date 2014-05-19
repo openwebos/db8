@@ -226,7 +226,6 @@ MojErr MojErrLogDebug(const MojChar* function, const MojChar* file, int line, co
 	}
 	err = msg.appendFormat(_T("(%d)"), (int) errToLog);
 	MojErrCheckNoLog(err);
-    //LOG_ERROR(MSGID_ERROR_CALL, 0, "%s", msg.data());
 
 	return MojErrNone;
 }

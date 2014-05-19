@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -25,7 +25,15 @@
 #include "MojDbPerfIndexTest.h"
 
 
-const MojChar* const MojDbTestDir = _T("mojodb-test-dir");
+MojString getTestDir()
+{
+	MojString dir;
+	MojErr err = dir.format("/tmp/mojodb-test-dir-%d", getpid());
+	assert( err == MojErrNone );
+	return dir;
+}
+const MojString mojDbTestDirString = getTestDir();
+const MojChar* const MojDbTestDir = mojDbTestDirString.data();
 MojUInt64 allTestsTime = 0;
 
 int main(int argc, char** argv)

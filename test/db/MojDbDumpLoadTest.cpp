@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,6 +20,16 @@
 #include "MojDbDumpLoadTest.h"
 #include "db/MojDb.h"
 #include "core/MojUtil.h"
+
+namespace {
+	MojString sandboxFileName(const MojChar *name)
+	{
+		MojString path;
+		MojErr err = path.format("%s/%s", MojDbTestDir, name);
+		assert(err == MojErrNone);
+		return path;
+	}
+}
 
 static const MojChar* const MojLoadTestFileName = _T("loadtest.json");
 static const MojChar* const MojDumpTestFileName = _T("dumptest.json");
@@ -51,10 +61,10 @@ MojErr MojDbDumpLoadTest::run()
 	MojTestErrCheck(err);
 
 	// load
-	err = MojFileFromString(MojLoadTestFileName, MojTestStr);
+	err = MojFileFromString(sandboxFileName(MojLoadTestFileName), MojTestStr);
 	MojTestErrCheck(err);
 	MojUInt32 count = 0;
-	err = db.load(MojLoadTestFileName, count);
+	err = db.load(sandboxFileName(MojLoadTestFileName), count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 11);
 	err = checkCount(db);
@@ -62,7 +72,7 @@ MojErr MojDbDumpLoadTest::run()
 
 	// dump
 	count = 0;
-	err = db.dump(MojDumpTestFileName, count);
+	err = db.dump(sandboxFileName(MojDumpTestFileName), count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 11);
 
@@ -78,7 +88,7 @@ MojErr MojDbDumpLoadTest::run()
 	MojTestErrCheck(err);
 
 	// load again
-	err = db.load(MojDumpTestFileName, count);
+	err = db.load(sandboxFileName(MojDumpTestFileName), count);
 	MojTestErrCheck(err);
 	MojTestAssert(count == 12);
 	err = checkCount(db);
@@ -115,7 +125,7 @@ MojErr MojDbDumpLoadTest::checkCount(MojDb& db)
 
 void MojDbDumpLoadTest::cleanup()
 {
-	(void) MojUnlink(MojLoadTestFileName);
-	(void) MojUnlink(MojDumpTestFileName);
+	(void) MojUnlink(sandboxFileName(MojLoadTestFileName));
+	(void) MojUnlink(sandboxFileName(MojDumpTestFileName));
 	(void) MojRmDirRecursive(MojDbTestDir);
 }

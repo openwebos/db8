@@ -28,6 +28,9 @@ webos_component(3 2 0)
 
 include(FindPkgConfig)
 
+# -- add local include paths (should override already installed ones)
+include_directories(inc)
+
 # -- check for glib 2.0
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 include_directories(${GLIB2_INCLUDE_DIRS})
@@ -81,9 +84,6 @@ webos_add_compiler_flags(ALL -Wall -fPIC -Wconversion --std=c++0x
 # to turn on extra debug information (like output to log dirty buffers data) add debug compile flag -DMOJ_DEBUG_LOGGING
 webos_add_compiler_flags(DEBUG -DMOJ_DEBUG)
 webos_add_linker_options(ALL --no-undefined)
-
-# -- add local include paths
-include_directories(inc)
 
 # -- source for generating libmojocore.so
 set(CORE_LIB_SOURCES
@@ -269,10 +269,21 @@ if (WEBOS_CONFIG_BUILD_TESTS)
     add_subdirectory(bundled/gtest-1.6.0)
     add_subdirectory(test/mojocore)
     add_subdirectory(test/db-core)
-    if (WEBOS_DB8_BACKEND STREQUAL "leveldb")
-        add_subdirectory(test/leveldb)
-    endif ()
-    add_subdirectory(test/db-media)
+    foreach (backend ${WEBOS_DB8_BACKEND})
+        if (backend STREQUAL "leveldb")
+            add_subdirectory(test/leveldb)
+        endif ()
+    endforeach ()
     add_subdirectory(test/volume)
+    #add_subdirectory(test/db-media)
+
+    include(ProcessorCount)
+    ProcessorCount(n)
+    if (NOT n EQUAL 0)
+        set(ctest_args ${ctest_args} -j${n})
+    endif ()
+
 endif()
 add_subdirectory(tool/dbgen)
+
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure ${ctest_args})

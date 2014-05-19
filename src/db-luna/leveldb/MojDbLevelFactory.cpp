@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-* Copyright (c) 2009-2013 LG Electronics, Inc.
+* Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 #include "db-luna/leveldb/MojDbLevelEngine.h"
 #include "db-luna/leveldb/MojDbLevelEnv.h"
 
+namespace { MojDbStorageEngine::Registrator<MojDbLevelFactory> factoryLevelDB; }
+
 MojErr MojDbLevelFactory::create(MojRefCountedPtr<MojDbStorageEngine>& engineOut) const
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
@@ -38,4 +40,4 @@ MojErr MojDbLevelFactory::createEnv(MojRefCountedPtr<MojDbEnv>& envOut) const
     return MojErrNone;
 }
 
-const MojChar* MojDbLevelFactory::name() const { return _T("ldb"); }
+const MojChar* MojDbLevelFactory::name() const { return _T("leveldb"); }

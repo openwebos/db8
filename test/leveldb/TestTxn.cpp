@@ -31,7 +31,7 @@ TEST_F(TestTxn, visibility)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -72,7 +72,7 @@ TEST_F(TestTxn, dbIsolation)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
@@ -104,12 +104,12 @@ TEST_F(TestTxn, txnIsolation)
 {
     initSample();
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     initTxnSampleA(ttxn);
 
     MojDbLevelTableTxn ttxn2;
-    ttxn2.begin(db);
+    ttxn2.begin(*db);
 
     std::string val;
 
@@ -137,7 +137,7 @@ TEST_F(TestTxn, txnIsolation)
 TEST_F(TestTxn, commitVisibility)
 {
     initSample();
-    ttxn.begin(db);
+    ttxn.begin(*db);
     initTxnSampleA(ttxn);
     ttxn.commitImpl();
 
@@ -160,7 +160,7 @@ TEST_F(TestTxn, snapshotTransparency)
 
     ASSERT_TRUE( db->Get(ro, "b", &val).IsNotFound() );
 
-    ttxn.begin(db);
+    ttxn.begin(*db);
 
     ASSERT_TRUE( ttxn.Get("b", val).IsNotFound() );
 

@@ -21,13 +21,6 @@
 
 const MojChar* const MojDbLevelEnv::LockFileName = _T("_ldblock");
 
-// this class is mostly placeholder
-MojDbLevelEnv::MojDbLevelEnv()
- : m_db(NULL)
-{
-}
-
-
 MojDbLevelEnv::~MojDbLevelEnv()
 {
     close();
@@ -37,12 +30,14 @@ MojErr MojDbLevelEnv::configure(const MojObject& conf)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
+    // TODO: read some configurtion
+
+    /*
     bool found = false;
     MojString logDir;
     MojErr err = conf.get(_T("logDir"), logDir, found);
     MojErrCheck(err);
-
-    m_logDir = logDir;
+    */
 
     return MojErrNone;
 }
@@ -57,9 +52,6 @@ MojErr MojDbLevelEnv::close()
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
     unlockDir();
-
-    /*if (m_db)
-        delete m_db;*/
 
     return MojErrNone;
 }
@@ -100,10 +92,4 @@ MojErr MojDbLevelEnv::unlockDir()
     }
 
     return err;
-}
-
-MojErr MojDbLevelEnv::postCommit(MojSize updateSize)
-{
-    LOG_TRACE("Entering function %s", __FUNCTION__);
-    return MojErrNone;
 }

@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@
 
 void* MojRefCountAlloc(MojSize n)
 {
-	void* p = MojMalloc(n + sizeof(MojAtomicT));
+	void* p = MojMalloc(n + sizeof(MojAtomicT) + MojAtomicPadding);
 	if (p) {
 		MojAtomicT* a = (MojAtomicT*) p;
 		MojAtomicInit(a, 1);
-		p = a + 1;
+		p = MojRefCountPtrFromAtomic(a);
 	}
 	return p;
 }
@@ -40,9 +40,9 @@ void* MojRefCountRealloc(void* p, MojSize n)
 	} else {
 		MojAssert(MojRefCountGet(p) == 1);
 		MojAtomicT* a = MojRefCountPtrToAtomic(p);
-		a = (MojAtomicT*) MojRealloc(a, n + sizeof(MojAtomicT));
-		if (a)
-			pnew = a + 1;
+		pnew = MojRealloc(a, n + sizeof(MojAtomicT) + MojAtomicPadding);
+		if (pnew)
+			pnew = MojRefCountPtrFromAtomic(pnew);
 	}
 	return pnew;
 }

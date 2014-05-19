@@ -21,14 +21,6 @@
 #include "db/MojDbServiceDefs.h"
 #include "db/MojDbServiceHandler.h"
 
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#else
-#error "Set database type"
-#endif
-
 #ifndef MOJ_VERSION_STRING
 #define MOJ_VERSION_STRING NULL
 #endif
@@ -46,14 +38,6 @@ MojDbLunaServiceApp::MojDbLunaServiceApp()
 : MojReactorApp<MojGmainReactor>(MajorVersion, MinorVersion, VersionString)
 , m_mainService(m_dispatcher)
 {
-   // set up db first
-#ifdef MOJ_USE_BDB
-   MojDbStorageEngine::setEngineFactory(new MojDbBerkeleyFactory());
-#elif MOJ_USE_LDB
-   MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
-#else
-  #error "Database not set"
-#endif
 }
 
 MojDbLunaServiceApp::~MojDbLunaServiceApp()

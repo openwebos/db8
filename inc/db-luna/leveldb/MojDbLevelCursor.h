@@ -33,7 +33,7 @@
 class MojDbLevelDatabase;
 class MojDbLevelItem;
 
-class MojDbLevelAbstractTxn;
+class MojDbLevelEnvTxn;
 class MojDbLevelTableTxn;
 class MojDbLevelTxnIterator;
 
@@ -59,7 +59,7 @@ public:
 
 private:
     leveldb::DB* m_db;
-    MojDbLevelAbstractTxn* m_txn;
+    MojDbLevelEnvTxn* m_txn;
     MojDbLevelTableTxn* m_ttxn;
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     boost::scoped_ptr<MojDbLevelTxnIterator> m_txnIt;

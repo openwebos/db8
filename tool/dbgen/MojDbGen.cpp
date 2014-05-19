@@ -19,13 +19,6 @@
 
 #include "db/MojDb.h"
 #include "core/MojUtil.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#else
-#error "Database Engine doesn't set. See README.txt"
-#endif
 
 enum DATA_TYPE {
     dataTypeKind,
@@ -100,11 +93,6 @@ Done:
 
 int main(int argc, char**argv)
 {
-#ifdef MOJ_USE_BDB
-    MojDbStorageEngine::setEngineFactory(new MojDbBerkeleyFactory());
-#elif MOJ_USE_LDB
-    MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
-#endif
     if (argc < 3) {
         LOG_ERROR(MSGID_DB_ERROR, 0, "Invalid arg, This program need two args(input and output path)");
         return -1;

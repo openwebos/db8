@@ -21,13 +21,7 @@
 #include "db/MojDb.h"
 #include "db/MojDbKind.h"
 #include "db/MojDbReq.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else 
-#error "Specify database engine"
-#endif
+#include "db/MojDbStorageEngine.h"
 
 #include "MojDbTestStorageEngine.h"
 #include "db/MojDbServiceDefs.h"
@@ -640,17 +634,14 @@ MojErr MojDbKindTest::testPermissions()
 MojErr MojDbKindTest::testPutKind()
 {
 	//setup the test storage engine
-#ifdef MOJ_USE_BDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
-#elif MOJ_USE_LDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
-#else
-    MojRefCountedPtr<MojDbStorageEngine> engine;
-#endif
+	MojErr err;
+	MojRefCountedPtr<MojDbStorageEngine> engine;
+	err = MojDbStorageEngine::createDefaultEngine(engine);
+	MojTestErrCheck(err);
 	MojAllocCheck(engine.get());
 	MojRefCountedPtr<MojDbStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
 	MojAllocCheck(testEngine.get());
-	MojErr err = testEngine->open(MojDbTestDir);
+	err = testEngine->open(MojDbTestDir);
 	MojTestErrCheck(err);
 
 	MojDb db;
@@ -756,17 +747,14 @@ MojErr MojDbKindTest::testPutKind()
 MojErr MojDbKindTest::testDelKind()
 {
 	//setup the test storage engine
-#ifdef MOJ_USE_BDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbBerkeleyEngine());
-#elif MOJ_USE_LDB
-	MojRefCountedPtr<MojDbStorageEngine> engine(new MojDbLevelEngine());
-#else
-    MojRefCountedPtr<MojDbStorageEngine> engine;
-#endif
+	MojErr err;
+	MojRefCountedPtr<MojDbStorageEngine> engine;
+	err = MojDbStorageEngine::createDefaultEngine(engine);
+	MojTestErrCheck(err);
 	MojAllocCheck(engine.get());
 	MojRefCountedPtr<MojDbStorageEngine> testEngine(new MojDbTestStorageEngine(engine.get()));
 	MojAllocCheck(testEngine.get());
-	MojErr err = testEngine->open(MojDbTestDir);
+	err = testEngine->open(MojDbTestDir);
 	MojErrCheck(err);
 
 	MojDb db;

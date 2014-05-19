@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -46,18 +46,12 @@
 #include "MojDbNewIdTest.h"
 
 #include "MojDbShardManagerTest.h"
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#else
-#error "Database Engine doesn't set. See README.txt"
-#endif
+#include "db/MojDbStorageEngine.h"
 
 std::string getTestDir()
 {
     char buf[128];
-    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", time(0));
+    size_t n = snprintf(buf, sizeof(buf)-1, "/tmp/mojodb-test-dir-%d", getpid());
     if (n < 0) return "/tmp/mojodb-test-dir"; // fallback
     else return std::string(buf, n);
 }
@@ -68,13 +62,6 @@ const MojChar* const MojDbTestDir = mojDbTestDirString.c_str();
 int main(int argc, char** argv)
 {
 	MojDbTestRunner runner;
-   // set up bdb first
-#ifdef MOJ_USE_BDB
-   MojDbStorageEngine::setEngineFactory(new MojDbBerkeleyFactory());
-#elif MOJ_USE_LDB
-   MojDbStorageEngine::setEngineFactory(new MojDbLevelFactory());
-#endif
-
 	return runner.main(argc, argv);
 }
 

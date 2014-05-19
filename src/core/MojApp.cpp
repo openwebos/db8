@@ -40,6 +40,38 @@ int MojApp::main(int argc, MojChar** argv)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
+	for (int i = 0; i< argc; ++i)
+	{
+		const char* expected="-c";
+		if((strcmp(argv[i],expected) == 0) && (i < (argc-1)) )
+		{
+			MojString confStr;
+			MojErr err = MojFileToString(argv[++i], confStr);
+			if (err != MojErrNone) break;
+			MojObject val;
+			err = val.fromJson(confStr);
+			if (err != MojErrNone) break;
+			MojObject dbval;
+			err = val.getRequired("db", dbval);
+			if (err != MojErrNone) break;
+			MojObject pathval;
+			err = dbval.getRequired("path", pathval);
+			if (err != MojErrNone) break;
+			MojString str;
+			err = pathval.stringValue(str);
+			if (err != MojErrNone) break;
+			err = str.append("/indexIds.db");
+			if (err != MojErrNone) break;
+			DIR* dir = opendir(str.data());
+			if (dir)
+			{
+				closedir(dir);
+				setenv("MOJODB_ENGINE", "leveldb", 0);
+			}
+			break;
+		}
+	}
+
 	MojErr err = init();
 	if (err != MojErrNone) {
 		(void) displayErr(err, _T("error initializing"));

@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2013 LG Electronics, Inc.
+*      Copyright (c) 2013-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,16 +21,6 @@
 #include "db/MojDb.h"
 #include "db/MojDbKind.h"
 #include <stdarg.h>
-
-#ifdef MOJ_USE_BDB
-#include "db-luna/MojDbBerkeleyFactory.h"
-#include "db-luna/MojDbBerkeleyEngine.h"
-#elif MOJ_USE_LDB
-#include "db-luna/leveldb/MojDbLevelFactory.h"
-#include "db-luna/leveldb/MojDbLevelEngine.h"
-#else
-#error "Doesn't specified database type. See macro MOJ_USE_BDB and MOJ_USE_LDB"
-#endif
 
 #define SHARDID_CACHE_SIZE  100
 #define SHARD_ITEMS_NUMBER  10
@@ -78,15 +68,6 @@ MojDbShardManagerTest::MojDbShardManagerTest()
  */
 MojErr MojDbShardManagerTest::run()
 {
-    //setup the test storage engine
-#ifdef MOJ_USE_BDB
-    MojDbStorageEngine::setEngineFactory (new MojDbBerkeleyFactory);
-#elif MOJ_USE_LDB
-    MojDbStorageEngine::setEngineFactory (new MojDbLevelFactory);
-#else
-#error "Not defined engine type"
-#endif
-
     MojErr err = MojErrNone;
     MojDb db;
 

@@ -1,6 +1,6 @@
 /* @@@LICENSE
 *
-*      Copyright (c) 2009-2013 LG Electronics, Inc.
+*      Copyright (c) 2009-2014 LG Electronics, Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 * LICENSE@@@ */
 
 
+#include <cstdlib>
+
 #include "db/MojDbStorageEngine.h"
 #include "core/MojObjectBuilder.h"
 #include "core/MojJson.h"
 #include "core/MojLogDb8.h"
 
-MojRefCountedPtr<MojDbStorageEngineFactory> MojDbStorageEngine::m_factory;
+MojDbStorageEngine::Factory MojDbStorageEngine::m_factory;
+MojDbStorageEngine::Factories MojDbStorageEngine::m_factories;
 
 MojErr MojDbStorageItem::toObject(MojObject& objOut, MojDbKindEngine& kindEngine, bool headerExpected) const
 {
@@ -50,9 +53,64 @@ MojErr MojDbStorageEngine::createDefaultEngine(MojRefCountedPtr<MojDbStorageEngi
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-   if(m_factory.get() == 0)
-      MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine is not set"));
+    if (!m_factory.get())
+    {
+        const char *default_engine = getenv("MOJODB_ENGINE");
+        if (default_engine) // someone asked for specific engine through env variable
+        {
+            MojString key;
+            MojErr err = key.assign(default_engine);
+            MojErrCheck(err);
+            if (!m_factories.get(key, m_factory))
+            { MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage default engine not found")); }
+        }
+        else
+        {
+            if (m_factories.size() != 1) // if none or ambiguous
+            {
+                MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine is not set"));
+            }
+            // lets use that the only one which is present
+            m_factory = *m_factories.begin();
+        }
+    }
+
    MojErr err = m_factory->create(engineOut);
+   MojErrCheck(err);
+   return MojErrNone;
+}
+
+MojErr MojDbStorageEngine::createEnv(MojRefCountedPtr<MojDbEnv>& envOut)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    if (!m_factory.get())
+    {
+        const char *default_engine = getenv("MOJODB_ENGINE");
+        if(!default_engine)
+        {
+            default_engine = "sandwich";
+        }
+        if (default_engine) // someone asked for specific engine through env variable
+        {
+            MojString key;
+            MojErr err = key.assign(default_engine);
+            MojErrCheck(err);
+            if (!m_factories.get(key, m_factory))
+            { MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage default engine not found")); }
+        }
+        else
+        {
+            if (m_factories.size() != 1) // if none or ambiguous
+            {
+                MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine is not set"));
+            }
+            // lets use that the only one which is present
+            m_factory = *m_factories.begin();
+        }
+    }
+
+   MojErr err = m_factory->createEnv(envOut);
    MojErrCheck(err);
    return MojErrNone;
 }
@@ -62,11 +120,24 @@ MojErr MojDbStorageEngine::createEngine(const MojChar* name, MojRefCountedPtr<Mo
     LOG_TRACE("Entering function %s", __FUNCTION__);
 	MojAssert(name);
 
-	if (MojStrCmp(name, m_factory->name()) == 0) {
+	// check default factory
+	if (m_factory.get() && MojStrCmp(name, m_factory->name()) == 0) {
 		MojErr err = m_factory->create(engineOut);
 		MojErrCheck(err);
 		return MojErrNone;
 	}
+
+	// lookup within all registered engine factories
+	MojString key;
+	MojErr err = key.assign(name);
+	Factory factory;
+	if (m_factories.get(key, factory))
+	{
+		err = factory->create(engineOut);
+		MojErrCheck(err);
+		return MojErrNone;
+	}
+
 	MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine not found: '%s'"), name);
 }
 MojErr MojDbStorageEngine::setEngineFactory(MojDbStorageEngineFactory* factory)
@@ -75,6 +146,19 @@ MojErr MojDbStorageEngine::setEngineFactory(MojDbStorageEngineFactory* factory)
    return MojErrNone;
 }
 
+MojErr MojDbStorageEngine::setEngineFactory(const MojChar *name)
+{
+	MojString key;
+	MojErr err = key.assign(name);
+	Factory factory;
+	if (m_factories.get(key, factory))
+	{
+		m_factory = factory;
+		return MojErrNone;
+	}
+
+	MojErrThrowMsg(MojErrDbStorageEngineNotFound, _T("Storage engine not found: '%s'"), name);
+}
 
 MojDbStorageEngine::MojDbStorageEngine()
 {

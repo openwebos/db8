@@ -32,7 +32,7 @@ pre-start script
 	BYTES_FREE=$(($(stat -f -c "%a*%S" /var/db)))
 
 	# If /var/db contain less 4.5% of free space, do factory reset
-	BYTES_THRESHOLD=$(($BYTES_TOTAL*45/1000))
+	BYTES_THRESHOLD=$((($BYTES_TOTAL/1000)*45))
 
 	# if not enough disk space, make factory reset and reboot.
 	if [ "$BYTES_FREE" -le "$BYTES_THRESHOLD" ]; then

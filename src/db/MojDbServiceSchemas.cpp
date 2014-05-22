@@ -226,6 +226,13 @@ const MojChar* const MojDbServiceHandler::WatchSchema =
   		 _T("\"subscribe\":{\"type\":\"boolean\",\"optional\":true}},")
 	 _T("\"additionalProperties\":false}");
 
+const MojChar* const MojDbServiceHandler::QuotaCheckSchema =
+	_T("{\"type\":\"object\",")
+	_T("\"properties\":{")
+		_T("\"subscribe\":{\"type\":\"boolean\",\"optional\":false}},")
+		_T("\"owner\":{\"type\":\"string\",\"optional\":true}},")
+	_T("\"additionalProperties\":false}");
+
 const MojChar* const MojDbServiceHandler::ListActiveMediaSchema = MojDbServiceHandler::PurgeStatusSchema;
 
 const MojChar* const MojDbServiceHandler::ShardInfoSchema =

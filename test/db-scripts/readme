@@ -1,0 +1,4 @@
+Scripts for DB8 testing:
+
+1. Quota subscription
+This script will test quota check and subscription on specified db using luna-send.

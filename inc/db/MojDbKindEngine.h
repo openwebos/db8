@@ -78,6 +78,7 @@ public:
 	MojErr idFromToken(MojInt64 tok, MojString& idOut);
 	MojErr getKind(const MojObject& obj, MojDbKind*& kind);
 	MojErr getKind(const MojChar* kindName, MojDbKind*& kind);
+	bool   isExist(const MojChar* kindName, MojDbKind*& kind);
 
     static MojErr formatKindId(const MojChar* id, MojString& dbIdOut);
 

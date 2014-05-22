@@ -85,6 +85,7 @@ public:
 	static const MojChar* const VerifyKey;
 	static const MojChar* const WarningsKey;
 	static const MojChar* const WatchKey;
+	static const MojChar* const QuotaCheckKey;
 	static const MojChar* const WindowKey;
 	static const MojChar* const ListActiveMediaKey;
 	static const MojChar* const ShardInfoKey;
@@ -122,6 +123,7 @@ public:
 	static const MojChar* const ScheduledPurgeMethod;
 	static const MojChar* const SearchMethod;
 	static const MojChar* const SpaceCheckMethod;
+	static const MojChar* const QuotaCheckMethod;
 	static const MojChar* const ScheduledSpaceCheckMethod;
 	static const MojChar* const StatsMethod;
 	static const MojChar* const WatchMethod;

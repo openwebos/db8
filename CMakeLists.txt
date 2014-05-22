@@ -157,6 +157,7 @@ set(DB_LIB_SOURCES
     src/db/MojDbQueryFilter.cpp
     src/db/MojDbQueryPlan.cpp
     src/db/MojDbQuotaEngine.cpp
+    src/db/MojDbQuotaCheckAlert.cpp
     src/db/MojDbReq.cpp
     src/db/MojDbRevisionSet.cpp
     src/db/MojDbSearchCursor.cpp
@@ -260,10 +261,11 @@ install(FILES src/db-luna/activity-com.webos.mediadb.space.json DESTINATION ${WE
 install(DIRECTORY inc/ DESTINATION ${WEBOS_INSTALL_INCLUDEDIR}/mojodb/)
 
 if (WEBOS_CONFIG_BUILD_TESTS)
-	add_subdirectory(test/core)
-	add_subdirectory(test/db)
-	add_subdirectory(test/dbclient)
-	add_subdirectory(test/luna-service)
+    add_subdirectory(test/core)
+    add_subdirectory(test/db)
+    add_subdirectory(test/dbclient)
+    add_subdirectory(test/luna-service)
+    add_subdirectory(test/db-scripts)
 
     add_subdirectory(bundled/gtest-1.6.0)
     add_subdirectory(test/mojocore)

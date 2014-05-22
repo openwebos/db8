@@ -120,6 +120,7 @@ const MojChar* const MojDbServiceDefs::SpaceCheckMethod = _T("spaceCheck");
 const MojChar* const MojDbServiceDefs::ScheduledSpaceCheckMethod = _T("scheduledSpaceCheck");
 const MojChar* const MojDbServiceDefs::StatsMethod = _T("stats");
 const MojChar* const MojDbServiceDefs::WatchMethod = _T("watch");
+const MojChar* const MojDbServiceDefs::QuotaCheckMethod = _T("quotaCheck");
 const MojChar* const MojDbServiceDefs::ListActiveMediaMethod = _T("listActiveMedia");
 const MojChar* const MojDbServiceDefs::ShardInfoMethod = _T("shardInfo");
 const MojChar* const MojDbServiceDefs::ShardKindMethod = _T("shardKind");

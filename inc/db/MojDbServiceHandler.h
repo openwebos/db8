@@ -58,6 +58,7 @@ private:
 	static const MojChar* const SearchSchema;
 	static const MojChar* const StatsSchema;
 	static const MojChar* const WatchSchema;
+	static const MojChar* const QuotaCheckSchema;
 	static const MojChar* const ListActiveMediaSchema;
 	static const MojChar* const ShardInfoSchema;
 	static const MojChar* const ShardKindSchema;

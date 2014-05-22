@@ -60,7 +60,8 @@ const MojUInt32 MojDb::TmpVersionFileLength = 32;
 static volatile bool DefaultLocaleAlreadyInited = false;
 
 MojDb::MojDb()
-: m_spaceAlert(*this),
+: m_quotaAlert(*this),
+  m_spaceAlert(*this),
   m_shardEngine(*this),
   m_purgeWindow(PurgeNumDaysDefault),
   m_loadStepSize(LoadStepSizeDefault),

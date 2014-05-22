@@ -32,6 +32,7 @@ const MojDbServiceHandlerInternal::Method MojDbServiceHandlerInternal::s_privMet
 	{MojDbServiceDefs::PreRestoreMethod, (Callback) &MojDbServiceHandlerInternal::handlePreRestore},
 	{MojDbServiceDefs::ScheduledPurgeMethod, (Callback) &MojDbServiceHandlerInternal::handleScheduledPurge},
 	{MojDbServiceDefs::SpaceCheckMethod, (Callback) &MojDbServiceHandlerInternal::handleSpaceCheck },
+	{MojDbServiceDefs::QuotaCheckMethod, (Callback) &MojDbServiceHandlerInternal::handleQuotaCheck },
 	{MojDbServiceDefs::ScheduledSpaceCheckMethod, (Callback) &MojDbServiceHandlerInternal::handleScheduledSpaceCheck },
 	{NULL, NULL} };
 
@@ -289,6 +290,59 @@ MojErr MojDbServiceHandlerInternal::handleSpaceCheck(MojServiceMessage* msg, Moj
 	return err;
 }
 
+MojErr MojDbServiceHandlerInternal::handleQuotaCheck(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    bool subscribe = false;
+
+    MojErr err = payload.getRequired(MojDbServiceDefs::SubscribeKey, subscribe);
+    MojErrCheck(err);
+    //get service's bus address or app's app ID if defined
+    bool found = false;
+    MojString owner;
+    err = payload.get(MojDbServiceDefs::OwnerKey, owner, found);
+    MojErrCheck(err);
+
+    if(!found)
+    {
+        err = owner.assign("");
+        MojErrCheck(err);
+    }
+
+    MojDbQuotaCheckAlert& quotaAlert = m_db.getQuotaAlert();
+    MojObject response;
+    MojInt64 bytesUsed;
+    MojInt64 bytesAvailable;
+    bool subscribed = msg->subscribed();
+
+    if (subscribe) {
+        quotaAlert.subscribe(msg, owner);
+    }
+    else {
+        quotaAlert.unsubscribe(owner);
+    }
+
+    if (owner.empty())
+    {
+        err = owner.assign(msg->senderName());
+        MojErrCheck(err);
+    }
+
+    err = quotaAlert.checkQuota(msg, owner, bytesUsed, bytesAvailable);
+    MojErrCheck(err);
+
+    err = response.putInt(_T("bytesUsed"), bytesUsed);
+    MojErrCheck(err);
+    err = response.putInt(_T("bytesAvailable"), bytesAvailable);
+    MojErrCheck(err);
+    err = response.putBool("subscribed", subscribed);
+    MojErrCheck(err);
+    err = msg->reply(response);
+    MojErrCheck(err);
+
+    return MojErrNone;
+}
 
 MojErr MojDbServiceHandlerInternal::requestLocale()
 {

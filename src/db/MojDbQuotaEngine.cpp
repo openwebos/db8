@@ -167,6 +167,12 @@ MojErr MojDbQuotaEngine::applyUsage(MojDbStorageTxn* txn)
 		 i != txn->m_offsetMap.end(); ++i) {
 		MojErr err = applyOffset(i.key(), i.value()->offset(), txn);
 		MojErrCheck(err);
+
+		if(!m_db->getQuotaAlert().isEmpty()) //optimization for empty list
+		{
+			err = informQuotaSubscribers(i.key());
+			MojErrCheck(err);
+		}
 	}
 	return MojErrNone;
 }
@@ -410,12 +416,45 @@ MojErr MojDbQuotaEngine::commitQuota(const MojString& owner, MojInt64 size)
 	} else {
 		iter.value()->size(size);
 	}
+
 	if (m_isOpen) {
 		err = refresh();
 		MojErrCheck(err);
 	}
 
 	return MojErrNone;
+}
+
+MojErr MojDbQuotaEngine::informQuotaSubscribers(const MojString& kindId)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    MojErr err;
+    MojInt64 sizeOut;
+    MojInt64 usageOut;
+    MojDbKind* kind = NULL;
+    MojString owner;
+
+    err = owner.assign("");
+    MojErrCheck(err);
+
+    if(m_db->kindEngine()->isExist(kindId.data(), kind))
+        owner = kind->owner();
+
+    if((kind == NULL) || owner.empty())
+        return MojErrNone;
+
+    //ignore if quota not exist
+    QuotaMap::ConstIterator iter = m_quotas.find(owner.data());
+    if (iter == m_quotas.end())
+        return MojErrNone;
+
+    err = quotaUsage(owner.data(), sizeOut, usageOut);
+    MojErrCheck(err);
+    err = m_db->getQuotaAlert().notifySubscriber(owner.data(), usageOut, sizeOut);
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
 MojInt64 MojDbQuotaEngine::Quota::size() const

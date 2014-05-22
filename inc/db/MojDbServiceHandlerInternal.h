@@ -104,6 +104,7 @@ private:
 	MojErr handleScheduledPurge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleSpaceCheck(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 	MojErr handleScheduledSpaceCheck(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
+	MojErr handleQuotaCheck(MojServiceMessage* msg, MojObject& payload, MojDbReq& req);
 
 	MojErr requestLocale();
 	MojErr generateSpaceAlert(MojDbSpaceAlert::AlertLevel level, MojInt64 bytesUsed, MojInt64 bytesAvailable);

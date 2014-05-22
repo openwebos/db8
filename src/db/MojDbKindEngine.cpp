@@ -510,6 +510,18 @@ MojErr MojDbKindEngine::getKind(const MojChar* kindName, MojDbKind*& kind)
 	return MojErrNone;
 }
 
+bool MojDbKindEngine::isExist(const MojChar* kindName, MojDbKind*& kind)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    KindMap::ConstIterator iter = m_kinds.find(kindName);
+    if (iter == m_kinds.end())
+        return false;
+    kind = iter.value().get();
+
+    return true;
+}
+
 MojErr MojDbKindEngine::formatKindId(const MojChar* id, MojString& dbIdOut)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);

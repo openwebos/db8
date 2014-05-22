@@ -76,6 +76,7 @@ public:
 	MojErr applyQuota(MojDbStorageTxn* txn);
 	MojErr kindUsage(const MojChar* kindId, MojInt64& usageOut, MojDbStorageTxn* txn);
 	MojErr quotaUsage(const MojChar* owner, MojInt64& sizeOut, MojInt64& usageOut);
+	MojErr informQuotaSubscribers(const MojString& kindId);
 	MojErr refresh();
 	MojErr stats(MojObject& objOut, MojDbReq& req);
 

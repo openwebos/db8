@@ -284,5 +284,6 @@ if (WEBOS_CONFIG_BUILD_TESTS)
 
 endif()
 add_subdirectory(tool/dbgen)
+add_subdirectory(tool/sandwichmigrate)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure ${ctest_args})

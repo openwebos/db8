@@ -61,5 +61,6 @@ script
 	fi
         # Use jemalloc
 	export LD_PRELOAD=/usr/lib/libjemalloc_mt.so.0:/lib/libpthread.so.0
+        @WEBOS_INSTALL_SBINDIR@/mojodb_migrate @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/db8/maindb.conf
 	exec $WEBOS_NICE @WEBOS_INSTALL_SBINDIR@/mojodb-luna -c @WEBOS_INSTALL_WEBOS_SYSCONFDIR@/db8/maindb.conf
 end script

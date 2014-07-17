@@ -70,6 +70,8 @@ private:
 	static bool handleRequest(LSHandle* sh, LSMessage* msg, void* ctx);
 	static bool handleResponse(LSHandle* sh, LSMessage* msg, void* ctx);
 
+	void Statistic(LSMessage* msg);
+
 	LSHandle* getHandle(bool onPublic = false);
 
 	bool m_allowPublicMethods;

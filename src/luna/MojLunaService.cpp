@@ -529,11 +529,20 @@ void MojLunaService::Statistic(LSMessage* message)
         char path[100];
         sprintf(path, "/var/db/db8-luna-commands-%d.sh", pid);
         FILE* file = fopen(path, "a+");
-        fputs("luna-send -a ", file);
-        fputs(senderServiceName.c_str(), file);
-        fputs(" -n 1 luna://", file);
-        fputs(m_name.data(), file);
-        fputs(messageCategory.c_str(), file);
+        std::string line;
+        line = "luna-send -a ";
+        line += senderServiceName;
+        line += " -n 1 luna://";
+        line += m_name.data();
+        if(!messageCategory.empty())
+        {
+            line += messageCategory;
+        }
+        if(!line.empty() && line[line.size() - 1] != '/')
+        {
+            line += "/";
+        }
+        fputs(line.c_str(), file);
         fputs(messageMethod.c_str(), file);
         fputs(" '", file);
         if(!messagePayload.empty())

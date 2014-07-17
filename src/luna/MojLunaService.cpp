@@ -22,6 +22,8 @@
 #include "luna/MojLunaMessage.h"
 #include "luna/MojLunaRequest.h"
 #include "core/MojObject.h"
+#include <map>
+#include <string>
 
 const MojChar* const MojLunaService::UriScheme = _T("palm");
 
@@ -412,6 +414,11 @@ bool MojLunaService::handleRequest(LSHandle* sh, LSMessage* msg, void* ctx)
     if (!request.get())
         return false;
 
+    if(service)
+    {
+        service->Statistic(msg);
+    }
+
     LOG_DEBUG("[db_lunaService] request received: %s", request->payload());
 
 	MojErr reqErr;
@@ -442,4 +449,122 @@ bool MojLunaService::handleResponse(LSHandle* sh, LSMessage* msg, void* ctx)
 	MojErrCatchAll(err);
 
     return true;
+}
+
+void MojLunaService::Statistic(LSMessage* message)
+{
+    enum mode{ needToCheck, active, inactive};
+    //need to check flag
+    static mode status = needToCheck;
+
+    //flag checked and statistic is not enabled
+    if(status == inactive )
+    {
+        return;
+    }
+
+    if(status == needToCheck)
+    {
+        struct stat buf;
+        std::string path("/var/db/");
+        path += m_name.data();
+        if(stat(path.c_str(), &buf) == 0)
+        {
+            status = active;
+        }
+        else
+        {
+            status = inactive;
+        }
+    }
+
+    if(status == active)
+    {
+        std::string appId_pid;
+        if(auto value = LSMessageGetApplicationID(message))
+        {
+            appId_pid = value;
+        }
+        std::string callerAppId = appId_pid.substr(0,appId_pid.find(" "));
+        std::string senderServiceName;
+        if(auto value = LSMessageGetSenderServiceName(message))
+        {
+            senderServiceName = value;
+        }
+        std::string messageCategory;
+        if(auto value = LSMessageGetCategory(message))
+        {
+            messageCategory = value;
+        }
+        std::string messageMethod;
+        if(auto value = LSMessageGetMethod(message))
+        {
+            messageMethod = value;
+        }
+        std::string messagePayload;
+        if(auto value = LSMessageGetPayload(message))
+        {
+            messagePayload = value;
+        }
+
+        static std::map<std::string, int> m_bytes;
+        static std::map<std::string, int> m_requests;
+        int pid = getpid();
+
+        if(senderServiceName.empty())
+        {
+            if(callerAppId.empty())
+            {
+                senderServiceName = ("com.palm.configurator");
+            }
+            else
+            {
+                senderServiceName = callerAppId;
+            }
+        }
+
+        m_bytes[senderServiceName] += messagePayload.size();
+        m_requests[senderServiceName] += 1;
+
+        char path[100];
+        sprintf(path, "/var/db/db8-luna-commands-%d.sh", pid);
+        FILE* file = fopen(path, "a+");
+        std::string line;
+        line = "luna-send -a ";
+        line += senderServiceName;
+        line += " -n 1 luna://";
+        line += m_name.data();
+        if(!messageCategory.empty())
+        {
+            line += messageCategory;
+        }
+        if(!line.empty() && line[line.size() - 1] != '/')
+        {
+            line += "/";
+        }
+        fputs(line.c_str(), file);
+        fputs(messageMethod.c_str(), file);
+        fputs(" '", file);
+        if(!messagePayload.empty())
+        {
+            fputs(messagePayload.c_str(), file);
+        }
+        fputs("'\n", file);
+        fclose(file);
+
+        sprintf(path, "/var/db/db8-luna-statistic-%d.txt", pid);
+
+        file = fopen(path, "w");
+        for(auto it : m_bytes)
+        {
+            fputs("Service: ", file);
+            fputs(it.first.c_str(), file);
+            fputs("\t\tbytes:", file);
+            fprintf(file, "%d", it.second);
+            fputs("\t\tcount:", file);
+            fprintf(file, "%d\n", m_requests[it.first]);
+        }
+        fputs("\n=============================\n", file);
+        fclose(file);
+    }
 }

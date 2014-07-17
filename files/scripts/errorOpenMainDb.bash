@@ -1,4 +1,11 @@
 #! /bin/bash
+# Ignore IO error if either of condtions are true
+#   - '/var/db' is mounted as read-only.
+#   - shutdown/reboot is ongoing.
+cat /proc/mounts | grep '/var/db ' |  grep -qw 'ro' && exit
+
+# checks whether reboot/shutdown is ongoing
+initctl status shutdown | grep -q running && touch /tmp/shutdown_running; initctl status reboot | grep -q running && exit
 
 # check available disk space
 BYTES_FREE=$(($(stat -f -c "%a*%S" /mnt/lg/cmn_data)))

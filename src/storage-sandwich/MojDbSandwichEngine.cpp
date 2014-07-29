@@ -260,8 +260,7 @@ MojErr MojDbSandwichEngine::compact()
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojThreadGuard guard(m_dbMutex);
 
-    // XXX: breaks DumpAndLoad
-    // (*m_db)->CompactRange(nullptr, nullptr);
+    (*m_db)->CompactRange(nullptr, nullptr);
 
     return MojErrNone;
 }

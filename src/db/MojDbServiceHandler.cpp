@@ -33,6 +33,7 @@ const MojDbServiceHandler::SchemaMethod MojDbServiceHandler::s_pubMethods[] = {
 	{MojDbServiceDefs::FindMethod, (Callback) &MojDbServiceHandler::handleFind, MojDbServiceHandler::FindSchema},
 	{MojDbServiceDefs::GetMethod, (Callback) &MojDbServiceHandler::handleGet, MojDbServiceHandler::GetSchema},
 	{MojDbServiceDefs::MergeMethod, (Callback) &MojDbServiceHandler::handleMerge, MojDbServiceHandler::MergeSchema},
+	{MojDbServiceDefs::MergePutMethod, (Callback) &MojDbServiceHandler::handleMergePut, MojDbServiceHandler::MergeSchema},
 	{MojDbServiceDefs::PurgeStatusMethod, (Callback) &MojDbServiceHandler::handlePurgeStatus, MojDbServiceHandler::PurgeStatusSchema},
 	{MojDbServiceDefs::PutMethod, (Callback) &MojDbServiceHandler::handlePut, MojDbServiceHandler::PutSchema},
 	{MojDbServiceDefs::PutKindMethod, (Callback) &MojDbServiceHandler::handlePutKind, MojDbServiceHandler::PutKindSchema},
@@ -354,6 +355,44 @@ MojErr MojDbServiceHandler::handleMerge(MojServiceMessage* msg, MojObject& paylo
 	}
 
 	return MojErrNone;
+}
+
+MojErr MojDbServiceHandler::handleMergePut(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)
+{
+    MojErr err;
+    MojObject obj;
+    MojObject props;
+    bool ignoreM = false;
+    MojUInt32 queryCount = 0;
+
+    err = payload.getRequired(MojDbServiceDefs::QueryKey, obj);
+    MojErrCheck(err);
+
+    if (payload.get(MojDbServiceDefs::IgnoreMissingKey, ignoreM))
+        MojErrThrowMsg(MojErrInvalidArg, _T("db: ignoreMissing - invalid option for mergePut query"));
+
+    MojDbQuery query;
+    err = query.fromObject(obj);
+    MojErrCheck(err);
+
+    err = payload.getRequired(MojDbServiceDefs::PropsKey, props);
+    MojErrCheck(err);
+
+    err = m_db.merge(query, props, queryCount, MojDb::FlagNone, req);
+    MojErrCheck(err);
+
+    if (queryCount > 0) {
+        err = formatCount(msg, queryCount);
+        MojErrCheck(err);
+    } else {
+        err = m_db.merge(props, MojDb::FlagNone, req);
+        MojErrCheck(err);
+
+        err = formatPut(msg, &props, &props + 1);
+        MojErrCheck(err);
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbServiceHandler::handlePurge(MojServiceMessage* msg, MojObject& payload, MojDbReq& req)

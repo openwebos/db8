@@ -46,6 +46,7 @@ foreach(test
         MojDbRev
         MojDbRevisionSet
         MojDbSearch
+        MojDbSearchCache
         MojDbDistinct
         MojDbTextCollator
         MojDbTextTokenizer

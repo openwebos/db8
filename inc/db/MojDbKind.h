@@ -95,6 +95,8 @@ public:
 	MojErr checkOwnerPermission(MojDbReq& req);
     MojDbIndex* indexForCollation(const MojDbQuery& query) { return indexForQuery(query); }
 	
+    inline MojUInt32 getUpdateRevision() const { return m_updateRev; }
+
 private:
 	struct IndexComp
 	{
@@ -128,6 +130,7 @@ private:
 	MojErr dropIndex(MojDbIndex* index, MojDbReq& req);
 	static MojErr removeKind(KindVec& vec, MojDbKind* kind);
 	static const MojChar* stringFromOperation(MojDbOp op);
+    inline void incUpdateRevision() { ++m_updateRev; }
 
 	MojObject m_obj;
 	MojString m_id;
@@ -146,6 +149,8 @@ private:
 	MojRefCountedPtr<MojDbKindState> m_state;
 	bool m_backup;
 	bool m_builtin;
+
+    MojUInt32 m_updateRev;
 };
 
 #endif /* MOJDBKIND_H_ */

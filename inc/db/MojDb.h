@@ -33,6 +33,7 @@
 #include "db/MojDbShardEngine.h"
 #include "db/MojDbWatcher.h"
 #include "db/MojDbReq.h"
+#include "db/MojDbSearchCache.h"
 #include "core/MojHashMap.h"
 #include "core/MojSignal.h"
 #include "core/MojString.h"
@@ -114,6 +115,9 @@ public:
 	MojInt64 version() { return DatabaseVersion; }
 	MojErr commitBatch(MojDbReq& req);
     MojInt64 purgeWindow() {return m_purgeWindow;}
+
+    // Search Cache
+    MojDbSearchCache* searchCache() { return &m_searchCache; }
 
     //verify _kind
     MojErr isValidKind (MojString& i_kindStr, bool & ret);
@@ -204,6 +208,8 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
+    // Search Cache
+    MojDbSearchCache m_searchCache;
 
 	MojThreadMutex m_compact_mutex;
 };

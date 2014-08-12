@@ -163,12 +163,17 @@ MojErr MojDbSearchCursor::init(const MojDbQuery& query)
     MojDbQuery::Page page;
     page = m_query.page();
     if(!page.empty()) {
-        MojObject objOut;
-        err = page.toObject(objOut);
+        err = page.toObject(m_pageObject);
         MojErrCheck(err);
-        m_page.fromObject(objOut);
+        m_page.fromObject(m_pageObject);
     }
 	m_query.limit(MaxResults);
+
+    MojObject obj;
+    err = m_query.toObject(obj);
+    MojErrCheck(err);
+    m_cacheQuery.fromObject(obj);
+
 	err = m_query.order(_T(""));
 	MojErrCheck(err);
     // delete page info from query for query plan
@@ -210,42 +215,79 @@ MojErr MojDbSearchCursor::begin()
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-	if (!loaded()) {
-		MojErr err = load();
-		MojErrCheck(err);
-	}
-	return MojErrNone;
+    if (!loaded()) {
+        // Checks whether we have cache for the query.
+        //
+        MojDb* db = m_kindEngine->db();
+        MojAssert(db);
+
+        MojDbSearchCache* cache = db->searchCache();
+        MojAssert(cache);
+
+        MojDbKind* kind = NULL;
+        MojErr err = m_kindEngine->getKind(m_cacheQuery.from().data(), kind);
+        MojErrCheck(err);
+        MojAssert(kind);
+
+        err = m_queryKey.fromQuery(m_cacheQuery, kind->getUpdateRevision());
+        MojErrCheck(err);
+
+        bool fromCache = false;
+        if(cache->contain(m_queryKey)) {
+            fromCache = true;
+        }
+
+        err = load(fromCache);
+        MojErrCheck(err);
+    }
+
+    return MojErrNone;
 }
 
-MojErr MojDbSearchCursor::load()
+MojErr MojDbSearchCursor::load(bool fromCache)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-	// pull unique ids from index
-	ObjectSet ids;
-	MojErr err = loadIds(ids);
-	MojErrCheck(err);
+    if(fromCache) {
+        MojDb* db = m_kindEngine->db();
+        MojAssert(db);
 
-	// load objects into memory
-	err = loadObjects(ids);
-	MojErrCheck(err);
-	// sort results
-	if (!m_orderProp.empty()) {
-		err = sort();
-		MojErrCheck(err);
-	}
-	// distinct
-	if (!m_distinct.empty()) {
-		distinct();
-	}
-	// reverse for desc
-	if (m_query.desc()) {
-		err = m_items.reverse();
-		MojErrCheck(err);
-	}
+        MojDbSearchCache* cache = db->searchCache();
+        MojAssert(cache);
+
+        MojErr err = loadFromCache(cache);
+        MojErrCheck(err);
+
+        // Here we don't need sort(), distinct() and reverse(),
+        // because we get the data with same query.
+        //
+    } else {
+        // pull unique ids from index
+        ObjectSet ids;
+        MojErr err = loadIds(ids);
+        MojErrCheck(err);
+
+        // load objects into memory
+        err = loadObjects(ids);
+        MojErrCheck(err);
+        // sort results
+        if (!m_orderProp.empty()) {
+        	err = sort();
+        	MojErrCheck(err);
+        }
+        // distinct
+        if (!m_distinct.empty()) {
+        	distinct();
+        }
+        // reverse for desc
+        if (m_query.desc()) {
+        	err = m_items.reverse();
+        	MojErrCheck(err);
+        }
+    }
     // next page
     if (!m_page.empty()) {
-        err = setPagePosition();
+        MojErr err = setPagePosition();
         MojErrCheck(err);
     } else {
         // set begin/last position.
@@ -258,8 +300,25 @@ MojErr MojDbSearchCursor::load()
             MojDbStorageItem* nextItem = m_limitPos->get();
             const MojObject nextId = nextItem->id();
             m_page.fromObject(nextId);
+
+            // Update cache only if all followings are met;
+            //    - 'page' is not specified in given query.
+            //    - item size is bigger than limit.
+            //
+            MojDb *db = m_kindEngine->db();
+            MojAssert(db);
+            MojDbSearchCache* cache = db->searchCache();
+            MojAssert(cache);
+
+            MojDbSearchCache::IdSet ids;
+            MojErr err = getIds(ids);
+            MojErrCheck(err);
+
+            err = cache->updateCache(m_queryKey, ids);
+            MojErrCheck(err);
         }
     }
+
     // set remainder count
     m_count = m_items.end() - m_pos;
 
@@ -366,6 +425,96 @@ MojErr MojDbSearchCursor::loadObjects(const ObjectSet& ids)
 	if (warns > 0)
         LOG_DEBUG("[db_mojodb] Search warnings: %d \n", warns);
 	return MojErrNone;
+}
+
+MojErr MojDbSearchCursor::loadFromCache(const MojDbSearchCache* cache)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    MojInt32 warns = 0;
+    MojDbSearchCache::IdSet ids;
+    MojErr err = cache->getIdSet(m_queryKey, ids);
+    MojErrCheck(err);
+
+    MojDbSearchCache::IdSet::Iterator it;
+    MojUInt32 count=0;
+
+    bool foundStart=false;
+    if (m_page.empty())
+        foundStart=true;
+
+    MojDbSearchCache::IdSet::ConstIterator citer = ids.begin();
+    for ( ; citer != ids.end(); ++citer) {
+        // get item by id
+        MojObject obj;
+        MojDbStorageItem* item = NULL;
+        bool found = false;
+        MojErr err = m_storageQuery->getById(*citer, item, found);
+        if (err == MojErrInternalIndexOnFind) {
+            ++warns;
+            continue;
+        }
+        MojErrCheck(err);
+
+        // Start to load if 'page' is available, and only if it matches id.
+        //
+        if (foundStart==false && m_pageObject.compare(*citer))
+            continue;
+        foundStart=true;
+
+        // Intensionally, load next object.
+        if ((m_limit+1) <= count)
+            break;
+
+        if (found) {
+            // get object from item
+            err = item->toObject(obj, *m_kindEngine);
+            MojErrCheck(err);
+        }
+
+        // create object item
+        MojRefCountedPtr<MojDbObjectItem> items(new MojDbObjectItem(obj));
+        MojAllocCheck(items.get());
+        // add to vec
+        err = m_items.push(items);
+        MojErrCheck(err);
+
+        ++count;
+    }
+
+    // Assign dummy object item for compatability.
+    // TODO: Remove below code.
+    //
+    for (; citer != ids.end(); ++citer) {
+        MojObject obj = *citer;
+
+        // create object item
+        MojRefCountedPtr<MojDbObjectItem> items(new MojDbObjectItem(obj));
+        MojAllocCheck(items.get());
+        // add to vec
+        err = m_items.push(items);
+        MojErrCheck(err);
+    }
+
+    if (warns > 0)
+        LOG_DEBUG("[db_mojodb] Search from cache warnings: %d \n", warns);
+
+    return MojErrNone;
+}
+
+//extract ids from m_items and copy it to IdSet for cache
+MojErr MojDbSearchCursor::getIds(MojDbSearchCache::IdSet& sortedId)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    for (ItemVec::ConstIterator i = m_items.begin(); i != m_items.end(); ++i) {
+        MojDbStorageItem* item = i->get();
+        const MojObject& id = item->id();
+        MojErr err = sortedId.push(id);
+        MojErrCheck(err);
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDbSearchCursor::sort()

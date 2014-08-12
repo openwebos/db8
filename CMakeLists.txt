@@ -177,6 +177,7 @@ set(DB_LIB_SOURCES
     src/db/MojDbUtils.cpp
     src/db/MojDbWatcher.cpp
     src/db/MojDbServiceHandlerInternal.cpp
+    src/db/MojDbSearchCache.cpp
     )
 
 add_library(mojodb SHARED ${DB_LIB_SOURCES})

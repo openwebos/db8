@@ -174,7 +174,7 @@ MojErr MojDbQuery::toObject(MojObjectVisitor& visitor) const
 	}
 
 	if (!m_filterClauses.empty()) {
-		err = appendClauses(visitor, WhereKey, m_whereClauses);
+		err = appendClauses(visitor, FilterKey, m_filterClauses);
 		MojErrCheck(err);
 	}
 

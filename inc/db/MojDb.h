@@ -33,6 +33,7 @@
 #include "db/MojDbShardEngine.h"
 #include "db/MojDbWatcher.h"
 #include "db/MojDbReq.h"
+#include "db/MojDbSearchCache.h"
 #include "core/MojHashMap.h"
 #include "core/MojSignal.h"
 #include "core/MojString.h"
@@ -115,6 +116,9 @@ public:
 	MojErr commitBatch(MojDbReq& req);
     MojInt64 purgeWindow() {return m_purgeWindow;}
 
+    // Search Cache
+    MojDbSearchCache* searchCache() { return &m_searchCache; }
+
     //verify _kind
     MojErr isValidKind (MojString& i_kindStr, bool & ret);
     //successful, if records for the _kind have been written to this shard
@@ -186,6 +190,7 @@ private:
 	MojErr commitKind(const MojString& id, MojDbReq& req, MojErr err);
 	MojErr reloadKind(const MojString& id);
 	MojErr assignIds(MojObject& objOut);
+    MojErr checkSameKind(const MojObject& obj, const MojString& id, const MojDbReq& req, bool &isSame);
 
 	MojDbQuotaCheckAlert m_quotaAlert;
     MojDbSpaceAlert m_spaceAlert;
@@ -203,6 +208,8 @@ private:
 	MojInt64 m_purgeWindow;
 	MojInt64 m_loadStepSize;
 	bool m_isOpen;
+    // Search Cache
+    MojDbSearchCache m_searchCache;
 
 	MojThreadMutex m_compact_mutex;
 };

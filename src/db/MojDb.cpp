@@ -571,20 +571,34 @@ MojErr MojDb::putKind(MojObject& obj, MojUInt32 flags, MojDbReqRef req)
 	err = obj.putString(IdKey, dbId);
 	MojErrCheck(err);
 
-	// put the object
-	MojDbAdminGuard guard(req);
-	err = putImpl(obj, flags | FlagForce, req, true, MojString(), false);
-	MojErrCheck(err);
-	guard.unset();
+    bool isSame = false;
+    err = checkSameKind(obj, id, req, isSame);
+    MojErrCheck(err);
 
-	// attempt the putKind
-	MojErr errAcc = m_kindEngine.putKind(obj, req);
-	MojErrAccumulate(err, errAcc);
+    if (false == isSame)
+    {
+        // put the object
+        MojDbAdminGuard guard(req);
+        err = putImpl(obj, flags | FlagForce, req, true, MojString(), false);
+        MojErrCheck(err);
+        guard.unset();
 
-	err = commitKind(id, req, err);
-	MojErrCheck(err);
+        // attempt the putKind
+        MojErr errAcc = m_kindEngine.putKind(obj, req);
+        MojErrAccumulate(err, errAcc);
 
-	return MojErrNone;
+        err = commitKind(id, req, err);
+        MojErrCheck(err);
+    }
+    else
+    {
+        LOG_DEBUG("[db_mojodb] skip putKind since same kind contents.\n");
+
+        err = m_kindEngine.checkPermission(id, OpKindUpdate, req);
+        MojErrCheck(err);
+    }
+
+    return MojErrNone;
 }
 
 MojErr MojDb::putConfig(MojObject* begin, const MojObject* end, MojDbReq& req, MojDbPutHandler& handler)
@@ -1024,6 +1038,71 @@ MojErr MojDb::getImpl(const MojObject& id, MojObjectVisitor& visitor, MojDbOp op
 		MojErrCheck(err);
 	}
 	return MojErrNone;
+}
+
+MojErr MojDb::checkSameKind(const MojObject& obj, const MojString& idStr, const MojDbReq& req, bool &isSame)
+{
+    LOG_TRACE("Entering function %s", __FUNCTION__);
+
+    isSame = false;
+    MojRefCountedPtr<MojDbStorageItem> prevItem;
+    MojObject id;
+    if (obj.get(IdKey, id)) {
+        MojErr err;
+
+        // If cannot find the kind in kindMap, then we should putKind it.
+        //
+        MojDbKind *pk = NULL;
+        err = m_kindEngine.getKind(idStr.data(), pk);
+        if (!pk)
+        {
+            // Intentionally does not check err.
+            return MojErrNone;
+        }
+
+        // get previous revision if we have an id
+        err = m_objDb->get(id, req.txn(), true, prevItem);
+        MojErrCheck(err);
+    }
+
+    if (!prevItem.get())
+    {
+        return MojErrNone;
+    }
+
+    MojObject prev;
+    MojErr err = prevItem->toObject(prev, m_kindEngine);
+    MojErrCheck(err);
+
+    MojObject delValue;
+    if (prev.get(DelKey, delValue) && (true == delValue.boolValue()))
+    {
+        // If _del:true, then skip to compare old and new.
+        //
+        isSame = false;
+    }
+    else
+    {
+        MojObject cur(obj);
+        const MojChar* const specialKeys[] = {DelKey, IdKey, RevKey, SyncKey};
+
+        // Do not compare special field, such as '_del', '_id', '_rev' and '_sync'.
+        //
+        for (unsigned i=0; i<(sizeof(specialKeys)/sizeof(specialKeys[i])); ++i)
+        {
+            MojObject value;
+            bool found=false;
+            cur.del(specialKeys[i], found);
+            prev.del(specialKeys[i], found);
+        }
+
+        isSame = (cur == prev);
+    }
+
+    err = prevItem->close();
+    MojErrCheck(err);
+
+    return MojErrNone;
 }
 
 MojErr MojDb::putImpl(MojObject& obj, MojUInt32 flags, MojDbReq& req, bool checkSchema, MojString shardId, bool reverseTransaction)

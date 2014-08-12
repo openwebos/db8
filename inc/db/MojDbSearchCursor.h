@@ -23,6 +23,9 @@
 #include "db/MojDbDefs.h"
 #include "db/MojDbCursor.h"
 #include "db/MojDbObjectItem.h"
+#include "db/MojDbSearchCache.h"
+#include "db/MojDbQuery.h"
+#include <map>
 
 class MojDbSearchCursor : public MojDbCursor
 {
@@ -35,6 +38,8 @@ public:
     virtual MojErr setPagePosition();
     virtual MojErr nextPage(MojDbQuery::Page& pageOut);
     MojDbCollationStrength collation() const { return m_collation; }
+    virtual MojErr getIds(MojDbSearchCache::IdSet& sortedId);
+    virtual MojErr loadFromCache(const MojDbSearchCache* cache);
 
 private:
 	struct ItemComp
@@ -55,7 +60,7 @@ private:
     MojErr retrieveCollation(const MojDbQuery& query);
 	bool loaded() const { return m_pos != NULL; }
 	MojErr begin();
-	MojErr load();
+	MojErr load(bool fromCache);
 	MojErr loadIds(ObjectSet& idsOut);
 	MojErr loadObjects(const ObjectSet& ids);
 	MojErr sort();
@@ -71,7 +76,9 @@ private:
 	MojString m_locale;
     MojDbCollationStrength m_collation;
     MojDbQuery::Page m_page;
+    MojObject m_pageObject;
     MojUInt32 m_count;
+    MojDbSearchCache::QueryKey m_queryKey;
+    MojDbQuery m_cacheQuery;
 };
-
 #endif /* MOJDBSEARCHCURSOR_H_ */

@@ -37,6 +37,7 @@
 #include "MojDbRevTest.h"
 #include "MojDbRevisionSetTest.h"
 #include "MojDbSearchTest.h"
+#include "MojDbSearchCacheTest.h"
 #include "MojDbDistinctTest.h"
 #include "MojDbTextCollatorTest.h"
 #include "MojDbTextTokenizerTest.h"
@@ -67,6 +68,7 @@ int main(int argc, char** argv)
 
 void MojDbTestRunner::runTests()
 {
+    test(MojDbSearchCacheTest());
 	test(MojDbShardManagerTest());
 	test(MojDbBulkTest());
 	test(MojDbConcurrencyTest());

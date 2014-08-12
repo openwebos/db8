@@ -51,7 +51,8 @@ MojDbKind::MojDbKind(MojDbStorageDatabase* db, MojDbKindEngine* kindEngine, bool
   m_db(db),
   m_kindEngine(kindEngine),
   m_backup(false),
-  m_builtin(builtIn)
+  m_builtin(builtIn),
+  m_updateRev(0)
 {
 }
 
@@ -688,6 +689,10 @@ MojErr MojDbKind::preUpdate(MojObject* newObj, const MojObject* oldObj, MojDbReq
                 "schema validation failed for kind 'kind': 'msg'");
 		}
 	}
+
+    // increment update revision
+    incUpdateRevision();
+
 	return MojErrNone;
 }
 

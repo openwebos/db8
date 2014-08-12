@@ -39,8 +39,8 @@ class MojDbSandwichEnvTxn final : public MojDbStorageTxn
 public:
     typedef leveldb::SandwichDB<leveldb::TxnDB<leveldb::BottomDB>> BackendDb;
 
-    MojDbSandwichEnvTxn(MojDbSandwichEngine::BackendDb& db)
-        : m_txn(db.ref<leveldb::TxnDB>())
+    MojDbSandwichEnvTxn(MojDbSandwichEngine::BackendDb& db, MojDbSandwichEngine& engine)
+        : m_txn(db.ref<leveldb::TxnDB>()), m_db(db), m_engine(engine)
     { }
 
     ~MojDbSandwichEnvTxn()
@@ -58,6 +58,8 @@ private:
     MojErr commitImpl() override;
 
     BackendDb m_txn;
+    MojDbSandwichEngine::BackendDb& m_db;
+    MojDbSandwichEngine& m_engine;
 };
 
 #endif

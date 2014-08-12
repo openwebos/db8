@@ -65,6 +65,7 @@ public:
 	MojInt32 batchsize() {return m_batchSize;}
 	operator MojDbReqRef() { return MojDbReqRef(*this); }
 	
+    bool schemaLocked() const { return m_schemaLocked; }
 
 
 private:

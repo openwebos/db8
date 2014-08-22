@@ -93,6 +93,7 @@ public:
 	MojErr tokenSet(MojTokenSet& tokenSetOut);
 	MojErr checkPermission(MojDbOp op, MojDbReq& req);
 	MojErr checkOwnerPermission(MojDbReq& req);
+	MojErr checkExtendPermission(const MojChar* superId, MojDbReq& req);
     MojDbIndex* indexForCollation(const MojDbQuery& query) { return indexForQuery(query); }
 	
     inline MojUInt32 getUpdateRevision() const { return m_updateRev; }

@@ -31,6 +31,10 @@ static const MojChar* const MojTestKind2 =
 static const MojChar* const MojTestKind3 =
         _T("{\"id\":\"PermissionTest3:1\",")
         _T("\"owner\":\"com.admin\"}");
+static const MojChar* const MojTestKind4 =
+	_T("{\"id\":\"PermissionTest4:1\",")
+	_T("\"owner\":\"com.bar\",")
+	_T("\"extends\":[\"PermissionTest3:1\"]}");
 static const MojChar* const MojTestPermission1 =
 		_T("{\"type\":\"db.kind\",\"object\":\"PermissionTest:1\",\"caller\":\"com.granted\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"allow\"}}");
 static const MojChar* const MojTestPermissionWildcard =
@@ -45,6 +49,8 @@ static const MojChar* const MojTestPermissionDeny2 =
         _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.foo\",\"operations\":{\"create\":\"allow\",\"read\":\"deny\",\"update\":\"allow\",\"delete\":\"allow\"}}");
 static const MojChar* const MojTestPermissionDeny3 =
         _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.foo\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"deny\"}}");
+static const MojChar* const MojTestPermissionDeny4 =
+        _T("{\"type\":\"db.kind\",\"object\":\"PermissionTest3:1\",\"caller\":\"com.bar\",\"operations\":{\"create\":\"allow\",\"read\":\"allow\",\"update\":\"allow\",\"delete\":\"allow\", \"extend\": \"deny\"}}");
 static const MojChar* const MojTestInvalidPermission1 =
 		_T("{\"type\":\"db.role\",\"object\":\"admin\",\"caller\":\"\",\"operations\":{\"*\":\"allow\"}}");
 static const MojChar* const MojTestInvalidPermission2 =
@@ -398,6 +404,22 @@ MojErr MojDbPermissionTest::testDenyPermissions(MojDb& db)
     err = db.delKind(id, found, MojDb::FlagNone, req);
     MojTestErrExpected(err, MojErrDbPermissionDenied);
     req.abort();
+
+    // extend
+    err = permission.fromJson(MojTestPermissionDeny4);
+    MojTestErrCheck(err);
+    err = db.putPermissions(&permission, &permission + 1, adminReq);
+    MojTestErrCheck(err);
+
+    MojObject childKind;
+    err = childKind.fromJson(MojTestKind4);
+    MojTestErrCheck(err);
+
+    MojDbReq childReq(false);
+    err = childReq.domain(_T("com.bar"));
+    MojTestErrCheck(err);
+    err = db.putKind(childKind, MojDb::FlagNone, childReq);
+    MojTestErrExpected(err, MojErrDbPermissionDenied);
 
     return MojErrNone;
 }

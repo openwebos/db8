@@ -217,21 +217,12 @@ MojDbLevelTableTxn &MojDbLevelEnvTxn::tableTxn(leveldb::DB &db)
 MojErr MojDbLevelEnvTxn::commitImpl()
 {
     MojErr accErr = MojErrNone;
-
-    if (!isReversed()) {
-        for(TableTxns::iterator it = m_tableTxns.begin();
+    for(TableTxns::iterator it = m_tableTxns.begin();
                             it != m_tableTxns.end();
                             ++it)
-        {
-            MojErr err = (*it)->commitImpl();
-            MojErrAccumulate(accErr, err);
-        }
-    } else {
-        for(TableTxns::reverse_iterator it = m_tableTxns.rbegin(); it != m_tableTxns.rend(); ++it)
-            {
-                MojErr err = (*it)->commitImpl();
-                MojErrAccumulate(accErr, err);
-            }
+    {
+        MojErr err = (*it)->commitImpl();
+        MojErrAccumulate(accErr, err);
     }
     return accErr;
 }

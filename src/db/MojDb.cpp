@@ -786,13 +786,6 @@ MojErr MojDb::mergeInto(MojObject& dest, const MojObject& obj, const MojObject& 
 	return MojErrNone;
 }
 
-/**
- * NOTE: Now this function use pseudo "safe" transaction logic. DB8 have multiply databases, like
- * Kind Db, Indexes Db, Objects, Usage. When we use simple object commit, we required change data in this database.
- * To provide fail safe logic, we reverse phisical put order. So, first will be commited objects, then indexes, then quotas.
- * Be carefull in changing commit order in this function! Commit order will be changed. See MojDbStorageTxn::reverseTransaction
- * TODO: Implement normal phisical transaction
- */
 MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldObj,
                      MojDbStorageItem* oldItem, MojDbReq& req, MojDbOp op, bool checkSchema,
                      MojString shardId, bool reverseTransaction)
@@ -830,10 +823,6 @@ MojErr MojDb::putObj(const MojObject& id, MojObject& obj, const MojObject* oldOb
 		err = assignIds(obj);
 		MojErrCheck(err);
 	}
-
-    // change physical commit order.
-    // TODO: remove this when phisical transaction will be ready
-	req.txn()->reverseTransaction(reverseTransaction);
 
 	// validate, update indexes, etc.
 	MojTokenSet tokenSet;
@@ -889,6 +878,7 @@ MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem
 		// delete succeed, change quota on a size of item
 		err = req.txn()->offsetQuota(-(MojInt64) item->size());
 		MojErrCheck(err);
+
 		err = foundObjOut.put(IdKey, id);
 		MojErrCheck(err);
 	} else {
@@ -896,10 +886,6 @@ MojErr MojDb::delObj(const MojObject& id, const MojObject& obj, MojDbStorageItem
 		MojObject newObj = obj;
 		MojErr err = newObj.putBool(DelKey, true);
 		MojErrCheck(err);
-        // as we are just update objects, revers transaction
-        // TODO: remove this when phisical transaction will be ready
-        // NOTE: See long comment for putObj function
-        req.txn()->reverseTransaction();
 		err = putObj(id, newObj, &obj, item, req, OpDelete);
 		MojErrCheck(err);
 		foundObjOut = newObj;

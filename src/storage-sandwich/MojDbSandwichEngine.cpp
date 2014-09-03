@@ -36,6 +36,7 @@
 #include "core/MojObjectSerialization.h"
 #include "core/MojString.h"
 #include "core/MojTokenSet.h"
+#include "MojDbSandwichLazyUpdater.h"
 
 #include <sys/statvfs.h>
 
@@ -53,8 +54,9 @@ leveldb::Options MojDbSandwichEngine::OpenOptions;
 ////////////////////MojDbSandwichEngine////////////////////////////////////////////
 
 MojDbSandwichEngine::MojDbSandwichEngine()
-: m_isOpen(false)
+: m_isOpen(false), m_lazySync(false), m_updater(NULL)
 {
+    m_updater = new MojDbSandwichLazyUpdater;
 }
 
 
@@ -62,14 +64,33 @@ MojDbSandwichEngine::~MojDbSandwichEngine()
 {
     MojErr err =  close();
     MojErrCatchAll(err);
+
+    if (m_updater)
+        delete m_updater;
 }
 
 MojErr MojDbSandwichEngine::configure(const MojObject& config)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-    if (!config.get("sync", WriteOptions.sync)) {
+    bool found=false;
+    MojInt32 syncOption=0;
+    MojErr err = config.get("sync", syncOption, found);
+    MojErrCheck(err);
+    if (false == found) {
         WriteOptions.sync = true;
+    } else {
+        switch(syncOption) {
+            case 2:
+                WriteOptions.sync = false;
+                m_lazySync = true;
+                break;
+
+            case 1:
+            case 0:
+                WriteOptions.sync = !!syncOption;
+                break;
+        }
     }
 
     if (!config.get("fill_cache", ReadOptions.fill_cache)) {
@@ -125,6 +146,9 @@ MojErr MojDbSandwichEngine::open(const MojChar* path)
     err = m_path.assign(path);
     MojErrCheck(err);
 
+    if (lazySync())
+        m_updater->start();
+
     return MojErrNone;
 }
 
@@ -173,6 +197,9 @@ MojErr MojDbSandwichEngine::open(const MojChar* path, MojDbEnv* env)
     MojErrCheck(err);
     m_isOpen = true;
 
+    if (lazySync())
+        m_updater->start();
+
     return MojErrNone;
 }
 
@@ -199,6 +226,9 @@ MojErr MojDbSandwichEngine::close()
     m_env.reset();
     m_isOpen = false;
 
+    if (lazySync())
+        m_updater->stop();
+
     return err;
 }
 
@@ -207,7 +237,7 @@ MojErr MojDbSandwichEngine::beginTxn(MojRefCountedPtr<MojDbStorageTxn>& txnOut)
     LOG_TRACE("Entering function %s", __FUNCTION__);
     MojAssert(!txnOut.get());
 
-    MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_db));
+    MojRefCountedPtr<MojDbSandwichEnvTxn> txn(new MojDbSandwichEnvTxn(m_db, *this));
     MojAllocCheck(txn.get());
     txnOut = txn;
 

@@ -107,8 +107,6 @@ public:
 	MojErr offsetQuota(MojInt64 amount);
 	void quotaEnabled(bool val) { m_quotaEnabled = val; }
 	void refreshQuotas() { m_refreshQuotas = true; }
-	void reverseTransaction(bool isReverse = true) { m_reverseTransaction = isReverse; }
-	bool isReversed() const { return m_reverseTransaction; }
 
 	void notifyPreCommit(CommitSignal::SlotRef slot);
 	void notifyPostCommit(CommitSignal::SlotRef slot);
@@ -138,7 +136,6 @@ private:
 	WatcherVec m_watchers;
 	CommitSignal m_preCommit;
 	CommitSignal m_postCommit;
-    bool m_reverseTransaction;
 };
 
 class MojDbStorageCollection : public MojRefCounted

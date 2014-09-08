@@ -137,18 +137,7 @@ MojErr MojDbPerfIndexTest::run()
 	cleanup();
 
 	// open
-	MojErr err = MojErrNone;
-
-    if (getenv("lazySync"))
-    {
-        MojObject conf;
-        conf.fromJson(_T("{ \"db\": { \"sync\": 2 } }"));
-
-        err=db.configure(conf);
-        MojTestErrCheck(err);
-    }
-
-    err = db.open(MojDbTestDir);
+	MojErr err = db.open(MojDbTestDir);
 	MojTestErrCheck(err);
 
 	// add type

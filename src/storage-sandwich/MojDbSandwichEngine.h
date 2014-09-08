@@ -31,7 +31,6 @@
 class MojDbSandwichDatabase;
 class MojDbSandwichEnv;
 class MojDbSandwichSeq;
-class MojDbSandwichLazyUpdater;
 
 class MojDbSandwichEngine : public MojDbStorageEngine
 {
@@ -61,10 +60,6 @@ public:
     static const leveldb::WriteOptions& getWriteOptions() { return WriteOptions; }
     static const leveldb::ReadOptions& getReadOptions() { return ReadOptions; }
     static const leveldb::Options& getOpenOptions() { return OpenOptions; }
-
-    MojDbSandwichLazyUpdater* getUpdater() const { return m_updater; }
-    bool lazySync() const { return m_lazySync; }
-
 private:
     typedef MojVector<MojRefCountedPtr<MojDbSandwichDatabase> > DatabaseVec;
     typedef MojVector<MojRefCountedPtr<MojDbSandwichSeq> > SequenceVec;
@@ -81,9 +76,6 @@ private:
     static leveldb::ReadOptions ReadOptions;
     static leveldb::WriteOptions WriteOptions;
     static leveldb::Options OpenOptions;
-
-    bool m_lazySync;
-    MojDbSandwichLazyUpdater* m_updater;
 };
 
 #endif /* MOJDBLEVELENGINE_H_ */

@@ -22,7 +22,6 @@
 #include "core/MojTime.h"
 
 #include <time.h>
-#include <stdlib.h>
 
 const MojChar* MojDbPerfTest::s_lastNames[] = {
 	_T("Smith"), _T("Johnson"), _T("Williams"), _T("Jones"), _T("Brown"),
@@ -137,9 +136,8 @@ const MojChar* const MojDbPerfTest::MojPerfLgArrayKindExtraIndex =
                 _T("{\"name\":\"timestamp\",\"props\":[{\"name\":\"timestamp\"}]}");
 
 MojDbPerfTest::MojDbPerfTest(const MojChar* name)
-: MojTestCase(name), m_lazySync(false)
+: MojTestCase(name)
 {
-    m_lazySync = getenv("lazySync") ? true : false;
 }
 
 
@@ -546,12 +544,5 @@ MojUInt64 MojDbPerfTest::timeDiff(timespec start, timespec end)
 		temp.tv_nsec = end.tv_nsec - start.tv_nsec;
 	}
 	return temp.tv_sec * 1000000000 + temp.tv_nsec;
-}
-
-MojObject MojDbPerfTest::lazySyncConfig() const
-{
-    MojObject conf;
-    conf.fromJson(_T("{ \"db\": { \"sync\": 2 } }"));
-    return (conf);
 }
 

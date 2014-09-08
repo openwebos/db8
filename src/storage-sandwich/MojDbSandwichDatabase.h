@@ -61,8 +61,6 @@ public:
     MojDbSandwichEngine::BackendDb::Part& impl() { return m_db; }
     MojDbSandwichEngine* engine() { return m_engine; }
 
-    leveldb::DB* getDb();
-
 private:
     friend class MojDbSandwichEngine;
     friend class MojDbSandwichIndex;

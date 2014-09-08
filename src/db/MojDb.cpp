@@ -1353,8 +1353,6 @@ MojErr MojDb::commitBatch(MojDbReq& req)
 {
     LOG_TRACE("Entering function %s", __FUNCTION__);
 
-    bool schemaLocked = req.schemaLocked();
-
 	// commit current batch and get things reset for next batch
 	// Can NOT have db cursor open at this stage and new queries have to be started
 	// Use with Caution otherwise you get db fatal errors
@@ -1376,7 +1374,7 @@ MojErr MojDb::commitBatch(MojDbReq& req)
 
 	req.beginBatch();
 
-	err = beginReq(req, schemaLocked);
+	err = beginReq(req, false);
 	if (err != MojErrNone)
         LOG_DEBUG("[db_mojodb] CommitBatch ended: err= %d\n", (int)err);
 

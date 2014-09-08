@@ -67,15 +67,8 @@ MojErr MojDbPerfCreateTest::run()
 MojErr MojDbPerfCreateTest::testCreate()
 {
 	MojDb db;
-    MojErr err = MojErrNone;
 
-    if (lazySync())
-    {
-        err=db.configure(lazySyncConfig());
-        MojTestErrCheck(err);
-    }
-
-    err = db.open(MojDbTestDir);
+	MojErr err = db.open(MojDbTestDir);
 	MojTestErrCheck(err);
 
 	// time put kind

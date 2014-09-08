@@ -48,12 +48,6 @@ MojErr MojDbPerfReadTest::run()
 	MojTestErrCheck(err);
 
 	MojDb db;
-    if (lazySync())
-    {
-        err=db.configure(lazySyncConfig());
-        MojTestErrCheck(err);
-    }
-
 	err = db.open(MojDbTestDir);
 	MojTestErrCheck(err);
 

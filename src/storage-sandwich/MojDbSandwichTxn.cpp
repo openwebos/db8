@@ -19,8 +19,6 @@
 #include "MojDbSandwichEngine.h"
 #include "MojDbSandwichTxn.h"
 
-#include "MojDbSandwichLazyUpdater.h"
-
 // class MojDbSandwichEnvTxn
 MojErr MojDbSandwichEnvTxn::abort()
 {
@@ -32,9 +30,5 @@ MojErr MojDbSandwichEnvTxn::abort()
 MojErr MojDbSandwichEnvTxn::commitImpl()
 {
     m_txn->commit();
-
-    if (m_engine.lazySync())
-        m_engine.getUpdater()->sendEvent( (*m_db).get() );
-
     return MojErrNone;
 }

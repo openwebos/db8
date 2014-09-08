@@ -48,6 +48,11 @@ public:
 	
 	MojUInt64 timeDiff(timespec start, timespec end);
 
+    MojObject lazySyncConfig() const;
+    bool lazySync() const { return m_lazySync; }
+
+    bool m_lazySync;
+
 	static const MojChar* s_lastNames[];
 	static const MojChar* s_firstNames[];
 	static const MojChar* const MojPerfSmKindId;

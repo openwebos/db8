@@ -1197,7 +1197,14 @@ MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload,
 	MojDbQuery::Page page;
 	err = cursor.nextPage(page);
 	MojErrCheck(err);
-	if (!page.empty()) {
+
+	// append count
+	MojUInt32 count = 0;
+	err = cursor.count(count);
+	MojErrCheck(err);
+
+	// append next page stage 2
+	if (!page.empty() && count > limit) {
 		MojObject pageObj;
 		err = page.toObject(pageObj);
 		MojErrCheck(err);
@@ -1205,11 +1212,8 @@ MojErr MojDbServiceHandler::findImpl(MojServiceMessage* msg, MojObject& payload,
 		MojErrCheck(err);
 	}
 
-	// append count
+	// append count stage 2
 	if (doCount) {
-		MojUInt32 count = 0;
-		err = cursor.count(count);
-		MojErrCheck(err);
 		err = writer.intProp(MojDbServiceDefs::CountKey, (MojInt64) count);
 		MojErrCheck(err);
 	}
